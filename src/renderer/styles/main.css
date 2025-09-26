@@ -1,0 +1,128 @@
+/* src/renderer/styles/main.css */
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body,
+html,
+#app {
+    height: 100%;
+    width: 100%;
+    font-family: system-ui, sans-serif;
+    color: #333;
+    background: #fafafa;
+    display: flex;
+}
+
+/* Sidebar */
+#sidebar {
+    width: 200px;
+    background: #2c3e50;
+    color: #ecf0f1;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    font-size: 1.3rem;
+    font-weight: bold;
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+}
+
+.sidebar-nav button {
+    background: transparent;
+    color: #ecf0f1;
+    border: none;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.sidebar-nav button:hover {
+    background: rgba(236, 240, 241, 0.1);
+}
+
+/* Main Area */
+#main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    overflow: hidden;
+}
+
+/* Tab Bar */
+#tab-bar {
+    display: flex;
+    background: #e0e0e0;
+    border-bottom: 1px solid #ccc;
+    overflow-x: auto;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    user-select: none;
+    border-right: 1px solid #ccc;
+    background: #e0e0e0;
+}
+
+.tab.active {
+    background: #fff;
+    font-weight: bold;
+}
+
+.tab-close {
+    margin-left: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #377fb9d5;
+    transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.tab-close:hover {
+    color: #000000;
+    transform: scale(1.8);
+}
+
+
+/* Tab Content */
+#tab-content {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    background: #fff;
+}
+
+.tab-content {
+    display: none;
+    height: 100%;
+    width: 100%;
+    padding: 1rem;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab.drag-over {
+  outline: 2px dashed #377fb9d5;
+}

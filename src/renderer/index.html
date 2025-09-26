@@ -1,0 +1,37 @@
+<!-- src/renderer/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolDeck PDF Reader</title>
+    <link rel="stylesheet" href="./styles/main.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="sidebar-header">ToolDeck</div>
+            <nav class="sidebar-nav">
+                <button data-feature="button1">Button 1</button>
+                <button data-feature="button2">Button 2</button>
+                <button data-feature="button3">Button 3</button>
+            </nav>
+        </aside>
+
+        <!-- Main area -->
+        <main id="main">
+            <!-- Tab bar -->
+            <div id="tab-bar"></div>
+
+            <!-- Tab content -->
+            <div id="tab-content"></div>
+        </main>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+</body>
+
+</html>
