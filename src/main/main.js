@@ -4,15 +4,15 @@ const path = require('path'); // 👈 ADD THIS
 
 const createWindow = () => {
     const win = new BrowserWindow({
-        width: 800,
-        height: 600,
+        minWidth: 700,
+        minHeight: 600,
         webPreferences: {
             preload: path.join(__dirname, '../preload/preload.js'), // 👈 adjust relative path
             contextIsolation: true,
             nodeIntegration: false
         }
     });
-
+    win.maximize();
     win.loadFile('src/renderer/index.html');
 };
 
