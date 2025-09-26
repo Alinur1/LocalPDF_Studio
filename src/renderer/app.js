@@ -1,6 +1,6 @@
 // src/renderer/app.js
 import TabManager from './tabs/tabManager.js';
-import { renderPDF } from './viewers/pdfViewer.js';
+import PdfViewer from './viewers/PdfViewer.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     const tabManager = new TabManager('#tab-bar', '#tab-content');
@@ -21,7 +21,6 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Replace dummy button with real "Open PDF"
     const openPdfBtn = document.createElement('button');
     openPdfBtn.textContent = 'Open PDF(s)';
     openPdfBtn.style.margin = '1rem';
@@ -30,45 +29,43 @@ window.addEventListener('DOMContentLoaded', () => {
         const files = await window.electronAPI.selectPdfs();
         if (!files || files.length === 0) return;
 
-        files.forEach(async (filePath) => {
+        for (const filePath of files) {
             const tabId = `pdf:${filePath}:${Date.now()}`;
             const container = document.createElement('div');
             container.classList.add('pdf-container');
             container.style.height = '100%';
             container.style.overflow = 'auto';
 
-            let pdfInstance = null;
+            // create viewer instance
+            const viewer = new PdfViewer(container, {
+                scale: 1.0,            // default scale multiplier
+                preRenderAdjacent: 1, // render neighbors
+                unloadDistance: 3
+            });
 
+            // open tab with onClose cleanup that destroys viewer
             tabManager.openTab({
                 id: tabId,
                 type: 'pdf',
                 title: filePath.split(/[\\/]/).pop(),
                 content: container,
                 closable: true,
-                onClose: () => {
-                    if (pdfInstance) {
-                        pdfInstance.destroy(); // 👈 free memory!
-                        pdfInstance = null;
+                onClose: async () => {
+                    try {
+                        await viewer.destroy();
+                    } catch (e) {
+                        console.warn('Error destroying viewer', e);
                     }
-                    // Extra canvas cleanup
-                    const canvas = container.querySelector('canvas');
-                    if (canvas) {
-                        const ctx = canvas.getContext('2d');
-                        if (ctx) {
-                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        }
-                        canvas.width = 0;
-                        canvas.height = 0;
-                    }
-                    container.innerHTML = ''; // finally remove from DOM
                 }
             });
 
-            pdfInstance = await renderPDF(filePath, container);
-        });
+            // load the PDF (async)
+            viewer.load(filePath).catch(err => {
+                console.error('Failed to load PDF', filePath, err);
+                container.textContent = 'Failed to load PDF';
+            });
+        }
     });
-
-
 
     document.querySelector('#main').prepend(openPdfBtn);
 });
