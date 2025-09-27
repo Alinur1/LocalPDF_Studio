@@ -21,9 +21,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const openPdfBtn = document.createElement('button');
-    openPdfBtn.textContent = 'Open PDF(s)';
-    openPdfBtn.style.margin = '1rem';
+    const openPdfBtn = document.getElementById('open-pdf-btn');
 
     openPdfBtn.addEventListener('click', async () => {
         const files = await window.electronAPI.selectPdfs();

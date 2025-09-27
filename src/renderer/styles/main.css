@@ -18,6 +18,30 @@ html,
     display: flex;
 }
 
+.pdf-open-bar {
+    display: flex;
+    align-items: center;
+    padding: 0.3rem;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.open-pdf-btn {
+    background: #9ab2c5d5;
+    color: #000000;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-weight: bold;
+}
+
+.open-pdf-btn:hover {
+    color: #fff;
+    background: #245a8d;
+}
+
 /* Sidebar */
 #sidebar {
     width: 200px;
