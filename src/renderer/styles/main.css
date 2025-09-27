@@ -22,7 +22,7 @@ html,
     display: flex;
     align-items: center;
     padding: 0.3rem;
-    background: #fff;
+    background: #213344;
     border-bottom: 1px solid #e0e0e0;
 }
 
@@ -92,7 +92,7 @@ html,
 /* Tab Bar */
 #tab-bar {
     display: flex;
-    background: #e0e0e0;
+    background: #213344;
     border-bottom: 1px solid #ccc;
     overflow-x: auto;
 }
@@ -133,7 +133,7 @@ html,
     flex: 1;
     overflow: auto;
     position: relative;
-    background: #fff;
+    background: #213344;
 }
 
 .tab-content {
