@@ -1,6 +1,5 @@
 // src/renderer/app.js
 import TabManager from './tabs/tabManager.js';
-import PdfViewer from './viewers/PdfViewer.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     const tabManager = new TabManager('#tab-bar', '#tab-content');
@@ -29,41 +28,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
         for (const filePath of files) {
             const tabId = `pdf:${filePath}:${Date.now()}`;
-            const container = document.createElement('div');
-            container.classList.add('pdf-container');
-            container.style.height = '100%';
-            container.style.overflow = 'auto';
 
-            // create viewer instance
-            const viewer = new PdfViewer(container, {
-                scale: 1.0,            // default scale multiplier
-                preRenderAdjacent: 1, // render neighbors
-                unloadDistance: 3
-            });
+            const iframe = document.createElement('iframe');
+            iframe.src = `../pdf/web/viewer.html?file=file://${filePath}`;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
 
-            // open tab with onClose cleanup that destroys viewer
             tabManager.openTab({
                 id: tabId,
                 type: 'pdf',
                 title: filePath.split(/[\\/]/).pop(),
-                content: container,
-                closable: true,
-                onClose: async () => {
-                    try {
-                        await viewer.destroy();
-                    } catch (e) {
-                        console.warn('Error destroying viewer', e);
-                    }
-                }
-            });
-
-            // load the PDF (async)
-            viewer.load(filePath).catch(err => {
-                console.error('Failed to load PDF', filePath, err);
-                container.textContent = 'Failed to load PDF';
+                content: iframe,
+                closable: true
             });
         }
     });
+
 
     document.querySelector('#main').prepend(openPdfBtn);
 });
