@@ -1,5 +1,6 @@
 // src/renderer/app.js
 import TabManager from './tabs/tabManager.js';
+import createPdfTab from './utils/createPdfTab.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     const tabManager = new TabManager('#tab-bar', '#tab-content');
@@ -27,23 +28,22 @@ window.addEventListener('DOMContentLoaded', () => {
         if (!files || files.length === 0) return;
 
         for (const filePath of files) {
-            const tabId = `pdf:${filePath}:${Date.now()}`;
-
-            const iframe = document.createElement('iframe');
-            iframe.src = `../pdf/web/viewer.html?file=file://${filePath}`;
-            iframe.style.width = '100%';
-            iframe.style.height = '100%';
-            iframe.style.border = 'none';
-
-            tabManager.openTab({
-                id: tabId,
-                type: 'pdf',
-                title: filePath.split(/[\\/]/).pop(),
-                content: iframe,
-                closable: true
-            });
+            createPdfTab(filePath, tabManager);
         }
     });
+
+
+    window.addEventListener('message', (event) => {
+        if (event.data?.type === 'open-external') {
+            if (window.electronAPI?.openExternal) {
+                window.electronAPI.openExternal(event.data.url);
+            } else {
+                // fallback: open in new tab if running in browser
+                window.open(event.data.url, '_blank');
+            }
+        }
+    });
+
 
 
     document.querySelector('#main').prepend(openPdfBtn);

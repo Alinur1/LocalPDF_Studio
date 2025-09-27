@@ -1,5 +1,5 @@
 // src/main/main.js
-const { app, BrowserWindow, dialog, ipcMain } = require('electron/main');
+const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron/main');
 const path = require('path'); // 👈 ADD THIS
 
 const createWindow = () => {
@@ -29,6 +29,15 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
+    }
+});
+
+ipcMain.on('open-external-link', (event, url) => {
+    // Security check: ensure the URL is a web link.
+    if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+        shell.openExternal(url);
+    } else {
+        console.warn(`Blocked attempt to open non-web URL: ${url}`);
     }
 });
 

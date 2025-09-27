@@ -2,5 +2,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    selectPdfs: () => ipcRenderer.invoke('select-pdf-files')
+    selectPdfs: () => ipcRenderer.invoke('select-pdf-files'),
+    openExternal: (url) => ipcRenderer.send('open-external-link', url)
 });
