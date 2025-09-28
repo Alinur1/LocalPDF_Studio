@@ -1,8 +1,10 @@
 // src/main/main.js
-const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron/main');
+
+const { app, BrowserWindow, dialog, ipcMain, shell, Menu } = require('electron/main');
 const path = require('path'); // 👈 ADD THIS
 
 const createWindow = () => {
+    Menu.setApplicationMenu(null);
     const win = new BrowserWindow({
         minWidth: 700,
         minHeight: 600,
