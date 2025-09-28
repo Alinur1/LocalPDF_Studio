@@ -1,14 +1,27 @@
 // src/renderer/app.js
 import TabManager from './tabs/tabManager.js';
 import createPdfTab from './utils/createPdfTab.js';
+import createMergePdfView from './tools/mergePdfView.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     const tabManager = new TabManager('#tab-bar', '#tab-content');
 
-    // Sidebar buttons (unchanged)
     document.querySelectorAll('#sidebar button').forEach((btn) => {
         btn.addEventListener('click', () => {
             const featureId = `feature:${btn.dataset.feature}`;
+            if (btn.dataset.feature === "merge-pdf") {
+                const content = createMergePdfView();
+                tabManager.openTab({
+                    id: featureId,
+                    type: 'feature',
+                    title: "Merge PDF",
+                    content,
+                    closable: true
+                });
+                return;
+            }
+
+            // Default dummy tabs
             let content = document.createElement('div');
             content.innerHTML = `<h2>${btn.textContent}</h2><p>This is ${btn.textContent} page.</p>`;
             tabManager.openTab({

@@ -1,21 +1,24 @@
 // src/main/main.js
 
 const { app, BrowserWindow, dialog, ipcMain, shell, Menu } = require('electron/main');
-const path = require('path'); // 👈 ADD THIS
+const path = require('path');
 
 const createWindow = () => {
     Menu.setApplicationMenu(null);
+
     const win = new BrowserWindow({
         minWidth: 700,
         minHeight: 600,
         webPreferences: {
-            preload: path.join(__dirname, '../preload/preload.js'), // 👈 adjust relative path
+            preload: path.resolve(app.getAppPath(), 'src/preload/preload.js'),
             contextIsolation: true,
-            nodeIntegration: false
+            nodeIntegration: false,
+            sandbox: false
         }
     });
+
     win.maximize();
-    win.loadFile('src/renderer/index.html');
+    win.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'));
 };
 
 app.whenReady().then(() => {
@@ -35,7 +38,6 @@ app.on('window-all-closed', () => {
 });
 
 ipcMain.on('open-external-link', (event, url) => {
-    // Security check: ensure the URL is a web link.
     if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
         shell.openExternal(url);
     } else {
@@ -48,7 +50,6 @@ ipcMain.handle('select-pdf-files', async () => {
         properties: ['openFile', 'multiSelections'],
         filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
     });
-
-    if (result.canceled) return [];
-    return result.filePaths;
+    return result.canceled ? [] : result.filePaths;
 });
+

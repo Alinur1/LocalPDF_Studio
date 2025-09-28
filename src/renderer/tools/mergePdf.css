@@ -1,0 +1,117 @@
+/* src/renderer/tools/mergePdf.css */
+
+.merge-pdf-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.drop-area {
+    border: 2px dashed #377fb9;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    background: #f9f9f9;
+    transition: background 0.2s;
+}
+
+.drop-area.drag-over {
+    background: #e0f0ff;
+}
+
+.pdf-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pdf-list li {
+    padding: 0.5rem;
+    margin: 0.3rem 0;
+    background: #eee;
+    border-radius: 6px;
+}
+
+.merge-btn {
+    background: #245a8d;
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+    align-self: flex-start;
+}
+
+.merge-btn:hover {
+    background: #377fb9;
+}
+
+.pdf-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pdf-list li {
+    display: flex;
+    align-items: center;
+    padding: 1.0rem;
+    margin: 0.3rem 0;
+    background: #eee;
+    border-radius: 6px;
+    cursor: grab;
+    gap: 0.8rem;
+}
+
+.pdf-thumbnail {
+    width: 90px;
+    height: 140px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex-shrink: 0;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.pdf-info {
+    flex-grow: 1;
+}
+
+.pdf-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.pdf-size {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.remove-btn {
+    padding: 50px;
+    margin-left: auto;
+    cursor: pointer;
+    font-size: 1.7rem;
+}
+
+
+.clear-btn {
+    background: #aaa;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    cursor: pointer;
+}
+
+.clear-btn:hover {
+    background: #888;
+}
