@@ -16,9 +16,10 @@ export default function createMergePdfView() {
     const container = document.createElement('div');
     container.classList.add('merge-pdf-container');
 
-    const dropArea = document.createElement('div');
-    dropArea.classList.add('drop-area');
-    dropArea.textContent = 'Drop PDFs here or click to select';
+    // Wide button instead of drop area
+    const selectBtn = document.createElement('button');
+    selectBtn.classList.add('select-pdf-btn');
+    selectBtn.textContent = 'Click to Select PDF Files';
 
     const pdfList = document.createElement('ul');
     pdfList.classList.add('pdf-list');
@@ -31,31 +32,16 @@ export default function createMergePdfView() {
     clearBtn.classList.add('clear-btn');
     clearBtn.textContent = 'Clear All';
 
-    container.append(dropArea, pdfList, mergeBtn, clearBtn);
+    container.append(selectBtn, pdfList, mergeBtn, clearBtn);
 
     let files = [];
 
-    dropArea.addEventListener('click', async () => {
+    // file selection
+    selectBtn.addEventListener('click', async () => {
         const selected = await window.electronAPI.selectPdfs();
         if (selected && selected.length) {
             addFiles(selected);
         }
-    });
-
-    dropArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropArea.classList.add('drag-over');
-    });
-    dropArea.addEventListener('dragleave', () => {
-        dropArea.classList.remove('drag-over');
-    });
-    dropArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropArea.classList.remove('drag-over');
-        const paths = Array.from(e.dataTransfer.files)
-            .filter(f => f.type === 'application/pdf')
-            .map(f => f.path);
-        if (paths.length) addFiles(paths);
     });
 
     function addFiles(paths) {
@@ -101,7 +87,7 @@ export default function createMergePdfView() {
 
             renderThumbnail(path, thumb);
 
-            // Dragging
+            // Reordering
             li.addEventListener('dragstart', () => li.classList.add('dragging'));
             li.addEventListener('dragend', () => {
                 li.classList.remove('dragging');
@@ -150,7 +136,7 @@ export default function createMergePdfView() {
     mergeBtn.addEventListener('click', async () => {
         if (!files.length) return;
         try {
-            const res = await fetch(`http://localhost:5295/api/pdf/merge`, { // adjust port
+            const res = await fetch(`http://localhost:5295/api/pdf/merge`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ files })

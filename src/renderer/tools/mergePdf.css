@@ -7,49 +7,27 @@
     padding: 1rem;
 }
 
-.drop-area {
-    border: 2px dashed #377fb9;
+/* Wide button instead of drop area */
+.select-pdf-btn {
+    color: white;
+    width: 100%;
+    border: 2px solid #377fb9;
     border-radius: 8px;
     padding: 2rem;
     text-align: center;
     cursor: pointer;
-    background: #f9f9f9;
+    background: #245a8d;
+    font-size: 1.1rem;
+    font-weight: 500;
     transition: background 0.2s;
 }
 
-.drop-area.drag-over {
+.select-pdf-btn:hover {
+    color: black;
     background: #e0f0ff;
 }
 
-.pdf-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.pdf-list li {
-    padding: 0.5rem;
-    margin: 0.3rem 0;
-    background: #eee;
-    border-radius: 6px;
-}
-
-.merge-btn {
-    background: #245a8d;
-    color: #fff;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 6px;
-    font-weight: bold;
-    align-self: flex-start;
-}
-
-.merge-btn:hover {
-    background: #377fb9;
-}
-
+/* rest remains unchanged */
 .pdf-list {
     list-style: none;
     padding: 0;
@@ -95,12 +73,28 @@
 }
 
 .remove-btn {
-    padding: 50px;
+    padding: 20px;
     margin-left: auto;
     cursor: pointer;
     font-size: 1.7rem;
+    border: .2rem solid deepskyblue;
 }
 
+.merge-btn {
+    background: #245a8d;
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+    align-self: flex-start;
+}
+
+.merge-btn:hover {
+    background: #377fb9;
+}
 
 .clear-btn {
     background: #aaa;
