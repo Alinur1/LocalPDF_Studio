@@ -12,5 +12,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
         } catch (err) {
             return Promise.resolve({ size: 0 });
         }
-    }
+    },
+    saveMergedPdf: (buffer) => ipcRenderer.invoke('save-merged-pdf', buffer)
 });

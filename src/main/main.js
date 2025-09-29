@@ -2,9 +2,10 @@
 
 const { app, BrowserWindow, dialog, ipcMain, shell, Menu } = require('electron/main');
 const path = require('path');
+const fs = require('fs');
 
 const createWindow = () => {
-    Menu.setApplicationMenu(null);
+    //Menu.setApplicationMenu(null);
 
     const win = new BrowserWindow({
         minWidth: 700,
@@ -51,5 +52,27 @@ ipcMain.handle('select-pdf-files', async () => {
         filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
     });
     return result.canceled ? [] : result.filePaths;
+});
+
+ipcMain.handle('save-merged-pdf', async (event, arrayBuffer) => { // Renamed 'buffer' to 'arrayBuffer' for clarity
+    const { filePath, canceled } = await dialog.showSaveDialog({
+        title: 'Save Merged PDF',
+        defaultPath: 'merged.pdf',
+        filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
+    });
+
+    if (canceled || !filePath) {
+        return { success: false };
+    }
+
+    try {
+        const buffer = Buffer.from(arrayBuffer);
+
+        fs.writeFileSync(filePath, buffer);
+        return { success: true, path: filePath };
+    } catch (err) {
+        console.error("Failed to save PDF:", err);
+        return { success: false, error: err.message };
+    }
 });
 

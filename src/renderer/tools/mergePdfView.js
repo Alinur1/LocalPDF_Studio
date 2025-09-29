@@ -147,9 +147,31 @@ export default function createMergePdfView() {
         pdfList.innerHTML = '';
     });
 
-    mergeBtn.addEventListener('click', () => {
-        console.log('Merge order:', files);
-        // TODO: send to backend
+    mergeBtn.addEventListener('click', async () => {
+        if (!files.length) return;
+        try {
+            const res = await fetch(`http://localhost:5295/api/pdf/merge`, { // adjust port
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ files })
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+
+            const blob = await res.blob();
+            const arrayBuffer = await blob.arrayBuffer();
+            const result = await window.electronAPI.saveMergedPdf(arrayBuffer);
+
+            if (result.success) {
+                console.log("PDF saved at:", result.path);
+                alert("PDF saved successfully!");
+            } else {
+                alert("Save canceled or failed.");
+            }
+        } catch (err) {
+            console.error("Merge error:", err);
+            alert("Error merging PDFs.");
+        }
     });
 
     return container;
