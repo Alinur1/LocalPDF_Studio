@@ -1,33 +1,5 @@
-/* src/renderer/tools/mergePdf.css */
+/* src/renderer/common/common.css */
 
-.merge-pdf-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-}
-
-/* Wide button instead of drop area */
-.select-pdf-btn {
-    color: white;
-    width: 100%;
-    border: 2px solid #377fb9;
-    border-radius: 8px;
-    padding: 2rem;
-    text-align: center;
-    cursor: pointer;
-    background: #245a8d;
-    font-size: 1.1rem;
-    font-weight: 500;
-    transition: background 0.2s;
-}
-
-.select-pdf-btn:hover {
-    color: black;
-    background: #e0f0ff;
-}
-
-/* rest remains unchanged */
 .pdf-list {
     list-style: none;
     padding: 0;
@@ -37,7 +9,7 @@
 .pdf-list li {
     display: flex;
     align-items: center;
-    padding: 1.0rem;
+    padding: 1rem;
     margin: 0.3rem 0;
     background: #eee;
     border-radius: 6px;
@@ -80,7 +52,8 @@
     border: .2rem solid deepskyblue;
 }
 
-.merge-btn {
+/* Button variants */
+.primary-btn {
     background: #245a8d;
     color: #fff;
     border: none;
@@ -89,23 +62,21 @@
     cursor: pointer;
     border-radius: 6px;
     font-weight: bold;
-    align-self: flex-start;
 }
 
-.merge-btn:hover {
+.primary-btn:hover {
     background: #377fb9;
 }
 
-.clear-btn {
+.secondary-btn {
     background: #aaa;
     color: #fff;
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 6px;
-    margin-top: 1rem;
     cursor: pointer;
 }
 
-.clear-btn:hover {
+.secondary-btn:hover {
     background: #888;
 }
