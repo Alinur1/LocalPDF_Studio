@@ -1,5 +1,6 @@
 //src/renderer/tools/mergePdfView.js
 
+import { API } from '../api/api.js';
 import { createPdfList } from '../common/pdfFileList.js';
 import { loadStyle } from '../common/styleLoader.js';
 
@@ -28,7 +29,7 @@ export default function createMergePdfView() {
 
     selectBtn.addEventListener('click', async () => {
         const selected = await window.electronAPI.selectPdfs();
-        if (selected && selected.length) addFiles(selected);
+        if (selected?.length) addFiles(selected);
     });
 
     clearBtn.addEventListener('click', clearAll);
@@ -36,16 +37,9 @@ export default function createMergePdfView() {
     mergeBtn.addEventListener('click', async () => {
         const files = getFiles();
         if (!files.length) return;
+
         try {
-            const res = await fetch(`http://localhost:5295/api/pdf/merge`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ files })
-            });
-
-            if (!res.ok) throw new Error(await res.text());
-
-            const blob = await res.blob();
+            const blob = await API.request.post(API.pdf.merge, { files });
             const arrayBuffer = await blob.arrayBuffer();
             const result = await window.electronAPI.saveMergedPdf(arrayBuffer);
 
@@ -55,8 +49,7 @@ export default function createMergePdfView() {
                 alert("Save canceled or failed.");
             }
         } catch (err) {
-            console.error("Merge error:", err);
-            alert("Error merging PDFs.");
+            alert("Error merging PDFs: " + err.message);
         }
     });
 
