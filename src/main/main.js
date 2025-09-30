@@ -8,52 +8,94 @@ const { spawn } = require('child_process');
 let apiProcess = null;
 let apiPort = null;
 
-// Start the ASP.NET Core backend
 function startBackend() {
     return new Promise((resolve, reject) => {
-        // Path to your published backend executable
-        // Adjust this path based on your build output
-        const backendPath = path.join(
-            app.getAppPath(),
-            './assets/backend_windows',
-            'tooldeck_api.exe' // or 'tooldeck_api' on Linux/Mac
-        );
+        let backendDir = '';
+        let backendFile = '';
 
-        apiProcess = spawn(backendPath);
+        switch (process.platform) {
+            case 'win32':
+                backendDir = './assets/backend_windows';
+                backendFile = 'tooldeck_api.exe';
+                break;
+            case 'linux':
+                backendDir = './assets/backend_linux';
+                backendFile = 'tooldeck_api';
+                break;
+            case 'darwin':
+                backendDir = './assets/backend_macos';
+                backendFile = 'tooldeck_api';
+                break;
+            default:
+                const errorMsg = `Your OS (${process.platform}) is not supported.`;
+                dialog.showErrorBox('Unsupported OS', errorMsg);
+                reject(new Error(errorMsg));
+                return;
+        }
 
-        apiProcess.stdout.on('data', (data) => {
-            const output = data.toString();
-            console.log('Backend:', output);
+        const backendPath = path.join(app.getAppPath(), backendDir, backendFile);
 
-            // Look for the port output
-            const match = output.match(/API_PORT:(\d+)/);
-            if (match) {
-                apiPort = parseInt(match[1]);
-                console.log(`Backend started on port ${apiPort}`);
-                resolve(apiPort);
+        // Check if backend exists
+        if (!fs.existsSync(backendPath)) {
+            const errorMsg = `Backend executable not found at: ${backendPath}`;
+            console.error(errorMsg);
+            dialog.showErrorBox('Backend Not Found', errorMsg);
+            reject(new Error(errorMsg));
+            return;
+        }
+
+        try {
+            // Set executable permissions for Linux/macOS
+            if (process.platform === 'linux' || process.platform === 'darwin') {
+                try {
+                    fs.chmodSync(backendPath, 0o755);
+                } catch (chmodErr) {
+                    console.warn(`Could not set executable permissions: ${chmodErr.message}`);
+                }
             }
-        });
 
-        apiProcess.stderr.on('data', (data) => {
-            console.error('Backend Error:', data.toString());
-        });
+            console.log(`Starting backend from: ${backendPath}`);
+            apiProcess = spawn(backendPath);
 
-        apiProcess.on('error', (err) => {
-            console.error('Failed to start backend:', err);
+            apiProcess.stdout.on('data', (data) => {
+                const output = data.toString();
+                console.log('Backend:', output);
+
+                const match = output.match(/API_PORT:(\d+)/);
+                if (match) {
+                    apiPort = parseInt(match[1]);
+                    console.log(`Backend started on port ${apiPort}`);
+                    resolve(apiPort);
+                }
+            });
+
+            apiProcess.stderr.on('data', (data) => {
+                console.error('Backend Error:', data.toString());
+            });
+
+            apiProcess.on('error', (err) => {
+                console.error('Failed to start backend:', err);
+                reject(err);
+            });
+
+            apiProcess.on('close', (code) => {
+                console.log(`Backend process exited with code ${code}`);
+                apiProcess = null;
+            });
+
+            // Timeout in case port is never received
+            setTimeout(() => {
+                if (!apiPort) {
+                    const errorMsg = 'Backend failed to start within 10 seconds';
+                    console.error(errorMsg);
+                    reject(new Error(errorMsg));
+                }
+            }, 10000);
+
+        } catch (err) {
+            console.error('Error starting backend:', err);
             reject(err);
-        });
-
-        apiProcess.on('close', (code) => {
-            console.log(`Backend process exited with code ${code}`);
-            apiProcess = null;
-        });
-
-        // Timeout in case port is never received
-        setTimeout(() => {
-            if (!apiPort) {
-                reject(new Error('Backend failed to start within timeout'));
-            }
-        }, 10000);
+        }
     });
 }
 
@@ -83,7 +125,7 @@ app.whenReady().then(async () => {
         createWindow();
     } catch (err) {
         console.error('Failed to initialize app:', err);
-        dialog.showErrorBox('Startup Error', 'Failed to start the application backend.');
+        dialog.showErrorBox('Startup Error', `Failed to start the application backend.\n\nError: ${err.message}`);
         app.quit();
     }
 
@@ -97,7 +139,11 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
     // Kill the backend process
     if (apiProcess) {
-        apiProcess.kill();
+        try {
+            apiProcess.kill();
+        } catch (err) {
+            console.error('Error killing backend process:', err);
+        }
     }
 
     if (process.platform !== 'darwin') {
@@ -108,7 +154,11 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
     // Ensure backend is killed on quit
     if (apiProcess) {
-        apiProcess.kill();
+        try {
+            apiProcess.kill();
+        } catch (err) {
+            console.error('Error killing backend process on quit:', err);
+        }
     }
 });
 
