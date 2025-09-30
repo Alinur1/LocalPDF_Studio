@@ -50,6 +50,13 @@
     cursor: pointer;
     font-size: 1.7rem;
     border: .2rem solid deepskyblue;
+    transition: 0.2s;
+}
+
+.remove-btn:hover{
+    background-color: #245a8d;
+    cursor: pointer;
+    color: white;
 }
 
 /* Button variants */
