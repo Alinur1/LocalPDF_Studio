@@ -1,4 +1,4 @@
-//src/renderer/tools/mergePdfView.js
+// src/renderer/tools/mergePdfView.js
 
 import { API } from '../api/api.js';
 import { createPdfList } from '../common/pdfFileList.js';
@@ -39,7 +39,9 @@ export default function createMergePdfView() {
         if (!files.length) return;
 
         try {
-            const blob = await API.request.post(API.pdf.merge, { files });
+            // Get the merge endpoint dynamically
+            const mergeEndpoint = await API.pdf.merge;
+            const blob = await API.request.post(mergeEndpoint, { files });
             const arrayBuffer = await blob.arrayBuffer();
             const result = await window.electronAPI.saveMergedPdf(arrayBuffer);
 

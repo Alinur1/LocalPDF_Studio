@@ -1,10 +1,22 @@
 // src/renderer/api/api.js
 
-const API_BASE = "http://localhost:5295/api";
+let API_BASE = null;
+
+// Initialize API base URL with dynamic port
+async function initializeAPI() {
+    if (!API_BASE) {
+        const port = await window.electronAPI.getApiPort();
+        API_BASE = `http://localhost:${port}/api`;
+    }
+    return API_BASE;
+}
 
 // Generic request wrapper
 async function request(endpoint, options = {}) {
     try {
+        // Ensure API is initialized
+        await initializeAPI();
+
         const res = await fetch(endpoint, {
             headers: { "Content-Type": "application/json", ...(options.headers || {}) },
             ...options,
@@ -36,26 +48,45 @@ const api = {
     delete: (endpoint) => request(endpoint, { method: "DELETE" }),
 };
 
+// Build endpoint paths dynamically
+async function getEndpoints() {
+    const base = await initializeAPI();
+    return {
+        merge: `${base}/pdf/merge`,
+        // Uncomment when implemented
+        // split: `${base}/pdf/split`,
+        // removePages: `${base}/pdf/remove-pages`,
+        // extractPages: `${base}/pdf/extract`,
+        // organize: `${base}/pdf/organize`,
+        // compress: `${base}/pdf/compress`,
+        // toJpg: `${base}/pdf/to-jpg`,
+        // toWord: `${base}/pdf/to-word`,
+        // toPowerPoint: `${base}/pdf/to-ppt`,
+        // toExcel: `${base}/pdf/to-excel`,
+        // addPageNumbers: `${base}/pdf/add-page-numbers`,
+        // watermark: `${base}/pdf/watermark`,
+        // crop: `${base}/pdf/crop`,
+        // lock: `${base}/pdf/lock`,
+        // unlock: `${base}/pdf/unlock`,
+        // sign: `${base}/pdf/sign`,
+        // metadata: `${base}/pdf/metadata`,
+    };
+}
+
 export const API = {
-    base: API_BASE,
-    pdf: {
-        merge: `${API_BASE}/pdf/merge`,
-        // split: `${API_BASE}/pdf/split`,
-        // removePages: `${API_BASE}/pdf/remove-pages`,
-        // extractPages: `${API_BASE}/pdf/extract`,
-        // organize: `${API_BASE}/pdf/organize`,
-        // compress: `${API_BASE}/pdf/compress`,
-        // toJpg: `${API_BASE}/pdf/to-jpg`,
-        // toWord: `${API_BASE}/pdf/to-word`,
-        // toPowerPoint: `${API_BASE}/pdf/to-ppt`,
-        // toExcel: `${API_BASE}/pdf/to-excel`,
-        // addPageNumbers: `${API_BASE}/pdf/add-page-numbers`,
-        // watermark: `${API_BASE}/pdf/watermark`,
-        // crop: `${API_BASE}/pdf/crop`,
-        // lock: `${API_BASE}/pdf/lock`,
-        // unlock: `${API_BASE}/pdf/unlock`,
-        // sign: `${API_BASE}/pdf/sign`,
-        // metadata: `${API_BASE}/pdf/metadata`,
+    get base() {
+        return API_BASE;
     },
-    request: api, // expose wrapper
+    async init() {
+        return await initializeAPI();
+    },
+    get pdf() {
+        // Return a proxy that resolves endpoints on access
+        return new Proxy({}, {
+            get(target, prop) {
+                return getEndpoints().then(endpoints => endpoints[prop]);
+            }
+        });
+    },
+    request: api,
 };

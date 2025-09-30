@@ -1,18 +1,17 @@
 using tooldeck_api.BLL.Interfaces;
 using tooldeck_api.BLL.Services;
+using System.Net;
+using System.Net.Sockets;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 builder.Services.AddScoped<IPdfMergeService, PdfMergeService>();
 
-//CORS policy
+// CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowElectronApp", policy =>
@@ -24,6 +23,15 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Get dynamic port
+int port = GetAvailablePort();
+
+// Configure Kestrel to use dynamic port
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Listen(IPAddress.Loopback, port);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -33,12 +41,25 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Remove HTTPS redirection for local-only app
+// app.UseHttpsRedirection();
 
 app.UseCors("AllowElectronApp");
-
 app.UseAuthorization();
-
 app.MapControllers();
 
+// Output the port to stdout so Electron can read it
+Console.WriteLine($"API_PORT:{port}");
+
 app.Run();
+
+// Helper method to find an available port
+static int GetAvailablePort()
+{
+    using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+    socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+    socket.Listen(1);
+    var port = ((IPEndPoint)socket.LocalEndPoint!).Port;
+    socket.Close();
+    return port;
+}
