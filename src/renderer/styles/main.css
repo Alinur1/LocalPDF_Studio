@@ -8,122 +8,153 @@
 }
 
 body,
-html,
-#app {
+html {
     height: 100%;
     width: 100%;
-    font-family: system-ui, sans-serif;
-    color: #333;
-    background: #fafafa;
-    display: flex;
-}
-
-.pdf-open-bar {
-    display: flex;
-    align-items: center;
-    padding: 0.3rem;
-    background: #213344;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.open-pdf-btn {
-    background: #9ab2c5d5;
-    color: #000000;
-    border: none;
-    padding: 0.5rem 1.2rem;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s;
-    font-weight: bold;
-}
-
-.open-pdf-btn:hover {
-    color: #fff;
-    background: #245a8d;
-}
-
-/* Sidebar */
-#sidebar {
-    width: 200px;
-    background: #2c3e50;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: #ecf0f1;
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-header {
-    font-size: 1.3rem;
-    font-weight: bold;
-    padding: 1rem;
-    text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    padding: 0.5rem;
-}
-
-.sidebar-nav button {
-    background: transparent;
-    color: #ecf0f1;
-    border: none;
-    padding: 0.75rem 1rem;
-    text-align: left;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background 0.2s;
-}
-
-.sidebar-nav button:hover {
-    background: rgba(236, 240, 241, 0.1);
-}
-
-/* Main Area */
-#main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: #fff;
+    background: #1e2a38;
     overflow: hidden;
 }
 
-/* Tab Bar */
+#app {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    background: #18222e;
+    border-bottom: 1px solid #111820;
+}
+
+.top-btn {
+    background: #2c3e50;
+    color: #ecf0f1;
+    border: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.3s ease, color 0.3s ease;
+    padding: 10px 18px;
+    cursor: pointer;
+    margin-right: 8px;
+    border-radius: 6px;
+    outline: none;
+}
+
+.top-btn:hover {
+    background: #3498db;
+    color: #fff;
+}
+
+/* Tools Dropdown */
+.tools-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.tools-menu {
+    display: none;
+    position: absolute;
+    background-color: #2c3e50;
+    min-width: 480px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.4);
+    z-index: 1;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+#tools-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.tools-menu a {
+    color: #ecf0f1;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.tools-menu a:hover {
+    background-color: #3498db;
+}
+
+.tools-dropdown:hover .tools-menu {
+    display: block;
+}
+
+
+/* Main Content Area */
+#main-content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+/* Tab Bar (Vertical) */
 #tab-bar {
     display: flex;
-    background: #213344;
-    border-bottom: 1px solid #ccc;
-    overflow-x: auto;
+    flex-direction: column;
+    background: #18222e;
+    border-right: 1px solid #111820;
+    overflow-y: auto;
+    width: 220px;
+    padding-top: 5px;
 }
 
 .tab {
     display: flex;
     align-items: center;
-    padding: 0.5rem 1rem;
+    justify-content: space-between;
+    padding: 12px 20px;
     cursor: pointer;
     position: relative;
-    white-space: nowrap;
     user-select: none;
-    border-right: 1px solid #ccc;
-    background: #e0e0e0;
+    border-left: 4px solid transparent;
+    color: #bdc3c7;
+    transition: background 0.2s ease, color 0.2s ease, border-left-color 0.3s ease;
+    overflow: hidden;
+}
+
+.tab-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tab:hover {
+    background: #2c3e50;
+    color: #ecf0f1;
 }
 
 .tab.active {
-    background: #fff;
-    font-weight: bold;
+    background: #2c3e50;
+    color: #fff;
+    font-weight: 600;
+    border-left: 4px solid #3498db;
 }
 
 .tab-close {
-    margin-left: 8px;
+    margin-left: auto;
+    padding-left: 15px;
     cursor: pointer;
     font-weight: bold;
-    color: #377fb9d5;
+    color: #7f8c8d;
     transition: color 0.2s ease, transform 0.1s ease;
+    font-size: 18px;
+    transform: scale(1.5);
 }
 
 .tab-close:hover {
-    color: #000000;
+    color: #e74c3c;
     transform: scale(1.8);
 }
 
@@ -133,7 +164,7 @@ html,
     flex: 1;
     overflow: auto;
     position: relative;
-    background: #213344;
+    background: #1e2a38;
 }
 
 .tab-content {
@@ -148,5 +179,6 @@ html,
 }
 
 .tab.drag-over {
-    outline: 2px dashed #377fb9d5;
+    background-color: #2c3e50;
+    border-left-color: #3498db;
 }

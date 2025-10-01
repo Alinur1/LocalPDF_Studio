@@ -6,36 +6,7 @@ import createMergePdfView from './tools/mergePdfView.js';
 window.addEventListener('DOMContentLoaded', () => {
     const tabManager = new TabManager('#tab-bar', '#tab-content');
 
-    document.querySelectorAll('#sidebar button').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const featureId = `feature:${btn.dataset.feature}`;
-            if (btn.dataset.feature === "merge-pdf") {
-                const content = createMergePdfView();
-                tabManager.openTab({
-                    id: featureId,
-                    type: 'feature',
-                    title: "Merge PDF",
-                    content,
-                    closable: true
-                });
-                return;
-            }
-
-            // Default dummy tabs
-            let content = document.createElement('div');
-            content.innerHTML = `<h2>${btn.textContent}</h2><p>This is ${btn.textContent} page.</p>`;
-            tabManager.openTab({
-                id: featureId,
-                type: 'feature',
-                title: btn.textContent,
-                content,
-                closable: false
-            });
-        });
-    });
-
     const openPdfBtn = document.getElementById('open-pdf-btn');
-
     openPdfBtn.addEventListener('click', async () => {
         const files = await window.electronAPI.selectPdfs();
         if (!files || files.length === 0) return;
@@ -45,6 +16,36 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.querySelectorAll('.tools-menu a').forEach(tool => {
+        tool.addEventListener('click', (e) => {
+            e.preventDefault();
+            const toolName = e.target.dataset.tool;
+            const featureId = `feature:${toolName}`;
+
+            if (toolName === "merge-pdf") {
+                const content = createMergePdfView();
+                tabManager.openTab({
+                    id: featureId,
+                    type: 'feature',
+                    title: e.target.textContent,
+                    content,
+                    closable: true
+                });
+                return;
+            }
+
+            // Default dummy tabs for other tools
+            let content = document.createElement('div');
+            content.innerHTML = `<h2>${e.target.textContent}</h2><p>This is ${e.target.textContent} page.</p>`;
+            tabManager.openTab({
+                id: featureId,
+                type: 'feature',
+                title: e.target.textContent,
+                content,
+                closable: true
+            });
+        });
+    });
 
     window.addEventListener('message', (event) => {
         if (event.data?.type === 'open-external') {
@@ -56,8 +57,4 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
-
-
-    document.querySelector('#main').prepend(openPdfBtn);
 });

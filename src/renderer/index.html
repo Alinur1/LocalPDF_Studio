@@ -17,29 +17,37 @@
 
 <body>
     <div id="app">
-        <!-- Sidebar -->
-        <aside id="sidebar">
-            <div class="sidebar-header">ToolDeck</div>
-            <nav class="sidebar-nav">
-                <button data-feature="merge-pdf">Merge PDF</button>
-                <button data-feature="button2">Button 2</button>
-                <button data-feature="button3">Button 3</button>
-            </nav>
-        </aside>
-
-        <!-- Main area -->
-        <main id="main">
-            <!-- Open PDF button -->
-            <div class="pdf-open-bar">
-                <button class="open-pdf-btn" id="open-pdf-btn">Open PDF Reader</button>
+        <div class="top-bar">
+            <button class="top-btn" id="open-pdf-btn">Open PDF Reader</button>
+            <div class="tools-dropdown">
+                <button class="top-btn" id="tools-btn">Tools</button>
+                <div class="tools-menu" id="tools-menu">
+                    <div id="tools-grid">
+                        <a href="#" data-tool="merge-pdf">Merge PDF</a>
+                        <a href="#" data-tool="split-pdf">Split PDF</a>
+                        <a href="#" data-tool="remove-pages">Remove Pages</a>
+                        <a href="#" data-tool="extract-pages">Extract Pages</a>
+                        <a href="#" data-tool="organize-pdf">Organize/Re-Arrange PDF</a>
+                        <a href="#" data-tool="compress-pdf">Compress PDF</a>
+                        <a href="#" data-tool="pdf-to-jpg">PDF to JPG</a>
+                        <a href="#" data-tool="pdf-to-word">PDF to WORD</a>
+                        <a href="#" data-tool="pdf-to-powerpoint">PDF to PowerPoint</a>
+                        <a href="#" data-tool="pdf-to-excel">PDF to Excel</a>
+                        <a href="#" data-tool="add-page-numbers">Add Page Numbers</a>
+                        <a href="#" data-tool="add-watermark">Add Watermark</a>
+                        <a href="#" data-tool="crop-pdf">Crop PDF</a>
+                        <a href="#" data-tool="lock-unlock-pdf">Lock/Unlock PDF</a>
+                        <a href="#" data-tool="sign-pdf">Sign PDF</a>
+                        <a href="#" data-tool="edit-metadata">View and Edit metadata</a>
+                    </div>
+                </div>
             </div>
-
-            <!-- Tab bar -->
+            <button class="top-btn" id="open-settings">Settings</button>
+        </div>
+        <div id="main-content">
             <div id="tab-bar"></div>
-
-            <!-- Tab content -->
             <div id="tab-content"></div>
-        </main>
+        </div>
     </div>
 
     <script type="module" src="./app.js"></script>

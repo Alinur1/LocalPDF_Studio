@@ -58,9 +58,13 @@ export default class TabManager {
 
         const tabButton = document.createElement('div');
         tabButton.classList.add('tab');
-        tabButton.textContent = config.title;
         tabButton.dataset.tabId = tabId;
         tabButton.addEventListener('click', () => this.switchTab(tabId));
+
+        const tabTitle = document.createElement('span');
+        tabTitle.classList.add('tab-title');
+        tabTitle.textContent = config.title;
+        tabButton.appendChild(tabTitle);
 
         // Close button
         const closeBtn = document.createElement('span');
@@ -114,7 +118,7 @@ export default class TabManager {
             if (!draggedTabId || draggedTabId === tabId) return;
 
             const rect = tabButton.getBoundingClientRect();
-            const insertBefore = e.clientX < rect.left + rect.width / 2;
+            const insertBefore = e.clientY < rect.top + rect.height / 2;
             this.reorderTabs(draggedTabId, tabId, insertBefore);
         });
 
