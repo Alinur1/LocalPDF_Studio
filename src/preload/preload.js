@@ -14,7 +14,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
         }
     },
     saveMergedPdf: (buffer) => ipcRenderer.invoke('save-merged-pdf', buffer),
-    getApiPort: () => ipcRenderer.invoke('get-api-port'),
-    getSettings: () => ipcRenderer.invoke('get-settings'),
-    setSettings: (settings) => ipcRenderer.invoke('set-settings', settings),
+    getApiPort: () => ipcRenderer.invoke('get-api-port')
 });

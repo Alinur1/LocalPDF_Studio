@@ -7,20 +7,17 @@ export default class TabManager {
         this.tabs = new Map();
         this.activeTabId = null;
 
-        window.addEventListener(
-            'keydown',
-            (e) => {
-                const isMac = navigator.platform.toUpperCase().includes('MAC');
-                const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
-                if (ctrlOrCmd && e.key.toLowerCase() === 'w') {
-                    e.preventDefault();
-                    if (this.activeTabId) {
-                        this.closeTab(this.activeTabId);
-                    }
+        // Ctrl/Cmd+W to close active tab
+        document.addEventListener('keydown', (e) => {
+            const isMac = navigator.platform.toUpperCase().includes('MAC');
+            const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+            if (ctrlOrCmd && e.key.toLowerCase() === 'w') {
+                e.preventDefault();
+                if (this.activeTabId) {
+                    this.closeTab(this.activeTabId);
                 }
-            },
-            true // <-- use capture phase to intercept BEFORE iframe/PDF viewer
-        );
+            }
+        });
 
         // Allow dropping on the tab bar empty space (append to end).
         // IMPORTANT: If the drop happens on a .tab, we do nothing here and let the tab's own drop handler run.

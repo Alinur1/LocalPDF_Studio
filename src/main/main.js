@@ -4,9 +4,7 @@ const { app, BrowserWindow, dialog, ipcMain, shell, Menu } = require('electron/m
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
-const Store = require('electron-store').default;
 
-const settingsStore = new Store({ name: 'settings' });
 let apiProcess = null;
 let apiPort = null;
 
@@ -114,14 +112,6 @@ const createWindow = () => {
         }
     });
 
-    win.webContents.setWindowOpenHandler(({ url }) => {
-        if (url.startsWith('http://') || url.startsWith('https://')) {
-            shell.openExternal(url);
-            return { action: 'deny' };
-        }
-        return { action: 'allow' };
-    });
-
     win.maximize();
     win.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'));
 };
@@ -212,15 +202,4 @@ ipcMain.handle('save-merged-pdf', async (event, arrayBuffer) => {
         console.error("Failed to save PDF:", err);
         return { success: false, error: err.message };
     }
-});
-
-ipcMain.handle('get-settings', () => {
-    return {
-        pdfViewer: settingsStore.get('pdfViewer', 'chromium') // default chromium
-    };
-});
-
-ipcMain.handle('set-settings', (event, newSettings) => {
-    settingsStore.set(newSettings);
-    return true;
 });
