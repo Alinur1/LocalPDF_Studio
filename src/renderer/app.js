@@ -2,6 +2,7 @@
 import TabManager from './tabs/tabManager.js';
 import createPdfTab from './utils/createPdfTab.js';
 import createMergePdfView from './tools/mergePdfView.js';
+import setupSettingsModal from './utils/settings.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     const tabManager = new TabManager('#tab-bar', '#tab-content');
@@ -85,4 +86,6 @@ window.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
     });
+
+    setupSettingsModal();
 });

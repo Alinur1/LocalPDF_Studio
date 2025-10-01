@@ -13,10 +13,37 @@
                connect-src 'self' http://localhost:*;">
 
     <link rel="stylesheet" href="./styles/main.css">
+    <link rel="stylesheet" href="./styles/settings.css">
 </head>
 
 <body>
     <div id="app">
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal">
+            <div class="modal-content">
+                <h2>Settings</h2>
+
+                <div class="setting-group">
+                    <label class="setting-label">Default PDF Viewer</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="pdfViewer" value="chromium" checked>
+                            Chromium (Fast, Recommended) <span class="tooltip">✔ Uses built-in Chromium PDF
+                                reader</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pdfViewer" value="pdfjs">
+                            Mozilla PDF.js (Advanced) <span class="tooltip">✨ More features, slightly heavier</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="save-settings" class="primary-btn">Save & Close</button>
+                </div>
+            </div>
+        </div>
+
         <div class="top-bar">
             <button class="top-btn" id="open-pdf-btn">Open PDF Reader</button>
             <div class="tools-dropdown">
