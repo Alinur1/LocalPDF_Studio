@@ -57,4 +57,32 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // Resizer logic
+    const tabBar = document.getElementById('tab-bar');
+    const resizer = document.getElementById('resizer');
+
+    // Set initial width
+    tabBar.style.width = '220px';
+
+    resizer.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        document.body.style.cursor = 'col-resize';
+
+        const handleMouseMove = (e) => {
+            const sidebarWidth = e.clientX;
+            if (sidebarWidth >= 220 && sidebarWidth <= 600) {
+                tabBar.style.width = `${sidebarWidth}px`;
+            }
+        };
+
+        const handleMouseUp = () => {
+            document.body.style.cursor = 'default';
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    });
 });

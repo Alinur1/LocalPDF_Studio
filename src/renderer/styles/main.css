@@ -106,8 +106,18 @@ html {
     background: #18222e;
     border-right: 1px solid #111820;
     overflow-y: auto;
-    width: 220px;
     padding-top: 5px;
+}
+
+.resizer {
+    width: 5px;
+    cursor: col-resize;
+    background: #111820;
+    transition: background 0.3s ease;
+}
+
+.resizer:hover {
+    background: #3498db;
 }
 
 .tab {
