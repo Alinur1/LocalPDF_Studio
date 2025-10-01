@@ -1,6 +1,6 @@
 // src/renderer/common/pdfFileList.js
 
-import { renderThumbnail } from './pdfUtils.js';
+import { renderThumbnail, clearCanvas } from './pdfUtils.js';
 
 export function createPdfList(container) {
     const pdfList = document.createElement('ul');
@@ -8,6 +8,7 @@ export function createPdfList(container) {
     container.appendChild(pdfList);
 
     let files = [];
+    const listItemCleanup = new Map(); // Track cleanup functions for each list item
 
     function addFiles(paths) {
         for (const path of paths) {
@@ -24,22 +25,27 @@ export function createPdfList(container) {
             // Info
             const infoDiv = document.createElement('div');
             infoDiv.classList.add('pdf-info');
+
             const nameSpan = document.createElement('div');
             nameSpan.classList.add('pdf-name');
             nameSpan.textContent = path.split(/[\\/]/).pop();
+
             const sizeSpan = document.createElement('div');
             sizeSpan.classList.add('pdf-size');
             infoDiv.append(nameSpan, sizeSpan);
 
-            // Remove button
+            // Remove button with cleanup
             const removeBtn = document.createElement('button');
             removeBtn.classList.add('remove-btn');
             removeBtn.textContent = '×';
-            removeBtn.addEventListener('click', () => {
+
+            const handleRemove = () => {
                 files = files.filter(f => f !== path);
+                cleanupListItem(li);
                 li.remove();
-                li.replaceChildren();
-            });
+            };
+
+            removeBtn.addEventListener('click', handleRemove);
 
             li.append(thumb, infoDiv, removeBtn);
             pdfList.appendChild(li);
@@ -52,18 +58,46 @@ export function createPdfList(container) {
             // Thumbnail
             renderThumbnail(path, thumb);
 
-            // Reordering
-            li.addEventListener('dragstart', () => li.classList.add('dragging'));
-            li.addEventListener('dragend', () => {
+            // Drag event handlers
+            const handleDragStart = () => li.classList.add('dragging');
+            const handleDragEnd = () => {
                 li.classList.remove('dragging');
                 updateFileOrder();
+            };
+
+            li.addEventListener('dragstart', handleDragStart);
+            li.addEventListener('dragend', handleDragEnd);
+
+            // Store cleanup function for this list item
+            listItemCleanup.set(li, () => {
+                // Clear canvas memory
+                clearCanvas(thumb);
+
+                // Remove event listeners
+                removeBtn.removeEventListener('click', handleRemove);
+                li.removeEventListener('dragstart', handleDragStart);
+                li.removeEventListener('dragend', handleDragEnd);
+
+                // Clear references
+                li.replaceChildren();
             });
+        }
+    }
+
+    // Cleanup individual list item
+    function cleanupListItem(li) {
+        const cleanup = listItemCleanup.get(li);
+        if (cleanup) {
+            cleanup();
+            listItemCleanup.delete(li);
         }
     }
 
     pdfList.addEventListener('dragover', (e) => {
         e.preventDefault();
         const dragging = pdfList.querySelector('.dragging');
+        if (!dragging) return;
+
         const afterEl = getDragAfterElement(pdfList, e.clientY);
         if (afterEl == null) {
             pdfList.appendChild(dragging);
@@ -94,9 +128,26 @@ export function createPdfList(container) {
     }
 
     function clearAll() {
+        // Clean up all list items
+        const allItems = [...pdfList.querySelectorAll('li')];
+        allItems.forEach(li => cleanupListItem(li));
+
         files = [];
         pdfList.innerHTML = '';
+        listItemCleanup.clear();
     }
 
-    return { pdfList, addFiles, clearAll, getFiles: () => files };
+    // Return cleanup function so parent can call it when view is destroyed
+    function destroy() {
+        clearAll();
+        pdfList.remove();
+    }
+
+    return {
+        pdfList,
+        addFiles,
+        clearAll,
+        getFiles: () => files,
+        destroy // Expose destroy method
+    };
 }

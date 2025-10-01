@@ -176,15 +176,33 @@ export default class TabManager {
         if (!this.tabs.has(tabId)) return;
         const tab = this.tabs.get(tabId);
 
-        // Run cleanup if provided
-        if (typeof tab.onClose === 'function') {
-            tab.onClose();
+        // Call cleanup method on content if it exists (for memory leak prevention)
+        if (tab.content && typeof tab.content.cleanup === 'function') {
+            try {
+                tab.content.cleanup();
+                console.log(`Cleaned up tab: ${tabId}`);
+            } catch (err) {
+                console.error(`Error cleaning up tab ${tabId}:`, err);
+            }
         }
 
+        // Run legacy onClose callback if provided
+        if (typeof tab.onClose === 'function') {
+            try {
+                tab.onClose();
+            } catch (err) {
+                console.error(`Error in onClose for tab ${tabId}:`, err);
+            }
+        }
+
+        // Remove DOM elements
         tab.tabButton.remove();
         tab.contentWrapper.remove();
+
+        // Delete from map
         this.tabs.delete(tabId);
 
+        // Switch to another tab if this was active
         if (this.activeTabId === tabId) {
             const remaining = Array.from(this.tabs.keys());
             if (remaining.length > 0) {
@@ -193,6 +211,21 @@ export default class TabManager {
                 this.activeTabId = null;
             }
         }
+
+        // Hint for garbage collection
+        if (window.gc) {
+            window.gc();
+        }
     }
 
+    // Method to close all tabs (useful for complete cleanup)
+    closeAllTabs() {
+        const tabIds = Array.from(this.tabs.keys());
+        tabIds.forEach(tabId => this.closeTab(tabId));
+    }
+
+    // Get number of open tabs
+    getTabCount() {
+        return this.tabs.size;
+    }
 }

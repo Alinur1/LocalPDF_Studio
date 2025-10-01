@@ -15,7 +15,7 @@ export default function createMergePdfView() {
     selectBtn.classList.add('select-pdf-btn');
     selectBtn.textContent = 'Click to Select PDF Files';
 
-    const { pdfList, addFiles, clearAll, getFiles } = createPdfList(container);
+    const { pdfList, addFiles, clearAll, getFiles, destroy } = createPdfList(container);
 
     const mergeBtn = document.createElement('button');
     mergeBtn.classList.add('primary-btn');
@@ -27,14 +27,19 @@ export default function createMergePdfView() {
 
     container.append(selectBtn, pdfList, mergeBtn, clearBtn);
 
-    selectBtn.addEventListener('click', async () => {
+    // Event handlers stored so they can be removed
+    const handleSelectClick = async () => {
         const selected = await window.electronAPI.selectPdfs();
         if (selected?.length) addFiles(selected);
-    });
+    };
 
-    clearBtn.addEventListener('click', clearAll);
+    const handleClearClick = () => {
+        clearAll();
+        // Force garbage collection hint (doesn't guarantee GC, but helps)
+        if (window.gc) window.gc();
+    };
 
-    mergeBtn.addEventListener('click', async () => {
+    const handleMergeClick = async () => {
         const files = getFiles();
         if (!files.length) return;
 
@@ -53,7 +58,25 @@ export default function createMergePdfView() {
         } catch (err) {
             alert("Error merging PDFs: " + err.message);
         }
-    });
+    };
+
+    selectBtn.addEventListener('click', handleSelectClick);
+    clearBtn.addEventListener('click', handleClearClick);
+    mergeBtn.addEventListener('click', handleMergeClick);
+
+    // Attach cleanup function to container for when view is removed
+    container.cleanup = () => {
+        // Remove event listeners
+        selectBtn.removeEventListener('click', handleSelectClick);
+        clearBtn.removeEventListener('click', handleClearClick);
+        mergeBtn.removeEventListener('click', handleMergeClick);
+
+        // Destroy PDF list
+        destroy();
+
+        // Clear container
+        container.replaceChildren();
+    };
 
     return container;
 }
