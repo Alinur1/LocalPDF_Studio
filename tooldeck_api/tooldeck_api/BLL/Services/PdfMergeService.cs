@@ -4,7 +4,7 @@ using tooldeck_api.BLL.Interfaces;
 
 namespace tooldeck_api.BLL.Services
 {
-    public class PdfMergeService : IPdfMergeService
+    public class PdfMergeService : IPdfMergeInterface
     {
         public async Task<byte[]> MergeFilesAsync(IEnumerable<string> inputPaths)
         {

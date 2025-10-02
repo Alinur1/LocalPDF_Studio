@@ -9,9 +9,9 @@ namespace tooldeck_api.Controllers
     [ApiController]
     public class PdfMergeController : ControllerBase
     {
-        private readonly IPdfMergeService _mergeService;
+        private readonly IPdfMergeInterface _mergeService;
 
-        public PdfMergeController(IPdfMergeService mergeService)
+        public PdfMergeController(IPdfMergeInterface mergeService)
         {
             _mergeService = mergeService;
         }

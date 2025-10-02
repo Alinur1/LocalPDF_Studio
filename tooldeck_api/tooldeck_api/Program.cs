@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IPdfMergeService, PdfMergeService>();
+builder.Services.AddScoped<IPdfMergeInterface, PdfMergeService>();
 
 // CORS policy
 builder.Services.AddCors(options =>
