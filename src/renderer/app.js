@@ -55,6 +55,10 @@ window.addEventListener('DOMContentLoaded', () => {
     const resizer = document.getElementById('resizer');
 
     tabBar.style.width = '220px';
+    const savedWidth = localStorage.getItem('sidebarWidth');
+    if (savedWidth) {
+        tabBar.style.width = savedWidth;
+    }
 
     resizer.addEventListener('mousedown', (e) => {
         e.preventDefault();
@@ -71,6 +75,7 @@ window.addEventListener('DOMContentLoaded', () => {
             document.body.style.cursor = 'default';
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
+            localStorage.setItem('sidebarWidth', tabBar.style.width);
         };
 
         document.addEventListener('mousemove', handleMouseMove);
@@ -83,7 +88,7 @@ window.addEventListener('DOMContentLoaded', () => {
             activeTabId: manager.activeTabId,
             tabs: Array.from(manager.tabs.entries()).map(([id, tab]) => ({
                 id,
-                filePath: tab.content.src.replace(/^.*file:\/\//, ''),
+                filePath: decodeURIComponent(tab.content.src.replace(/^.*file:\/\//, '')),
                 title: tab.tabButton.querySelector('.tab-title')?.textContent || 'PDF'
             }))
         };
