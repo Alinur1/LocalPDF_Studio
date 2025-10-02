@@ -3,19 +3,37 @@ import createPdfTab from './utils/createPdfTab.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     const tabManager = new TabManager('#tab-bar', '#tab-content');
+    const openPdfBtn = document.getElementById('open-pdf-btn');
 
     // Restore saved tabs on startup
     restoreTabs(tabManager);
 
-    // Open PDF button
-    const openPdfBtn = document.getElementById('open-pdf-btn');
-    openPdfBtn.addEventListener('click', async () => {
-        const files = await window.electronAPI.selectPdfs();
-        if (!files || files.length === 0) return;
+    // Open PDF button with dialog state management
+    let isDialogOpen = false;
 
-        for (const filePath of files) {
-            createPdfTab(filePath, tabManager);
-            saveTabs(tabManager);
+    openPdfBtn.addEventListener('click', async () => {
+        // Prevent multiple dialogs
+        if (isDialogOpen) return;
+
+        isDialogOpen = true;
+        openPdfBtn.disabled = true;
+        openPdfBtn.textContent = 'Selecting...';
+
+        try {
+            const files = await window.electronAPI.selectPdfs();
+
+            if (files && files.length > 0) {
+                for (const filePath of files) {
+                    createPdfTab(filePath, tabManager);
+                }
+                saveTabs(tabManager);
+            }
+        } catch (error) {
+            console.error('Error opening PDFs:', error);
+        } finally {
+            isDialogOpen = false;
+            openPdfBtn.disabled = false;
+            openPdfBtn.textContent = 'Open PDF Reader';
         }
     });
 
@@ -63,7 +81,7 @@ window.addEventListener('DOMContentLoaded', () => {
             activeTabId: manager.activeTabId,
             tabs: Array.from(manager.tabs.entries()).map(([id, tab]) => ({
                 id,
-                filePath: tab.content.src.replace(/^.*file:\/\//, ''), // extract path
+                filePath: tab.content.src.replace(/^.*file:\/\//, ''),
                 title: tab.tabButton.querySelector('.tab-title')?.textContent || 'PDF'
             }))
         };
