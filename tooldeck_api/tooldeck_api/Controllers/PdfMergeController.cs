@@ -17,7 +17,7 @@ namespace tooldeck_api.Controllers
         }
 
         [HttpPost("merge")]
-        public async Task<IActionResult> Merge([FromBody] MergeRequestDto request)
+        public async Task<IActionResult> Merge([FromBody] MergeRequest request)
         {
             if (request?.Files == null)
                 return BadRequest("No files provided.");

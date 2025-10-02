@@ -1,6 +1,6 @@
 ﻿namespace tooldeck_api.DAL.Models
 {
-    public class MergeRequestDto
+    public class MergeRequest
     {
         public IEnumerable<string> Files { get; set; }
     }
