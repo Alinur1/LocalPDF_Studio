@@ -52,7 +52,7 @@ const api = {
 async function getEndpoints() {
     const base = await initializeAPI();
     return {
-        merge: `${base}/pdf/merge`,
+        merge: `${base}/PdfMerge/merge`,
         // Uncomment when implemented
         // split: `${base}/pdf/split`,
         // removePages: `${base}/pdf/remove-pages`,

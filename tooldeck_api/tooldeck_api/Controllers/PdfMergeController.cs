@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using tooldeck_api.BLL.Interfaces;
-using tooldeck_api.DAL.DTOs;
+using tooldeck_api.DAL.Models;
 
 namespace tooldeck_api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PdfController : ControllerBase
+    public class PdfMergeController : ControllerBase
     {
         private readonly IPdfMergeService _mergeService;
 
-        public PdfController(IPdfMergeService mergeService)
+        public PdfMergeController(IPdfMergeService mergeService)
         {
             _mergeService = mergeService;
         }

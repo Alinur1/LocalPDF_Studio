@@ -1,4 +1,4 @@
-﻿namespace tooldeck_api.DAL.DTOs
+﻿namespace tooldeck_api.DAL.Models
 {
     public class MergeRequestDto
     {
