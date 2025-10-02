@@ -15,9 +15,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="BLL\Utilities\" />
-    <Folder Include="DAL\Enums\" />
-  </ItemGroup>
-
 </Project>
