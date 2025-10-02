@@ -6,9 +6,11 @@ export default function createPdfTab(filePath, tabManager) {
 
     const iframe = document.createElement('iframe');
     iframe.src = `../pdf/web/viewer.html?file=file://${filePath}`;
-    iframe.style.width = '100%';
+    iframe.style.width = '90%';
     iframe.style.height = '100%';
     iframe.style.border = 'none';
+    iframe.style.margin = 'auto';
+    iframe.style.display = 'block';
 
     iframe.addEventListener('load', () => {
         const iframeWin = iframe.contentWindow;

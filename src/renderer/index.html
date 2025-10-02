@@ -1,49 +1,52 @@
-<!-- src/renderer/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ToolDeck PDF Reader (Beta)</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self';
-               script-src 'self';
-               style-src 'self' 'unsafe-inline';
-               img-src 'self' data:;
-               connect-src 'self' http://localhost:*;">
+    <title>LocalPDF Studio - Reader</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
 
     <link rel="stylesheet" href="./styles/main.css">
 </head>
 
 <body>
     <div id="app">
+        <!-- Top Bar -->
         <div class="top-bar">
             <button class="top-btn" id="open-pdf-btn">Open PDF Reader</button>
             <div class="tools-dropdown">
                 <button class="top-btn" id="tools-btn">Tools</button>
                 <div class="tools-menu" id="tools-menu">
                     <div id="tools-grid">
-                        <a href="#" data-tool="merge-pdf">Merge PDF</a>
-                        <a href="#" data-tool="split-pdf">Split PDF</a>
-                        <a href="#" data-tool="remove-pages">Remove Pages</a>
-                        <a href="#" data-tool="extract-pages">Extract Pages</a>
-                        <a href="#" data-tool="organize-pdf">Organize/Re-Arrange PDF</a>
-                        <a href="#" data-tool="compress-pdf">Compress PDF</a>
-                        <a href="#" data-tool="pdf-to-jpg">PDF to JPG</a>
-                        <a href="#" data-tool="pdf-to-word">PDF to WORD</a>
-                        <a href="#" data-tool="pdf-to-powerpoint">PDF to PowerPoint</a>
-                        <a href="#" data-tool="pdf-to-excel">PDF to Excel</a>
-                        <a href="#" data-tool="add-page-numbers">Add Page Numbers</a>
-                        <a href="#" data-tool="add-watermark">Add Watermark</a>
-                        <a href="#" data-tool="crop-pdf">Crop PDF</a>
-                        <a href="#" data-tool="lock-unlock-pdf">Lock/Unlock PDF</a>
-                        <a href="#" data-tool="sign-pdf">Sign PDF</a>
-                        <a href="#" data-tool="edit-metadata">View and Edit metadata</a>
+                        <a href="./tools/mergePdf/mergePdf.html">Merge PDF</a>
+                        <a href="./tools/splitPdf/splitPdf.html">Split PDF</a>
+                        <a href="./tools/removePages/removePages.html">Remove Pages</a>
+                        <a href="./tools/extractPages/extractPages.html">Extract Pages</a>
+                        <a href="./tools/organizePdf/organizePdf.html">Organize/Re-Arrange PDF</a>
+                        <a href="./tools/compressPdf/compressPdf.html">Compress PDF</a>
+                        <a href="./tools/pdfToJpg/pdfToJpg.html">PDF to JPG</a>
+                        <a href="./tools/pdfToWord/pdfToWord.html">PDF to WORD</a>
+                        <a href="./tools/pdfToPowerPoint/pdfToPowerPoint.html">PDF to PowerPoint</a>
+                        <a href="./tools/pdfToExcel/pdfToExcel.html">PDF to Excel</a>
+                        <a href="./tools/addPageNumbers/addPageNumbers.html">Add Page Numbers</a>
+                        <a href="./tools/addWatermark/addWatermark.html">Add Watermark</a>
+                        <a href="./tools/cropPdf/cropPdf.html">Crop PDF</a>
+                        <a href="./tools/lockUnlockPdf/lockUnlockPdf.html">Lock/Unlock PDF</a>
+                        <a href="./tools/signPdf/signPdf.html">Sign PDF</a>
+                        <a href="./tools/editMetadata/editMetadata.html">View and Edit Metadata</a>
                     </div>
                 </div>
             </div>
             <button class="top-btn" id="open-settings">Settings</button>
         </div>
+
+        <!-- Main Content -->
         <div id="main-content">
             <div id="tab-bar"></div>
             <div class="resizer" id="resizer"></div>
