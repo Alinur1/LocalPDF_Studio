@@ -5,6 +5,10 @@ export default class TabManager {
         this.tabs = new Map();
         this.activeTabId = null;
 
+        // Callbacks for persistence
+        this.onTabChange = null;
+        this.onTabClose = null;
+
         // Close active tab with Ctrl/Cmd+W
         document.addEventListener('keydown', (e) => {
             const isMac = navigator.platform.toUpperCase().includes('MAC');
@@ -55,6 +59,7 @@ export default class TabManager {
 
         this.tabs.set(id, { tabButton, contentWrapper, content, onClose });
         this.switchTab(id);
+        if (this.onTabChange) this.onTabChange();
     }
 
     switchTab(id) {
@@ -67,6 +72,7 @@ export default class TabManager {
         targetTab.tabButton.classList.add('active');
         targetTab.contentWrapper.style.display = 'block';
         this.activeTabId = id;
+        if (this.onTabChange) this.onTabChange();
     }
 
     closeTab(id) {
@@ -89,5 +95,7 @@ export default class TabManager {
                 this.activeTabId = null;
             }
         }
+
+        if (this.onTabClose) this.onTabClose();
     }
 }

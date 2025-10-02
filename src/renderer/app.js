@@ -4,6 +4,9 @@ import createPdfTab from './utils/createPdfTab.js';
 window.addEventListener('DOMContentLoaded', () => {
     const tabManager = new TabManager('#tab-bar', '#tab-content');
 
+    // Restore saved tabs on startup
+    restoreTabs(tabManager);
+
     // Open PDF button
     const openPdfBtn = document.getElementById('open-pdf-btn');
     openPdfBtn.addEventListener('click', async () => {
@@ -12,6 +15,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         for (const filePath of files) {
             createPdfTab(filePath, tabManager);
+            saveTabs(tabManager);
         }
     });
 
@@ -52,4 +56,40 @@ window.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
     });
+
+    // --- Persistence helpers ---
+    function saveTabs(manager) {
+        const state = {
+            activeTabId: manager.activeTabId,
+            tabs: Array.from(manager.tabs.entries()).map(([id, tab]) => ({
+                id,
+                filePath: tab.content.src.replace(/^.*file:\/\//, ''), // extract path
+                title: tab.tabButton.querySelector('.tab-title')?.textContent || 'PDF'
+            }))
+        };
+        localStorage.setItem('pdfTabs', JSON.stringify(state));
+    }
+
+    function restoreTabs(manager) {
+        const saved = localStorage.getItem('pdfTabs');
+        if (!saved) return;
+
+        try {
+            const state = JSON.parse(saved);
+            if (state.tabs && Array.isArray(state.tabs)) {
+                for (const tab of state.tabs) {
+                    createPdfTab(tab.filePath, manager);
+                }
+            }
+            if (state.activeTabId) {
+                manager.switchTab(state.activeTabId);
+            }
+        } catch (err) {
+            console.error('Failed to restore tabs:', err);
+        }
+    }
+
+    // Hook TabManager events
+    tabManager.onTabChange = () => saveTabs(tabManager);
+    tabManager.onTabClose = () => saveTabs(tabManager);
 });
