@@ -6,6 +6,11 @@ import createPdfTab from './utils/createPdfTab.js';
 window.addEventListener('DOMContentLoaded', () => {
     const tabManager = new TabManager('#tab-bar', '#tab-content');
     const openPdfBtn = document.getElementById('open-pdf-btn');
+    const settingsBtn = document.getElementById('settings-btn');
+    const modal = document.getElementById('settings-modal');
+    const saveBtn = document.getElementById('settings-save');
+    const cancelBtn = document.getElementById('settings-cancel');
+    const radios = document.querySelectorAll('input[name="restore-tabs"]');
 
     // Restore saved tabs on startup
     restoreTabs(tabManager);
@@ -96,23 +101,45 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     function restoreTabs(manager) {
+        const restoreSetting = localStorage.getItem('restoreTabs') || 'restore';
         const saved = localStorage.getItem('pdfTabs');
         if (!saved) return;
 
         try {
             const state = JSON.parse(saved);
-            if (state.tabs && Array.isArray(state.tabs)) {
+            if (restoreSetting === 'restore' && state.tabs && Array.isArray(state.tabs)) {
                 for (const tab of state.tabs) {
                     createPdfTab(tab.filePath, manager);
                 }
-            }
-            if (state.activeTabId) {
-                manager.switchTab(state.activeTabId);
+                if (state.activeTabId) {
+                    manager.switchTab(state.activeTabId);
+                }
             }
         } catch (err) {
             console.error('Failed to restore tabs:', err);
         }
     }
+
+
+    // Load saved setting (default = restore)
+    const savedSetting = localStorage.getItem('restoreTabs') || 'restore';
+    radios.forEach(r => {
+        r.checked = (r.value === savedSetting);
+    });
+
+    settingsBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    saveBtn.addEventListener('click', () => {
+        const selected = document.querySelector('input[name="restore-tabs"]:checked').value;
+        localStorage.setItem('restoreTabs', selected);
+        modal.classList.add('hidden');
+    });
 
     // Hook TabManager events
     tabManager.onTabChange = () => saveTabs(tabManager);
