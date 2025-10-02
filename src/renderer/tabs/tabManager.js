@@ -1,3 +1,5 @@
+// src/renderer/tabs/tabManager.js
+
 export default class TabManager {
     constructor(tabBarSelector, tabContentSelector) {
         this.tabBar = document.querySelector(tabBarSelector);

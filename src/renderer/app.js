@@ -1,3 +1,5 @@
+// src/renderer/app.js
+
 import TabManager from './tabs/tabManager.js';
 import createPdfTab from './utils/createPdfTab.js';
 
