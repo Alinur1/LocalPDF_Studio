@@ -1,0 +1,244 @@
+// src/renderer/tools/splitPdf/splitPdf.js
+
+import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
+import { API } from '../../api/api.js';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await API.init();
+
+    const selectPdfBtn = document.getElementById('select-pdf-btn');
+    const removePdfBtn = document.getElementById('remove-pdf-btn');
+    const splitBtn = document.getElementById('split-btn');
+    const selectedFileInfo = document.getElementById('selected-file-info');
+    const pdfNameEl = document.getElementById('pdf-name');
+    const pdfSizeEl = document.getElementById('pdf-size');
+    const previewContainer = document.getElementById('preview-container');
+    const previewGrid = document.getElementById('preview-grid');
+    const pageCountEl = document.getElementById('page-count');
+
+    const splitMethodRadios = document.querySelectorAll('input[name="splitMethod"]');
+    const blankThresholdSlider = document.getElementById('blankThreshold');
+    const blankThresholdValue = document.getElementById('blank-threshold-value');
+
+    let selectedFile = null;
+    let pdfDoc = null;
+    let renderedPages = [];
+
+    // --- File Selection ---
+    selectPdfBtn.addEventListener('click', async () => {
+        const files = await window.electronAPI.selectPdfs();
+        if (files && files.length > 0) {
+            const filePath = files[0];
+            const fileName = filePath.split(/[\\/]/).pop();
+            const fileSize = await getFileSize(filePath);
+            handleFileSelected({ path: filePath, name: fileName, size: fileSize });
+        }
+    });
+
+    removePdfBtn.addEventListener('click', () => clearAll());
+
+    const backBtn = document.querySelector('a[href="../../index.html"]');
+    if (backBtn) {
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            clearAll();
+            window.location.href = '../../index.html';
+        });
+    }
+
+    async function handleFileSelected(file) {
+        clearAll();
+        selectedFile = file;
+        pdfNameEl.textContent = file.name;
+        pdfSizeEl.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+        selectPdfBtn.style.display = 'none';
+        selectedFileInfo.style.display = 'flex';
+        await loadPdfPreview(file.path);
+        updateSplitButtonState();
+    }
+
+    async function loadPdfPreview(filePath) {
+        try {
+            previewContainer.style.display = 'block';
+            previewGrid.innerHTML = '<p style="color: #bdc3c7; text-align: center;">Loading preview...</p>';
+            const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
+            pdfDoc = await loadingTask.promise;
+            pageCountEl.textContent = `Total Pages: ${pdfDoc.numPages}`;
+            previewGrid.innerHTML = '';
+            for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+                await renderPageThumbnail(pageNum);
+            }
+        } catch (error) {
+            console.error('Error loading PDF:', error);
+            previewGrid.innerHTML = '<p style="color: #e74c3c; text-align: center;">Failed to load PDF preview</p>';
+        }
+    }
+
+    async function renderPageThumbnail(pageNum) {
+        const page = await pdfDoc.getPage(pageNum);
+        const scale = 0.3;
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        await page.render({ canvasContext: context, viewport }).promise;
+        const thumbWrapper = document.createElement('div');
+        thumbWrapper.className = 'page-thumbnail';
+        thumbWrapper.dataset.pageNum = pageNum;
+        const pageLabel = document.createElement('div');
+        pageLabel.className = 'page-label';
+        pageLabel.textContent = `Page ${pageNum}`;
+        thumbWrapper.appendChild(canvas);
+        thumbWrapper.appendChild(pageLabel);
+        previewGrid.appendChild(thumbWrapper);
+        renderedPages.push(canvas);
+    }
+
+    function clearAll() {
+        if (pdfDoc) {
+            pdfDoc.destroy();
+            pdfDoc = null;
+        }
+        renderedPages.forEach(c => {
+            const ctx = c.getContext('2d');
+            ctx.clearRect(0, 0, c.width, c.height);
+        });
+        renderedPages = [];
+        previewGrid.innerHTML = '';
+        previewContainer.style.display = 'none';
+        selectedFile = null;
+        selectedFileInfo.style.display = 'none';
+        selectPdfBtn.style.display = 'block';
+        updateSplitButtonState();
+    }
+
+    async function getFileSize(filePath) {
+        try {
+            if (window.electronAPI?.getFileInfo) {
+                const info = await window.electronAPI.getFileInfo(filePath);
+                return info.size || 0;
+            }
+            return 0;
+        } catch {
+            return 0;
+        }
+    }
+
+    // --- UI Logic for Split Options ---
+    splitMethodRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            document.querySelectorAll('.options-panel').forEach(p => p.style.display = 'none');
+            const panel = document.getElementById(`options${radio.value}`);
+            if (panel) panel.style.display = 'block';
+        });
+    });
+
+    blankThresholdSlider.addEventListener('input', () => {
+        blankThresholdValue.textContent = `${Math.round(blankThresholdSlider.value * 100)}%`;
+    });
+
+    function updateSplitButtonState() {
+        splitBtn.disabled = !selectedFile;
+    }
+
+    // --- API Call ---
+    splitBtn.addEventListener('click', async () => {
+        if (!selectedFile) {
+            alert('Please select a file first.');
+            return;
+        }
+
+        const selectedMethod = document.querySelector('input[name="splitMethod"]:checked').value;
+        let options = {};
+        let isValid = true;
+
+        switch (selectedMethod) {
+            case 'ByPageRanges':
+                const pageRanges = document.getElementById('pageRanges').value.trim();
+                if (!pageRanges) {
+                    isValid = false;
+                    alert('Page ranges cannot be empty.');
+                } else {
+                    options.pageRanges = pageRanges.split(',').map(r => r.trim());
+                }
+                break;
+            case 'AtSpecificPages':
+                const splitPages = document.getElementById('splitPages').value.trim();
+                if (!splitPages) {
+                    isValid = false;
+                    alert('Specific pages cannot be empty.');
+                } else {
+                    options.splitPages = splitPages.split(',')
+                        .map(p => parseInt(p.trim()))
+                        .filter(p => !isNaN(p));
+                }
+                break;
+            case 'EveryNPages':
+                const pageInterval = document.getElementById('pageInterval').value;
+                if (!pageInterval || parseInt(pageInterval) <= 0) {
+                    isValid = false;
+                    alert('Please enter a valid number of pages.');
+                } else {
+                    options.pageInterval = parseInt(pageInterval);
+                }
+                break;
+            case 'ByBlankPages':
+                options.blankThreshold = parseFloat(blankThresholdSlider.value);
+                break;
+        }
+
+        if (!isValid) return;
+
+        const requestBody = {
+            filePath: selectedFile.path,
+            method: getSplitMethodEnumValue(selectedMethod),
+            options: options,
+            outputFormat: 0
+        };
+
+        try {
+            splitBtn.disabled = true;
+            splitBtn.textContent = 'Splitting...';
+
+            const splitEndpoint = await API.pdf.split;
+            const result = await API.request.post(splitEndpoint, requestBody);
+
+            if (result instanceof Blob) {
+                const arrayBuffer = await result.arrayBuffer();
+
+                const defaultName = `${selectedFile.name.replace('.pdf', '')}_split.zip`;
+
+                const savedPath = await window.electronAPI.saveFile(defaultName, arrayBuffer);
+
+                if (savedPath) {
+                    alert('PDF split successfully!\nSaved to: ' + savedPath);
+                } else {
+                    alert('Operation cancelled or failed to save the file.');
+                }
+            } else {
+                console.error("Split API returned JSON:", result);
+                alert(`Error: ${JSON.stringify(result)}`);
+            }
+        } catch (error) {
+            console.error('Error splitting PDF:', error);
+            alert(`An error occurred while splitting the PDF:\n${error.message}`);
+        } finally {
+            splitBtn.disabled = false;
+            splitBtn.textContent = 'Split PDF';
+        }
+    });
+
+    function getSplitMethodEnumValue(methodName) {
+        const methods = {
+            'ByPageRanges': 0,
+            'AtSpecificPages': 1,
+            'EveryNPages': 2,
+            'ExtractAllPages': 3,
+            'ByBlankPages': 4
+        };
+        return methods[methodName];
+    }
+});
