@@ -11,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPdfMergeInterface, PdfMergeService>();
 builder.Services.AddScoped<IPdfSplitInterface, PdfSplitService>();
+builder.Services.AddScoped<IPdfRemoveInterface, PdfRemoveService>();
 
 // CORS policy
 builder.Services.AddCors(options =>

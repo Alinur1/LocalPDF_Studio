@@ -54,7 +54,7 @@ async function getEndpoints() {
     return {
         merge: `${base}/PdfMerge/merge`,
         split: `${base}/PdfSplit/split`,
-        // removePages: `${base}/pdf/remove-pages`,
+        removePages: `${base}/PdfRemove/remove`,
         // extractPages: `${base}/pdf/extract`,
         // organize: `${base}/pdf/organize`,
         // compress: `${base}/pdf/compress`,
