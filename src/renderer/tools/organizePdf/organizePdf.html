@@ -1,0 +1,86 @@
+<!-- src/renderer/tools/organizePdf/organizePdf.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - Organize PDF</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+
+    <!-- PDF.js (local) -->
+    <script type="module">
+        import * as pdfjsLib from '../../pdf/build/pdf.mjs';
+        window.pdfjsLib = pdfjsLib;
+    </script>
+
+    <!-- Global theme -->
+    <link rel="stylesheet" href="../../styles/main.css">
+
+    <!-- Tool-specific styles -->
+    <link rel="stylesheet" href="./organizePdf.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn">← Back</a>
+            <h1 class="tool-title">Organize/Re-Arrange PDF</h1>
+        </div>
+
+        <main class="tool-container">
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                </div>
+            </div>
+
+            <div class="organize-info" style="display: none;" id="organize-info">
+                <div class="info-card">
+                    <h3>How to Organize:</h3>
+                    <ul>
+                        <li><strong>Drag & Drop</strong> pages to reorder them</li>
+                        <li><strong>Click rotation buttons</strong> to rotate pages 90°</li>
+                        <li><strong>Click duplicate button</strong> to copy a page</li>
+                        <li><strong>Click delete button</strong> to remove a page</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PDF Pages Grid for Organizing -->
+            <div id="organize-container" class="organize-container" style="display: none;">
+                <div class="organize-header">
+                    <div>
+                        <h3>Drag pages to reorder</h3>
+                        <p class="page-count-info" id="page-count-info"></p>
+                    </div>
+                    <div class="header-actions">
+                        <button id="reset-order-btn" class="action-btn secondary">Reset to Original</button>
+                    </div>
+                </div>
+                <div id="pages-grid" class="pages-grid">
+                    <!-- Draggable page thumbnails will be inserted here -->
+                </div>
+            </div>
+
+            <div class="action-buttons" id="action-buttons" style="display: none;">
+                <button id="organize-btn" class="top-btn">Save Organized PDF</button>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="./organizePdf.js"></script>
+</body>
+
+</html>

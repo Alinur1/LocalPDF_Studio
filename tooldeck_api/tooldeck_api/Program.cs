@@ -12,6 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPdfMergeInterface, PdfMergeService>();
 builder.Services.AddScoped<IPdfSplitInterface, PdfSplitService>();
 builder.Services.AddScoped<IPdfRemoveInterface, PdfRemoveService>();
+builder.Services.AddScoped<IPdfOrganizeInterface, PdfOrganizeService>();
 
 // CORS policy
 builder.Services.AddCors(options =>
