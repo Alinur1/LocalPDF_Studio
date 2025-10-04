@@ -204,7 +204,7 @@ ipcMain.handle('save-merged-pdf', async (event, arrayBuffer) => {
     }
 });
 
-ipcMain.handle('save-file', async (event, { filename, buffer }) => {
+ipcMain.handle('save-zip-file', async (event, { filename, buffer }) => {
     const { filePath, canceled } = await dialog.showSaveDialog({
         defaultPath: filename,
         filters: [
@@ -237,8 +237,7 @@ ipcMain.handle('save-file', async (event, { filename, buffer }) => {
     }
 });
 
-
-ipcMain.handle('save-removed-page-file', async (event, { filename, buffer }) => {
+ipcMain.handle('save-pdf-file', async (event, { filename, buffer }) => {
     const { filePath, canceled } = await dialog.showSaveDialog({
         defaultPath: filename,
         filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
