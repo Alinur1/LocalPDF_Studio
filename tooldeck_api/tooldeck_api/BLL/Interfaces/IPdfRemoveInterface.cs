@@ -1,4 +1,4 @@
-﻿using tooldeck_api.DAL.Models;
+﻿using tooldeck_api.DAL.Models.RemovePdfModel;
 
 namespace tooldeck_api.BLL.Interfaces
 {

@@ -1,4 +1,4 @@
-﻿namespace tooldeck_api.DAL.Models
+﻿namespace tooldeck_api.DAL.Models.MergePdfModel
 {
     public class MergeRequest
     {

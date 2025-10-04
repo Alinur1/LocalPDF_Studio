@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using tooldeck_api.BLL.Interfaces;
-using tooldeck_api.DAL.Models;
+using tooldeck_api.DAL.Models.RemovePdfModel;
 
 namespace tooldeck_api.Controllers
 {

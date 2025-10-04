@@ -1,7 +1,7 @@
 ﻿using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
 using tooldeck_api.BLL.Interfaces;
-using tooldeck_api.DAL.Models;
+using tooldeck_api.DAL.Models.RemovePdfModel;
 
 namespace tooldeck_api.BLL.Services
 {

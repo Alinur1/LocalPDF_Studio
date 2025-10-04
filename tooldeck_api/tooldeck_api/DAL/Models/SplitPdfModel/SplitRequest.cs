@@ -1,6 +1,6 @@
 ﻿using tooldeck_api.DAL.Enums;
 
-namespace tooldeck_api.DAL.Models
+namespace tooldeck_api.DAL.Models.SplitPdfModel
 {
     public class SplitRequest
     {

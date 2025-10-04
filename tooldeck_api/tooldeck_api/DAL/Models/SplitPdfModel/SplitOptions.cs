@@ -1,4 +1,4 @@
-﻿namespace tooldeck_api.DAL.Models
+﻿namespace tooldeck_api.DAL.Models.SplitPdfModel
 {
     public class SplitOptions
     {
