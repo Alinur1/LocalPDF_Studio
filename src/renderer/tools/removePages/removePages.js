@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (result instanceof Blob) {
                 const arrayBuffer = await result.arrayBuffer();
                 const defaultName = `${selectedFile.name.replace('.pdf', '')}_removed_pages.pdf`;
-                const savedPath = await window.electronAPI.saveRemovedPageFile(defaultName, arrayBuffer);
+                const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
                     alert(`Success! Pages removed successfully!\nSaved to: ${savedPath}`);

@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const defaultName = `${selectedFile.name.replace('.pdf', '')}_split.zip`;
 
-                const savedPath = await window.electronAPI.saveFile(defaultName, arrayBuffer);
+                const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
                     alert('PDF split successfully!\nSaved to: ' + savedPath);

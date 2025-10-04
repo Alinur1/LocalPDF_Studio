@@ -15,7 +15,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
         }
     },
     saveMergedPdf: (buffer) => ipcRenderer.invoke('save-merged-pdf', buffer),
-    saveFile: (filename, buffer) => ipcRenderer.invoke('save-file', { filename, buffer }),
-    saveRemovedPageFile: (filename, buffer) => ipcRenderer.invoke('save-removed-page-file', { filename, buffer }),
+    saveZipFile: (filename, buffer) => ipcRenderer.invoke('save-zip-file', { filename, buffer }),
+    savePdfFile: (filename, buffer) => ipcRenderer.invoke('save-pdf-file', { filename, buffer }),
     getApiPort: () => ipcRenderer.invoke('get-api-port')
 });
