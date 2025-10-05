@@ -1,0 +1,132 @@
+<!-- src/renderer/tools/compressPdf/compressPdf.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - Compress PDF</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+
+    <!-- Global theme -->
+    <link rel="stylesheet" href="../../styles/main.css">
+
+    <!-- Tool-specific styles -->
+    <link rel="stylesheet" href="./compressPdf.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn">← Back</a>
+            <h1 class="tool-title">Compress PDF</h1>
+        </div>
+
+        <main class="tool-container">
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-card">
+                    <h3>About PDF Compression</h3>
+                    <p>This tool reduces PDF file size by compressing images and optimizing content streams. Higher
+                        compression reduces quality but creates smaller files.</p>
+                </div>
+            </div>
+
+            <div class="compress-options-container">
+                <h2>Compression Settings</h2>
+
+                <div class="quality-section">
+                    <h3>Quality Level</h3>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="quality" value="high" checked>
+                            <div class="option-content">
+                                <span class="option-title">High Quality</span>
+                                <span class="option-desc">Minimal compression, best quality (90% JPEG quality)</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="quality" value="medium">
+                            <div class="option-content">
+                                <span class="option-title">Medium Quality (Recommended)</span>
+                                <span class="option-desc">Balanced compression (75% JPEG quality)</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="quality" value="low">
+                            <div class="option-content">
+                                <span class="option-title">Low Quality</span>
+                                <span class="option-desc">Maximum compression, reduced quality (50% JPEG quality)</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="quality" value="custom">
+                            <div class="option-content">
+                                <span class="option-title">Custom Quality</span>
+                                <span class="option-desc">Set your own compression level</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="custom-quality-section" class="custom-quality-section" style="display: none;">
+                        <label for="custom-quality-slider">Quality: <span id="quality-value">75</span>%</label>
+                        <input type="range" id="custom-quality-slider" min="1" max="100" value="75">
+                        <div class="slider-labels">
+                            <span>Smaller file</span>
+                            <span>Better quality</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="additional-options">
+                    <h3>Additional Options</h3>
+
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="remove-metadata">
+                        <span>Remove metadata (author, title, keywords)</span>
+                    </label>
+
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="remove-unused" checked>
+                        <span>Remove unused objects and resources</span>
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="action-buttons">
+                <button id="compress-btn" class="top-btn" disabled>Compress PDF</button>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="./compressPdf.js"></script>
+</body>
+
+</html>

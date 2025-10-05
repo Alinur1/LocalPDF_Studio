@@ -1,0 +1,327 @@
+/* src/renderer/tools/compressPdf/compressPdf.css */
+
+.tool-title {
+    font-size: 1.2rem;
+    margin-left: 1rem;
+    color: #ecf0f1;
+}
+
+.tool-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+    height: calc(100vh - 58px);
+    overflow-y: auto;
+}
+
+.file-selection-area .select-pdf-btn {
+    color: #ecf0f1;
+    width: 100%;
+    border: 2px dashed #3498db;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    background: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.file-selection-area .select-pdf-btn:hover {
+    background: #34495e;
+    border-color: #3498db;
+}
+
+.selected-file-info {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #2c3e50;
+    border-radius: 6px;
+    gap: 1rem;
+    color: #ecf0f1;
+    border: 1px solid #18222e;
+}
+
+.pdf-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #ecf0f1;
+    margin: 0 0 0.3rem 0;
+}
+
+.pdf-size {
+    font-size: 0.75rem;
+    color: #bdc3c7;
+    margin: 0;
+}
+
+.remove-btn {
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.remove-btn:hover {
+    background: #c0392b;
+}
+
+/* Info Section */
+.info-section {
+    background: #2c3e50;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #18222e;
+}
+
+.info-card h3 {
+    margin: 0 0 0.8rem 0;
+    font-size: 1rem;
+    color: #3498db;
+}
+
+.info-card p {
+    margin: 0;
+    color: #bdc3c7;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* Compress Options */
+.compress-options-container {
+    background: #2c3e50;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #18222e;
+}
+
+.compress-options-container h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    color: #ecf0f1;
+    border-bottom: 1px solid #34495e;
+    padding-bottom: 0.8rem;
+}
+
+.quality-section {
+    margin-bottom: 2rem;
+}
+
+.quality-section h3 {
+    font-size: 1rem;
+    color: #ecf0f1;
+    margin: 0 0 1rem 0;
+}
+
+.quality-option {
+    margin-bottom: 0.8rem;
+}
+
+.radio-label {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    padding: 1rem;
+    background: #1c2833;
+    border-radius: 6px;
+    border: 2px solid #34495e;
+    transition: all 0.2s;
+}
+
+.radio-label:hover {
+    border-color: #3498db;
+    background: #243342;
+}
+
+.radio-label input[type="radio"] {
+    margin-top: 0.2rem;
+    margin-right: 0.8rem;
+    accent-color: #3498db;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.radio-label input[type="radio"]:checked~.option-content {
+    color: #3498db;
+}
+
+.radio-label:has(input[type="radio"]:checked) {
+    border-color: #3498db;
+    background: #1e3545;
+}
+
+.option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.option-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #ecf0f1;
+}
+
+.option-desc {
+    font-size: 0.8rem;
+    color: #95a5a6;
+}
+
+/* Custom Quality Section */
+.custom-quality-section {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #1c2833;
+    border-radius: 6px;
+    border: 1px solid #34495e;
+}
+
+.custom-quality-section label {
+    display: block;
+    color: #ecf0f1;
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
+}
+
+#quality-value {
+    color: #3498db;
+    font-weight: bold;
+}
+
+#custom-quality-slider {
+    width: 100%;
+    height: 6px;
+    background: #34495e;
+    outline: none;
+    border-radius: 3px;
+    margin-bottom: 0.5rem;
+    accent-color: #3498db;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #7f8c8d;
+}
+
+/* Additional Options */
+.additional-options {
+    margin-bottom: 2rem;
+}
+
+.additional-options h3 {
+    font-size: 1rem;
+    color: #ecf0f1;
+    margin: 0 0 1rem 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.8rem;
+    background: #1c2833;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    transition: background 0.2s;
+}
+
+.checkbox-label:hover {
+    background: #243342;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 0.8rem;
+    accent-color: #3498db;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    font-size: 0.9rem;
+    color: #bdc3c7;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+.action-buttons .top-btn {
+    min-width: 200px;
+}
+
+.action-buttons .top-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #34495e;
+}
+
+.action-buttons .top-btn:disabled:hover {
+    background: #34495e;
+}
+
+/* Loading overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background: #2c3e50;
+    padding: 2rem 3rem;
+    border-radius: 8px;
+    text-align: center;
+    color: #ecf0f1;
+}
+
+.loading-content h3 {
+    margin: 0 0 1rem 0;
+    color: #3498db;
+}
+
+.loading-spinner {
+    border: 4px solid #34495e;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
