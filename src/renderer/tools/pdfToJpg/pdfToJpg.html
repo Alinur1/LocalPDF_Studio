@@ -1,0 +1,101 @@
+<!-- src/renderer/tools/pdfToJpg/pdfToJpg.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - PDF to JPG</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+
+    <!-- PDF.js (local) -->
+    <script type="module">
+        import * as pdfjsLib from '../../pdf/build/pdf.mjs';
+        window.pdfjsLib = pdfjsLib;
+    </script>
+
+    <!-- Global theme -->
+    <link rel="stylesheet" href="../../styles/main.css">
+
+    <!-- Tool-specific styles -->
+    <link rel="stylesheet" href="./pdfToJpg.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn">← Back</a>
+            <h1 class="tool-title">PDF to JPG</h1>
+        </div>
+
+        <main class="tool-container">
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                </div>
+            </div>
+
+            <!-- PDF Preview Section -->
+            <div id="preview-container" class="preview-container" style="display: none;">
+                <div class="preview-header">
+                    <h3>PDF Preview</h3>
+                    <span id="page-count" class="page-count"></span>
+                </div>
+                <div id="preview-grid" class="preview-grid">
+                    <!-- Thumbnails will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Conversion Options -->
+            <div class="conversion-options-container">
+                <h2>Conversion Options</h2>
+
+                <div class="option-group">
+                    <label for="imageQuality">Image Quality:</label>
+                    <select id="imageQuality" class="options-select">
+                        <option value="72">Low (72 DPI) - Smaller file size</option>
+                        <option value="150" selected>Medium (150 DPI) - Balanced</option>
+                        <option value="300">High (300 DPI) - Best quality</option>
+                    </select>
+                    <small class="help-text">Higher DPI = Better quality but larger file sizes</small>
+                </div>
+
+                <div class="option-group">
+                    <label for="imageFormat">Output Format:</label>
+                    <select id="imageFormat" class="options-select">
+                        <option value="jpg" selected>JPG (Smaller size, good for photos)</option>
+                        <option value="png">PNG (Larger size, lossless quality)</option>
+                    </select>
+                    <small class="help-text">All images will be saved as a ZIP file</small>
+                </div>
+
+                <div class="option-group">
+                    <label>
+                        <input type="checkbox" id="includePageNumbers" checked>
+                        Include page numbers in filenames
+                    </label>
+                    <small class="help-text">e.g., document_page_001.jpg, document_page_002.jpg</small>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="convert-btn" class="top-btn" disabled>Convert to JPG</button>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="./pdfToJpg.js"></script>
+</body>
+
+</html>

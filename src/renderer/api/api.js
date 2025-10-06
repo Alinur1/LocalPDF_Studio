@@ -57,7 +57,7 @@ async function getEndpoints() {
         removePages: `${base}/PdfRemove/remove`,
         organize: `${base}/PdfOrganize/organize`,
         compress: `${base}/PdfCompress/compress`,
-        // toJpg: `${base}/pdf/to-jpg`,
+        toJpg: `${base}/PdfToJpg/convert`,
         // toWord: `${base}/pdf/to-word`,
         // toPowerPoint: `${base}/pdf/to-ppt`,
         // toExcel: `${base}/pdf/to-excel`,
