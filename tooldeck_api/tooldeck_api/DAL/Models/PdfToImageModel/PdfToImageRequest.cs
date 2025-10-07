@@ -1,6 +1,6 @@
-﻿namespace tooldeck_api.DAL.Models.PdfToJpgModel
+﻿namespace tooldeck_api.DAL.Models.PdfToImageModel
 {
-    public class PdfToJpgRequest
+    public class PdfToImageRequest
     {
         // Full path to the PDF file
         public string FilePath { get; set; } = string.Empty;

@@ -1,4 +1,4 @@
-// src/renderer/tools/pdfToJpg/pdfToJpg.js
+// src/renderer/tools/pdfToImage/pdfToImage.js
 
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert(`An error occurred while converting the PDF:\n${error.message}`);
         } finally {
             convertBtn.disabled = false;
-            convertBtn.textContent = 'Convert to JPG';
+            convertBtn.textContent = 'Convert to Image';
         }
     });
 });

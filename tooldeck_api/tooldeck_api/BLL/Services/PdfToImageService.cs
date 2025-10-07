@@ -2,22 +2,22 @@
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using tooldeck_api.BLL.Interfaces;
-using tooldeck_api.DAL.Models.PdfToJpgModel;
+using tooldeck_api.DAL.Models.PdfToImageModel;
 
 namespace tooldeck_api.BLL.Services
 {
-    public class PdfToJpgService : IPdfToJpgInterface
+    public class PdfToImageService : IPdfToImageInterface
     {
-        private readonly ILogger<PdfToJpgService> _logger;
+        private readonly ILogger<PdfToImageService> _logger;
         private readonly string _pythonExecutablePath;
 
-        public PdfToJpgService(ILogger<PdfToJpgService> logger)
+        public PdfToImageService(ILogger<PdfToImageService> logger)
         {
             _logger = logger;
             _pythonExecutablePath = GetPythonExecutablePath();
         }
 
-        public async Task<byte[]> ConvertPdfToImagesAsync(PdfToJpgRequest request)
+        public async Task<byte[]> ConvertPdfToImagesAsync(PdfToImageRequest request)
         {
             string tempZipPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_pdf_images.zip");
 
@@ -57,7 +57,7 @@ namespace tooldeck_api.BLL.Services
             }
         }
 
-        private async Task<PythonPdfToJpgResult> RunPythonConversionAsync(PdfToJpgRequest request, string outputZipPath)
+        private async Task<PythonPdfToImageResult> RunPythonConversionAsync(PdfToImageRequest request, string outputZipPath)
         {
             if (!File.Exists(_pythonExecutablePath))
                 throw new FileNotFoundException($"Python converter not found: {_pythonExecutablePath}");
@@ -112,7 +112,7 @@ namespace tooldeck_api.BLL.Services
 
             try
             {
-                var result = JsonSerializer.Deserialize<PythonPdfToJpgResult>(stdout, new JsonSerializerOptions
+                var result = JsonSerializer.Deserialize<PythonPdfToImageResult>(stdout, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
@@ -124,7 +124,7 @@ namespace tooldeck_api.BLL.Services
             }
             catch (Exception ex)
             {
-                return new PythonPdfToJpgResult { Success = false, Error = $"JSON parse error: {ex.Message} | Raw: {stdout}" };
+                return new PythonPdfToImageResult { Success = false, Error = $"JSON parse error: {ex.Message} | Raw: {stdout}" };
             }
         }
 

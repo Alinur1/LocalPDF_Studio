@@ -2,25 +2,25 @@
 using Microsoft.AspNetCore.Mvc;
 using tooldeck_api.BLL.Interfaces;
 using tooldeck_api.BLL.Services;
-using tooldeck_api.DAL.Models.PdfToJpgModel;
+using tooldeck_api.DAL.Models.PdfToImageModel;
 
 namespace tooldeck_api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PdfToJpgController : ControllerBase
+    public class PdfToImageController : ControllerBase
     {
-        private readonly IPdfToJpgInterface _pdfToJpgInterface;
-        private readonly ILogger<PdfToJpgController> _logger;
+        private readonly IPdfToImageInterface _pdfToImageInterface;
+        private readonly ILogger<PdfToImageController> _logger;
 
-        public PdfToJpgController(IPdfToJpgInterface pdfToJpgInterface, ILogger<PdfToJpgController> logger)
+        public PdfToImageController(IPdfToImageInterface pdfToImageInterface, ILogger<PdfToImageController> logger)
         {
-            _pdfToJpgInterface = pdfToJpgInterface;
+            _pdfToImageInterface = pdfToImageInterface;
             _logger = logger;
         }
 
         [HttpPost("convert")]
-        public async Task<IActionResult> ConvertToJpg([FromBody] PdfToJpgRequest request)
+        public async Task<IActionResult> ConvertToJpg([FromBody] PdfToImageRequest request)
         {
             try
             {
@@ -51,7 +51,7 @@ namespace tooldeck_api.Controllers
                 _logger.LogInformation($"Converting PDF to {request.Format.ToUpper()}: {request.FilePath}");
 
                 // Convert PDF to images and get ZIP file
-                var zipBytes = await _pdfToJpgInterface.ConvertPdfToImagesAsync(request);
+                var zipBytes = await _pdfToImageInterface.ConvertPdfToImagesAsync(request);
 
                 // Return ZIP file
                 var fileName = Path.GetFileNameWithoutExtension(request.FilePath);

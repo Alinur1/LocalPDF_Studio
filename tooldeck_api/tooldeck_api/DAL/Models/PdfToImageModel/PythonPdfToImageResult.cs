@@ -1,6 +1,6 @@
-﻿namespace tooldeck_api.DAL.Models.PdfToJpgModel
+﻿namespace tooldeck_api.DAL.Models.PdfToImageModel
 {
-    public class PythonPdfToJpgResult
+    public class PythonPdfToImageResult
     {
         public bool Success { get; set; }
         public string? Output { get; set; }
