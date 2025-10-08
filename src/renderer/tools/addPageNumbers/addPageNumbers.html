@@ -1,0 +1,97 @@
+<!-- src/renderer/tools/addPageNumbers/addPageNumbers.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - Add Page Numbers</title>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:*;">
+    <script type="module">
+        import * as pdfjsLib from '../../pdf/build/pdf.mjs';
+        window.pdfjsLib = pdfjsLib;
+    </script>
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./addPageNumbers.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn">← Back</a>
+            <h1 class="tool-title">Add Page Numbers</h1>
+        </div>
+        <main class="tool-container">
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                </div>
+            </div>
+
+            <div id="preview-container" class="preview-container" style="display: none;">
+                <div class="preview-header">
+                    <h3>PDF Preview</h3>
+                    <span id="page-count" class="page-count"></span>
+                </div>
+                <div id="preview-grid" class="preview-grid"></div>
+            </div>
+
+            <div class="options-container">
+                <h2>Page Number Options</h2>
+
+                <div class="option-group">
+                    <label>Position:</label>
+                    <select id="position" class="options-select">
+                        <option value="BottomCenter">Bottom Center</option>
+                        <option value="BottomLeft">Bottom Left</option>
+                        <option value="BottomRight">Bottom Right</option>
+                        <option value="TopCenter">Top Center</option>
+                        <option value="TopLeft">Top Left</option>
+                        <option value="TopRight">Top Right</option>
+                    </select>
+                </div>
+
+                <div class="option-group">
+                    <label>Format:</label>
+                    <select id="format" class="options-select">
+                        <option value="Number">1, 2, 3...</option>
+                        <option value="PageOfTotal">Page 1 of 10</option>
+                        <option value="NumberWithDash">-1-, -2-, -3-</option>
+                        <option value="RomanLower">i, ii, iii...</option>
+                        <option value="RomanUpper">I, II, III...</option>
+                    </select>
+                </div>
+
+                <div class="option-group">
+                    <label>Font Size:</label>
+                    <input type="number" id="fontSize" class="options-input" value="12" min="8" max="72">
+                </div>
+
+                <div class="option-group">
+                    <label>Starting Page:</label>
+                    <input type="number" id="startPage" class="options-input" value="1" min="1">
+                    <small class="help-text">Add numbers starting from this page</small>
+                </div>
+
+                <div class="option-group">
+                    <label>Starting Number:</label>
+                    <input type="number" id="startNumber" class="options-input" value="1" min="1">
+                    <small class="help-text">First page will have this number</small>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="add-btn" class="top-btn" disabled>Add Page Numbers</button>
+            </div>
+        </main>
+    </div>
+    <script type="module" src="./addPageNumbers.js"></script>
+</body>
+
+</html>

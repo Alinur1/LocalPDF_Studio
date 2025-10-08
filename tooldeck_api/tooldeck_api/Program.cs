@@ -15,6 +15,7 @@ builder.Services.AddScoped<IPdfRemoveInterface, PdfRemoveService>();
 builder.Services.AddScoped<IPdfOrganizeInterface, PdfOrganizeService>();
 builder.Services.AddScoped<IPdfCompressInterface, PdfCompressService>();
 builder.Services.AddScoped<IPdfToImageInterface, PdfToImageService>();
+builder.Services.AddScoped<IAddPageNumbersInterface, AddPageNumbersService>();
 
 // CORS policy
 builder.Services.AddCors(options =>
