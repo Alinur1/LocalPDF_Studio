@@ -60,7 +60,7 @@ async function getEndpoints() {
         toJpg: `${base}/PdfToImage/convert`,
         addPageNumbers: `${base}/AddPageNumbers/add`,
         addWatermark: `${base}/PdfWatermark/add`,
-        // crop: `${base}/pdf/crop`,
+        crop: `${base}/PdfCrop/crop`,
         // lock: `${base}/pdf/lock`,
         // unlock: `${base}/pdf/unlock`,
         // sign: `${base}/pdf/sign`,

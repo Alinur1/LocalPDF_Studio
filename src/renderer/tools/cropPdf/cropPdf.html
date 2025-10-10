@@ -1,0 +1,108 @@
+<!-- src/renderer/tools/cropPdf/cropPdf.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - Crop PDF</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:*;">
+    <script type="module">
+        import * as pdfjsLib from '../../pdf/build/pdf.mjs';
+        window.pdfjsLib = pdfjsLib;
+    </script>
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./cropPdf.css">
+</head>
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn">← Back</a>
+            <h1 class="tool-title">Crop PDF</h1>
+        </div>
+        <main class="tool-container">
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                </div>
+            </div>
+
+            <div id="preview-container" class="preview-container" style="display: none;">
+                <div class="preview-header">
+                    <h3>PDF Preview</h3>
+                    <span id="page-count" class="page-count"></span>
+                </div>
+                <div id="preview-grid" class="preview-grid"></div>
+            </div>
+
+            <div class="options-container">
+                <h2>Crop Options</h2>
+
+                <div class="preset-section">
+                    <label>Quick Presets:</label>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-preset="remove-margins">Remove All Margins</button>
+                        <button class="preset-btn" data-preset="a4-to-letter">A4 to Letter</button>
+                        <button class="preset-btn" data-preset="letter-to-a4">Letter to A4</button>
+                        <button class="preset-btn" data-preset="custom">Custom</button>
+                    </div>
+                </div>
+
+                <div class="crop-inputs">
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Top (pts):</label>
+                            <input type="number" id="top" class="crop-input" value="0" min="0" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label>Bottom (pts):</label>
+                            <input type="number" id="bottom" class="crop-input" value="0" min="0" step="1">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Left (pts):</label>
+                            <input type="number" id="left" class="crop-input" value="0" min="0" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label>Right (pts):</label>
+                            <input type="number" id="right" class="crop-input" value="0" min="0" step="1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-preview">
+                    <div class="crop-visual">
+                        <div class="page-representation">
+                            <div id="crop-top" class="crop-overlay crop-top"></div>
+                            <div id="crop-bottom" class="crop-overlay crop-bottom"></div>
+                            <div id="crop-left" class="crop-overlay crop-left"></div>
+                            <div id="crop-right" class="crop-overlay crop-right"></div>
+                            <div class="content-area">Content Area</div>
+                        </div>
+                    </div>
+                    <small class="help-text" style="text-align: center; display: block; margin-top: 0.5rem;">
+                        Visual representation of crop margins (1 point = 1/72 inch)
+                    </small>
+                </div>
+
+                <div class="option-group">
+                    <label>
+                        <input type="checkbox" id="applyToAll" checked>
+                        Apply to all pages
+                    </label>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="crop-btn" class="top-btn" disabled>Crop PDF</button>
+            </div>
+        </main>
+    </div>
+    <script type="module" src="./cropPdf.js"></script>
+</body>
+</html>
