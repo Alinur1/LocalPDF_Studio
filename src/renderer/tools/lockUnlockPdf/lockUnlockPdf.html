@@ -1,0 +1,125 @@
+<!-- src/renderer/tools/lockUnlockPdf/lockUnlockPdf.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - Lock/Unlock PDF</title>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:*;">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./lockUnlockPdf.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn">← Back</a>
+            <h1 class="tool-title">Lock/Unlock PDF</h1>
+        </div>
+
+        <main class="tool-container">
+            <!-- File Selection -->
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                        <p id="pdf-security" class="pdf-security"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                </div>
+            </div>
+
+            <!-- Operation Selection -->
+            <div class="options-container">
+                <h2>Operation</h2>
+                <div class="radio-group operation-group">
+                    <label><input type="radio" name="operation" value="lock" checked> Lock PDF (Encrypt)</label>
+                    <label><input type="radio" name="operation" value="unlock"> Unlock PDF (Remove Protection)</label>
+                </div>
+            </div>
+
+            <!-- Lock Options -->
+            <div id="lock-options" class="options-container">
+                <h2>Encryption Settings</h2>
+
+                <!-- Open Password -->
+                <div class="option-group">
+                    <label for="open-password">Open Password (Required to view):</label>
+                    <div class="password-input-group">
+                        <input type="password" id="open-password" class="password-input"
+                            placeholder="Enter password to open PDF">
+                        <button type="button" class="toggle-password" data-target="open-password">👁️</button>
+                    </div>
+                </div>
+
+                <!-- Permissions Password -->
+                <div class="option-group">
+                    <label for="permissions-password">Permissions Password (Optional):</label>
+                    <div class="password-input-group">
+                        <input type="password" id="permissions-password" class="password-input"
+                            placeholder="Enter password to change permissions">
+                        <button type="button" class="toggle-password" data-target="permissions-password">👁️</button>
+                    </div>
+                    <small class="help-text">If set, required to modify permissions later</small>
+                </div>
+
+                <!-- Permissions -->
+                <div class="option-group">
+                    <label>Permissions:</label>
+                    <div class="permissions-grid">
+                        <label class="permission-item">
+                            <input type="checkbox" id="allow-printing" checked> Allow Printing
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="allow-copying" checked> Allow Copying Text/Images
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="allow-modification" checked> Allow Modification
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="allow-annotations" checked> Allow Annotations
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Encryption Level -->
+                <div class="option-group">
+                    <label for="encryption-level">Encryption Level:</label>
+                    <select id="encryption-level" class="options-select">
+                        <option value="128">128-bit AES (Standard)</option>
+                        <option value="40">40-bit RC4 (Compatibility)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Unlock Options -->
+            <div id="unlock-options" class="options-container" style="display: none;">
+                <h2>Decryption Settings</h2>
+
+                <div class="option-group">
+                    <label for="unlock-password">PDF Password:</label>
+                    <div class="password-input-group">
+                        <input type="password" id="unlock-password" class="password-input"
+                            placeholder="Enter PDF password to unlock">
+                        <button type="button" class="toggle-password" data-target="unlock-password">👁️</button>
+                    </div>
+                    <small class="help-text">Enter the password used to encrypt this PDF</small>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button id="process-btn" class="top-btn" disabled>Lock PDF</button>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="./lockUnlockPdf.js"></script>
+</body>
+
+</html>
