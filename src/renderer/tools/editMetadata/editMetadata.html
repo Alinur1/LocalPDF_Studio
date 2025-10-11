@@ -1,0 +1,147 @@
+<!-- src/renderer/tools/editMetadata/editMetadata.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - View and Edit Metadata</title>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:*;">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./editMetadata.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn">← Back</a>
+            <h1 class="tool-title">View and Edit Metadata</h1>
+        </div>
+
+        <main class="tool-container">
+            <!-- File Selection -->
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                </div>
+            </div>
+
+            <!-- Metadata Display -->
+            <div id="metadata-container" class="metadata-container" style="display: none;">
+                <div class="metadata-header">
+                    <h2>PDF Metadata</h2>
+                    <div class="header-actions">
+                        <button id="copy-metadata-btn" class="secondary-btn copy-btn"
+                            title="Copy all metadata to clipboard">
+                            📋 Copy Metadata
+                        </button>
+                        <button id="edit-toggle-btn" class="secondary-btn">Edit Metadata</button>
+                    </div>
+                </div>
+
+                <!-- Read-only View -->
+                <div id="readonly-view" class="metadata-view">
+                    <div class="metadata-grid">
+                        <div class="metadata-item">
+                            <label>Title:</label>
+                            <span id="meta-title" class="meta-value"></span>
+                        </div>
+                        <div class="metadata-item">
+                            <label>Author:</label>
+                            <span id="meta-author" class="meta-value"></span>
+                        </div>
+                        <div class="metadata-item">
+                            <label>Subject:</label>
+                            <span id="meta-subject" class="meta-value"></span>
+                        </div>
+                        <div class="metadata-item">
+                            <label>Keywords:</label>
+                            <span id="meta-keywords" class="meta-value"></span>
+                        </div>
+                        <div class="metadata-item">
+                            <label>Creator:</label>
+                            <span id="meta-creator" class="meta-value"></span>
+                        </div>
+                        <div class="metadata-item">
+                            <label>Producer:</label>
+                            <span id="meta-producer" class="meta-value"></span>
+                        </div>
+                        <div class="metadata-item">
+                            <label>Creation Date:</label>
+                            <span id="meta-creation-date" class="meta-value"></span>
+                        </div>
+                        <div class="metadata-item">
+                            <label>Modification Date:</label>
+                            <span id="meta-mod-date" class="meta-value"></span>
+                        </div>
+                        <div class="metadata-item full-width">
+                            <label>Number of Pages:</label>
+                            <span id="meta-page-count" class="meta-value"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editable View -->
+                <div id="editable-view" class="metadata-view" style="display: none;">
+                    <form id="metadata-form" class="metadata-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="edit-title">Title:</label>
+                                <input type="text" id="edit-title" class="metadata-input" placeholder="Document title">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-author">Author:</label>
+                                <input type="text" id="edit-author" class="metadata-input" placeholder="Author name">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-subject">Subject:</label>
+                                <input type="text" id="edit-subject" class="metadata-input"
+                                    placeholder="Document subject">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-keywords">Keywords:</label>
+                                <input type="text" id="edit-keywords" class="metadata-input"
+                                    placeholder="Comma-separated keywords">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-creator">Creator:</label>
+                                <input type="text" id="edit-creator" class="metadata-input"
+                                    placeholder="Creating application">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-producer">Producer:</label>
+                                <input type="text" id="edit-producer" class="metadata-input" placeholder="PDF producer">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="edit-description">Description:</label>
+                                <textarea id="edit-description" class="metadata-textarea"
+                                    placeholder="Document description" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Action Buttons for Edit Mode -->
+                <div id="edit-actions" class="action-buttons" style="display: none; margin-top: 1.5rem;">
+                    <button id="cancel-edit-btn" class="secondary-btn">Cancel</button>
+                    <button id="save-metadata-btn" class="top-btn">Save Metadata</button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button id="save-pdf-btn" class="top-btn" disabled>Save PDF with Updated Metadata</button>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="./editMetadata.js"></script>
+</body>
+
+</html>

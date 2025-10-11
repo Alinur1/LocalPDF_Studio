@@ -1,0 +1,327 @@
+/* src/renderer/tools/editMetadata/editMetadata.css */
+.tool-title {
+    font-size: 1.2rem;
+    margin-left: 1rem;
+    color: #ecf0f1;
+}
+
+.tool-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+    height: calc(100vh - 58px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* --- File Selection --- */
+.file-selection-area .select-pdf-btn {
+    color: #ecf0f1;
+    width: 100%;
+    border: 2px dashed #3498db;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    background: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.file-selection-area .select-pdf-btn:hover {
+    background: #34495e;
+    border-color: #3498db;
+}
+
+.selected-file-info {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #2c3e50;
+    border-radius: 6px;
+    gap: 1rem;
+    color: #ecf0f1;
+    border: 1px solid #18222e;
+}
+
+/* --- Metadata Container --- */
+.metadata-container {
+    background: #2c3e50;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #18222e;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.metadata-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid #34495e;
+}
+
+.metadata-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #ecf0f1;
+}
+
+/* --- Metadata Grid --- */
+.metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.metadata-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.metadata-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.metadata-item label {
+    color: #bdc3c7;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.meta-value {
+    color: #ecf0f1;
+    font-size: 0.95rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #34495e;
+    min-height: 1.2rem;
+}
+
+.meta-value:empty::before {
+    content: "Not set";
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+/* --- Form Styles --- */
+.metadata-form {
+    width: 100%;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    color: #bdc3c7;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metadata-input,
+.metadata-textarea {
+    background: #1c2833;
+    border: 1px solid #34495e;
+    border-radius: 4px;
+    color: #ecf0f1;
+    font-size: 0.95rem;
+    padding: 0.6rem;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.metadata-input:focus,
+.metadata-textarea:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.metadata-textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+/* --- Buttons --- */
+.secondary-btn {
+    background: #34495e;
+    color: #ecf0f1;
+    border: none;
+    border-radius: 6px;
+    padding: 0.7rem 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+}
+
+.secondary-btn:hover {
+    background: #3d566e;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+.action-buttons .top-btn {
+    min-width: 180px;
+}
+
+/* Add to editMetadata.css */
+.metadata-input.error,
+.metadata-textarea.error {
+    border-color: #e74c3c;
+    background: #2d1b1c;
+}
+
+.metadata-input.error:focus,
+.metadata-textarea.error:focus {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+}
+
+.meta-value.error {
+    color: #e74c3c;
+    font-style: italic;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.copy-btn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.7rem 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.copy-btn:hover {
+    background: #219653;
+}
+
+.copy-btn.copied {
+    background: #2ecc71;
+    animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Tooltip for copy button */
+.copy-btn::after {
+    content: "Copy all metadata to clipboard";
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #34495e;
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.copy-btn:hover::after {
+    opacity: 1;
+}
+
+.remove-btn {
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.remove-btn:hover {
+    background: #c0392b;
+}
+
+/* --- View Transitions --- */
+.metadata-view {
+    transition: opacity 0.3s ease;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+
+    .metadata-grid,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metadata-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons .top-btn {
+        min-width: auto;
+        width: 100%;
+    }
+}

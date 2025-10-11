@@ -63,6 +63,7 @@ async function getEndpoints() {
         crop: `${base}/PdfCrop/crop`,
         lock: `${base}/PdfLockUnlock/lock`,
         unlock: `${base}/PdfLockUnlock/unlock`,
+        metadata: `${base}/PdfMetadata/metadata`,
         // Add more as necessary
     };
 }
