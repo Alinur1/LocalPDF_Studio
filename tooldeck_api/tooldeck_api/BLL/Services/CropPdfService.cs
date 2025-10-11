@@ -27,56 +27,97 @@ namespace tooldeck_api.BLL.Services
                 if (!File.Exists(request.FilePath))
                     throw new FileNotFoundException($"File not found: {request.FilePath}");
 
-                _logger.LogInformation($"Starting PDF crop with PdfSharpCore: {request.FilePath}");
+                _logger.LogInformation($"Starting PDF crop operation: {request.FilePath}");
 
-                // Open the input document
-                var inputDocument = PdfReader.Open(request.FilePath, PdfDocumentOpenMode.Import);
-                var outputDocument = new PdfDocument();
+                using var inputDocument = PdfReader.Open(request.FilePath, PdfDocumentOpenMode.Import);
+                using var outputDocument = new PdfDocument();
 
-                for (int i = 0; i < inputDocument.Pages.Count; i++)
+                var pagesToCrop = ParsePageRange(request);
+
+                int croppedCount = 0;
+                int totalPages = inputDocument.Pages.Count;
+
+                for (int i = 0; i < totalPages; i++)
                 {
                     var inputPage = inputDocument.Pages[i];
-
-                    // Add the page to the output document
                     var outputPage = outputDocument.AddPage(inputPage);
 
-                    // Get the media box (original page size)
-                    var mediaBox = outputPage.MediaBox;
+                    // Determine if this page should be cropped
+                    bool shouldCrop = request.PagesRange == "all" || pagesToCrop.Contains(i + 1);
 
-                    // Calculate new crop box
-                    var cropX1 = mediaBox.X1 + request.Left;
-                    var cropY1 = mediaBox.Y1 + request.Bottom;
-                    var cropX2 = mediaBox.X2 - request.Right;
-                    var cropY2 = mediaBox.Y2 - request.Top;
+                    if (shouldCrop)
+                    {
+                        var mediaBox = outputPage.MediaBox;
 
-                    // Validate crop box
-                    if (cropX2 > cropX1 && cropY2 > cropY1)
-                    {
-                        // Set the new crop box using two points (bottom-left and top-right)
-                        outputPage.CropBox = new PdfRectangle(new XPoint(cropX1, cropY1), new XPoint(cropX2, cropY2));
-                    }
-                    else
-                    {
-                        _logger.LogWarning($"Page {i + 1}: Invalid crop dimensions, using original page size");
+                        double cropX1 = mediaBox.X1 + request.Margins.Left;
+                        double cropY1 = mediaBox.Y1 + request.Margins.Bottom;
+                        double cropX2 = mediaBox.X2 - request.Margins.Right;
+                        double cropY2 = mediaBox.Y2 - request.Margins.Top;
+
+                        if (cropX2 > cropX1 && cropY2 > cropY1)
+                        {
+                            outputPage.CropBox = new PdfRectangle(
+                                new XPoint(cropX1, cropY1),
+                                new XPoint(cropX2, cropY2)
+                            );
+                            croppedCount++;
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Page {i + 1}: Invalid crop dimensions. Skipped.");
+                        }
                     }
                 }
 
-                // Save to memory stream
                 using var memoryStream = new MemoryStream();
                 outputDocument.Save(memoryStream, false);
-                outputDocument.Close();
-                inputDocument.Close();
 
-                var resultBytes = memoryStream.ToArray();
-                _logger.LogInformation($"PDF cropped successfully with PdfSharpCore. Pages: {inputDocument.Pages.Count}");
-
-                return resultBytes;
+                _logger.LogInformation($"Crop completed. Total pages: {totalPages}, Cropped: {croppedCount}");
+                return memoryStream.ToArray();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error cropping PDF with PdfSharpCore");
+                _logger.LogError(ex, "Error cropping PDF file: {FilePath}", request.FilePath);
                 throw;
             }
+        }
+
+        private static HashSet<int> ParsePageRange(CropPdfRequest request)
+        {
+            var pages = new HashSet<int>();
+
+            if (request.PagesRange == "all")
+                return pages; // Empty set = all pages
+
+            if (string.IsNullOrWhiteSpace(request.CustomPages))
+                return pages;
+
+            var parts = request.CustomPages.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var part in parts)
+            {
+                var trimmed = part.Trim();
+                if (trimmed.Contains('-'))
+                {
+                    var rangeParts = trimmed.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                    if (rangeParts.Length == 2 &&
+                        int.TryParse(rangeParts[0], out int start) &&
+                        int.TryParse(rangeParts[1], out int end))
+                    {
+                        if (start > end)
+                            (start, end) = (end, start);
+
+                        for (int p = start; p <= end; p++)
+                            pages.Add(p);
+                    }
+                }
+                else if (int.TryParse(trimmed, out int page))
+                {
+                    pages.Add(page);
+                }
+            }
+
+            return pages;
         }
     }
 }

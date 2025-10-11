@@ -3,10 +3,17 @@
     public class CropPdfRequest
     {
         public string FilePath { get; set; } = string.Empty;
-        public double Top { get; set; }
-        public double Bottom { get; set; }
-        public double Left { get; set; }
-        public double Right { get; set; }
-        public bool ApplyToAllPages { get; set; } = true;
+
+        // Frontend: "all", "current", or "custom"
+        public string PagesRange { get; set; } = "all";
+
+        // Frontend: "1, 2-3, 5"
+        public string? CustomPages { get; set; }
+
+        // Margin values (in points)
+        public CropMargins Margins { get; set; } = new();
+
+        // Optional current page index if future use
+        public int? CurrentPage { get; set; }
     }
 }

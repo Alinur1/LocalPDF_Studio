@@ -61,10 +61,7 @@ async function getEndpoints() {
         addPageNumbers: `${base}/AddPageNumbers/add`,
         addWatermark: `${base}/PdfWatermark/add`,
         crop: `${base}/PdfCrop/crop`,
-        // lock: `${base}/pdf/lock`,
-        // unlock: `${base}/pdf/unlock`,
-        // sign: `${base}/pdf/sign`,
-        // metadata: `${base}/pdf/metadata`,
+        // Add more as necessary
     };
 }
 

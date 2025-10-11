@@ -9,12 +9,12 @@ namespace tooldeck_api.Controllers
     [ApiController]
     public class PdfCropController : ControllerBase
     {
-        private readonly ICropPdfInterface _cropPdfInterface;
+        private readonly ICropPdfInterface _cropPdfService;
         private readonly ILogger<PdfCropController> _logger;
 
-        public PdfCropController(ICropPdfInterface cropPdfInterface, ILogger<PdfCropController> logger)
+        public PdfCropController(ICropPdfInterface cropPdfService, ILogger<PdfCropController> logger)
         {
-            _cropPdfInterface = cropPdfInterface;
+            _cropPdfService = cropPdfService;
             _logger = logger;
         }
 
@@ -23,43 +23,23 @@ namespace tooldeck_api.Controllers
         {
             try
             {
-                // Validate request
                 if (string.IsNullOrWhiteSpace(request.FilePath))
-                {
                     return BadRequest("File path is required.");
-                }
 
                 if (!System.IO.File.Exists(request.FilePath))
-                {
                     return NotFound($"File not found: {request.FilePath}");
-                }
 
-                // Validate crop values
-                if (request.Top < 0 || request.Bottom < 0 || request.Left < 0 || request.Right < 0)
-                {
-                    return BadRequest("Crop values cannot be negative.");
-                }
+                _logger.LogInformation("Cropping PDF: {FilePath}", request.FilePath);
 
-                _logger.LogInformation($"Cropping PDF: {request.FilePath}");
+                var pdfBytes = await _cropPdfService.CropPdfAsync(request);
+                var outputName = Path.GetFileNameWithoutExtension(request.FilePath) + "_cropped.pdf";
 
-                // Crop the PDF
-                var pdfBytes = await _cropPdfInterface.CropPdfAsync(request);
-
-                // Return the cropped PDF
-                var fileName = Path.GetFileNameWithoutExtension(request.FilePath);
-                var outputFileName = $"{fileName}_cropped.pdf";
-
-                return File(pdfBytes, "application/pdf", outputFileName);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                _logger.LogError(ex, "Access denied to file: {FilePath}", request.FilePath);
-                return StatusCode(403, "Access denied to the specified file.");
+                return File(pdfBytes, "application/pdf", outputName);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error cropping PDF: {FilePath}", request.FilePath);
-                return StatusCode(500, $"An error occurred while cropping the PDF: {ex.Message}");
+                return StatusCode(500, $"Error cropping PDF: {ex.Message}");
             }
         }
     }

@@ -1,11 +1,14 @@
 <!-- src/renderer/tools/cropPdf/cropPdf.html -->
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LocalPDF Studio - Crop PDF</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:*;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:*;">
     <script type="module">
         import * as pdfjsLib from '../../pdf/build/pdf.mjs';
         window.pdfjsLib = pdfjsLib;
@@ -13,13 +16,16 @@
     <link rel="stylesheet" href="../../styles/main.css">
     <link rel="stylesheet" href="./cropPdf.css">
 </head>
+
 <body>
     <div id="app">
         <div class="top-bar">
             <a href="../../index.html" class="top-btn">← Back</a>
             <h1 class="tool-title">Crop PDF</h1>
         </div>
+
         <main class="tool-container">
+            <!-- File Selection -->
             <div class="file-selection-area">
                 <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
@@ -31,7 +37,8 @@
                 </div>
             </div>
 
-            <div id="preview-container" class="preview-container" style="display: none;">
+            <!-- Preview -->
+            <div id="preview-container" class="preview-container" style="display:none;">
                 <div class="preview-header">
                     <h3>PDF Preview</h3>
                     <span id="page-count" class="page-count"></span>
@@ -39,62 +46,53 @@
                 <div id="preview-grid" class="preview-grid"></div>
             </div>
 
+            <!-- Crop Options -->
             <div class="options-container">
                 <h2>Crop Options</h2>
 
-                <div class="preset-section">
-                    <label>Quick Presets:</label>
-                    <div class="preset-buttons">
-                        <button class="preset-btn" data-preset="remove-margins">Remove All Margins</button>
-                        <button class="preset-btn" data-preset="a4-to-letter">A4 to Letter</button>
-                        <button class="preset-btn" data-preset="letter-to-a4">Letter to A4</button>
-                        <button class="preset-btn" data-preset="custom">Custom</button>
+                <div class="option-group">
+                    <label>Pages to Crop:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="pages-range" value="all" checked> All Pages</label>
+                        <label><input type="radio" name="pages-range" value="custom"> Custom Range</label>
                     </div>
                 </div>
 
-                <div class="crop-inputs">
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>Top (pts):</label>
-                            <input type="number" id="top" class="crop-input" value="0" min="0" step="1">
-                        </div>
-                        <div class="input-group">
-                            <label>Bottom (pts):</label>
-                            <input type="number" id="bottom" class="crop-input" value="0" min="0" step="1">
-                        </div>
-                    </div>
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>Left (pts):</label>
-                            <input type="number" id="left" class="crop-input" value="0" min="0" step="1">
-                        </div>
-                        <div class="input-group">
-                            <label>Right (pts):</label>
-                            <input type="number" id="right" class="crop-input" value="0" min="0" step="1">
-                        </div>
-                    </div>
-                </div>
 
-                <div class="visual-preview">
-                    <div class="crop-visual">
-                        <div class="page-representation">
-                            <div id="crop-top" class="crop-overlay crop-top"></div>
-                            <div id="crop-bottom" class="crop-overlay crop-bottom"></div>
-                            <div id="crop-left" class="crop-overlay crop-left"></div>
-                            <div id="crop-right" class="crop-overlay crop-right"></div>
-                            <div class="content-area">Content Area</div>
-                        </div>
-                    </div>
-                    <small class="help-text" style="text-align: center; display: block; margin-top: 0.5rem;">
-                        Visual representation of crop margins (1 point = 1/72 inch)
-                    </small>
+                <div id="custom-pages-group" class="option-group" style="display:none;">
+                    <label for="custom-pages">Custom Page Range:</label>
+                    <input type="text" id="custom-pages" class="options-input" placeholder="e.g., 1, 2-4, 7, 9-10">
+                    <small class="help-text">Enter page numbers or ranges separated by commas.</small>
                 </div>
 
                 <div class="option-group">
-                    <label>
-                        <input type="checkbox" id="applyToAll" checked>
-                        Apply to all pages
-                    </label>
+                    <label>Crop Margins (in points):</label>
+                    <div class="margin-inputs">
+                        <div class="margin-input-group">
+                            <label for="margin-top" class="margin-label">Top</label>
+                            <input type="number" id="margin-top" class="margin-input" placeholder="0" min="0" value="0">
+                        </div>
+                        <div class="margin-input-group">
+                            <label for="margin-right" class="margin-label">Right</label>
+                            <input type="number" id="margin-right" class="margin-input" placeholder="0" min="0"
+                                value="0">
+                        </div>
+                        <div class="margin-input-group">
+                            <label for="margin-bottom" class="margin-label">Bottom</label>
+                            <input type="number" id="margin-bottom" class="margin-input" placeholder="0" min="0"
+                                value="0">
+                        </div>
+                        <div class="margin-input-group">
+                            <label for="margin-left" class="margin-label">Left</label>
+                            <input type="number" id="margin-left" class="margin-input" placeholder="0" min="0"
+                                value="0">
+                        </div>
+                    </div>
+                    <small class="help-text">1 point ≈ 1/72 inch. Typical margins: 10–50 points.</small>
+                </div>
+
+                <div class="option-group reset-group">
+                    <button id="reset-btn" class="secondary-btn">Reset to Original</button>
                 </div>
             </div>
 
@@ -103,6 +101,8 @@
             </div>
         </main>
     </div>
+
     <script type="module" src="./cropPdf.js"></script>
 </body>
+
 </html>
