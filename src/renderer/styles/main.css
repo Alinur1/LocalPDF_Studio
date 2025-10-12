@@ -279,3 +279,11 @@ html {
     justify-content: flex-end;
     gap: 1rem;
 }
+
+#custom-alert-container button:hover {
+    transform: translateY(-1px);
+}
+
+#custom-alert-container button:active {
+    transform: translateY(0);
+}
