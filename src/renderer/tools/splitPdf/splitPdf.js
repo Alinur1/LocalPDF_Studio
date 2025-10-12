@@ -2,6 +2,7 @@
 
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
+import customAlert from '../../utils/customAlert.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -147,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- API Call ---
     splitBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            alert('Please select a file first.');
+            await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']);
             return;
         }
 
@@ -160,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pageRanges = document.getElementById('pageRanges').value.trim();
                 if (!pageRanges) {
                     isValid = false;
-                    alert('Page ranges cannot be empty.');
+                    await customAlert.alert('LocalPDF Studio - WARNING', 'Page ranges cannot be empty.', ['OK']);
                 } else {
                     options.pageRanges = pageRanges.split(',').map(r => r.trim());
                 }
@@ -169,7 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const splitPages = document.getElementById('splitPages').value.trim();
                 if (!splitPages) {
                     isValid = false;
-                    alert('Specific pages cannot be empty.');
+                    await customAlert.alert('LocalPDF Studio - WARNING', 'Specific pages cannot be empty.', ['OK']);
                 } else {
                     options.splitPages = splitPages.split(',')
                         .map(p => parseInt(p.trim()))
@@ -180,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pageInterval = document.getElementById('pageInterval').value;
                 if (!pageInterval || parseInt(pageInterval) <= 0) {
                     isValid = false;
-                    alert('Please enter a valid number of pages.');
+                    await customAlert.alert('LocalPDF Studio - WARNING', 'Please enter a valid number of pages.', ['OK']);
                 } else {
                     options.pageInterval = parseInt(pageInterval);
                 }
@@ -214,17 +215,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
-                    alert('PDF split successfully!\nSaved to: ' + savedPath);
+                    await customAlert.alert('LocalPDF Studio', 'PDF split successfully!\nSaved to: ' + savedPath, ['OK']);
                 } else {
-                    alert('Operation cancelled or failed to save the file.');
+                    await customAlert.alert('LocalPDF Studio' ,'Operation cancelled or failed to save the file.', ['OK']);
                 }
             } else {
                 console.error("Split API returned JSON:", result);
-                alert(`Error: ${JSON.stringify(result)}`);
+                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
             console.error('Error splitting PDF:', error);
-            alert(`An error occurred while splitting the PDF:\n${error.message}`);
+            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while splitting the PDF:\n${error.message}`, ['OK']);
         } finally {
             splitBtn.disabled = false;
             splitBtn.textContent = 'Split PDF';
