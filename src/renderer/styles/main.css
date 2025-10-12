@@ -137,6 +137,34 @@ html {
     color: #bdc3c7;
     transition: background 0.2s ease, color 0.2s ease, border-left-color 0.3s ease;
     overflow: hidden;
+    cursor: grab;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.tab.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+    transform: rotate(2deg);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tab.drag-over-above {
+    border-top: 2px solid #3498db;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.tab.drag-over-below {
+    border-bottom: 2px solid #3498db;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Ensure smooth transitions */
+.tab,
+.tab-content {
+    transition: all 0.2s ease;
 }
 
 .tab-title {

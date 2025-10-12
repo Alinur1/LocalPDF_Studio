@@ -91,6 +91,7 @@ window.addEventListener('DOMContentLoaded', () => {
     function saveTabs(manager) {
         const state = {
             activeTabId: manager.activeTabId,
+            tabOrder: manager.getTabOrder(), // Save the current order
             tabs: Array.from(manager.tabs.entries()).map(([id, tab]) => ({
                 id,
                 filePath: decodeURIComponent(tab.content.src.replace(/^.*file:\/\//, '')),
@@ -108,9 +109,17 @@ window.addEventListener('DOMContentLoaded', () => {
         try {
             const state = JSON.parse(saved);
             if (restoreSetting === 'restore' && state.tabs && Array.isArray(state.tabs)) {
+                // First create all tabs
                 for (const tab of state.tabs) {
                     createPdfTab(tab.filePath, manager);
                 }
+
+                // Then restore the order if available
+                if (state.tabOrder && Array.isArray(state.tabOrder)) {
+                    manager.restoreTabOrder(state.tabOrder);
+                }
+
+                // Finally switch to the active tab
                 if (state.activeTabId) {
                     manager.switchTab(state.activeTabId);
                 }
@@ -119,7 +128,6 @@ window.addEventListener('DOMContentLoaded', () => {
             console.error('Failed to restore tabs:', err);
         }
     }
-
 
     // Load saved setting (default = restore)
     const savedSetting = localStorage.getItem('restoreTabs') || 'restore';
@@ -144,4 +152,5 @@ window.addEventListener('DOMContentLoaded', () => {
     // Hook TabManager events
     tabManager.onTabChange = () => saveTabs(tabManager);
     tabManager.onTabClose = () => saveTabs(tabManager);
+    tabManager.onTabReorder = () => saveTabs(tabManager);
 });
