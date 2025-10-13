@@ -2,6 +2,7 @@
 
 import { API } from '../../api/api.js';
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
+import customAlert from '../../utils/customAlert.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mergeBtn.addEventListener('click', async () => {
         const files = getFiles();
         if (!files.length) {
-            alert("Please select at least one PDF.");
+            await customAlert.alert('LocalPDF Studio', "Please select at least one PDF.", ['OK']);
             return;
         }
 
@@ -40,13 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await window.electronAPI.saveMergedPdf(arrayBuffer);
 
             if (result.success) {
-                alert("PDF saved successfully!");
+                await customAlert.alert('LocalPDF Studio', "PDF saved successfully!", ['OK']);
             } else {
-                alert("Save canceled.");
+                await customAlert.alert('LocalPDF Studio - WARNING', "Save canceled.", ['OK']);
             }
         } catch (err) {
             console.error(err);
-            alert("Error merging PDFs: " + err.message);
+            await customAlert.alert('LocalPDF Studio - ERROR', "Error merging PDFs: " + err.message, ['OK']);
         }
     });
 

@@ -1,6 +1,7 @@
 // src/renderer/tools/addPageNumbers/addPageNumbers.js
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
+import customAlert from '../../utils/customAlert.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -116,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     addBtn.addEventListener('click', async () => {
-        if (!selectedFile) { alert('Please select a file first.'); return; }
+        if (!selectedFile) { await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']); return; }
 
         const positionMap = {
             'TopLeft': 0, 'TopCenter': 1, 'TopRight': 2,
@@ -147,15 +148,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const arrayBuffer = await result.arrayBuffer();
                 const defaultName = selectedFile.name.replace('.pdf', '_numbered.pdf');
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
-                if (savedPath) alert('Page numbers added successfully!\nSaved to: ' + savedPath);
-                else alert('Operation cancelled or failed to save the file.');
+                if (savedPath) await customAlert.alert('LocalPDF Studio', 'Page numbers added successfully!\nSaved to: ' + savedPath, ['OK']);
+                else await customAlert.alert('LocalPDF Studio', 'Operation cancelled or failed to save the file.', ['OK']);
             } else {
                 console.error("API returned JSON:", result);
-                alert(`Error: ${JSON.stringify(result)}`);
+                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert(`An error occurred:\n${error.message}`);
+            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
         } finally {
             addBtn.disabled = false;
             addBtn.textContent = 'Add Page Numbers';

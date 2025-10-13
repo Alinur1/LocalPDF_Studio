@@ -2,6 +2,7 @@
 
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
+import customAlert from '../../utils/customAlert.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -165,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 openPassword.classList.add('error');
                 isValid = false;
                 if (isValid) {
-                    alert('Open password should be at least 3 characters long.');
+                    customAlert.alert('LocalPDF Studio', 'Open password should be at least 3 characters long.', ['OK']);
                 }
             }
 
@@ -183,12 +184,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Process PDF Handler
     async function handleProcessPdf() {
         if (!selectedFile) {
-            alert('Please select a PDF file first.');
+            await customAlert.alert('LocalPDF Studio', 'Please select a PDF file first.', ['OK']);
             return;
         }
 
         if (!validateForm()) {
-            alert('Please fill in all required fields correctly.');
+            await customAlert.alert('LocalPDF Studio', 'Please fill in all required fields correctly.', ['OK']);
             return;
         }
 
@@ -237,28 +238,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
                 if (savedPath) {
                     const operationText = selectedOperation === 'lock' ? 'locked' : 'unlocked';
-                    alert(`PDF ${operationText} successfully!\nSaved to: ${savedPath}`);
+                    await customAlert.alert('LocalPDF Studio', `PDF ${operationText} successfully!\nSaved to: ${savedPath}`, ['OK']);
 
                     // Clear passwords after successful operation
                     clearPasswords();
                 } else {
-                    alert('Operation cancelled or failed to save.');
+                    await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save.', ['OK']);
                 }
             } else {
-                alert(`Error: ${JSON.stringify(result)}`);
+                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
             console.error(`${selectedOperation === 'lock' ? 'Lock' : 'Unlock'} Error:`, error);
 
             // Handle wrong password specifically
             if (error.message.includes('password') || error.message.includes('Password')) {
-                alert('Incorrect password. Please check the password and try again.');
+                await customAlert.alert('LocalPDF Studio - WARNING', 'Incorrect password. Please check the password and try again.', ['OK']);
                 if (selectedOperation === 'unlock') {
                     unlockPassword.classList.add('error');
                     unlockPassword.focus();
                 }
             } else {
-                alert(`An error occurred:\n${error.message}`);
+                await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
             }
         } finally {
             processBtn.disabled = false;

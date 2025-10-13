@@ -2,6 +2,7 @@
 
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
+import customAlert from '../../utils/customAlert.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -265,35 +266,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     previewBtn.addEventListener('click', () => {
         const pagesToRemove = collectPagesToRemove();
         if (pagesToRemove.size === 0) {
-            alert('No pages selected for removal.');
+            customAlert.alert('LocalPDF Studio', 'No pages selected for removal.', ['OK']);
             return;
         }
         if (pagesToRemove.size >= totalPages) {
-            alert('Cannot remove all pages from the PDF.');
+            customAlert.alert('LocalPDF Studio - WARNING', 'Cannot remove all pages from the PDF.', ['OK']);
             return;
         }
 
         const sortedPages = Array.from(pagesToRemove).sort((a, b) => a - b);
         const remaining = totalPages - pagesToRemove.size;
-        alert(`Preview:\n\nPages to remove: ${sortedPages.join(', ')}\nTotal pages to remove: ${pagesToRemove.size}\nRemaining pages: ${remaining}`);
+        customAlert.alert('LocalPDF Studio', `Preview:\n\nPages to remove: ${sortedPages.join(', ')}\nTotal pages to remove: ${pagesToRemove.size}\nRemaining pages: ${remaining}`, ['OK']);
     });
 
     // Remove Pages
     removeBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            alert('Please select a file first.');
+            await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']);
             return;
         }
 
         const pagesToRemove = collectPagesToRemove();
 
         if (pagesToRemove.size === 0) {
-            alert('Please select at least one page to remove.');
+            await customAlert.alert('LocalPDF Studio', 'Please select at least one page to remove.', ['OK']);
             return;
         }
 
         if (pagesToRemove.size >= totalPages) {
-            alert('Cannot remove all pages from the PDF.');
+            await customAlert.alert('LocalPDF Studio - WARNING', 'Cannot remove all pages from the PDF.', ['OK']);
             return;
         }
 
@@ -317,17 +318,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
-                    alert(`Success! Pages removed successfully!\nSaved to: ${savedPath}`);
+                    await customAlert.alert('LocalPDF Studio', `Success! Pages removed successfully!\nSaved to: ${savedPath}`, ['OK']);
                 } else {
-                    alert('Operation cancelled or failed to save the file.');
+                    await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
                 }
             } else {
                 console.error("Remove API returned JSON:", result);
-                alert(`Error: ${JSON.stringify(result)}`);
+                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
             console.error('Error removing pages:', error);
-            alert(`An error occurred while removing pages:\n${error.message}`);
+            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while removing pages:\n${error.message}`, ['OK']);
         } finally {
             removeBtn.disabled = false;
             removeBtn.textContent = 'Remove Pages';

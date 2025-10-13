@@ -1,6 +1,7 @@
 // src/renderer/tools/editMetadata/editMetadata.js
 
 import { API } from '../../api/api.js';
+import customAlert from '../../utils/customAlert.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await API.init();
@@ -101,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         }).catch(err => {
             console.error('Failed to copy metadata: ', err);
-            alert('Failed to copy metadata to clipboard. Please try again.');
+            customAlert.alert('LocalPDF Studio - ERROR', 'Failed to copy metadata to clipboard. Please try again.', ['OK']);
         });
     }
 
@@ -275,7 +276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Save Metadata (within edit mode)
     async function saveMetadata() {
         if (!validateForm()) {
-            alert('Please fill in all required fields correctly.');
+            await customAlert.alert('LocalPDF Studio', 'Please fill in all required fields correctly.', ['OK']);
             return;
         }
 
@@ -311,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             console.error('Error saving metadata:', error);
-            alert('Failed to save metadata. Please try again.');
+            await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to save metadata. Please try again.', ['OK']);
         } finally {
             saveMetadataBtn.disabled = false;
             saveMetadataBtn.textContent = 'Save Metadata';
@@ -321,7 +322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Save PDF with Updated Metadata
     async function savePdfWithMetadata() {
         if (!selectedFile || !currentMetadata) {
-            alert('Please select a PDF file first.');
+            await customAlert.alert('LocalPDF Studio', 'Please select a PDF file first.', ['OK']);
             return;
         }
 
@@ -346,14 +347,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (savedPath) {
                     showMessage('PDF saved successfully with updated metadata!\nSaved to: ' + savedPath, 'success');
                 } else {
-                    alert('Operation cancelled or failed to save.');
+                    await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save.', ['OK']);
                 }
             } else {
-                alert(`Error: ${JSON.stringify(result)}`);
+                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
             console.error('Save PDF Error:', error);
-            alert(`An error occurred:\n${error.message}`);
+            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
         } finally {
             savePdfBtn.disabled = false;
             savePdfBtn.textContent = 'Save PDF with Updated Metadata';
@@ -405,9 +406,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showMessage(message, type = 'info') {
         // Simple message display - you could enhance this with a toast notification
         if (type === 'success') {
-            alert('✅ ' + message);
+            customAlert.alert('LocalPDF Studio', '✅ ' + message, ['OK']);
         } else {
-            alert('ℹ️ ' + message);
+            customAlert.alert('LocalPDF Studio - WARNING', 'ℹ️ ' + message, ['OK']);
         }
     }
 

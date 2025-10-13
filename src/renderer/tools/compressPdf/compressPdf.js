@@ -1,6 +1,7 @@
 // src/renderer/tools/compressPdf/compressPdf.js
 
 import { API } from '../../api/api.js';
+import customAlert from '../../utils/customAlert.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await API.init();
@@ -95,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Compress PDF ---
     compressBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            alert('Please select a file first.');
+            await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']);
             return;
         }
 
@@ -145,14 +146,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `Saved to: ${savedPath}`
                     : `Success! PDF compressed successfully!\nSaved to: ${savedPath}`;
 
-                alert(message);
+                await customAlert.alert('LocalPDF Studio', message, ['OK']);
             } else {
-                alert('Operation cancelled or failed to save the file.');
+                await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
             }
         } catch (error) {
             hideLoading();
             console.error('Error compressing PDF:', error);
-            alert(`An error occurred while compressing the PDF:\n${error.message}`);
+            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while compressing the PDF:\n${error.message}`, ['OK']);
         } finally {
             compressBtn.disabled = false;
             compressBtn.textContent = 'Compress PDF';

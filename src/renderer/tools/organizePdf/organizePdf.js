@@ -2,6 +2,7 @@
 
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
+import customAlert from '../../utils/customAlert.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -101,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             hideLoading();
             console.error('Error loading PDF:', error);
-            alert(`Failed to load PDF: ${error.message}`);
+            await customAlert.alert('LocalPDF Studio - ERROR', `Failed to load PDF: ${error.message}`, ['OK']);
         }
     }
 
@@ -299,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function deletePage(pageId) {
         if (pages.length <= 1) {
-            alert('Cannot delete the last page. PDF must have at least one page.');
+            customAlert.alert('LocalPDF Studio', 'Cannot delete the last page. PDF must have at least one page.', ['OK']);
             return;
         }
 
@@ -338,12 +339,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     organizeBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            alert('Please select a file first.');
+            await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']);
             return;
         }
 
         if (pages.length === 0) {
-            alert('No pages to organize.');
+            await customAlert.alert('LocalPDF Studio', 'No pages to organize.', ['OK']);
             return;
         }
 
@@ -374,19 +375,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 hideLoading();
                 if (savedPath) {
-                    alert(`Success! PDF organized successfully!\nSaved to: ${savedPath}`);
+                    await customAlert.alert('LocalPDF Studio', `Success! PDF organized successfully!\nSaved to: ${savedPath}`, ['OK']);
                 } else {
-                    alert('Operation cancelled or failed to save the file.');
+                    await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
                 }
             } else {
                 hideLoading();
                 console.error("Organize API returned JSON:", result);
-                alert(`Error: ${JSON.stringify(result)}`);
+                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
             hideLoading();
             console.error('Error organizing PDF:', error);
-            alert(`An error occurred while organizing the PDF:\n${error.message}`);
+            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while organizing the PDF:\n${error.message}`, ['OK']);
         } finally {
             organizeBtn.disabled = false;
             organizeBtn.textContent = 'Save Organized PDF';

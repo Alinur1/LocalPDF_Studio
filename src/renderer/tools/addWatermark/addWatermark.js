@@ -1,6 +1,7 @@
 // src/renderer/tools/addWatermark/addWatermark.js
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
+import customAlert from '../../utils/customAlert.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -110,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Validate image file
             const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp'];
             if (!validTypes.includes(file.type)) {
-                alert('Please select a valid image file (PNG, JPG, JPEG, GIF, BMP)');
+                customAlert.alert('LocalPDF Studio', 'Please select a valid image file (PNG, JPG, JPEG, GIF, BMP)', ['OK']);
                 e.target.value = '';
                 return;
             }
@@ -215,12 +216,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Main watermark function
     addBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            alert('Please select a PDF file first.');
+            await customAlert.alert('LocalPDF Studio', 'Please select a PDF file first.', ['OK']);
             return;
         }
 
         if (watermarkType.value === 'image' && !imageFile.files[0]) {
-            alert('Please select an image file for the watermark.');
+            await customAlert.alert('LocalPDF Studio', 'Please select an image file for the watermark.', ['OK']);
             return;
         }
 
@@ -252,7 +253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             // For image watermark, we'll need to handle file upload
             // This would require additional backend implementation
-            alert('Image watermark feature requires additional backend implementation.');
+            await customAlert.alert('LocalPDF Studio', 'Image watermark feature requires additional backend implementation.\nFeature not available.', ['OK']);
             return;
         }
 
@@ -269,17 +270,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const defaultName = selectedFile.name.replace('.pdf', '_watermarked.pdf');
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
                 if (savedPath) {
-                    alert('Watermark added successfully!\nSaved to: ' + savedPath);
+                    await customAlert.alert('LocalPDF Studio', 'Watermark added successfully!\nSaved to: ' + savedPath, ['OK']);
                 } else {
-                    alert('Operation cancelled or failed to save the file.');
+                    await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
                 }
             } else {
                 console.error("API returned JSON:", result);
-                alert(`Error: ${JSON.stringify(result)}`);
+                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert(`An error occurred:\n${error.message}`);
+            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
         } finally {
             addBtn.disabled = false;
             addBtn.textContent = 'Add Watermark';

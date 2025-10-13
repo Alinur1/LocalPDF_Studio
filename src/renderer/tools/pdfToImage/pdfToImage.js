@@ -2,6 +2,7 @@
 
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
+import customAlert from '../../utils/customAlert.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -134,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- API Call for Conversion ---
     convertBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            alert('Please select a file first.');
+            await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']);
             return;
         }
 
@@ -165,17 +166,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
-                    alert('PDF converted successfully!\nSaved to: ' + savedPath);
+                    await customAlert.alert('LocalPDF Studio', 'PDF converted successfully!\nSaved to: ' + savedPath, ['OK']);
                 } else {
-                    alert('Operation cancelled or failed to save the file.');
+                    await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
                 }
             } else {
                 console.error("Convert API returned JSON:", result);
-                alert(`Error: ${JSON.stringify(result)}`);
+                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
             console.error('Error converting PDF:', error);
-            alert(`An error occurred while converting the PDF:\n${error.message}`);
+            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while converting the PDF:\n${error.message}`, ['OK']);
         } finally {
             convertBtn.disabled = false;
             convertBtn.textContent = 'Convert to Image';
