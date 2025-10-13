@@ -3,6 +3,17 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const fs = require('fs');
 
+// Global drag and drop prevention
+document.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+});
+
+document.addEventListener('drop', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+});
+
 contextBridge.exposeInMainWorld('electronAPI', {
     selectPdfs: () => ipcRenderer.invoke('select-pdf-files'),
     openExternal: (url) => ipcRenderer.send('open-external-link', url),

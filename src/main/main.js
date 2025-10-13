@@ -112,6 +112,14 @@ const createWindow = () => {
         }
     });
 
+    win.webContents.on('will-navigate', (event, navigationUrl) => {
+        const parsedUrl = new URL(navigationUrl);
+        if (parsedUrl.protocol === 'file:') {
+            return;
+        }
+        event.preventDefault();
+    });
+
     win.maximize();
     win.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'));
 };
