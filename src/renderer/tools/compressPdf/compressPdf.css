@@ -85,18 +85,17 @@
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid #18222e;
+    color: red;
 }
 
 .info-card h3 {
     margin: 0 0 0.8rem 0;
-    font-size: 1rem;
-    color: #3498db;
+    font-size: 1.2rem;
 }
 
 .info-card p {
     margin: 0;
-    color: #bdc3c7;
-    font-size: 0.9rem;
+    font-size: 1.0rem;
     line-height: 1.6;
 }
 
