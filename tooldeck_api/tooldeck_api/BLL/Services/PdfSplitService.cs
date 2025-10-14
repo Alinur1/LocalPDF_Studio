@@ -234,17 +234,36 @@ namespace tooldeck_api.BLL.Services
 
         private (int start, int end) ParsePageRange(string range, int maxPages)
         {
+            range = range.Trim();
+
+            // Handle single page
+            if (!range.Contains('-'))
+            {
+                if (int.TryParse(range, out int singlePage))
+                {
+                    if (singlePage >= 1 && singlePage <= maxPages)
+                        return (singlePage, singlePage);
+                    else
+                        throw new ArgumentException($"Page number {singlePage} is out of range (1-{maxPages})");
+                }
+                throw new ArgumentException($"Invalid page number: '{range}'");
+            }
+
+            // Handle range
             var parts = range.Split('-');
             if (parts.Length != 2)
-                throw new ArgumentException($"Invalid page range format: {range}");
+                throw new ArgumentException($"Invalid range format: '{range}'. Use 'start-end' or single page numbers.");
 
-            if (!int.TryParse(parts[0].Trim(), out int start) || !int.TryParse(parts[1].Trim(), out int end))
-                throw new ArgumentException($"Invalid page numbers in range: {range}");
+            if (int.TryParse(parts[0].Trim(), out int start) && int.TryParse(parts[1].Trim(), out int end))
+            {
+                if (start < 1) throw new ArgumentException($"Start page cannot be less than 1: '{range}'");
+                if (end > maxPages) throw new ArgumentException($"End page cannot exceed {maxPages}: '{range}'");
+                if (start > end) throw new ArgumentException($"Start page cannot be greater than end page: '{range}'");
 
-            if (start < 1 || end > maxPages || start > end)
-                throw new ArgumentException($"Page range out of bounds: {range}");
+                return (start, end);
+            }
 
-            return (start, end);
+            throw new ArgumentException($"Invalid page numbers in range: '{range}'");
         }
 
         private byte[] SaveToBytes(PdfDocument doc)
