@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- API Call ---
     splitBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
             return;
         }
 
@@ -215,9 +215,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
-                    await customAlert.alert('LocalPDF Studio', 'PDF split successfully!\nSaved to: ' + savedPath, ['OK']);
+                    await customAlert.alert('LocalPDF Studio - SUCCESS', 'PDF split successfully!\nSaved to: ' + savedPath, ['OK']);
                 } else {
-                    await customAlert.alert('LocalPDF Studio' ,'Operation cancelled or failed to save the file.', ['OK']);
+                    await customAlert.alert('LocalPDF Studio - WARNING' ,'Operation cancelled or failed to save the file.', ['OK']);
                 }
             } else {
                 console.error("Split API returned JSON:", result);

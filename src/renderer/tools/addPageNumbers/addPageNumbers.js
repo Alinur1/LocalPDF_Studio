@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     addBtn.addEventListener('click', async () => {
-        if (!selectedFile) { await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']); return; }
+        if (!selectedFile) { await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']); return; }
 
         const positionMap = {
             'TopLeft': 0, 'TopCenter': 1, 'TopRight': 2,
@@ -148,8 +148,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const arrayBuffer = await result.arrayBuffer();
                 const defaultName = selectedFile.name.replace('.pdf', '_numbered.pdf');
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
-                if (savedPath) await customAlert.alert('LocalPDF Studio', 'Page numbers added successfully!\nSaved to: ' + savedPath, ['OK']);
-                else await customAlert.alert('LocalPDF Studio', 'Operation cancelled or failed to save the file.', ['OK']);
+                if (savedPath) await customAlert.alert('LocalPDF Studio - SUCCESS', 'Page numbers added successfully!\nSaved to: ' + savedPath, ['OK']);
+                else await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
             } else {
                 console.error("API returned JSON:", result);
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);

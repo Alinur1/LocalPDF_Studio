@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- API Call for Conversion ---
     convertBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
             return;
         }
 
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
-                    await customAlert.alert('LocalPDF Studio', 'PDF converted successfully!\nSaved to: ' + savedPath, ['OK']);
+                    await customAlert.alert('LocalPDF Studio - SUCCESS', 'PDF converted successfully!\nSaved to: ' + savedPath, ['OK']);
                 } else {
                     await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
                 }

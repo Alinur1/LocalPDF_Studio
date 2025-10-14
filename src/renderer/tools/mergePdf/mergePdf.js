@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mergeBtn.addEventListener('click', async () => {
         const files = getFiles();
         if (!files.length) {
-            await customAlert.alert('LocalPDF Studio', "Please select at least one PDF.", ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', "Please select at least one PDF.", ['OK']);
             return;
         }
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await window.electronAPI.saveMergedPdf(arrayBuffer);
 
             if (result.success) {
-                await customAlert.alert('LocalPDF Studio', "PDF saved successfully!", ['OK']);
+                await customAlert.alert('LocalPDF Studio - SUCCESS', "PDF saved successfully!", ['OK']);
             } else {
                 await customAlert.alert('LocalPDF Studio - WARNING', "Save canceled.", ['OK']);
             }

@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     previewBtn.addEventListener('click', () => {
         const pagesToRemove = collectPagesToRemove();
         if (pagesToRemove.size === 0) {
-            customAlert.alert('LocalPDF Studio', 'No pages selected for removal.', ['OK']);
+            customAlert.alert('LocalPDF Studio - NOTICE', 'No pages selected for removal.', ['OK']);
             return;
         }
         if (pagesToRemove.size >= totalPages) {
@@ -276,20 +276,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const sortedPages = Array.from(pagesToRemove).sort((a, b) => a - b);
         const remaining = totalPages - pagesToRemove.size;
-        customAlert.alert('LocalPDF Studio', `Preview:\n\nPages to remove: ${sortedPages.join(', ')}\nTotal pages to remove: ${pagesToRemove.size}\nRemaining pages: ${remaining}`, ['OK']);
+        customAlert.alert('LocalPDF Studio - NOTICE', `Preview:\n\nPages to remove: ${sortedPages.join(', ')}\nTotal pages to remove: ${pagesToRemove.size}\nRemaining pages: ${remaining}`, ['OK']);
     });
 
     // Remove Pages
     removeBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
             return;
         }
 
         const pagesToRemove = collectPagesToRemove();
 
         if (pagesToRemove.size === 0) {
-            await customAlert.alert('LocalPDF Studio', 'Please select at least one page to remove.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select at least one page to remove.', ['OK']);
             return;
         }
 
@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
-                    await customAlert.alert('LocalPDF Studio', `Success! Pages removed successfully!\nSaved to: ${savedPath}`, ['OK']);
+                    await customAlert.alert('LocalPDF Studio - SUCCESS', `Success! Pages removed successfully!\nSaved to: ${savedPath}`, ['OK']);
                 } else {
                     await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
                 }

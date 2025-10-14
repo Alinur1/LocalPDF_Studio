@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function deletePage(pageId) {
         if (pages.length <= 1) {
-            customAlert.alert('LocalPDF Studio', 'Cannot delete the last page. PDF must have at least one page.', ['OK']);
+            customAlert.alert('LocalPDF Studio - NOTICE', 'Cannot delete the last page. PDF must have at least one page.', ['OK']);
             return;
         }
 
@@ -339,12 +339,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     organizeBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
             return;
         }
 
         if (pages.length === 0) {
-            await customAlert.alert('LocalPDF Studio', 'No pages to organize.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'No pages to organize.', ['OK']);
             return;
         }
 
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 hideLoading();
                 if (savedPath) {
-                    await customAlert.alert('LocalPDF Studio', `Success! PDF organized successfully!\nSaved to: ${savedPath}`, ['OK']);
+                    await customAlert.alert('LocalPDF Studio - SUCCESS', `Success! PDF organized successfully!\nSaved to: ${savedPath}`, ['OK']);
                 } else {
                     await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
                 }

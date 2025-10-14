@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Compress PDF ---
     compressBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio', 'Please select a file first.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
             return;
         }
 
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `Saved to: ${savedPath}`
                     : `Success! PDF compressed successfully!\nSaved to: ${savedPath}`;
 
-                await customAlert.alert('LocalPDF Studio', message, ['OK']);
+                await customAlert.alert('LocalPDF Studio - SUCCESS', message, ['OK']);
             } else {
                 await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
             }

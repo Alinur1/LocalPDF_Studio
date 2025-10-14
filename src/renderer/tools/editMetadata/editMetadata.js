@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Save Metadata (within edit mode)
     async function saveMetadata() {
         if (!validateForm()) {
-            await customAlert.alert('LocalPDF Studio', 'Please fill in all required fields correctly.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please fill in all required fields correctly.', ['OK']);
             return;
         }
 
@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Save PDF with Updated Metadata
     async function savePdfWithMetadata() {
         if (!selectedFile || !currentMetadata) {
-            await customAlert.alert('LocalPDF Studio', 'Please select a PDF file first.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a PDF file first.', ['OK']);
             return;
         }
 
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showMessage(message, type = 'info') {
         // Simple message display - you could enhance this with a toast notification
         if (type === 'success') {
-            customAlert.alert('LocalPDF Studio', '✅ ' + message, ['OK']);
+            customAlert.alert('LocalPDF Studio - SUCCESS', '✅ ' + message, ['OK']);
         } else {
             customAlert.alert('LocalPDF Studio - WARNING', 'ℹ️ ' + message, ['OK']);
         }

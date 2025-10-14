@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 openPassword.classList.add('error');
                 isValid = false;
                 if (isValid) {
-                    customAlert.alert('LocalPDF Studio', 'Open password should be at least 3 characters long.', ['OK']);
+                    customAlert.alert('LocalPDF Studio - NOTICE', 'Open password should be at least 3 characters long.', ['OK']);
                 }
             }
 
@@ -184,12 +184,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Process PDF Handler
     async function handleProcessPdf() {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio', 'Please select a PDF file first.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a PDF file first.', ['OK']);
             return;
         }
 
         if (!validateForm()) {
-            await customAlert.alert('LocalPDF Studio', 'Please fill in all required fields correctly.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please fill in all required fields correctly.', ['OK']);
             return;
         }
 
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
                 if (savedPath) {
                     const operationText = selectedOperation === 'lock' ? 'locked' : 'unlocked';
-                    await customAlert.alert('LocalPDF Studio', `PDF ${operationText} successfully!\nSaved to: ${savedPath}`, ['OK']);
+                    await customAlert.alert('LocalPDF Studio - SUCCESS', `PDF ${operationText} successfully!\nSaved to: ${savedPath}`, ['OK']);
 
                     // Clear passwords after successful operation
                     clearPasswords();

@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     cropBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio', 'Please select a PDF file first.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a PDF file first.', ['OK']);
             return;
         }
 
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 field.charAt(0).toUpperCase() + field.slice(1)
             ).join(', ');
 
-            await customAlert.alert('LocalPDF Studio', `Please enter valid margin values for: ${fieldNames}\n\nAll margin values must be numbers (0 or greater).`, ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', `Please enter valid margin values for: ${fieldNames}\n\nAll margin values must be numbers (0 or greater).`, ['OK']);
             return;
         }
 
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Additional validation for custom pages
         if (selectedRange === 'custom' && (!customPages.value || customPages.value.trim() === '')) {
-            await customAlert.alert('LocalPDF Studio', 'Please enter a custom page range or select "All Pages".', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please enter a custom page range or select "All Pages".', ['OK']);
             customPages.focus();
             return;
         }
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const defaultName = selectedFile.name.replace('.pdf', '_cropped.pdf');
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
                 if (savedPath) {
-                    await customAlert.alert('LocalPDF Studio', 'PDF cropped successfully!\nSaved to: ' + savedPath, ['OK']);
+                    await customAlert.alert('LocalPDF Studio - SUCCESS', 'PDF cropped successfully!\nSaved to: ' + savedPath, ['OK']);
                 } else {
                     await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save.', ['OK']);
                 }
