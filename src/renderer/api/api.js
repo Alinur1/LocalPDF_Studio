@@ -64,6 +64,8 @@ async function getEndpoints() {
         lock: `${base}/PdfLockUnlock/lock`,
         unlock: `${base}/PdfLockUnlock/unlock`,
         metadata: `${base}/PdfMetadata/metadata`,
+        extractImages: `${base}/PdfExtractImages/extract`,
+        removeImages: `${base}/PdfExtractImages/extract`,
         // Add more as necessary
     };
 }

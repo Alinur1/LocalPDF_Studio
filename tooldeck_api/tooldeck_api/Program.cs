@@ -20,6 +20,7 @@ builder.Services.AddScoped<IWatermarkInterface, WatermarkService>();
 builder.Services.AddScoped<ICropPdfInterface, CropPdfService>();
 builder.Services.AddScoped<ILockUnlockPdfInterface, LockUnlockPdfService>();
 builder.Services.AddScoped<IEditMetadataInterface, EditMetadataService>();
+builder.Services.AddScoped<IPdfExtractImagesInterface, PdfExtractImagesService>();
 
 // CORS policy
 builder.Services.AddCors(options =>

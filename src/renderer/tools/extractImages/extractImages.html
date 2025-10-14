@@ -1,0 +1,173 @@
+<!-- src/renderer/tools/extractImages/extractImages.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - Extract Images</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+
+    <!-- PDF.js (local) -->
+    <script type="module">
+        import * as pdfjsLib from '../../pdf/build/pdf.mjs';
+        window.pdfjsLib = pdfjsLib;
+    </script>
+
+    <!-- Global theme -->
+    <link rel="stylesheet" href="../../styles/main.css">
+
+    <!-- Tool-specific styles -->
+    <link rel="stylesheet" href="./extractImages.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn">← Back</a>
+            <h1 class="tool-title">Extract or Remove Images from PDF</h1>
+        </div>
+
+        <main class="tool-container">
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                </div>
+            </div>
+
+            <!-- PDF Preview Section -->
+            <div id="preview-container" class="preview-container" style="display: none;">
+                <div class="preview-header">
+                    <div>
+                        <h3>PDF Preview - Select Pages</h3>
+                        <p class="selection-info" id="selection-info">No pages selected</p>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span id="page-count" class="page-count"></span>
+                        <button id="clear-selection-btn" class="action-btn secondary" style="display: none;">Clear
+                            Selection</button>
+                    </div>
+                </div>
+                <div id="preview-grid" class="preview-grid">
+                    <!-- Thumbnails will be inserted here -->
+                </div>
+            </div>
+
+            <div class="options-container">
+                <h2>Operation Mode</h2>
+
+                <div class="mode-selection">
+                    <label class="mode-option">
+                        <input type="radio" name="operation-mode" value="extract" checked>
+                        <div class="mode-card">
+                            <div class="mode-icon extract-icon">📤</div>
+                            <div class="mode-details">
+                                <h3>Extract Images</h3>
+                                <p>Extract images from PDF pages and save as ZIP</p>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="operation-mode" value="remove">
+                        <div class="mode-card">
+                            <div class="mode-icon remove-icon">🗑️</div>
+                            <div class="mode-details">
+                                <h3>Remove Images</h3>
+                                <p>Remove images from PDF pages and save as PDF</p>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="option-group">
+                    <h3>Quick Actions</h3>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" id="select-all-pages">Select All Pages</button>
+                        <button class="quick-action-btn" id="select-even-pages">Select Even Pages</button>
+                        <button class="quick-action-btn" id="select-odd-pages">Select Odd Pages</button>
+                        <button class="quick-action-btn" id="invert-selection">Invert Selection</button>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <h3>Specify Pages Manually</h3>
+                    <label for="manual-pages">Individual Pages:</label>
+                    <input type="text" id="manual-pages" class="options-input" placeholder="e.g., 1, 3, 5, 10">
+                    <small class="help-text">Enter page numbers separated by commas</small>
+                </div>
+
+                <div class="option-group">
+                    <h3>Page Ranges</h3>
+                    <label for="page-ranges">Page Ranges:</label>
+                    <input type="text" id="page-ranges" class="options-input" placeholder="e.g., 1-3, 7-9, 15-20">
+                    <small class="help-text">Enter ranges like "1-5, 10-15"</small>
+                </div>
+
+                <div class="option-group" id="extract-options" style="display: block;">
+                    <h3>Extract Settings</h3>
+                    <div class="extract-settings">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="preserve-quality" checked>
+                            Preserve original image quality (recommended)
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="preserve-format" checked>
+                            Maintain original file formats (JPEG, PNG, etc.)
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="preserve-metadata" checked>
+                            Keep image metadata
+                        </label>
+                        <small class="help-text">Recommended settings ensure best quality and fastest processing</small>
+                    </div>
+                </div>
+
+                <div class="info-box" id="extract-info" style="display: block;">
+                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <div>
+                        <strong>Extract Mode:</strong> Images will be extracted and saved as a ZIP file with original
+                        quality and format.
+                    </div>
+                </div>
+
+                <div class="info-box warning" id="remove-info" style="display: none;">
+                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                        </path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <div>
+                        <strong>Remove Mode:</strong> Images will be permanently removed from the specified pages and
+                        saved as a new PDF file.
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="preview-btn" class="top-btn secondary" disabled>Preview Selection</button>
+                <button id="process-btn" class="top-btn" disabled>Extract Images</button>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="./extractImages.js"></script>
+</body>
+
+</html>
