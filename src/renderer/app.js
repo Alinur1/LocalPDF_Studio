@@ -149,6 +149,14 @@ window.addEventListener('DOMContentLoaded', () => {
         modal.classList.add('hidden');
     });
 
+    document.getElementById('about-btn').addEventListener('click', () => {
+        window.location.href = './about/about.html';
+    });
+
+    document.getElementById('donate-btn').addEventListener('click', () => {
+        window.location.href = './donate/donate.html';
+    });
+
     // Hook TabManager events
     tabManager.onTabChange = () => saveTabs(tabManager);
     tabManager.onTabClose = () => saveTabs(tabManager);

@@ -1,0 +1,177 @@
+<!-- src/renderer/about/about.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - LocalPDF Studio</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+
+    <!-- Global theme -->
+    <link rel="stylesheet" href="../styles/main.css">
+
+    <!-- Page-specific styles -->
+    <link rel="stylesheet" href="./about.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <a href="../index.html" class="top-btn">← Back to App</a>
+            <h1 class="page-title">About LocalPDF Studio</h1>
+        </div>
+
+        <!-- Main Content -->
+        <main class="about-container">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="app-icon">
+                    <!-- You can add your app icon here later -->
+                    <div class="icon-placeholder">📄</div>
+                </div>
+                <h1 class="app-name">LocalPDF Studio</h1>
+                <p class="app-version">v1.0.0</p>
+                <p class="app-tagline">Your complete offline PDF toolkit</p>
+                <p class="app-description">A privacy-focused, cross-platform PDF editor that works completely offline
+                </p>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features-section">
+                <h2 class="section-title">Why Choose LocalPDF Studio?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>100% Offline</h3>
+                        <p>Your files never leave your computer. Complete privacy and security.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🛡️</div>
+                        <h3>Privacy First</h3>
+                        <p>No data collection, no tracking, no internet connection required.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🆓</div>
+                        <h3>Free & Open Source</h3>
+                        <p>Completely free to use. Open source under MPL 2.0 license.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>Cross-Platform</h3>
+                        <p>Works seamlessly on Windows, Linux, and macOS.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tech Stack Section -->
+            <section class="tech-section">
+                <h2 class="section-title">Built With Modern Technology</h2>
+                <div class="tech-grid">
+                    <div class="tech-item" data-tooltip="Electron (HTML, CSS, JavaScript)">
+                        <img src="../../../assets/icons/tech/electron.png" alt="Electron" class="tech-icon">
+                        <span class="tech-name">Electron</span>
+                    </div>
+                    <div class="tech-item" data-tooltip="ASP.NET Core Web API (C#)">
+                        <img src="../../../assets/icons/tech/dotnet.png" alt=".NET Core" class="tech-icon">
+                        <span class="tech-name">.NET Core</span>
+                    </div>
+                    <div class="tech-item" data-tooltip="Python">
+                        <img src="../../../assets/icons/tech/python.png" alt="Python" class="tech-icon">
+                        <span class="tech-name">Python</span>
+                    </div>
+                    <div class="tech-item" data-tooltip="Mozilla PDF.js">
+                        <img src="../../../assets/icons/tech/pdfjs.png" alt="PDF.js" class="tech-icon">
+                        <span class="tech-name">PDF.js</span>
+                    </div>
+                    <div class="tech-item" data-tooltip="PDFSharp">
+                        <img src="../../../assets/icons/tech/pdfsharp.png" alt="PDFSharp" class="tech-icon">
+                        <span class="tech-name">PDFSharp</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Assistance Section -->
+            <section class="ai-section">
+                <h2 class="section-title">AI Assistance</h2>
+                <p class="section-subtitle">This project was developed with help from these amazing AI assistants:</p>
+                <div class="ai-grid">
+                    <div class="ai-item" data-tooltip="ChatGPT">
+                        <img src="../../../assets/icons/ai/chatgpt.png" alt="ChatGPT" class="ai-icon">
+                        <span class="ai-name">ChatGPT</span>
+                    </div>
+                    <div class="ai-item" data-tooltip="Deepseek">
+                        <img src="../../../assets/icons/ai/deepseek.png" alt="Deepseek" class="ai-icon">
+                        <span class="ai-name">Deepseek</span>
+                    </div>
+                    <div class="ai-item" data-tooltip="Claude">
+                        <img src="../../../assets/icons/ai/claude.png" alt="Claude" class="ai-icon">
+                        <span class="ai-name">Claude</span>
+                    </div>
+                    <div class="ai-item" data-tooltip="Gemini">
+                        <img src="../../../assets/icons/ai/gemini.png" alt="Gemini" class="ai-icon">
+                        <span class="ai-name">Gemini</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Developer Section -->
+            <section class="developer-section">
+                <h2 class="section-title">About the Developer</h2>
+                <div class="developer-card">
+                    <div class="developer-info">
+                        <h3>Md. Alinur Hossain</h3>
+                        <p class="developer-bio">Passionate developer creating open-source tools that make a difference.
+                            Believer in privacy, freedom, and the power of community-driven software.</p>
+                        <p class="love-message">Made with ❤️ for the open-source community</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- License Section -->
+            <section class="license-section">
+                <h2 class="section-title">License</h2>
+                <div class="license-card">
+                    <p>This software is licensed under the <strong>Mozilla Public License 2.0</strong></p>
+                    <p>You are free to use, modify, and distribute this software in accordance with the MPL 2.0 terms.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Support Section -->
+            <section class="support-section">
+                <h2 class="section-title">Support This Project</h2>
+                <div class="support-actions">
+                    <a href="../donate/donate.html" class="support-btn primary">
+                        <span>💝 Support Development</span>
+                    </a>
+                    <div class="secondary-actions">
+                        <button class="support-btn secondary" id="view-source">
+                            <img src="../../../assets/icons/social/github.png" alt="GitHub">
+                            View Source Code
+                        </button>
+                        <button class="support-btn secondary" id="star-repo">
+                            <img src="../../../assets/icons/social/star.png" alt="Star">
+                            Star on GitHub
+                        </button>
+                        <button class="support-btn secondary" id="report-issue">
+                            <img src="../../../assets/icons/social/bug.png" alt="Bug">
+                            Report Issues
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="./about.js"></script>
+</body>
+
+</html>

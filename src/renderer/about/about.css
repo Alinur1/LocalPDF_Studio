@@ -1,0 +1,472 @@
+/* About Page Styles */
+
+/* Hide scrollbar but keep functionality */
+.about-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    overflow-y: auto;
+    height: calc(100vh - 50px);
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+}
+
+.about-container::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+.page-title {
+    color: #ecf0f1;
+    font-size: 1.5rem;
+    margin: 0;
+    text-align: center;
+    flex: 1;
+}
+
+/* Hero Section */
+.hero-section {
+    text-align: left;
+    padding: 2rem 0;
+    border-bottom: 1px solid #34495e;
+    width: 100%;
+}
+
+.app-icon {
+    margin-bottom: 1.5rem;
+}
+
+.icon-placeholder {
+    font-size: 4rem;
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+}
+
+.app-name {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #ecf0f1;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, #3498db, #2ecc71);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.app-version {
+    font-size: 1.2rem;
+    color: #bdc3c7;
+    margin: 0 0 1rem 0;
+}
+
+.app-tagline {
+    font-size: 1.5rem;
+    color: #3498db;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+}
+
+.app-description {
+    font-size: 1.1rem;
+    color: #bdc3c7;
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0;
+}
+
+/* Section Styles */
+.section-title {
+    font-size: 2rem;
+    color: #ecf0f1;
+    text-align: left;
+    margin: 0 0 2rem 0;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 2px;
+}
+
+.section-subtitle {
+    text-align: left;
+    color: #bdc3c7;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+/* Features Section */
+.features-section {
+    width: 100%;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.feature-card {
+    background: #2c3e50;
+    padding: 2rem 1.5rem;
+    border-radius: 12px;
+    text-align: left;
+    border: 1px solid #34495e;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border-color: #3498db;
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.feature-card h3 {
+    color: #ecf0f1;
+    margin: 0 0 0.75rem 0;
+    font-size: 1.2rem;
+}
+
+.feature-card p {
+    color: #bdc3c7;
+    line-height: 1.5;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* Tech Stack Section */
+.tech-section,
+.ai-section {
+    width: 100%;
+}
+
+.tech-grid,
+.ai-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.tech-item,
+.ai-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1.5rem 1rem;
+    background: #2c3e50;
+    border-radius: 12px;
+    border: 1px solid #34495e;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: help;
+}
+
+.tech-item:hover,
+.ai-item:hover {
+    transform: translateY(-3px);
+    border-color: #3498db;
+    box-shadow: 0 5px 20px rgba(52, 152, 219, 0.2);
+}
+
+.tech-icon,
+.ai-icon {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+}
+
+.tech-name,
+.ai-name {
+    color: #ecf0f1;
+    font-weight: 600;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* Tooltips */
+.tech-item::after,
+.ai-item::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    border: 1px solid #34495e;
+}
+
+.tech-item:hover::after,
+.ai-item:hover::after {
+    opacity: 1;
+    visibility: visible;
+    bottom: -35px;
+}
+
+/* Developer Section */
+.developer-section {
+    width: 100%;
+}
+
+.developer-card {
+    background: #2c3e50;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #34495e;
+    text-align: left;
+}
+
+.developer-info h3 {
+    color: #ecf0f1;
+    font-size: 1.5rem;
+    margin: 0 0 1rem 0;
+}
+
+.developer-bio {
+    color: #bdc3c7;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.love-message {
+    color: #e74c3c;
+    font-style: italic;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* License Section */
+.license-section {
+    width: 100%;
+}
+
+.license-card {
+    background: #2c3e50;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #34495e;
+    text-align: left;
+}
+
+.license-card p {
+    color: #bdc3c7;
+    line-height: 1.6;
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+}
+
+.license-card p:last-child {
+    margin-bottom: 0;
+}
+
+/* Support Section */
+.support-section {
+    width: 100%;
+}
+
+.support-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.support-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.support-btn.primary {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    font-size: 1.1rem;
+}
+
+.support-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+}
+
+.support-btn.secondary {
+    background: #34495e;
+    color: #ecf0f1;
+    border: 1px solid #4a6572;
+}
+
+.support-btn.secondary:hover {
+    background: #3d566e;
+    border-color: #3498db;
+    transform: translateY(-1px);
+}
+
+.support-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.secondary-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .about-container {
+        padding: 1.5rem 1rem;
+        gap: 2.5rem;
+    }
+
+    .app-name {
+        font-size: 2.5rem;
+    }
+
+    .app-tagline {
+        font-size: 1.3rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .tech-grid,
+    .ai-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+    }
+
+    .secondary-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .support-btn {
+        width: 100%;
+    }
+
+    .support-actions {
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 480px) {
+    .about-container {
+        padding: 1rem;
+        gap: 2rem;
+    }
+
+    .hero-section {
+        padding: 1rem 0;
+    }
+
+    .icon-placeholder {
+        width: 100px;
+        height: 100px;
+        font-size: 3rem;
+    }
+
+    .app-name {
+        font-size: 2rem;
+    }
+
+    .app-version {
+        font-size: 1rem;
+    }
+
+    .app-tagline {
+        font-size: 1.2rem;
+    }
+
+    .app-description {
+        font-size: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .tech-grid,
+    .ai-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .feature-card,
+    .developer-card,
+    .license-card {
+        padding: 1.5rem;
+    }
+
+    .tech-icon,
+    .ai-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .feature-icon {
+        font-size: 2rem;
+    }
+}

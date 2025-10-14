@@ -1,0 +1,196 @@
+<!-- src/renderer/donate/donate.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support - LocalPDF Studio</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+
+    <!-- Global theme -->
+    <link rel="stylesheet" href="../styles/main.css">
+
+    <!-- Page-specific styles -->
+    <link rel="stylesheet" href="./donate.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <a href="../index.html" class="top-btn">← Back to App</a>
+            <h1 class="page-title">Support LocalPDF Studio</h1>
+        </div>
+
+        <!-- Main Content -->
+        <main class="donate-container">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="heart-icon">❤️</div>
+                <h1 class="hero-title">Support Our Mission</h1>
+                <p class="hero-subtitle">Help us keep LocalPDF Studio free, open-source, and continuously improving</p>
+            </section>
+
+            <!-- Why Donate Section -->
+            <section class="why-donate-section">
+                <h2 class="section-title">Why Your Support Matters</h2>
+                <div class="reasons-grid">
+                    <div class="reason-card">
+                        <div class="reason-icon">🚀</div>
+                        <h3>Continue Development</h3>
+                        <p>Your support enables ongoing development and maintenance of the software.</p>
+                    </div>
+                    <div class="reason-card">
+                        <div class="reason-icon">✨</div>
+                        <h3>Add New Features</h3>
+                        <p>Fund new features and improvements based on community feedback.</p>
+                    </div>
+                    <div class="reason-card">
+                        <div class="reason-icon">🆓</div>
+                        <h3>Keep It Free</h3>
+                        <p>Ensure the software remains free and accessible to everyone forever.</p>
+                    </div>
+                    <div class="reason-card">
+                        <div class="reason-icon">🌍</div>
+                        <h3>Support Open Source</h3>
+                        <p>Contribute to the open-source ecosystem and privacy-focused software.</p>
+                    </div>
+                </div>
+                <div class="appreciation-message">
+                    <p>Your donation will always be appreciated 🙏</p>
+                </div>
+            </section>
+
+            <!-- Donation Options Section -->
+            <section class="donation-options-section">
+                <h2 class="section-title">Choose Your Donation Method</h2>
+                <div class="donation-options">
+                    <!-- GitHub Sponsors -->
+                    <div class="donation-option" id="github-sponsors">
+                        <div class="option-header">
+                            <img src="../../../assets/icons/donate/github-sponsors.png" alt="GitHub Sponsors"
+                                class="option-icon">
+                            <h3>GitHub Sponsors</h3>
+                        </div>
+                        <p class="option-description">Support through GitHub's native sponsorship platform. Recurring or
+                            one-time donations.</p>
+                        <button class="donate-btn primary">Support on GitHub</button>
+                    </div>
+
+                    <!-- bKash -->
+                    <div class="donation-option" id="bkash-option">
+                        <div class="option-header">
+                            <img src="../../../assets/icons/donate/bKash.png" alt="bKash" class="option-icon">
+                            <h3>bKash <span class="country-badge">Bangladesh Only</span></h3>
+                        </div>
+                        <p class="option-description">Mobile banking for Bangladeshi users. Fast and convenient local
+                            payments.</p>
+                        <button class="donate-btn secondary" id="show-bkash-qr">Show QR Code</button>
+                    </div>
+
+                    <!-- Gumroad -->
+                    <div class="donation-option" id="gumroad-option">
+                        <div class="option-header">
+                            <img src="../../../assets/icons/donate/gumroad.png" alt="Gumroad" class="option-icon">
+                            <h3>Gumroad</h3>
+                        </div>
+                        <p class="option-description">Secure global payments with multiple payment methods available.
+                        </p>
+                        <button class="donate-btn primary">Donate via Gumroad</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- bKash QR Modal -->
+            <div id="bkash-qr-modal" class="modal hidden">
+                <div class="modal-content qr-modal">
+                    <h2 class="modal-title">Donate via bKash</h2>
+
+                    <div class="qr-section">
+                        <p class="qr-note">Scan the QR code to donate via bKash</p>
+                        <div class="qr-code-container">
+                            <img src="../../../assets/icons/donate/bkash-qr.png" alt="bKash QR Code" class="qr-code">
+                        </div>
+                        <p class="qr-instruction">Open bKash app → Scan QR → Enter amount</p>
+                        <p class="qr-alternative">Alternatively, send to phone number: <strong>01XXXXXXXXX</strong></p>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button id="qr-close" class="top-btn">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sponsors Section -->
+            <section class="sponsors-section">
+                <h2 class="section-title">Our Amazing Sponsors</h2>
+                <div class="no-sponsors-message" id="no-sponsors">
+                    <div class="empty-state">
+                        <div class="empty-icon">🎉</div>
+                        <h3>No sponsors yet</h3>
+                        <p>Be the first to support LocalPDF Studio and get featured here!</p>
+                    </div>
+                </div>
+                <div class="sponsors-grid hidden" id="sponsors-grid">
+                    <!-- Sponsors will be added dynamically -->
+                </div>
+            </section>
+
+            <!-- Alternative Support Section -->
+            <section class="alternative-support-section">
+                <h2 class="section-title">Other Ways to Support</h2>
+                <div class="alt-support-grid">
+                    <div class="alt-support-card">
+                        <div class="alt-icon">⭐</div>
+                        <h3>Star on GitHub</h3>
+                        <p>Show your support by starring the repository on GitHub.</p>
+                        <button class="alt-action-btn" id="alt-star">Star Repository</button>
+                    </div>
+                    <div class="alt-support-card">
+                        <div class="alt-icon">📢</div>
+                        <h3>Share with Others</h3>
+                        <p>Spread the word about LocalPDF Studio in your community.</p>
+                        <button class="alt-action-btn" id="alt-share">Share App</button>
+                    </div>
+                    <div class="alt-support-card">
+                        <div class="alt-icon">🐛</div>
+                        <h3>Report Issues</h3>
+                        <p>Help improve the software by reporting bugs and issues.</p>
+                        <button class="alt-action-btn" id="alt-report">Report Issues</button>
+                    </div>
+                    <div class="alt-support-card">
+                        <div class="alt-icon">💡</div>
+                        <h3>Suggest Features</h3>
+                        <p>Share your ideas for new features and improvements.</p>
+                        <button class="alt-action-btn" id="alt-suggest">Suggest Features</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Thank You Section -->
+            <section class="thank-you-section">
+                <div class="thank-you-card">
+                    <h2>Thank You!</h2>
+                    <p>Whether through donations, code contributions, or simply using and sharing LocalPDF Studio,
+                        your support means the world to us. Together, we're building better, privacy-focused software
+                        for everyone.</p>
+                    <div class="signature">
+                        <p>With gratitude,</p>
+                        <p class="developer-name">Md. Alinur Hossain</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="./donate.js"></script>
+</body>
+
+</html>
