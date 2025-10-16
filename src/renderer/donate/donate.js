@@ -24,7 +24,7 @@ function initializeDonationHandlers() {
     const gumroadBtn = document.getElementById('gumroad-option')?.querySelector('.donate-btn');
     if (gumroadBtn) {
         gumroadBtn.addEventListener('click', () => {
-            const gumroadLink = 'https://alinur.gumroad.com/l/localpdf-studio-donate';
+            const gumroadLink = 'https://alinur3.gumroad.com/coffee';
             openExternalLink(gumroadLink);
         });
     }
