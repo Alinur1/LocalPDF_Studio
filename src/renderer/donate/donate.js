@@ -9,14 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeDonationHandlers() {
-    // GitHub Sponsors
-    const githubBtn = document.getElementById('github-sponsors')?.querySelector('.donate-btn');
-    if (githubBtn) {
-        githubBtn.addEventListener('click', () => {
-            openExternalLink('https://github.com/sponsors/Alinur1');
-        });
-    }
-
     // bKash QR Code
     const bkashBtn = document.getElementById('show-bkash-qr');
     if (bkashBtn) {
