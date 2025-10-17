@@ -20,7 +20,6 @@
 
 <body>
     <div id="app">
-        <!-- Top Bar -->
         <div class="top-bar">
             <button class="top-btn" id="open-pdf-btn">Open PDF Reader</button>
             <div class="tools-dropdown">
@@ -47,7 +46,6 @@
             <button class="top-btn" id="donate-btn">Donate</button>
         </div>
 
-        <!-- Main Content -->
         <div id="main-content">
             <div id="tab-bar"></div>
             <div class="resizer" id="resizer"></div>
@@ -65,7 +63,6 @@
         </div>
     </div>
 
-    <!-- Settings Modal -->
     <div id="settings-modal" class="modal hidden">
         <div class="modal-overlay" id="modal-overlay"></div>
         <div class="modal-container">
@@ -124,6 +121,35 @@
                         </label>
                     </div>
                 </div>
+
+                <div class="settings-divider"></div>
+
+                <div class="settings-category">
+                    <h3 class="category-title">
+                        <span class="category-icon">🔍</span>
+                        Search & History
+                    </h3>
+                    <div class="settings-options">
+                        <label class="option-item toggle-option">
+                            <input type="checkbox" id="search-enabled">
+                            <span class="toggle-slider"></span>
+                            <span class="option-content">
+                                <span class="option-title">Enable Search Bar</span>
+                                <span class="option-description">Quickly find and reopen previously opened PDF
+                                    files</span>
+                            </span>
+                        </label>
+                        <div class="option-note">
+                            <span class="note-icon">ℹ️</span>
+                            Only indexes PDF files you've opened in LocalPDF Studio
+                        </div>
+                        <button id="clear-search-history" class="btn-secondary"
+                            style="margin-top: 0.5rem; width: 100%;">
+                            <span class="btn-icon">🗑️</span>
+                            Clear Search History
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="modal-footer">
@@ -143,6 +169,7 @@
 
 
     <script type="module" src="./app.js"></script>
+    <script type="module" src="./utils/customAlert.js"></script>
 </body>
 
 </html>

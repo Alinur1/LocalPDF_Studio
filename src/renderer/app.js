@@ -2,11 +2,16 @@
 
 import TabManager from './tabs/tabManager.js';
 import createPdfTab from './utils/createPdfTab.js';
+import customAlert from './utils/customAlert.js';
 import { ClockManager } from './utils/clockManager.js';
+import { SearchIndexManager } from './utils/searchIndexManager.js';
+import { SearchBar } from './utils/searchBar.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     const tabManager = new TabManager('#tab-bar', '#tab-content');
     const clockManager = new ClockManager();
+    const searchIndexManager = new SearchIndexManager();
+    const searchBar = new SearchBar(searchIndexManager, tabManager);
     const emptyState = document.getElementById('empty-state');
     const openPdfBtn = document.getElementById('open-pdf-btn');
     const settingsBtn = document.getElementById('settings-btn');
@@ -15,10 +20,10 @@ window.addEventListener('DOMContentLoaded', () => {
     const cancelBtn = document.getElementById('settings-cancel');
     const radios = document.querySelectorAll('input[name="restore-tabs"]');
     const clockCheckbox = document.getElementById('clock-enabled');
+    const searchEnabledCheckbox = document.getElementById('search-enabled');
+    const clearHistoryBtn = document.getElementById('clear-search-history');
     const toolsDropdown = document.querySelector('.tools-dropdown');
-    let originalSettings = {};
 
-    // Initialize empty state as hidden by default
     emptyState.classList.add('hidden');
 
     toolsDropdown.addEventListener('mouseenter', () => {
@@ -33,7 +38,6 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Update empty state based on tabs
     function updateEmptyState() {
         if (tabManager.tabs.size === 0) {
             console.log('No tabs - showing empty state');
@@ -48,7 +52,6 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Override tab manager methods to update empty state
     const originalOpenTab = tabManager.openTab.bind(tabManager);
     tabManager.openTab = function (...args) {
         const result = originalOpenTab(...args);
@@ -63,24 +66,14 @@ window.addEventListener('DOMContentLoaded', () => {
         return result;
     };
 
-    // Clock settings
-    if (clockCheckbox) {
-        clockCheckbox.checked = clockManager.isEnabled;
-        clockCheckbox.addEventListener('change', (e) => {
-            clockManager.setEnabled(e.target.checked);
-            updateEmptyState();
-        });
-    }
+    searchBar.setVisible(searchIndexManager.isEnabled());
 
-    // Restore tabs and update empty state
     restoreTabs(tabManager);
     updateEmptyState();
 
-    // Open PDF button with dialog state management
     let isDialogOpen = false;
 
     openPdfBtn.addEventListener('click', async () => {
-        // Prevent multiple dialogs
         if (isDialogOpen) return;
 
         isDialogOpen = true;
@@ -93,6 +86,7 @@ window.addEventListener('DOMContentLoaded', () => {
             if (files && files.length > 0) {
                 for (const filePath of files) {
                     createPdfTab(filePath, tabManager);
+                    searchIndexManager.addFile(filePath);
                 }
                 saveTabs(tabManager);
             }
@@ -105,7 +99,6 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // External links from PDF viewer
     window.addEventListener('message', (event) => {
         if (event.data?.type === 'open-external') {
             if (window.electronAPI?.openExternal) {
@@ -116,7 +109,6 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Resizer logic
     const tabBar = document.getElementById('tab-bar');
     const resizer = document.getElementById('resizer');
 
@@ -148,11 +140,10 @@ window.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mouseup', handleMouseUp);
     });
 
-    // --- Persistence helpers ---
     function saveTabs(manager) {
         const state = {
             activeTabId: manager.activeTabId,
-            tabOrder: manager.getTabOrder(), // Save the current order
+            tabOrder: manager.getTabOrder(),
             tabs: Array.from(manager.tabs.entries()).map(([id, tab]) => ({
                 id,
                 filePath: decodeURIComponent(tab.content.src.replace(/^.*file:\/\//, '')),
@@ -170,17 +161,12 @@ window.addEventListener('DOMContentLoaded', () => {
         try {
             const state = JSON.parse(saved);
             if (restoreSetting === 'restore' && state.tabs && Array.isArray(state.tabs)) {
-                // First create all tabs
                 for (const tab of state.tabs) {
                     createPdfTab(tab.filePath, manager);
                 }
-
-                // Then restore the order if available
                 if (state.tabOrder && Array.isArray(state.tabOrder)) {
                     manager.restoreTabOrder(state.tabOrder);
                 }
-
-                // Finally switch to the active tab
                 if (state.activeTabId) {
                     manager.switchTab(state.activeTabId);
                 }
@@ -190,22 +176,22 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Load saved setting (default = restore)
     const savedSetting = localStorage.getItem('restoreTabs') || 'restore';
     radios.forEach(r => {
         r.checked = (r.value === savedSetting);
     });
 
+    let originalSettings = {};
+
     settingsBtn.addEventListener('click', () => {
-        // Store current settings before changes
         originalSettings = {
             restoreTabs: localStorage.getItem('restoreTabs') || 'restore',
-            clockEnabled: localStorage.getItem('clockEnabled') !== 'false' // true by default
+            clockEnabled: localStorage.getItem('clockEnabled') !== 'false',
+            searchEnabled: searchIndexManager.isEnabled()
         };
-
-        // Set UI to current settings
         document.querySelector(`input[name="restore-tabs"][value="${originalSettings.restoreTabs}"]`).checked = true;
         document.getElementById('clock-enabled').checked = originalSettings.clockEnabled;
+        document.getElementById('search-enabled').checked = originalSettings.searchEnabled;
 
         modal.classList.remove('hidden');
     });
@@ -215,13 +201,11 @@ window.addEventListener('DOMContentLoaded', () => {
         modal.classList.add('hidden');
     });
 
-    // Close modal when clicking close button
     document.getElementById('modal-close').addEventListener('click', () => {
         restoreOriginalSettings();
         modal.classList.add('hidden');
     });
 
-    // Close modal with Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
             restoreOriginalSettings();
@@ -235,16 +219,14 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     saveBtn.addEventListener('click', () => {
-        // Get current UI state
         const selectedRestore = document.querySelector('input[name="restore-tabs"]:checked').value;
         const clockEnabled = document.getElementById('clock-enabled').checked;
-
-        // Save to localStorage
+        const searchEnabled = document.getElementById('search-enabled').checked;
         localStorage.setItem('restoreTabs', selectedRestore);
         localStorage.setItem('clockEnabled', clockEnabled.toString());
-
-        // Update clock manager
         clockManager.setEnabled(clockEnabled);
+        searchIndexManager.setEnabled(searchEnabled);
+        searchBar.setVisible(searchEnabled);
 
         modal.classList.add('hidden');
     });
@@ -252,11 +234,21 @@ window.addEventListener('DOMContentLoaded', () => {
     function restoreOriginalSettings() {
         localStorage.setItem('restoreTabs', originalSettings.restoreTabs);
         localStorage.setItem('clockEnabled', originalSettings.clockEnabled.toString());
-
+        searchIndexManager.setEnabled(originalSettings.searchEnabled);
+        searchBar.setVisible(originalSettings.searchEnabled);
         clockManager.setEnabled(originalSettings.clockEnabled);
-
         document.querySelector(`input[name="restore-tabs"][value="${originalSettings.restoreTabs}"]`).checked = true;
         document.getElementById('clock-enabled').checked = originalSettings.clockEnabled;
+        document.getElementById('search-enabled').checked = originalSettings.searchEnabled;
+    }
+
+    if (clearHistoryBtn) {
+        clearHistoryBtn.addEventListener('click', () => {
+            searchIndexManager.clearHistory();
+            if (customAlert) {
+                customAlert.alert('Search History Cleared', 'All search history has been removed.');
+            }
+        });
     }
 
     document.getElementById('about-btn').addEventListener('click', () => {
@@ -267,7 +259,6 @@ window.addEventListener('DOMContentLoaded', () => {
         window.location.href = './donate/donate.html';
     });
 
-    // Hook TabManager events
     tabManager.onTabChange = () => saveTabs(tabManager);
     tabManager.onTabClose = () => saveTabs(tabManager);
     tabManager.onTabReorder = () => saveTabs(tabManager);
