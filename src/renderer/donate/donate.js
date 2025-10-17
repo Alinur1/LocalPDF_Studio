@@ -132,7 +132,6 @@ async function copyToClipboard(text, url) {
 }
 
 function showSimpleAlert(message) {
-    // Simple alert fallback if customAlert is not available
     if (window.customAlert && window.customAlert.alert) {
         window.customAlert.alert('LocalPDF Studio', message, ['OK']);
     } else {
