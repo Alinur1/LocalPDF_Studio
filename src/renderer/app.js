@@ -16,6 +16,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const radios = document.querySelectorAll('input[name="restore-tabs"]');
     const clockCheckbox = document.getElementById('clock-enabled');
     const toolsDropdown = document.querySelector('.tools-dropdown');
+    let originalSettings = {};
 
     // Initialize empty state as hidden by default
     emptyState.classList.add('hidden');
@@ -196,34 +197,67 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     settingsBtn.addEventListener('click', () => {
+        // Store current settings before changes
+        originalSettings = {
+            restoreTabs: localStorage.getItem('restoreTabs') || 'restore',
+            clockEnabled: localStorage.getItem('clockEnabled') !== 'false' // true by default
+        };
+
+        // Set UI to current settings
+        document.querySelector(`input[name="restore-tabs"][value="${originalSettings.restoreTabs}"]`).checked = true;
+        document.getElementById('clock-enabled').checked = originalSettings.clockEnabled;
+
         modal.classList.remove('hidden');
     });
 
     document.getElementById('modal-overlay').addEventListener('click', () => {
+        restoreOriginalSettings();
         modal.classList.add('hidden');
     });
 
     // Close modal when clicking close button
     document.getElementById('modal-close').addEventListener('click', () => {
+        restoreOriginalSettings();
         modal.classList.add('hidden');
     });
 
     // Close modal with Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+            restoreOriginalSettings();
             modal.classList.add('hidden');
         }
     });
 
     cancelBtn.addEventListener('click', () => {
+        restoreOriginalSettings();
         modal.classList.add('hidden');
     });
 
     saveBtn.addEventListener('click', () => {
-        const selected = document.querySelector('input[name="restore-tabs"]:checked').value;
-        localStorage.setItem('restoreTabs', selected);
+        // Get current UI state
+        const selectedRestore = document.querySelector('input[name="restore-tabs"]:checked').value;
+        const clockEnabled = document.getElementById('clock-enabled').checked;
+
+        // Save to localStorage
+        localStorage.setItem('restoreTabs', selectedRestore);
+        localStorage.setItem('clockEnabled', clockEnabled.toString());
+
+        // Update clock manager
+        clockManager.setEnabled(clockEnabled);
+
         modal.classList.add('hidden');
     });
+
+    function restoreOriginalSettings() {
+        localStorage.setItem('restoreTabs', originalSettings.restoreTabs);
+        localStorage.setItem('clockEnabled', originalSettings.clockEnabled.toString());
+
+        clockManager.setEnabled(originalSettings.clockEnabled);
+
+        document.querySelector(`input[name="restore-tabs"][value="${originalSettings.restoreTabs}"]`).checked = true;
+        document.getElementById('clock-enabled').checked = originalSettings.clockEnabled;
+    }
 
     document.getElementById('about-btn').addEventListener('click', () => {
         window.location.href = './about/about.html';
