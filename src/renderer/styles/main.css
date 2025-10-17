@@ -29,6 +29,8 @@ html {
     padding: 8px;
     background: #18222e;
     border-bottom: 1px solid #111820;
+    position: relative;
+    z-index: 1000;
 }
 
 .top-btn {
@@ -59,6 +61,7 @@ html {
 .tools-dropdown {
     position: relative;
     display: inline-block;
+    z-index: 1001;
 }
 
 .tools-menu {
@@ -67,7 +70,7 @@ html {
     background-color: #2c3e50;
     min-width: 480px;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.4);
-    z-index: 1;
+    z-index: 1002;
     border-radius: 6px;
     padding: 10px;
 }
@@ -102,6 +105,7 @@ html {
     flex: 1;
     display: flex;
     overflow: hidden;
+    position: relative;
 }
 
 /* Tab Bar (Vertical) */
@@ -226,64 +230,135 @@ html {
     border-left-color: #3498db;
 }
 
-/* --- Modal --- */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.modal.hidden {
-    display: none;
-}
-
-.modal-content {
-    background: #2c3e50;
-    padding: 1.5rem;
-    border-radius: 8px;
-    width: 400px;
-    max-width: 90%;
-    color: #ecf0f1;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-}
-
-.modal-title {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-}
-
-.settings-section label {
-    display: block;
-    margin: 0.5rem 0;
-    cursor: pointer;
-}
-
-.note {
-    font-size: 0.8rem;
-    color: #bdc3c7;
-    display: block;
-    margin-top: 0.5rem;
-}
-
-.modal-actions {
-    margin-top: 1.5rem;
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-}
-
 #custom-alert-container button:hover {
     transform: translateY(-1px);
 }
 
 #custom-alert-container button:active {
     transform: translateY(0);
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    padding: 2rem;
+    color: #bdc3c7;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    /* Lower than dropdowns */
+    background: #1e2a38;
+    transition: opacity 0.2s ease;
+    /* Smooth transition */
+}
+
+.empty-state.hidden {
+    display: none;
+}
+
+.empty-state.transparent {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.clock-container {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: rgba(44, 62, 80, 0.7);
+    border-radius: 12px;
+    border: 1px solid #3498db;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    min-width: 300px;
+}
+
+.time {
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: #ecf0f1;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    letter-spacing: 2px;
+}
+
+.date {
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: #3498db;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.day {
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: #bdc3c7;
+    font-style: italic;
+    letter-spacing: 1px;
+}
+
+.empty-message {
+    font-size: 1.1rem;
+    color: #95a5a6;
+    max-width: 400px;
+    line-height: 1.5;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    background: #34495e;
+    border-radius: 12px;
+    transition: background 0.3s ease;
+}
+
+.toggle-slider::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #ecf0f1;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease;
+}
+
+#clock-enabled:checked+.toggle-slider {
+    background: #3498db;
+}
+
+#clock-enabled:checked+.toggle-slider::after {
+    transform: translateX(26px);
+}
+
+#clock-enabled {
+    display: none;
+}
+
+.empty-state:not(:has(.clock-container[style*="display: none"])) .empty-message {
+    margin-top: 0;
+}
+
+.empty-state:has(.clock-container[style*="display: none"]) .empty-message {
+    margin-top: 2rem;
+    font-size: 1.3rem;
 }

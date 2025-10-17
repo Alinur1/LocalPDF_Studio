@@ -15,6 +15,7 @@
     connect-src 'self' http://localhost:*;">
 
     <link rel="stylesheet" href="./styles/main.css">
+    <link rel="stylesheet" href="./styles/settings_modal.css">
 </head>
 
 <body>
@@ -51,32 +52,91 @@
             <div id="tab-bar"></div>
             <div class="resizer" id="resizer"></div>
             <div id="tab-content"></div>
+            <div id="empty-state" class="empty-state">
+                <div id="clock-container" class="clock-container">
+                    <div id="time" class="time">--:-- --</div>
+                    <div id="date" class="date">-- Month --</div>
+                    <div id="day" class="day">--</div>
+                </div>
+                <div class="empty-message">
+                    <p>No PDFs open. Click "Open PDF Reader" to get started!</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2 class="modal-title">Settings</h2>
-
-            <div class="settings-section">
-                <p>Startup behavior</p>
-                <label>
-                    <input type="radio" name="restore-tabs" value="restore" checked>
-                    Restore previously opened PDF tabs
-                </label>
-                <label>
-                    <input type="radio" name="restore-tabs" value="no-restore">
-                    Do not restore PDF tabs
-                </label>
-                <small class="note">
-                    Sidebar size and layout will always be restored.
-                </small>
+        <div class="modal-overlay" id="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span class="modal-icon">⚙️</span>
+                    Settings
+                </h2>
+                <button class="modal-close" id="modal-close">&times;</button>
             </div>
 
-            <div class="modal-actions">
-                <button id="settings-save" class="top-btn">Save & Close</button>
-                <button id="settings-cancel" class="top-btn secondary">Cancel</button>
+            <div class="modal-body">
+                <div class="settings-category">
+                    <h3 class="category-title">
+                        <span class="category-icon">🚀</span>
+                        Startup Behavior
+                    </h3>
+                    <div class="settings-options">
+                        <label class="option-item radio-option">
+                            <input type="radio" name="restore-tabs" value="restore" checked>
+                            <span class="option-content">
+                                <span class="option-title">Restore Session</span>
+                                <span class="option-description">Automatically reopen all PDFs from your last
+                                    session</span>
+                            </span>
+                        </label>
+                        <label class="option-item radio-option">
+                            <input type="radio" name="restore-tabs" value="no-restore">
+                            <span class="option-content">
+                                <span class="option-title">Fresh Start</span>
+                                <span class="option-description">Start with a clean slate every time</span>
+                            </span>
+                        </label>
+                        <div class="option-note">
+                            <span class="note-icon">💡</span>
+                            Sidebar layout and size preferences are always remembered
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <div class="settings-category">
+                    <h3 class="category-title">
+                        <span class="category-icon">⏰</span>
+                        Interface
+                    </h3>
+                    <div class="settings-options">
+                        <label class="option-item toggle-option">
+                            <input type="checkbox" id="clock-enabled" checked>
+                            <span class="toggle-slider"></span>
+                            <span class="option-content">
+                                <span class="option-title">Show Clock</span>
+                                <span class="option-description">Display time and date when no PDFs are open</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="footer-actions">
+                    <button id="settings-cancel" class="btn-secondary">
+                        <span class="btn-icon">↶</span>
+                        Cancel
+                    </button>
+                    <button id="settings-save" class="btn-primary">
+                        <span class="btn-icon">💾</span>
+                        Save Changes
+                    </button>
+                </div>
             </div>
         </div>
     </div>

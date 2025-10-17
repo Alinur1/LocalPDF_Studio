@@ -2,18 +2,78 @@
 
 import TabManager from './tabs/tabManager.js';
 import createPdfTab from './utils/createPdfTab.js';
+import { ClockManager } from './utils/clockManager.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     const tabManager = new TabManager('#tab-bar', '#tab-content');
+    const clockManager = new ClockManager();
+    const emptyState = document.getElementById('empty-state');
     const openPdfBtn = document.getElementById('open-pdf-btn');
     const settingsBtn = document.getElementById('settings-btn');
     const modal = document.getElementById('settings-modal');
     const saveBtn = document.getElementById('settings-save');
     const cancelBtn = document.getElementById('settings-cancel');
     const radios = document.querySelectorAll('input[name="restore-tabs"]');
+    const clockCheckbox = document.getElementById('clock-enabled');
+    const toolsDropdown = document.querySelector('.tools-dropdown');
 
-    // Restore saved tabs on startup
+    // Initialize empty state as hidden by default
+    emptyState.classList.add('hidden');
+
+    toolsDropdown.addEventListener('mouseenter', () => {
+        if (emptyState && !emptyState.classList.contains('hidden')) {
+            emptyState.classList.add('transparent');
+        }
+    });
+
+    toolsDropdown.addEventListener('mouseleave', () => {
+        if (emptyState && !emptyState.classList.contains('hidden')) {
+            emptyState.classList.remove('transparent');
+        }
+    });
+
+    // Update empty state based on tabs
+    function updateEmptyState() {
+        if (tabManager.tabs.size === 0) {
+            console.log('No tabs - showing empty state');
+            emptyState.classList.remove('hidden');
+            if (clockManager.isEnabled) {
+                clockManager.start();
+            }
+        } else {
+            console.log('Tabs present - hiding empty state');
+            emptyState.classList.add('hidden');
+            clockManager.stop();
+        }
+    }
+
+    // Override tab manager methods to update empty state
+    const originalOpenTab = tabManager.openTab.bind(tabManager);
+    tabManager.openTab = function (...args) {
+        const result = originalOpenTab(...args);
+        updateEmptyState();
+        return result;
+    };
+
+    const originalCloseTab = tabManager.closeTab.bind(tabManager);
+    tabManager.closeTab = function (...args) {
+        const result = originalCloseTab(...args);
+        updateEmptyState();
+        return result;
+    };
+
+    // Clock settings
+    if (clockCheckbox) {
+        clockCheckbox.checked = clockManager.isEnabled;
+        clockCheckbox.addEventListener('change', (e) => {
+            clockManager.setEnabled(e.target.checked);
+            updateEmptyState();
+        });
+    }
+
+    // Restore tabs and update empty state
     restoreTabs(tabManager);
+    updateEmptyState();
 
     // Open PDF button with dialog state management
     let isDialogOpen = false;
@@ -137,6 +197,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
     settingsBtn.addEventListener('click', () => {
         modal.classList.remove('hidden');
+    });
+
+    document.getElementById('modal-overlay').addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    // Close modal when clicking close button
+    document.getElementById('modal-close').addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+            modal.classList.add('hidden');
+        }
     });
 
     cancelBtn.addEventListener('click', () => {
