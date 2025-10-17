@@ -35,7 +35,7 @@ function initializeSupportHandlers() {
     const starBtn = document.getElementById('alt-star');
     if (starBtn) {
         starBtn.addEventListener('click', () => {
-            openExternalLink('https://github.com/Alinur1/tooldeck');
+            openExternalLink('https://github.com/Alinur1/LocalPDF_Studio');
         });
     }
 
@@ -49,14 +49,14 @@ function initializeSupportHandlers() {
     const reportBtn = document.getElementById('alt-report');
     if (reportBtn) {
         reportBtn.addEventListener('click', () => {
-            openExternalLink('https://github.com/Alinur1/tooldeck/issues');
+            openExternalLink('https://github.com/Alinur1/LocalPDF_Studio/issues');
         });
     }
 
     const suggestBtn = document.getElementById('alt-suggest');
     if (suggestBtn) {
         suggestBtn.addEventListener('click', () => {
-            openExternalLink('https://github.com/Alinur1/tooldeck/issues/new?template=feature_request.md');
+            openExternalLink('https://github.com/Alinur1/LocalPDF_Studio/issues/new?template=feature_request.md');
         });
     }
 }
@@ -101,7 +101,7 @@ function openExternalLink(url) {
 
 async function shareApp() {
     const shareText = 'Check out LocalPDF Studio - A complete offline PDF toolkit! Free, open source, and privacy-focused.';
-    const shareUrl = 'https://github.com/Alinur1/tooldeck';
+    const shareUrl = 'https://github.com/Alinur1/LocalPDF_Studio';
 
     if (navigator.share) {
         try {

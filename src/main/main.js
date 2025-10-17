@@ -16,15 +16,15 @@ function startBackend() {
         switch (process.platform) {
             case 'win32':
                 backendDir = './assets/backend_windows';
-                backendFile = 'tooldeck_api.exe';
+                backendFile = 'LocalPDF_Studio_api.exe';
                 break;
             case 'linux':
                 backendDir = './assets/backend_linux';
-                backendFile = 'tooldeck_api';
+                backendFile = 'LocalPDF_Studio_api';
                 break;
             case 'darwin':
                 backendDir = './assets/backend_macos';
-                backendFile = 'tooldeck_api';
+                backendFile = 'LocalPDF_Studio_api';
                 break;
             default:
                 const errorMsg = `Your OS (${process.platform}) is not supported.`;

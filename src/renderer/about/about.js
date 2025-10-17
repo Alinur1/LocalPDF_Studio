@@ -8,19 +8,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (viewSourceBtn) {
         viewSourceBtn.addEventListener('click', () => {
-            openExternalLink('https://github.com/Alinur1/tooldeck');
+            openExternalLink('https://github.com/Alinur1/LocalPDF_Studio');
         });
     }
 
     if (starRepoBtn) {
         starRepoBtn.addEventListener('click', () => {
-            openExternalLink('https://github.com/Alinur1/tooldeck');
+            openExternalLink('https://github.com/Alinur1/LocalPDF_Studio');
         });
     }
 
     if (reportIssueBtn) {
         reportIssueBtn.addEventListener('click', () => {
-            openExternalLink('https://github.com/Alinur1/tooldeck/issues');
+            openExternalLink('https://github.com/Alinur1/LocalPDF_Studio/issues');
         });
     }
 
