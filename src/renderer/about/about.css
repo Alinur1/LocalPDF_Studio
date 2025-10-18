@@ -1,25 +1,43 @@
-/* About Page Styles */
+/* src/renderer/about/about.css */
 
-/* Hide scrollbar but keep functionality */
 .about-container {
-    max-width: 1000px;
+    max-width: 1920px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     gap: 3rem;
-    overflow-y: auto;
-    height: calc(100vh - 50px);
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    scrollbar-width: none;
-    /* Firefox */
-    -ms-overflow-style: none;
-    /* IE and Edge */
 }
 
-.about-container::-webkit-scrollbar {
-    display: none;
-    /* Chrome, Safari, Opera */
+#app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+main {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3498db #1e2a38;
+}
+
+main::-webkit-scrollbar {
+    width: 8px;
+}
+
+main::-webkit-scrollbar-track {
+    background: #1e2a38;
+}
+
+main::-webkit-scrollbar-thumb {
+    background: #3498db;
+    border-radius: 4px;
+}
+
+main::-webkit-scrollbar-thumb:hover {
+    background: #2980b9;
 }
 
 .page-title {
@@ -30,7 +48,6 @@
     flex: 1;
 }
 
-/* Hero Section */
 .hero-section {
     text-align: left;
     padding: 2rem 0;
@@ -86,7 +103,6 @@
     margin: 0;
 }
 
-/* Section Styles */
 .section-title {
     font-size: 2rem;
     color: #ecf0f1;
@@ -114,7 +130,6 @@
     font-size: 1.1rem;
 }
 
-/* Features Section */
 .features-section {
     width: 100%;
 }
@@ -172,7 +187,6 @@
     font-size: 0.95rem;
 }
 
-/* Tech Stack Section */
 .tech-section,
 .ai-section {
     width: 100%;
@@ -223,7 +237,6 @@
     font-size: 0.9rem;
 }
 
-/* Tooltips */
 .tech-item::after,
 .ai-item::after {
     content: attr(data-tooltip);
@@ -248,10 +261,9 @@
 .ai-item:hover::after {
     opacity: 1;
     visibility: visible;
-    bottom: -35px;
+    bottom: -10px;
 }
 
-/* Developer Section */
 .developer-section {
     width: 100%;
 }
@@ -284,7 +296,6 @@
     margin: 0;
 }
 
-/* License Section */
 .license-section {
     width: 100%;
 }
@@ -308,7 +319,6 @@
     margin-bottom: 0;
 }
 
-/* Support Section */
 .support-section {
     width: 100%;
 }
@@ -369,7 +379,6 @@
     flex-wrap: wrap;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .about-container {
         padding: 1.5rem 1rem;

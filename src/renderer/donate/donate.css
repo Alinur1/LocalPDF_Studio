@@ -1,25 +1,43 @@
 /* src/renderer/donate/donate.css */
 
-/* Hide scrollbar but keep functionality */
 .donate-container {
-    max-width: 1200px;
+    max-width: 1920px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     gap: 3rem;
-    overflow-y: auto;
-    height: calc(100vh - 50px);
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    scrollbar-width: none;
-    /* Firefox */
-    -ms-overflow-style: none;
-    /* IE and Edge */
 }
 
-.donate-container::-webkit-scrollbar {
-    display: none;
-    /* Chrome, Safari, Opera */
+#app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+main {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3498db #1e2a38;
+}
+
+main::-webkit-scrollbar {
+    width: 8px;
+}
+
+main::-webkit-scrollbar-track {
+    background: #1e2a38;
+}
+
+main::-webkit-scrollbar-thumb {
+    background: #3498db;
+    border-radius: 4px;
+}
+
+main::-webkit-scrollbar-thumb:hover {
+    background: #2980b9;
 }
 
 .page-title {
@@ -30,7 +48,6 @@
     flex: 1;
 }
 
-/* Hero Section */
 .hero-section {
     text-align: left;
     padding: 2rem 0 1rem;
@@ -75,7 +92,6 @@
     line-height: 1.6;
 }
 
-/* Section Styles */
 .section-title {
     font-size: 2rem;
     color: #ecf0f1;
@@ -96,7 +112,6 @@
     border-radius: 2px;
 }
 
-/* Why Donate Section */
 .why-donate-section {
     width: 100%;
 }
@@ -170,7 +185,6 @@
     font-weight: 600;
 }
 
-/* Donation Options Section */
 .donation-options-section {
     width: 100%;
 }
@@ -274,15 +288,118 @@
     transform: translateY(-2px);
 }
 
-/* QR Modal Styles */
-.qr-modal {
-    width: 400px;
-    text-align: center;
+#bkash-qr-modal.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    padding: 20px;
+}
+
+#bkash-qr-modal .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+#bkash-qr-modal .modal-container {
+    position: relative;
+    background: #2c3e50;
+    border-radius: 12px;
+    width: 450px;
     max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid #34495e;
+    overflow: hidden;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+#bkash-qr-modal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid #34495e;
+    background: rgba(44, 62, 80, 0.9);
+}
+
+#bkash-qr-modal .modal-title {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #ecf0f1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+#bkash-qr-modal .modal-close {
+    background: none;
+    border: none;
+    color: #bdc3c7;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#bkash-qr-modal .modal-close:hover {
+    background: #e74c3c;
+    color: white;
+    transform: scale(1.1);
+}
+
+#bkash-qr-modal .modal-body {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: #2c3e50;
+}
+
+#bkash-qr-modal .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #34495e;
+    background: rgba(44, 62, 80, 0.9);
+}
+
+#bkash-qr-modal .footer-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
 }
 
 .qr-section {
     margin-bottom: 1.5rem;
+    text-align: center;
 }
 
 .qr-note {
@@ -323,49 +440,47 @@
     text-align: left;
 }
 
-/* Sponsors Section */
-.sponsors-section {
-    width: 100%;
+.donation-option .qr-code-container {
+    display: none !important;
 }
 
-.no-sponsors-message {
-    text-align: left;
-    padding: 0;
+.btn-primary,
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
 }
 
-.empty-state {
-    background: #2c3e50;
-    padding: 2.5rem 2rem;
-    border-radius: 12px;
-    border: 2px dashed #34495e;
-    text-align: left;
+.btn-primary {
+    background: #3498db;
+    color: white;
 }
 
-.empty-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    display: inline-block;
+.btn-primary:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
-.empty-state h3 {
-    color: #ecf0f1;
-    font-size: 1.5rem;
-    margin: 0 0 0.75rem 0;
-}
-
-.empty-state p {
+.btn-secondary {
+    background: #34495e;
     color: #bdc3c7;
-    font-size: 1rem;
-    margin: 0;
+    border: 1px solid #4a6572;
 }
 
-.sponsors-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
+.btn-secondary:hover {
+    background: #3d566e;
+    color: #ecf0f1;
+    transform: translateY(-1px);
 }
 
-/* Alternative Support Section */
 .alternative-support-section {
     width: 100%;
 }
@@ -429,7 +544,6 @@
     transform: translateY(-1px);
 }
 
-/* Thank You Section */
 .thank-you-section {
     width: 100%;
     max-width: 100%;
@@ -486,7 +600,10 @@
     font-size: 1.1rem;
 }
 
-/* Responsive Design */
+.hidden {
+    display: none !important;
+}
+
 @media (max-width: 768px) {
     .donate-container {
         padding: 1.5rem 1rem;
@@ -536,6 +653,12 @@
         width: 100%;
         text-align: center;
     }
+
+    #bkash-qr-modal .modal-container {
+        width: 75vw;
+        height: 100vh;
+        margin: 0.8rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -568,11 +691,6 @@
     .donation-option,
     .reason-card,
     .alt-support-card {
-        padding: 1.25rem;
-    }
-
-    .qr-modal {
-        width: 95vw;
         padding: 1.25rem;
     }
 

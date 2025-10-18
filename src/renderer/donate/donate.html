@@ -1,5 +1,4 @@
 <!-- src/renderer/donate/donate.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,32 +12,22 @@
     style-src 'self' 'unsafe-inline';
     img-src 'self' data:;
     connect-src 'self' http://localhost:*;">
-
-    <!-- Global theme -->
     <link rel="stylesheet" href="../styles/main.css">
-
-    <!-- Page-specific styles -->
     <link rel="stylesheet" href="./donate.css">
 </head>
 
 <body>
     <div id="app">
-        <!-- Top Bar -->
         <div class="top-bar">
             <a href="../index.html" class="top-btn">← Back to App</a>
             <h1 class="page-title">Support LocalPDF Studio</h1>
         </div>
-
-        <!-- Main Content -->
         <main class="donate-container">
-            <!-- Hero Section -->
             <section class="hero-section">
                 <div class="heart-icon">❤️</div>
                 <h1 class="hero-title">Support Our Mission</h1>
                 <p class="hero-subtitle">Help us keep LocalPDF Studio free, open-source, and continuously improving</p>
             </section>
-
-            <!-- Why Donate Section -->
             <section class="why-donate-section">
                 <h2 class="section-title">Why Your Support Matters</h2>
                 <div class="reasons-grid">
@@ -67,12 +56,9 @@
                     <p>Your donation will always be appreciated</p>
                 </div>
             </section>
-
-            <!-- Donation Options Section -->
             <section class="donation-options-section">
                 <h2 class="section-title">Choose Your Donation Method</h2>
                 <div class="donation-options">
-                    <!-- bKash -->
                     <div class="donation-option" id="bkash-option">
                         <div class="option-header">
                             <img src="../../../assets/icons/donate/bKash.png" alt="bKash" class="option-icon">
@@ -82,43 +68,43 @@
                             payments.</p>
                         <button class="donate-btn secondary" id="show-bkash-qr">Show QR Code</button>
                     </div>
-
-                    <!-- Gumroad -->
                     <div class="donation-option" id="gumroad-option">
                         <div class="option-header">
                             <img src="../../../assets/icons/donate/gumroad.png" alt="Gumroad" class="option-icon">
                             <h3>Gumroad</h3>
                         </div>
                         <p class="option-description">Secure global payments with multiple payment methods available
-                            worldwide.
-                        </p>
-                        <button class="donate-btn primary">Donate via Gumroad</button>
+                            worldwide.</p>
+                        <button class="donate-btn primary" id="gumroad-donate">Donate via Gumroad</button>
                     </div>
                 </div>
             </section>
-
-            <!-- bKash QR Modal -->
             <div id="bkash-qr-modal" class="modal hidden">
-                <div class="modal-content qr-modal">
-                    <h2 class="modal-title">Donate via bKash</h2>
-
-                    <div class="qr-section">
-                        <p class="qr-note">Scan the QR code to donate via bKash</p>
-                        <div class="qr-code-container">
-                            <img src="../../../assets/icons/donate/bkash-qr.png" alt="bKash QR Code" class="qr-code">
-                        </div>
-                        <p class="qr-instruction">Open bKash app → Scan QR → Enter amount</p>
-                        <p class="qr-instruction" style="color: yellow;">If you want to enable recurring donation, you can use autopay system in bKash.</p>
-                        <!-- <p class="qr-alternative">Alternatively, send to phone number: <strong>01XXXXXXXXX</strong></p> -->
+                <div class="modal-overlay" id="bkash-modal-overlay"></div>
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Donate via bKash</h2>
+                        <button class="modal-close" id="bkash-modal-close">&times;</button>
                     </div>
-
-                    <div class="modal-actions">
-                        <button id="qr-close" class="top-btn">Close</button>
+                    <div class="modal-body">
+                        <div class="qr-section">
+                            <p class="qr-note">Scan the QR code to donate via bKash</p>
+                            <div class="qr-code-container">
+                                <img src="../../../assets/icons/donate/bkash-qr.png" alt="bKash QR Code"
+                                    class="qr-code">
+                            </div>
+                            <p class="qr-instruction">Open bKash app → Scan QR → Enter amount</p>
+                            <p class="qr-instruction" style="color: #f39c12;">If you want to enable recurring donation,
+                                you can use autopay system in bKash.</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="footer-actions">
+                            <button id="qr-close" class="btn-secondary">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Alternative Support Section -->
             <section class="alternative-support-section">
                 <h2 class="section-title">Other Ways to Support</h2>
                 <div class="alt-support-grid">
@@ -148,8 +134,6 @@
                     </div>
                 </div>
             </section>
-
-            <!-- Thank You Section -->
             <section class="thank-you-section">
                 <div class="thank-you-card">
                     <h2>Thank You!</h2>
@@ -166,7 +150,6 @@
     </div>
 
     <script src="./donate.js"></script>
-    <script type="module" src="../utils/customAlert.js"></script>
 </body>
 
 </html>
