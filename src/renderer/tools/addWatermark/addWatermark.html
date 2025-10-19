@@ -1,4 +1,5 @@
 <!-- src/renderer/tools/addWatermark/addWatermark.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -33,7 +34,6 @@
                     <button id="remove-pdf-btn" class="remove-btn">×</button>
                 </div>
             </div>
-
             <div id="preview-container" class="preview-container" style="display: none;">
                 <div class="preview-header">
                     <h3>PDF Preview</h3>
@@ -41,10 +41,8 @@
                 </div>
                 <div id="preview-grid" class="preview-grid"></div>
             </div>
-
             <div class="options-container">
                 <h2>Watermark Options</h2>
-
                 <div class="option-group">
                     <label>Watermark Type:</label>
                     <select id="watermark-type" class="options-select">
@@ -52,15 +50,12 @@
                         <option value="image">Image Watermark</option>
                     </select>
                 </div>
-
-                <!-- Text Watermark Options -->
                 <div id="text-options">
                     <div class="option-group">
                         <label>Watermark Text:</label>
                         <textarea id="watermark-text" class="options-textarea"
                             placeholder="Enter watermark text">CONFIDENTIAL</textarea>
                     </div>
-
                     <div class="option-group">
                         <label>Font Size:</label>
                         <div class="range-input-group">
@@ -68,7 +63,6 @@
                             <span id="font-size-value" class="range-value">36</span>
                         </div>
                     </div>
-
                     <div class="option-group">
                         <label>Text Color:</label>
                         <div class="color-input-group">
@@ -76,7 +70,6 @@
                             <div id="color-preview" class="color-preview" style="background-color: #3498db;"></div>
                         </div>
                     </div>
-
                     <div class="option-group">
                         <label>Opacity:</label>
                         <div class="range-input-group">
@@ -85,15 +78,12 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Image Watermark Options (initially hidden) -->
                 <div id="image-options" style="display: none;">
                     <div class="option-group">
                         <label>Select Image:</label>
                         <input type="file" id="image-file" class="options-input" accept=".png,.jpg,.jpeg,.gif,.bmp">
                         <small class="help-text">Supported formats: PNG, JPG, JPEG, GIF, BMP</small>
                     </div>
-
                     <div class="option-group">
                         <label>Image Scale:</label>
                         <div class="range-input-group">
@@ -102,12 +92,9 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Common Options -->
                 <div class="option-group">
                     <label>Position:</label>
                     <select id="position" class="options-select">
-                        <option value="Diagonal">Diagonal (Center)</option>
                         <option value="Center">Center</option>
                         <option value="TopLeft">Top Left</option>
                         <option value="TopRight">Top Right</option>
@@ -116,7 +103,6 @@
                         <option value="Tiled">Tiled (Repeated)</option>
                     </select>
                 </div>
-
                 <div class="option-group">
                     <label>Rotation:</label>
                     <div class="range-input-group">
@@ -124,7 +110,6 @@
                         <span id="rotation-value" class="range-value">45°</span>
                     </div>
                 </div>
-
                 <div class="option-group">
                     <label>Pages to Apply:</label>
                     <select id="pages-range" class="options-select">
@@ -134,15 +119,12 @@
                         <option value="custom">Custom Range</option>
                     </select>
                 </div>
-
                 <div id="custom-pages-group" class="option-group" style="display: none;">
                     <label>Page Range:</label>
                     <input type="text" id="custom-pages" class="options-input" placeholder="e.g., 1-5, 7, 9-12">
                     <small class="help-text">Enter page numbers or ranges separated by commas (e.g., 1-5, 7,
                         9-12)</small>
                 </div>
-
-                <!-- Watermark Preview -->
                 <div class="option-group">
                     <label>Watermark Preview:</label>
                     <div class="watermark-preview">
@@ -150,7 +132,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="action-buttons">
                 <button id="add-btn" class="top-btn" disabled>Add Watermark</button>
             </div>

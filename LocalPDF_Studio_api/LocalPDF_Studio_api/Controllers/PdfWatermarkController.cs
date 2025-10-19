@@ -23,30 +23,22 @@ namespace LocalPDF_Studio_api.Controllers
         {
             try
             {
-                // Validate request
                 if (string.IsNullOrWhiteSpace(request.FilePath))
                 {
                     return BadRequest("File path is required.");
                 }
-
                 if (!System.IO.File.Exists(request.FilePath))
                 {
                     return NotFound($"File not found: {request.FilePath}");
                 }
-
-                // Validate watermark type
                 if (request.WatermarkType != "text")
                 {
                     return BadRequest("Only text watermarks are currently supported.");
                 }
-
-                // Validate opacity
                 if (request.Opacity < 1 || request.Opacity > 100)
                 {
                     return BadRequest("Opacity must be between 1 and 100.");
                 }
-
-                // Validate font size
                 if (request.FontSize < 8 || request.FontSize > 144)
                 {
                     return BadRequest("Font size must be between 8 and 144.");
@@ -54,10 +46,7 @@ namespace LocalPDF_Studio_api.Controllers
 
                 _logger.LogInformation($"Adding watermark to PDF: {request.FilePath}");
 
-                // Add watermark and get PDF bytes
                 var pdfBytes = await _watermarkInterface.AddWatermarkAsync(request);
-
-                // Return PDF file
                 var fileName = Path.GetFileNameWithoutExtension(request.FilePath);
                 var outputFileName = $"{fileName}_watermarked.pdf";
 

@@ -3,9 +3,9 @@
     public class WatermarkRequest
     {
         public string FilePath { get; set; } = string.Empty;
-        public string WatermarkType { get; set; } = "text"; // "text" or "image"
+        public string WatermarkType { get; set; } = "text";
         public string Text { get; set; } = "CONFIDENTIAL";
-        public string Position { get; set; } = "Diagonal";
+        public string Position { get; set; } = "Center";
         public int Rotation { get; set; } = 45;
         public int Opacity { get; set; } = 60;
         public int FontSize { get; set; } = 36;
@@ -13,6 +13,6 @@
         public string PagesRange { get; set; } = "all";
         public string CustomPages { get; set; } = "";
         public int StartPage { get; set; } = 1;
-        public int EndPage { get; set; } = 0; // 0 means all pages
+        public int EndPage { get; set; } = 0;
     }
 }

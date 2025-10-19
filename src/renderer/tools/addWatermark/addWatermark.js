@@ -1,4 +1,5 @@
 // src/renderer/tools/addWatermark/addWatermark.js
+
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
 import customAlert from '../../utils/customAlert.js';
@@ -7,8 +8,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await API.init();
-
-    // DOM Elements
     const selectPdfBtn = document.getElementById('select-pdf-btn');
     const removePdfBtn = document.getElementById('remove-pdf-btn');
     const addBtn = document.getElementById('add-btn');
@@ -18,8 +17,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const previewContainer = document.getElementById('preview-container');
     const previewGrid = document.getElementById('preview-grid');
     const pageCountEl = document.getElementById('page-count');
-
-    // Watermark Options Elements
     const watermarkType = document.getElementById('watermark-type');
     const textOptions = document.getElementById('text-options');
     const imageOptions = document.getElementById('image-options');
@@ -45,7 +42,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let pdfDoc = null;
     let renderedPages = [];
 
-    // Event Listeners
     selectPdfBtn.addEventListener('click', async () => {
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
@@ -57,14 +53,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     removePdfBtn.addEventListener('click', () => clearAll());
-
     document.querySelector('a[href="../../index.html"]')?.addEventListener('click', (e) => {
         e.preventDefault();
         clearAll();
         window.location.href = '../../index.html';
     });
 
-    // Watermark type toggle
     watermarkType.addEventListener('change', () => {
         const type = watermarkType.value;
         textOptions.style.display = type === 'text' ? 'block' : 'none';
@@ -72,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateWatermarkPreview();
     });
 
-    // Range input updates
     fontSize.addEventListener('input', () => {
         fontSizeValue.textContent = fontSize.value;
         updateWatermarkPreview();
@@ -98,17 +91,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     watermarkText.addEventListener('input', updateWatermarkPreview);
-
-    // Pages range toggle
     pagesRange.addEventListener('change', () => {
         customPagesGroup.style.display = pagesRange.value === 'custom' ? 'block' : 'none';
     });
 
-    // File selection for image watermark
     imageFile.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Validate image file
             const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp'];
             if (!validTypes.includes(file.type)) {
                 customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a valid image file (PNG, JPG, JPEG, GIF, BMP)', ['OK']);
@@ -118,7 +107,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Update watermark preview
     function updateWatermarkPreview() {
         if (watermarkType.value === 'text') {
             watermarkPreviewText.textContent = watermarkText.value || 'CONFIDENTIAL';
@@ -135,7 +123,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // File handling functions
     async function handleFileSelected(file) {
         clearAll();
         selectedFile = file;
@@ -213,28 +200,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch { return 0; }
     }
 
-    // Main watermark function
     addBtn.addEventListener('click', async () => {
         if (!selectedFile) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a PDF file first.', ['OK']);
             return;
         }
-
         if (watermarkType.value === 'image' && !imageFile.files[0]) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select an image file for the watermark.', ['OK']);
             return;
         }
 
         const positionMap = {
-            'Diagonal': 0, 'Center': 1, 'TopLeft': 2,
-            'TopRight': 3, 'BottomLeft': 4, 'BottomRight': 5, 'Tiled': 6
+            'Center': 0, 'TopLeft': 1,
+            'TopRight': 2, 'BottomLeft': 3, 'BottomRight': 4, 'Tiled': 5
         };
 
         const requestBody = {
             filePath: selectedFile.path,
             watermarkType: watermarkType.value,
             text: watermarkText.value,
-            position: document.getElementById('position').value, // Should be string like "Diagonal"
+            position: document.getElementById('position').value,
             rotation: parseInt(rotation.value),
             opacity: parseInt(opacity.value),
             fontSize: parseInt(fontSize.value),
@@ -245,7 +230,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             endPage: 0
         };
 
-        // Add type-specific parameters
         if (watermarkType.value === 'text') {
             requestBody.text = watermarkText.value;
             requestBody.fontSize = parseInt(fontSize.value);
@@ -260,8 +244,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             addBtn.disabled = true;
             addBtn.textContent = 'Adding Watermark...';
-
-            // Note: You'll need to add the watermark endpoint to your API
             const endpoint = await API.pdf.addWatermark;
             const result = await API.request.post(endpoint, requestBody);
 
@@ -286,7 +268,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             addBtn.textContent = 'Add Watermark';
         }
     });
-
-    // Initialize watermark preview
     updateWatermarkPreview();
 });
