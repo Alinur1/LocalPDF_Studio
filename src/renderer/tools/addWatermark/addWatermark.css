@@ -293,6 +293,13 @@
     color: #3498db;
 }
 
+.watermark-preview-image {
+    position: absolute;
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
 .action-buttons {
     display: flex;
     justify-content: flex-end;

@@ -26,12 +26,15 @@ namespace LocalPDF_Studio_api.BLL.Services
                 if (!File.Exists(request.FilePath))
                     throw new FileNotFoundException($"File not found: {request.FilePath}");
 
-                _logger.LogInformation($"Starting Python-based watermark addition: {request.FilePath}");
+                _logger.LogInformation($"Starting Python-based watermark addition: {request.FilePath}, Type: {request.WatermarkType}");
 
                 var watermarkResult = await RunPythonWatermarkAsync(request, tempOutputPath);
 
                 if (!watermarkResult.Success)
                     throw new Exception(watermarkResult.Error ?? "Unknown Python watermark error");
+
+                if (!File.Exists(tempOutputPath))
+                    throw new FileNotFoundException("Watermarked PDF was not created");
 
                 var pdfBytes = await File.ReadAllBytesAsync(tempOutputPath);
                 _logger.LogInformation($"Watermark successfully added (PDF size: {pdfBytes.Length / 1024} KB, Pages: {watermarkResult.WatermarkedPages})");
@@ -40,7 +43,8 @@ namespace LocalPDF_Studio_api.BLL.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding watermark to PDF");
+                _logger.LogError(ex, "Error adding watermark to PDF. File: {FilePath}, Type: {WatermarkType}",
+                    request.FilePath, request.WatermarkType);
                 throw;
             }
             finally
@@ -66,17 +70,24 @@ namespace LocalPDF_Studio_api.BLL.Services
             {
                 $"\"{request.FilePath}\"",
                 $"\"{outputPath}\"",
+                $"--watermark-type {request.WatermarkType}",
                 $"--text \"{request.Text}\"",
                 $"--position {request.Position}",
                 $"--rotation {request.Rotation}",
                 $"--opacity {request.Opacity}",
                 $"--font-size {request.FontSize}",
                 $"--text-color {request.TextColor}",
+                $"--image-scale {request.ImageScale}",
                 $"--start-page {request.StartPage}",
                 $"--end-page {request.EndPage}",
                 $"--pages-range {request.PagesRange}",
                 "--json"
             };
+
+            if (request.WatermarkType == "image" && !string.IsNullOrEmpty(request.ImagePath))
+            {
+                arguments.Add($"--image-path \"{request.ImagePath}\"");
+            }
 
             if (!string.IsNullOrEmpty(request.CustomPages))
                 arguments.Add($"--custom-pages \"{request.CustomPages}\"");
@@ -111,13 +122,29 @@ namespace LocalPDF_Studio_api.BLL.Services
             process.BeginErrorReadLine();
             await process.WaitForExitAsync();
 
-            var stdout = outputBuilder.ToString();
-            var stderr = errorBuilder.ToString();
+            var stdout = outputBuilder.ToString().Trim();
+            var stderr = errorBuilder.ToString().Trim();
 
             _logger.LogDebug($"Python stdout: {stdout}");
             if (!string.IsNullOrEmpty(stderr))
                 _logger.LogWarning($"Python stderr: {stderr}");
 
+            if (process.ExitCode != 0)
+            {
+                return new PythonWatermarkResult
+                {
+                    Success = false,
+                    Error = $"Python process exited with code {process.ExitCode}. Error: {stderr}"
+                };
+            }
+            if (string.IsNullOrEmpty(stdout))
+            {
+                return new PythonWatermarkResult
+                {
+                    Success = false,
+                    Error = "Python process returned no output"
+                };
+            }
             try
             {
                 var result = JsonSerializer.Deserialize<PythonWatermarkResult>(stdout, new JsonSerializerOptions
@@ -135,7 +162,7 @@ namespace LocalPDF_Studio_api.BLL.Services
                 return new PythonWatermarkResult
                 {
                     Success = false,
-                    Error = $"JSON parse error: {ex.Message} | Raw: {stdout}"
+                    Error = $"JSON parse error: {ex.Message} | Raw stdout: {stdout} | Stderr: {stderr}"
                 };
             }
         }

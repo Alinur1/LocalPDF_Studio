@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const customPagesGroup = document.getElementById('custom-pages-group');
     const customPages = document.getElementById('custom-pages');
     const watermarkPreviewText = document.getElementById('watermark-preview-text');
+    const watermarkPreviewImage = document.getElementById('watermark-preview-image');
 
     let selectedFile = null;
     let pdfDoc = null;
@@ -78,6 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     imageScale.addEventListener('input', () => {
         imageScaleValue.textContent = `${imageScale.value}%`;
+        updateWatermarkPreview();
     });
 
     rotation.addEventListener('input', () => {
@@ -104,27 +106,57 @@ document.addEventListener('DOMContentLoaded', async () => {
                 e.target.value = '';
                 return;
             }
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                watermarkPreviewImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+            updateWatermarkPreview();
         }
     });
 
     function updateWatermarkPreview() {
-        if (watermarkType.value === 'text') {
+        const type = watermarkType.value;
+        if (type === 'text') {
+            watermarkPreviewText.style.display = 'block';
+            watermarkPreviewImage.style.display = 'none';
             watermarkPreviewText.textContent = watermarkText.value || 'CONFIDENTIAL';
             watermarkPreviewText.style.fontSize = `${fontSize.value}px`;
             watermarkPreviewText.style.color = textColor.value;
             watermarkPreviewText.style.opacity = (opacity.value / 100).toString();
             watermarkPreviewText.style.transform = `rotate(${rotation.value}deg)`;
-        } else {
-            watermarkPreviewText.textContent = '[Image Watermark]';
-            watermarkPreviewText.style.fontSize = '1.5rem';
-            watermarkPreviewText.style.color = '#3498db';
-            watermarkPreviewText.style.opacity = '0.6';
-            watermarkPreviewText.style.transform = `rotate(${rotation.value}deg)`;
+        } else { // image
+            if (imageFile.files && imageFile.files[0]) {
+                watermarkPreviewText.style.display = 'none';
+                watermarkPreviewImage.style.display = 'block';
+                const scale = imageScale.value / 50;
+                watermarkPreviewImage.style.opacity = (opacity.value / 100).toString();
+                watermarkPreviewImage.style.transform = `rotate(${rotation.value}deg) scale(${scale})`;
+            } else {
+                watermarkPreviewText.style.display = 'block';
+                watermarkPreviewImage.style.display = 'none';
+                watermarkPreviewText.textContent = '[Image Watermark]';
+                watermarkPreviewText.style.fontSize = '1.5rem';
+                watermarkPreviewText.style.color = '#3498db';
+                watermarkPreviewText.style.opacity = '1';
+                watermarkPreviewText.style.transform = 'none';
+            }
         }
     }
 
     async function handleFileSelected(file) {
-        clearAll();
+        if (pdfDoc) {
+            pdfDoc.destroy();
+            pdfDoc = null;
+        }
+        renderedPages.forEach(c => {
+            if (c && c.getContext) {
+                c.getContext('2d').clearRect(0, 0, c.width, c.height);
+            }
+        });
+        renderedPages = [];
+        previewGrid.innerHTML = '';
+
         selectedFile = file;
         pdfNameEl.textContent = file.name;
         pdfSizeEl.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
@@ -177,13 +209,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderedPages.push(canvas);
     }
 
-    function clearAll() {
-        if (pdfDoc) { pdfDoc.destroy(); pdfDoc = null; }
-        renderedPages.forEach(c => c.getContext('2d').clearRect(0, 0, c.width, c.height));
+    removePdfBtn.addEventListener('click', () => {
+        if (pdfDoc) {
+            pdfDoc.destroy();
+            pdfDoc = null;
+        }
+        renderedPages.forEach(c => {
+            if (c && c.getContext) {
+                c.getContext('2d').clearRect(0, 0, c.width, c.height);
+            }
+        });
         renderedPages = [];
         previewGrid.innerHTML = '';
         previewContainer.style.display = 'none';
         selectedFile = null;
+        selectedFileInfo.style.display = 'none';
+        selectPdfBtn.style.display = 'block';
+        addBtn.disabled = true;
+        imageFile.value = '';
+    });
+
+    function clearAll() {
+        if (pdfDoc) {
+            pdfDoc.destroy();
+            pdfDoc = null;
+        }
+        renderedPages.forEach(c => {
+            if (c && c.getContext) {
+                c.getContext('2d').clearRect(0, 0, c.width, c.height);
+            }
+        });
+        renderedPages = [];
+        previewGrid.innerHTML = '';
+        previewContainer.style.display = 'none';
         selectedFileInfo.style.display = 'none';
         selectPdfBtn.style.display = 'block';
         addBtn.disabled = true;
@@ -201,23 +259,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     addBtn.addEventListener('click', async () => {
-        if (!selectedFile) {
+        if (!selectedFile || !selectedFile.path) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a PDF file first.', ['OK']);
             return;
         }
-        if (watermarkType.value === 'image' && !imageFile.files[0]) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select an image file for the watermark.', ['OK']);
-            return;
-        }
-
-        const positionMap = {
-            'Center': 0, 'TopLeft': 1,
-            'TopRight': 2, 'BottomLeft': 3, 'BottomRight': 4, 'Tiled': 5
-        };
 
         const requestBody = {
             filePath: selectedFile.path,
-            watermarkType: watermarkType.value,
             text: watermarkText.value,
             position: document.getElementById('position').value,
             rotation: parseInt(rotation.value),
@@ -227,26 +275,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             pagesRange: pagesRange.value,
             customPages: customPages.value || '',
             startPage: 1,
-            endPage: 0
+            endPage: 0,
+            imageScale: parseInt(imageScale.value)
         };
-
-        if (watermarkType.value === 'text') {
-            requestBody.text = watermarkText.value;
-            requestBody.fontSize = parseInt(fontSize.value);
-            requestBody.textColor = textColor.value;
-        } else {
-            // For image watermark, we'll need to handle file upload
-            // This would require additional backend implementation
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Image watermark feature requires additional backend implementation.\nFeature not available.', ['OK']);
-            return;
-        }
 
         try {
             addBtn.disabled = true;
             addBtn.textContent = 'Adding Watermark...';
-            const endpoint = await API.pdf.addWatermark;
-            const result = await API.request.post(endpoint, requestBody);
 
+            let result;
+
+            if (watermarkType.value === 'image') {
+                if (!imageFile.files[0]) {
+                    await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select an image file for the watermark.', ['OK']);
+                    addBtn.disabled = false;
+                    addBtn.textContent = 'Add Watermark';
+                    return;
+                }
+                const formData = new FormData();
+                Object.keys(requestBody).forEach(key => {
+                    formData.append(key, requestBody[key]);
+                });
+                formData.append('imageFile', imageFile.files[0]);
+                const endpoint = await API.pdf.addWatermarkImage;
+                result = await API.request.postFormData(endpoint, formData);
+            } else {
+                const endpoint = await API.pdf.addWatermarkText;
+                result = await API.request.post(endpoint, requestBody);
+            }
             if (result instanceof Blob) {
                 const arrayBuffer = await result.arrayBuffer();
                 const defaultName = selectedFile.name.replace('.pdf', '_watermarked.pdf');

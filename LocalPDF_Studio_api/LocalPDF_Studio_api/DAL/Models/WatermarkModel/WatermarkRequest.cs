@@ -11,8 +11,10 @@
         public int FontSize { get; set; } = 36;
         public string TextColor { get; set; } = "#3498db";
         public string PagesRange { get; set; } = "all";
-        public string CustomPages { get; set; } = "";
+        public string? CustomPages { get; set; } = "";
         public int StartPage { get; set; } = 1;
         public int EndPage { get; set; } = 0;
+        public string? ImagePath { get; set; }
+        public int ImageScale { get; set; } = 50;
     }
 }

@@ -70,13 +70,6 @@
                             <div id="color-preview" class="color-preview" style="background-color: #3498db;"></div>
                         </div>
                     </div>
-                    <div class="option-group">
-                        <label>Opacity:</label>
-                        <div class="range-input-group">
-                            <input type="range" id="opacity" class="range-input" min="10" max="100" value="60">
-                            <span id="opacity-value" class="range-value">60%</span>
-                        </div>
-                    </div>
                 </div>
                 <div id="image-options" style="display: none;">
                     <div class="option-group">
@@ -90,6 +83,13 @@
                             <input type="range" id="image-scale" class="range-input" min="10" max="100" value="50">
                             <span id="image-scale-value" class="range-value">50%</span>
                         </div>
+                    </div>
+                </div>
+                <div class="option-group">
+                    <label>Opacity:</label>
+                    <div class="range-input-group">
+                        <input type="range" id="opacity" class="range-input" min="10" max="100" value="60">
+                        <span id="opacity-value" class="range-value">60%</span>
                     </div>
                 </div>
                 <div class="option-group">
@@ -129,6 +129,7 @@
                     <label>Watermark Preview:</label>
                     <div class="watermark-preview">
                         <div id="watermark-preview-text" class="watermark-preview-text">CONFIDENTIAL</div>
+                        <img id="watermark-preview-image" class="watermark-preview-image" style="display: none;">
                     </div>
                 </div>
             </div>

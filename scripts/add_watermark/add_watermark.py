@@ -8,39 +8,45 @@ import tempfile
 import io
 
 def add_text_watermark(input_path, output_path, text, position, rotation, opacity, 
-                      font_size, text_color, start_page, end_page, pages_range, custom_pages):
+                      font_size, text_color, start_page, end_page, pages_range, custom_pages,
+                      watermark_type="text", image_path=None, image_scale=50):
     try:
         if not os.path.exists(input_path):
             return {"success": False, "error": f"Input file not found: {input_path}"}
 
-        doc = fitz.open(input_path)
-        total_pages = doc.page_count
-        
-        # Parse page range
-        target_pages = parse_page_range(total_pages, start_page, end_page, pages_range, custom_pages)
-        
-        for page_num in target_pages:
-            if page_num < 1 or page_num > total_pages:
-                continue
-                
-            page = doc[page_num - 1]
+        if watermark_type == "image":
+            if not image_path or not os.path.exists(image_path):
+                return {"success": False, "error": f"Image file not found: {image_path}"}
+            return add_image_watermark(input_path, output_path, image_path, position, rotation, 
+                                     opacity, image_scale, start_page, end_page, pages_range, custom_pages)
+        else:
+            # Original text watermark code
+            doc = fitz.open(input_path)
+            total_pages = doc.page_count
             
-            if position == "Tiled":
-                # Handle tiled watermarks
-                add_tiled_watermark_high_quality(page, text, font_size, text_color, opacity, rotation)
-            else:
-                # Handle single watermark with high-quality approach
-                add_single_watermark_high_quality(page, text, position, font_size, text_color, opacity, rotation)
+            # Parse page range
+            target_pages = parse_page_range(total_pages, start_page, end_page, pages_range, custom_pages)
+            
+            for page_num in target_pages:
+                if page_num < 1 or page_num > total_pages:
+                    continue
+                    
+                page = doc[page_num - 1]
+                
+                if position == "Tiled":
+                    add_tiled_watermark_high_quality(page, text, font_size, text_color, opacity, rotation)
+                else:
+                    add_single_watermark_high_quality(page, text, position, font_size, text_color, opacity, rotation)
 
-        doc.save(output_path)
-        doc.close()
-        
-        return {
-            "success": True,
-            "page_count": total_pages,
-            "watermarked_pages": len(target_pages),
-            "output": output_path
-        }
+            doc.save(output_path)
+            doc.close()
+            
+            return {
+                "success": True,
+                "page_count": total_pages,
+                "watermarked_pages": len(target_pages),
+                "output": output_path
+            }
 
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -115,11 +121,25 @@ def create_high_quality_watermark_image(text, font_size, text_color, opacity, ro
     
     # Load font first to calculate text dimensions
     try:
+        # Cross-platform font paths
         font_paths = [
+            # Windows
             "arial.ttf", "Arial.ttf",
+            "C:/Windows/Fonts/arial.ttf",
+            "C:/Windows/Fonts/tahoma.ttf",
+            "C:/Windows/Fonts/verdana.ttf",
+            
+            # Linux
             "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
             "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-            "C:/Windows/Fonts/arial.ttf"
+            "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+            "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+            
+            # macOS
+            "/Library/Fonts/Arial.ttf",
+            "/Library/Fonts/Verdana.ttf",
+            "/System/Library/Fonts/Helvetica.ttc",
+            "/System/Library/Fonts/Arial.ttf"
         ]
         
         font = None
@@ -128,13 +148,16 @@ def create_high_quality_watermark_image(text, font_size, text_color, opacity, ro
                 # Scale font size for high DPI
                 scaled_font_size = int(font_size * scale_factor)
                 font = ImageFont.truetype(font_path, scaled_font_size)
+                #print(f"Using font: {font_path}")  # Debug log
                 break
-            except:
+            except Exception as e:
                 continue
         
         if font is None:
+            #print("No system font found, using default")
             font = ImageFont.load_default()
-    except:
+    except Exception as e:
+        #print(f"Font loading warning: {e}")
         font = ImageFont.load_default()
     
     # Create temporary image to measure text
@@ -262,20 +285,214 @@ def parse_custom_pages(custom_pages, total_pages):
     
     return sorted(pages)
 
+def add_watermark(input_path, output_path, watermark_type="text", text="CONFIDENTIAL", 
+                 image_path=None, position="Center", rotation=45, opacity=60, 
+                 font_size=36, text_color="#3498db", image_scale=50,
+                 start_page=1, end_page=0, pages_range="all", custom_pages=""):
+    try:
+        # Normalize paths for cross-platform compatibility
+        input_path = os.path.normpath(input_path)
+        output_path = os.path.normpath(output_path)
+        if image_path:
+            image_path = os.path.normpath(image_path)
+        
+        if not os.path.exists(input_path):
+            return {"success": False, "error": f"Input file not found: {input_path}"}
+
+        if watermark_type == "image" and (not image_path or not os.path.exists(image_path)):
+            return {"success": False, "error": f"Image file not found: {image_path}"}
+
+        doc = fitz.open(input_path)
+        total_pages = doc.page_count
+        
+        # Parse page range
+        target_pages = parse_page_range(total_pages, start_page, end_page, pages_range, custom_pages)
+        
+        for page_num in target_pages:
+            if page_num < 1 or page_num > total_pages:
+                continue
+                
+            page = doc[page_num - 1]
+            
+            if watermark_type == "image":
+                if position == "Tiled":
+                    add_tiled_image_watermark(page, image_path, image_scale, opacity, rotation)
+                else:
+                    add_single_image_watermark(page, image_path, position, image_scale, opacity, rotation)
+            else:
+                if position == "Tiled":
+                    add_tiled_watermark_high_quality(page, text, font_size, text_color, opacity, rotation)
+                else:
+                    add_single_watermark_high_quality(page, text, position, font_size, text_color, opacity, rotation)
+
+        doc.save(output_path)
+        doc.close()
+        
+        return {
+            "success": True,
+            "page_count": total_pages,
+            "watermarked_pages": len(target_pages),
+            "output": output_path
+        }
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def add_image_watermark(input_path, output_path, image_path, position, rotation, opacity, 
+                       image_scale, start_page, end_page, pages_range, custom_pages):
+    try:
+        if not os.path.exists(input_path):
+            return {"success": False, "error": f"Input file not found: {input_path}"}
+        if not os.path.exists(image_path):
+            return {"success": False, "error": f"Image file not found: {image_path}"}
+
+        doc = fitz.open(input_path)
+        total_pages = doc.page_count
+        
+        # Parse page range
+        target_pages = parse_page_range(total_pages, start_page, end_page, pages_range, custom_pages)
+        
+        for page_num in target_pages:
+            if page_num < 1 or page_num > total_pages:
+                continue
+                
+            page = doc[page_num - 1]
+            
+            if position == "Tiled":
+                add_tiled_image_watermark(page, image_path, image_scale, opacity, rotation)
+            else:
+                add_single_image_watermark(page, image_path, position, image_scale, opacity, rotation)
+
+        doc.save(output_path)
+        doc.close()
+        
+        return {
+            "success": True,
+            "page_count": total_pages,
+            "watermarked_pages": len(target_pages),
+            "output": output_path
+        }
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def add_single_image_watermark(page, image_path, position, image_scale, opacity, rotation):
+    """Add single image watermark"""
+    try:
+        # Load and process the image
+        with Image.open(image_path) as img:
+            # Convert to RGBA if needed
+            if img.mode != 'RGBA':
+                img = img.convert('RGBA')
+            
+            # Apply opacity
+            if opacity < 100:
+                alpha = img.split()[3] if len(img.split()) > 3 else Image.new('L', img.size, 255)
+                alpha = alpha.point(lambda p: p * opacity // 100)
+                img.putalpha(alpha)
+            
+            # Apply rotation
+            if rotation != 0:
+                img = img.rotate(-rotation, expand=True, resample=Image.BICUBIC, fillcolor=(0, 0, 0, 0))
+            
+            # Convert to bytes
+            img_bytes = io.BytesIO()
+            img.save(img_bytes, format='PNG')
+            img_bytes.seek(0)
+            
+            # Create pixmap
+            pix = fitz.Pixmap(img_bytes.read())
+            
+            # Calculate scale factor (image_scale is percentage)
+            scale_factor = image_scale / 100.0
+            watermark_width = pix.width * scale_factor
+            watermark_height = pix.height * scale_factor
+            
+            # Calculate position
+            rect = calculate_simple_position(page.rect, position, watermark_width, watermark_height)
+            
+            # Insert image
+            page.insert_image(rect, pixmap=pix)
+            pix = None
+    except Exception as e:
+        raise Exception(f"Failed to add image watermark: {str(e)}")
+
+def add_tiled_image_watermark(page, image_path, image_scale, opacity, rotation):
+    """Add three tiled image watermarks"""
+    try:
+        page_rect = page.rect
+        page_width = page_rect.width
+        page_height = page_rect.height
+        
+        # Load and process the image
+        with Image.open(image_path) as img:
+            if img.mode != 'RGBA':
+                img = img.convert('RGBA')
+            
+            # Apply opacity
+            if opacity < 100:
+                alpha = img.split()[3] if len(img.split()) > 3 else Image.new('L', img.size, 255)
+                alpha = alpha.point(lambda p: p * opacity // 100)
+                img.putalpha(alpha)
+            
+            # Apply rotation
+            if rotation != 0:
+                img = img.rotate(-rotation, expand=True, resample=Image.BICUBIC, fillcolor=(0, 0, 0, 0))
+            
+            # Convert to bytes
+            img_bytes = io.BytesIO()
+            img.save(img_bytes, format='PNG')
+            img_bytes.seek(0)
+            pix = fitz.Pixmap(img_bytes.read())
+        
+        # Calculate scale factor
+        scale_factor = image_scale / 100.0
+        watermark_width = pix.width * scale_factor
+        watermark_height = pix.height * scale_factor
+        
+        # Position three watermarks
+        center_x = page_width / 2
+        center_y = page_height / 2
+        
+        positions = [
+            (center_x - watermark_width / 2, center_y - watermark_height / 2),  # Center
+            (center_x - watermark_width / 2, center_y / 3 - watermark_height / 2),  # Top-third
+            (center_x - watermark_width / 2, center_y * 5/3 - watermark_height / 2)  # Bottom-third
+        ]
+        
+        # Add the three watermarks
+        for x, y in positions:
+            rect = fitz.Rect(x, y, x + watermark_width, y + watermark_height)
+            page.insert_image(rect, pixmap=pix)
+        
+        pix = None
+    except Exception as e:
+        raise Exception(f"Failed to add tiled image watermark: {str(e)}")
+
 def main():
     parser = argparse.ArgumentParser(description="Add watermark to PDF pages")
     parser.add_argument("input", help="Path to input PDF file")
     parser.add_argument("output", help="Path to output PDF file")
     
-    # Watermark options
-    parser.add_argument("--text", type=str, required=True, help="Watermark text")
-    parser.add_argument("--position", type=str, default="Center", 
-                   choices=["Center", "TopLeft", "TopRight", "BottomLeft", "BottomRight", "Tiled"],
-                   help="Watermark position")
-    parser.add_argument("--rotation", type=int, default=45, help="Rotation angle in degrees")
-    parser.add_argument("--opacity", type=int, default=60, help="Opacity percentage (1-100)")
+    # Watermark type
+    parser.add_argument("--watermark-type", type=str, default="text", 
+                       choices=["text", "image"], help="Watermark type")
+    
+    # Text watermark options
+    parser.add_argument("--text", type=str, default="CONFIDENTIAL", help="Watermark text")
     parser.add_argument("--font-size", type=int, default=36, help="Font size")
     parser.add_argument("--text-color", type=str, default="#3498db", help="Text color in hex")
+    
+    # Image watermark options
+    parser.add_argument("--image-path", type=str, help="Path to image file for image watermark")
+    parser.add_argument("--image-scale", type=int, default=50, help="Image scale percentage (10-100)")
+    
+    # Common options
+    parser.add_argument("--position", type=str, default="Center", 
+                       choices=["Center", "TopLeft", "TopRight", "BottomLeft", "BottomRight", "Tiled"],
+                       help="Watermark position")
+    parser.add_argument("--rotation", type=int, default=45, help="Rotation angle in degrees")
+    parser.add_argument("--opacity", type=int, default=60, help="Opacity percentage (1-100)")
     
     # Page range options
     parser.add_argument("--start-page", type=int, default=1, help="Start page (1-based)")
@@ -288,15 +505,18 @@ def main():
 
     args = parser.parse_args()
 
-    result = add_text_watermark(
+    result = add_watermark(
         input_path=args.input,
         output_path=args.output,
+        watermark_type=args.watermark_type,
         text=args.text,
+        image_path=args.image_path,
         position=args.position,
         rotation=args.rotation,
         opacity=args.opacity,
         font_size=args.font_size,
         text_color=args.text_color,
+        image_scale=args.image_scale,
         start_page=args.start_page,
         end_page=args.end_page,
         pages_range=args.pages_range,
@@ -307,7 +527,7 @@ def main():
         print(json.dumps(result))
     else:
         if result["success"]:
-            print(f"✅ Added watermark to {result['watermarked_pages']} pages")
+            print(f"✅ Added {args.watermark_type} watermark to {result['watermarked_pages']} pages")
         else:
             print(f"❌ Error: {result['error']}")
 
