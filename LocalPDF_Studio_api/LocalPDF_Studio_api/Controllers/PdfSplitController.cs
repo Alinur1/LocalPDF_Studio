@@ -36,7 +36,6 @@ namespace LocalPDF_Studio_api.Controllers
 
                 var fileName = Path.GetFileNameWithoutExtension(request.FilePath);
                 var downloadName = $"{fileName}_split.zip";
-
                 return File(resultBytes, "application/zip", downloadName);
             }
             catch (ArgumentException ex)
@@ -48,6 +47,5 @@ namespace LocalPDF_Studio_api.Controllers
                 return StatusCode(500, $"Error splitting PDF: {ex.Message}");
             }
         }
-
     }
 }

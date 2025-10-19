@@ -79,7 +79,6 @@
     background: #c0392b;
 }
 
-/* Preview Container */
 .preview-container {
     background: #2c3e50;
     padding: 1.5rem;
@@ -171,7 +170,6 @@
     text-align: center;
 }
 
-/* Split Options */
 .split-options-container {
     background: #2c3e50;
     padding: 1.5rem;
@@ -243,18 +241,6 @@
     margin-top: 0.3rem;
 }
 
-#blank-threshold-value {
-    font-weight: bold;
-    color: #3498db;
-}
-
-input[type="range"] {
-    width: 100%;
-    margin-top: 0.5rem;
-    accent-color: #3498db;
-}
-
-/* Action Buttons */
 .action-buttons {
     display: flex;
     justify-content: flex-end;

@@ -13,17 +13,11 @@
     style-src 'self' 'unsafe-inline';
     img-src 'self' data:;
     connect-src 'self' http://localhost:*;">
-
-    <!-- PDF.js (local) -->
     <script type="module">
         import * as pdfjsLib from '../../pdf/build/pdf.mjs';
         window.pdfjsLib = pdfjsLib;
     </script>
-
-    <!-- Global theme -->
     <link rel="stylesheet" href="../../styles/main.css">
-
-    <!-- Tool-specific styles -->
     <link rel="stylesheet" href="./splitPdf.css">
 </head>
 
@@ -33,7 +27,6 @@
             <a href="../../index.html" class="top-btn">← Back</a>
             <h1 class="tool-title">Split PDF</h1>
         </div>
-
         <main class="tool-container">
             <div class="file-selection-area">
                 <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
@@ -45,21 +38,16 @@
                     <button id="remove-pdf-btn" class="remove-btn">×</button>
                 </div>
             </div>
-
-            <!-- PDF Preview Section -->
             <div id="preview-container" class="preview-container" style="display: none;">
                 <div class="preview-header">
                     <h3>PDF Preview</h3>
                     <span id="page-count" class="page-count"></span>
                 </div>
                 <div id="preview-grid" class="preview-grid">
-                    <!-- Thumbnails will be inserted here -->
                 </div>
             </div>
-
             <div class="split-options-container">
                 <h2>Split Options</h2>
-
                 <div class="split-method">
                     <input type="radio" id="byPageRanges" name="splitMethod" value="ByPageRanges" checked>
                     <label for="byPageRanges">Split by page ranges</label>
@@ -94,17 +82,6 @@
                 </div>
                 <div class="options-panel" style="display: none; border: none; padding-left: 2rem;">
                     <small class="help-text">Each page will be saved as a separate PDF file</small>
-                </div>
-
-                <div class="split-method">
-                    <input type="radio" id="byBlankPages" name="splitMethod" value="ByBlankPages">
-                    <label for="byBlankPages">Split by blank pages <span style="color: red;">(Might not work properly. Still work in progress)</span></label>
-                </div>
-                <div class="options-panel" id="optionsByBlankPages" style="display: none;">
-                    <label for="blankThreshold">Blankness Threshold: <span id="blank-threshold-value">98%</span></label>
-                    <input type="range" id="blankThreshold" class="options-input" min="0.9" max="1.0" step="0.01"
-                        value="0.98">
-                    <small class="help-text">Higher threshold = stricter blank detection</small>
                 </div>
             </div>
 

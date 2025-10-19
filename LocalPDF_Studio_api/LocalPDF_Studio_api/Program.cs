@@ -5,7 +5,6 @@ using System.Net.Sockets;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -22,7 +21,6 @@ builder.Services.AddScoped<ILockUnlockPdfInterface, LockUnlockPdfService>();
 builder.Services.AddScoped<IEditMetadataInterface, EditMetadataService>();
 builder.Services.AddScoped<IPdfExtractImagesInterface, PdfExtractImagesService>();
 
-// CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowElectronApp", policy =>
@@ -45,15 +43,11 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-// Remove HTTPS redirection for local-only app
-// app.UseHttpsRedirection();
 
 app.UseCors("AllowElectronApp");
 app.UseAuthorization();

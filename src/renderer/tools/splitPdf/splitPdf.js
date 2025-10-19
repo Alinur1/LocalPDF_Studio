@@ -18,16 +18,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const previewContainer = document.getElementById('preview-container');
     const previewGrid = document.getElementById('preview-grid');
     const pageCountEl = document.getElementById('page-count');
-
     const splitMethodRadios = document.querySelectorAll('input[name="splitMethod"]');
-    const blankThresholdSlider = document.getElementById('blankThreshold');
-    const blankThresholdValue = document.getElementById('blank-threshold-value');
 
     let selectedFile = null;
     let pdfDoc = null;
     let renderedPages = [];
 
-    // --- File Selection ---
     selectPdfBtn.addEventListener('click', async () => {
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
@@ -128,7 +124,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // --- UI Logic for Split Options ---
     splitMethodRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             document.querySelectorAll('.options-panel').forEach(p => p.style.display = 'none');
@@ -137,15 +132,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    blankThresholdSlider.addEventListener('input', () => {
-        blankThresholdValue.textContent = `${Math.round(blankThresholdSlider.value * 100)}%`;
-    });
-
     function updateSplitButtonState() {
         splitBtn.disabled = !selectedFile;
     }
 
-    // --- API Call ---
     splitBtn.addEventListener('click', async () => {
         if (!selectedFile) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
@@ -186,9 +176,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     options.pageInterval = parseInt(pageInterval);
                 }
                 break;
-            case 'ByBlankPages':
-                options.blankThreshold = parseFloat(blankThresholdSlider.value);
-                break;
         }
 
         if (!isValid) return;
@@ -217,7 +204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (savedPath) {
                     await customAlert.alert('LocalPDF Studio - SUCCESS', 'PDF split successfully!\nSaved to: ' + savedPath, ['OK']);
                 } else {
-                    await customAlert.alert('LocalPDF Studio - WARNING' ,'Operation cancelled or failed to save the file.', ['OK']);
+                    await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
                 }
             } else {
                 console.error("Split API returned JSON:", result);
@@ -238,7 +225,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             'AtSpecificPages': 1,
             'EveryNPages': 2,
             'ExtractAllPages': 3,
-            'ByBlankPages': 4
         };
         return methods[methodName];
     }

@@ -5,7 +5,6 @@
         ByPageRanges,
         AtSpecificPages,
         EveryNPages,
-        ExtractAllPages,
-        ByBlankPages
+        ExtractAllPages
     }
 }
