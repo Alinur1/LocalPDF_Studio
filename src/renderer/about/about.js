@@ -2,12 +2,18 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const viewSourceBtn = document.getElementById('view-source');
+    const currentlyWorkingOnBtn = document.getElementById('currently-working-on');
     const starRepoBtn = document.getElementById('star-repo');
     const reportIssueBtn = document.getElementById('report-issue');
 
     if (viewSourceBtn) {
         viewSourceBtn.addEventListener('click', () => {
             openExternalLink('https://github.com/Alinur1/LocalPDF_Studio');
+        });
+    }
+    if (currentlyWorkingOnBtn) {
+        currentlyWorkingOnBtn.addEventListener('click', () => {
+            openExternalLink('https://docs.google.com/document/d/1wcbxeCYDs7yDEdKZFABC8Jow5mxG0XUqfbuB_fO3-hI/edit?usp=sharing');
         });
     }
     if (starRepoBtn) {
