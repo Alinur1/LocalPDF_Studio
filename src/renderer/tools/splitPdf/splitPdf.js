@@ -3,6 +3,7 @@
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
 import customAlert from '../../utils/customAlert.js';
+import loadingUI from '../../utils/loading.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -57,19 +58,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadPdfPreview(filePath) {
+        loadingUI.show('Loading PDF preview...');
         try {
             previewContainer.style.display = 'block';
-            previewGrid.innerHTML = '<p style="color: #bdc3c7; text-align: center;">Loading preview...</p>';
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
             pdfDoc = await loadingTask.promise;
             pageCountEl.textContent = `Total Pages: ${pdfDoc.numPages}`;
             previewGrid.innerHTML = '';
+            const thumbnailPromises = [];
             for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-                await renderPageThumbnail(pageNum);
+                thumbnailPromises.push(renderPageThumbnail(pageNum));
             }
+            await Promise.all(thumbnailPromises);
         } catch (error) {
             console.error('Error loading PDF:', error);
             previewGrid.innerHTML = '<p style="color: #e74c3c; text-align: center;">Failed to load PDF preview</p>';
+        } finally {
+            loadingUI.hide();
         }
     }
 
@@ -188,6 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
+            loadingUI.show('Splitting PDF...');
             splitBtn.disabled = true;
             splitBtn.textContent = 'Splitting...';
 
@@ -214,6 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Error splitting PDF:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while splitting the PDF:\n${error.message}`, ['OK']);
         } finally {
+            loadingUI.hide();
             splitBtn.disabled = false;
             splitBtn.textContent = 'Split PDF';
         }
