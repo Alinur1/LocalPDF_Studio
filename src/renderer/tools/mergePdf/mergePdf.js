@@ -3,6 +3,7 @@
 import { API } from '../../api/api.js';
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import customAlert from '../../utils/customAlert.js';
+import loadingUI from '../../utils/loading.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -11,30 +12,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const mergeBtn = document.getElementById('merge-btn');
     const clearBtn = document.getElementById('clear-btn');
     const listContainer = document.getElementById('pdf-list');
-
-    // Create PDF list component directly in this file
     const { addFiles, clearAll, getFiles, destroy } = createPdfList(listContainer);
 
-    // Select files
     selectBtn.addEventListener('click', async () => {
         const selected = await window.electronAPI.selectPdfs();
         if (selected?.length) addFiles(selected);
     });
 
-    // Clear list
     clearBtn.addEventListener('click', () => {
         clearAll();
     });
 
-    // Merge PDFs
     mergeBtn.addEventListener('click', async () => {
         const files = getFiles();
         if (!files.length) {
             await customAlert.alert('LocalPDF Studio - NOTICE', "Please select at least one PDF.", ['OK']);
             return;
         }
-
         try {
+            loadingUI.show('Merging PDFs...');
             const mergeEndpoint = await API.pdf.merge;
             const blob = await API.request.post(mergeEndpoint, { files });
             const arrayBuffer = await blob.arrayBuffer();
@@ -48,99 +44,93 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.error(err);
             await customAlert.alert('LocalPDF Studio - ERROR', "Error merging PDFs: " + err.message, ['OK']);
+        } finally {
+            loadingUI.hide();
         }
     });
-
-    // Cleanup on unload
     window.addEventListener('beforeunload', () => {
         destroy();
     });
 });
 
-// Moved from pdfFileList.js
 function createPdfList(container) {
     const pdfList = document.createElement('ul');
     pdfList.classList.add('pdf-list');
     container.appendChild(pdfList);
 
     let files = [];
-    const listItemCleanup = new Map(); // Track cleanup functions for each list item
+    const listItemCleanup = new Map();
 
-    function addFiles(paths) {
-        for (const path of paths) {
-            if (files.includes(path)) continue;
-            files.push(path);
+    async function addFiles(paths) {
+        loadingUI.show('Generating previews...');
+        try {
+            const thumbnailPromises = [];
 
-            const li = document.createElement('li');
-            li.draggable = true;
+            for (const path of paths) {
+                if (files.includes(path)) continue;
+                files.push(path);
 
-            // Thumbnail
-            const thumb = document.createElement('canvas');
-            thumb.classList.add('pdf-thumbnail');
+                const li = document.createElement('li');
+                li.draggable = true;
 
-            // Info
-            const infoDiv = document.createElement('div');
-            infoDiv.classList.add('pdf-info');
+                const thumb = document.createElement('canvas');
+                thumb.classList.add('pdf-thumbnail');
 
-            const nameSpan = document.createElement('div');
-            nameSpan.classList.add('pdf-name');
-            nameSpan.textContent = path.split(/[\\/]/).pop();
+                const infoDiv = document.createElement('div');
+                infoDiv.classList.add('pdf-info');
 
-            const sizeSpan = document.createElement('div');
-            sizeSpan.classList.add('pdf-size');
-            infoDiv.append(nameSpan, sizeSpan);
+                const nameSpan = document.createElement('div');
+                nameSpan.classList.add('pdf-name');
+                nameSpan.textContent = path.split(/[\\/]/).pop();
 
-            // Remove button with cleanup
-            const removeBtn = document.createElement('button');
-            removeBtn.classList.add('remove-btn');
-            removeBtn.textContent = '×';
+                const sizeSpan = document.createElement('div');
+                sizeSpan.classList.add('pdf-size');
+                infoDiv.append(nameSpan, sizeSpan);
 
-            const handleRemove = () => {
-                files = files.filter(f => f !== path);
-                cleanupListItem(li);
-                li.remove();
-            };
+                const removeBtn = document.createElement('button');
+                removeBtn.classList.add('remove-btn');
+                removeBtn.textContent = '×';
 
-            removeBtn.addEventListener('click', handleRemove);
+                const handleRemove = () => {
+                    files = files.filter(f => f !== path);
+                    cleanupListItem(li);
+                    li.remove();
+                };
 
-            li.append(thumb, infoDiv, removeBtn);
-            pdfList.appendChild(li);
+                removeBtn.addEventListener('click', handleRemove);
 
-            // File info
-            window.electronAPI.getFileInfo(path).then(({ size }) => {
-                sizeSpan.textContent = `${(size / 1024 / 1024).toFixed(2)} MB`;
-            });
+                li.append(thumb, infoDiv, removeBtn);
+                pdfList.appendChild(li);
 
-            // Thumbnail
-            renderThumbnail(path, thumb);
+                window.electronAPI.getFileInfo(path).then(({ size }) => {
+                    sizeSpan.textContent = `${(size / 1024 / 1024).toFixed(2)} MB`;
+                });
 
-            // Drag event handlers
-            const handleDragStart = () => li.classList.add('dragging');
-            const handleDragEnd = () => {
-                li.classList.remove('dragging');
-                updateFileOrder();
-            };
+                thumbnailPromises.push(renderThumbnail(path, thumb));
 
-            li.addEventListener('dragstart', handleDragStart);
-            li.addEventListener('dragend', handleDragEnd);
+                const handleDragStart = () => li.classList.add('dragging');
+                const handleDragEnd = () => {
+                    li.classList.remove('dragging');
+                    updateFileOrder();
+                };
 
-            // Store cleanup function for this list item
-            listItemCleanup.set(li, () => {
-                // Clear canvas memory
-                clearCanvas(thumb);
+                li.addEventListener('dragstart', handleDragStart);
+                li.addEventListener('dragend', handleDragEnd);
 
-                // Remove event listeners
-                removeBtn.removeEventListener('click', handleRemove);
-                li.removeEventListener('dragstart', handleDragStart);
-                li.removeEventListener('dragend', handleDragEnd);
-
-                // Clear references
-                li.replaceChildren();
-            });
+                listItemCleanup.set(li, () => {
+                    clearCanvas(thumb);
+                    removeBtn.removeEventListener('click', handleRemove);
+                    li.removeEventListener('dragstart', handleDragStart);
+                    li.removeEventListener('dragend', handleDragEnd);
+                    li.replaceChildren();
+                });
+            }
+            await Promise.all(thumbnailPromises);
+        } finally {
+            loadingUI.hide();
         }
     }
 
-    // Cleanup individual list item
     function cleanupListItem(li) {
         const cleanup = listItemCleanup.get(li);
         if (cleanup) {
@@ -184,16 +174,13 @@ function createPdfList(container) {
     }
 
     function clearAll() {
-        // Clean up all list items
         const allItems = [...pdfList.querySelectorAll('li')];
         allItems.forEach(li => cleanupListItem(li));
-
         files = [];
         pdfList.innerHTML = '';
         listItemCleanup.clear();
     }
 
-    // Return cleanup function so parent can call it when view is destroyed
     function destroy() {
         clearAll();
         pdfList.remove();
@@ -204,11 +191,10 @@ function createPdfList(container) {
         addFiles,
         clearAll,
         getFiles: () => files,
-        destroy // Expose destroy method
+        destroy
     };
 }
 
-// Moved from pdfUtils.js
 async function renderThumbnail(path, canvas) {
     let pdf = null;
     let page = null;
@@ -227,7 +213,6 @@ async function renderThumbnail(path, canvas) {
     } catch (err) {
         console.error('Thumbnail error:', err);
     } finally {
-        // Proper cleanup to prevent memory leaks
         if (page) {
             page.cleanup();
         }
@@ -238,7 +223,6 @@ async function renderThumbnail(path, canvas) {
     }
 }
 
-// Helper function to clear canvas and free memory
 function clearCanvas(canvas) {
     if (!canvas) return;
 
@@ -246,8 +230,6 @@ function clearCanvas(canvas) {
     if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-
-    // Reset canvas dimensions to free memory
     canvas.width = 0;
     canvas.height = 0;
 }

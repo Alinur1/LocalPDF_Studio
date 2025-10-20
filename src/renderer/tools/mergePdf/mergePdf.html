@@ -13,26 +13,19 @@
     style-src 'self' 'unsafe-inline';
     img-src 'self' data:;
     connect-src 'self' http://localhost:*;">
-
-    <!-- Global theme -->
     <link rel="stylesheet" href="../../styles/main.css">
-
-    <!-- Tool-specific styles -->
     <link rel="stylesheet" href="./mergePdf.css">
+    <link rel="stylesheet" href="../../styles/loading.css">
 </head>
-
 <body>
     <div id="app">
         <div class="top-bar">
             <a href="../../index.html" class="top-btn">← Back</a>
             <h1 class="tool-title">Merge PDF</h1>
         </div>
-
         <main class="tool-container">
             <button id="select-pdf-btn" class="select-pdf-btn">Click to Select PDF Files</button>
-
             <ul id="pdf-list" class="pdf-list"></ul>
-
             <div class="action-buttons">
                 <button id="merge-btn" class="top-btn">Merge PDFs</button>
                 <button id="clear-btn" class="top-btn secondary">Clear All</button>

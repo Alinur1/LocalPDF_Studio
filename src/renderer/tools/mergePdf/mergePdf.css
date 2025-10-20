@@ -11,7 +11,7 @@
     flex-direction: column;
     gap: 1rem;
     padding: 1rem;
-    height: calc(100vh - 58px); /* Full height minus top-bar */
+    height: calc(100vh - 58px);
     overflow-y: auto;
 }
 
@@ -104,7 +104,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
-    margin-top: auto; /* Pushes buttons to the bottom */
+    margin-top: auto;
     padding-top: 1rem;
 }
 
