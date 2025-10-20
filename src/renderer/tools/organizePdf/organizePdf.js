@@ -3,6 +3,7 @@
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
 import customAlert from '../../utils/customAlert.js';
+import loadingUI from '../../utils/loading.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -21,14 +22,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pagesGrid = document.getElementById('pages-grid');
     const pageCountInfo = document.getElementById('page-count-info');
     const actionButtons = document.getElementById('action-buttons');
-
     let selectedFile = null;
     let pdfDoc = null;
-    let pages = []; // Array of { id, originalPageNum, rotation, canvas }
+    let pages = [];
     let draggedElement = null;
     let nextId = 1;
 
-    // --- File Selection ---
     selectPdfBtn.addEventListener('click', async () => {
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
@@ -65,15 +64,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadPdfPages(filePath) {
         try {
-            showLoading('Loading PDF...');
-
-            // Normalize file path for different platforms
+            loadingUI.show('Loading PDF...');
             let pdfPath = filePath;
             if (navigator.platform.indexOf('Win') > -1) {
-                // Windows: file:///C:/path/to/file.pdf
                 pdfPath = filePath.startsWith('file:///') ? filePath : `file:///${filePath.replace(/\\/g, '/')}`;
             } else {
-                // Unix-like: file:///path/to/file.pdf
                 pdfPath = filePath.startsWith('file://') ? filePath : `file://${filePath}`;
             }
 
@@ -98,9 +93,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('All pages rendered:', pages.length);
             updatePageCountInfo();
             renderPagesGrid();
-            hideLoading();
+            loadingUI.hide();
         } catch (error) {
-            hideLoading();
+            loadingUI.hide();
             console.error('Error loading PDF:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `Failed to load PDF: ${error.message}`, ['OK']);
         }
@@ -114,11 +109,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
 
-            // Set canvas dimensions
             canvas.height = viewport.height;
             canvas.width = viewport.width;
 
-            // Render the page
             const renderContext = {
                 canvasContext: context,
                 viewport: viewport
@@ -128,7 +121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return canvas;
         } catch (error) {
             console.error(`Error rendering page ${pageNum}:`, error);
-            // Return a placeholder canvas on error
             const canvas = document.createElement('canvas');
             canvas.width = 200;
             canvas.height = 280;
@@ -159,7 +151,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         item.dataset.pageId = page.id;
         item.dataset.rotation = page.rotation;
 
-        // Page preview
         const preview = document.createElement('div');
         preview.className = 'page-preview';
 
@@ -167,7 +158,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         badge.className = 'page-number-badge';
         badge.textContent = `#${index + 1}`;
 
-        // Clone canvas properly
         const canvasClone = document.createElement('canvas');
         canvasClone.width = page.canvas.width;
         canvasClone.height = page.canvas.height;
@@ -177,7 +167,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         preview.appendChild(badge);
         preview.appendChild(canvasClone);
 
-        // Controls
         const controls = document.createElement('div');
         controls.className = 'page-controls';
 
@@ -212,7 +201,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         item.appendChild(preview);
         item.appendChild(controls);
 
-        // Drag events
         item.addEventListener('dragstart', handleDragStart);
         item.addEventListener('dragend', handleDragEnd);
         item.addEventListener('dragover', handleDragOver);
@@ -264,7 +252,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const targetIndex = pages.findIndex(p => p.id === targetId);
 
             if (draggedIndex !== -1 && targetIndex !== -1) {
-                // Reorder array
                 const [removed] = pages.splice(draggedIndex, 1);
                 pages.splice(targetIndex, 0, removed);
 
@@ -317,7 +304,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     resetOrderBtn.addEventListener('click', async () => {
         if (selectedFile && pdfDoc) {
-            showLoading('Resetting to original order...');
+            loadingUI.show('Resetting to original order...');
             pages = [];
             nextId = 1;
 
@@ -333,7 +320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             renderPagesGrid();
             updatePageCountInfo();
-            hideLoading();
+            loadingUI.hide();
         }
     });
 
@@ -363,7 +350,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             organizeBtn.disabled = true;
             organizeBtn.textContent = 'Organizing...';
-            showLoading('Organizing PDF...');
+            loadingUI.show('Organizing PDF...');
 
             const organizeEndpoint = await API.pdf.organize;
             const result = await API.request.post(organizeEndpoint, requestBody);
@@ -373,19 +360,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const defaultName = `${selectedFile.name.replace('.pdf', '')}_organized.pdf`;
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
 
-                hideLoading();
+                loadingUI.hide();
                 if (savedPath) {
                     await customAlert.alert('LocalPDF Studio - SUCCESS', `Success! PDF organized successfully!\nSaved to: ${savedPath}`, ['OK']);
                 } else {
                     await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
                 }
             } else {
-                hideLoading();
+                loadingUI.hide();
                 console.error("Organize API returned JSON:", result);
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
-            hideLoading();
+            loadingUI.hide();
             console.error('Error organizing PDF:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while organizing the PDF:\n${error.message}`, ['OK']);
         } finally {
@@ -419,33 +406,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return 0;
         } catch {
             return 0;
-        }
-    }
-
-    // Loading overlay functions
-    function showLoading(message = 'Loading...') {
-        let overlay = document.getElementById('loading-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'loading-overlay';
-            overlay.className = 'loading-overlay';
-            overlay.innerHTML = `
-                <div class="loading-content">
-                    <h3 id="loading-message">${message}</h3>
-                    <div class="loading-spinner"></div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-        } else {
-            document.getElementById('loading-message').textContent = message;
-            overlay.style.display = 'flex';
-        }
-    }
-
-    function hideLoading() {
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay) {
-            overlay.style.display = 'none';
         }
     }
 });

@@ -13,27 +13,19 @@
     style-src 'self' 'unsafe-inline';
     img-src 'self' data:;
     connect-src 'self' http://localhost:*;">
-
-    <!-- PDF.js (local) -->
     <script type="module">
         import * as pdfjsLib from '../../pdf/build/pdf.mjs';
         window.pdfjsLib = pdfjsLib;
     </script>
-
-    <!-- Global theme -->
     <link rel="stylesheet" href="../../styles/main.css">
-
-    <!-- Tool-specific styles -->
     <link rel="stylesheet" href="./organizePdf.css">
 </head>
-
 <body>
     <div id="app">
         <div class="top-bar">
             <a href="../../index.html" class="top-btn">← Back</a>
             <h1 class="tool-title">Organize/Re-Arrange PDF</h1>
         </div>
-
         <main class="tool-container">
             <div class="file-selection-area">
                 <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
@@ -45,7 +37,6 @@
                     <button id="remove-pdf-btn" class="remove-btn">×</button>
                 </div>
             </div>
-
             <div class="organize-info" style="display: none;" id="organize-info">
                 <div class="info-card">
                     <h3>How to Organize:</h3>
@@ -57,8 +48,6 @@
                     </ul>
                 </div>
             </div>
-
-            <!-- PDF Pages Grid for Organizing -->
             <div id="organize-container" class="organize-container" style="display: none;">
                 <div class="organize-header">
                     <div>
@@ -70,10 +59,8 @@
                     </div>
                 </div>
                 <div id="pages-grid" class="pages-grid">
-                    <!-- Draggable page thumbnails will be inserted here -->
                 </div>
             </div>
-
             <div class="action-buttons" id="action-buttons" style="display: none;">
                 <button id="organize-btn" class="top-btn">Save Organized PDF</button>
             </div>
