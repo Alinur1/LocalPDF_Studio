@@ -3,6 +3,7 @@
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
 import customAlert from '../../utils/customAlert.js';
+import loadingUI from '../../utils/loading.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -28,12 +29,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         bottom: document.getElementById('margin-bottom'),
         left: document.getElementById('margin-left'),
     };
-
     let selectedFile = null;
     let pdfDoc = null;
     let renderedPages = [];
 
-    // File selection
     selectPdfBtn.addEventListener('click', async () => {
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
@@ -56,10 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         Object.values(margins).forEach(m => (m.value = 0));
     });
 
-    // Add input event listeners to margin inputs to clear validation state
     Object.values(margins).forEach(input => {
         input.addEventListener('input', () => {
-            // Remove error styling when user starts typing
             if (input.classList.contains('error')) {
                 input.classList.remove('error');
             }
@@ -79,8 +76,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadPdfPreview(filePath) {
         try {
+            loadingUI.show('Loading PDF preview...');
             previewContainer.style.display = 'block';
-            previewGrid.innerHTML = '<p style="color:#bdc3c7;text-align:center;">Loading preview...</p>';
+            previewGrid.innerHTML = '';
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
             pdfDoc = await loadingTask.promise;
             pageCountEl.textContent = `Total Pages: ${pdfDoc.numPages}`;
@@ -97,6 +95,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error loading PDF:', error);
             previewGrid.innerHTML = '<p style="color:#e74c3c;text-align:center;">Failed to load PDF preview</p>';
+        } finally {
+            loadingUI.hide();
         }
     }
 
@@ -133,8 +133,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         selectedFileInfo.style.display = 'none';
         selectPdfBtn.style.display = 'block';
         cropBtn.disabled = true;
-
-        // Clear any error styling
         Object.values(margins).forEach(input => {
             input.classList.remove('error');
         });
@@ -155,8 +153,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     function validateMargins() {
         let isValid = true;
         const emptyFields = [];
-
-        // Check each margin input
         Object.entries(margins).forEach(([position, input]) => {
             if (input.value === '' || isNaN(parseInt(input.value))) {
                 isValid = false;
@@ -175,8 +171,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a PDF file first.', ['OK']);
             return;
         }
-
-        // Validate margin inputs
         const validation = validateMargins();
         if (!validation.isValid) {
             const fieldNames = validation.emptyFields.map(field =>
@@ -186,10 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await customAlert.alert('LocalPDF Studio - NOTICE', `Please enter valid margin values for: ${fieldNames}\n\nAll margin values must be numbers (0 or greater).`, ['OK']);
             return;
         }
-
         const selectedRange = document.querySelector('input[name="pages-range"]:checked').value;
-
-        // Additional validation for custom pages
         if (selectedRange === 'custom' && (!customPages.value || customPages.value.trim() === '')) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please enter a custom page range or select "All Pages".', ['OK']);
             customPages.focus();
@@ -209,12 +200,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
+            loadingUI.show('Cropping PDF...');
             cropBtn.disabled = true;
             cropBtn.textContent = 'Cropping...';
 
             const endpoint = await API.pdf.crop;
             const result = await API.request.post(endpoint, requestBody);
 
+            loadingUI.hide();
             if (result instanceof Blob) {
                 const arrayBuffer = await result.arrayBuffer();
                 const defaultName = selectedFile.name.replace('.pdf', '_cropped.pdf');
@@ -228,6 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
+            loadingUI.hide();
             console.error('Crop Error:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
         } finally {

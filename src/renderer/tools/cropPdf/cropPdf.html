@@ -16,16 +16,13 @@
     <link rel="stylesheet" href="../../styles/main.css">
     <link rel="stylesheet" href="./cropPdf.css">
 </head>
-
 <body>
     <div id="app">
         <div class="top-bar">
             <a href="../../index.html" class="top-btn">← Back</a>
             <h1 class="tool-title">Crop PDF</h1>
         </div>
-
         <main class="tool-container">
-            <!-- File Selection -->
             <div class="file-selection-area">
                 <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
@@ -36,8 +33,6 @@
                     <button id="remove-pdf-btn" class="remove-btn">×</button>
                 </div>
             </div>
-
-            <!-- Preview -->
             <div id="preview-container" class="preview-container" style="display:none;">
                 <div class="preview-header">
                     <h3>PDF Preview</h3>
@@ -45,11 +40,8 @@
                 </div>
                 <div id="preview-grid" class="preview-grid"></div>
             </div>
-
-            <!-- Crop Options -->
             <div class="options-container">
                 <h2>Crop Options</h2>
-
                 <div class="option-group">
                     <label>Pages to Crop:</label>
                     <div class="radio-group">
@@ -57,14 +49,11 @@
                         <label><input type="radio" name="pages-range" value="custom"> Custom Range</label>
                     </div>
                 </div>
-
-
                 <div id="custom-pages-group" class="option-group" style="display:none;">
                     <label for="custom-pages">Custom Page Range:</label>
                     <input type="text" id="custom-pages" class="options-input" placeholder="e.g., 1, 2-4, 7, 9-10">
                     <small class="help-text">Enter page numbers or ranges separated by commas.</small>
                 </div>
-
                 <div class="option-group">
                     <label>Crop Margins (in points):</label>
                     <div class="margin-inputs">
@@ -90,12 +79,10 @@
                     </div>
                     <small class="help-text">1 point ≈ 1/72 inch. Typical margins: 10–50 points.</small>
                 </div>
-
                 <div class="option-group reset-group">
                     <button id="reset-btn" class="secondary-btn">Reset to Original</button>
                 </div>
             </div>
-
             <div class="action-buttons">
                 <button id="crop-btn" class="top-btn" disabled>Crop PDF</button>
             </div>
