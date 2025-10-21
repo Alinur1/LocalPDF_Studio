@@ -3,6 +3,7 @@
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
 import customAlert from '../../utils/customAlert.js';
+import loadingUI from '../../utils/loading.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -18,16 +19,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const previewContainer = document.getElementById('preview-container');
     const previewGrid = document.getElementById('preview-grid');
     const pageCountEl = document.getElementById('page-count');
-
     const imageQualitySelect = document.getElementById('imageQuality');
     const imageFormatSelect = document.getElementById('imageFormat');
     const includePageNumbersCheckbox = document.getElementById('includePageNumbers');
-
     let selectedFile = null;
     let pdfDoc = null;
     let renderedPages = [];
 
-    // --- File Selection ---
     selectPdfBtn.addEventListener('click', async () => {
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
@@ -62,8 +60,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadPdfPreview(filePath) {
         try {
+            loadingUI.show('Loading PDF preview...');
             previewContainer.style.display = 'block';
-            previewGrid.innerHTML = '<p style="color: #bdc3c7; text-align: center;">Loading preview...</p>';
+            previewGrid.innerHTML = '';
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
             pdfDoc = await loadingTask.promise;
             pageCountEl.textContent = `Total Pages: ${pdfDoc.numPages}`;
@@ -74,6 +73,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error loading PDF:', error);
             previewGrid.innerHTML = '<p style="color: #e74c3c; text-align: center;">Failed to load PDF preview</p>';
+        } finally {
+            loadingUI.hide();
         }
     }
 
@@ -132,7 +133,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         convertBtn.disabled = !selectedFile;
     }
 
-    // --- API Call for Conversion ---
     convertBtn.addEventListener('click', async () => {
         if (!selectedFile) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
@@ -151,12 +151,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
+            loadingUI.show('Converting PDF to images...');
             convertBtn.disabled = true;
             convertBtn.textContent = 'Converting...';
 
             const convertEndpoint = await API.pdf.toJpg;
             const result = await API.request.post(convertEndpoint, requestBody);
 
+            loadingUI.hide();
             if (result instanceof Blob) {
                 const arrayBuffer = await result.arrayBuffer();
 
@@ -175,6 +177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
+            loadingUI.hide();
             console.error('Error converting PDF:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while converting the PDF:\n${error.message}`, ['OK']);
         } finally {

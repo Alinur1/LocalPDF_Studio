@@ -79,7 +79,6 @@
     background: #c0392b;
 }
 
-/* Preview Container */
 .preview-container {
     background: #2c3e50;
     padding: 1.5rem;
@@ -171,7 +170,6 @@
     text-align: center;
 }
 
-/* Conversion Options */
 .conversion-options-container {
     background: #2c3e50;
     padding: 1.5rem;
@@ -236,7 +234,6 @@
     margin-top: 0.4rem;
 }
 
-/* Action Buttons */
 .action-buttons {
     display: flex;
     justify-content: flex-end;
