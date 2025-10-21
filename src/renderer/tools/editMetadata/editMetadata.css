@@ -1,4 +1,5 @@
 /* src/renderer/tools/editMetadata/editMetadata.css */
+
 .tool-title {
     font-size: 1.2rem;
     margin-left: 1rem;
@@ -16,7 +17,6 @@
     max-width: 100%;
 }
 
-/* --- File Selection --- */
 .file-selection-area .select-pdf-btn {
     color: #ecf0f1;
     width: 100%;
@@ -47,7 +47,6 @@
     border: 1px solid #18222e;
 }
 
-/* --- Metadata Container --- */
 .metadata-container {
     background: #2c3e50;
     padding: 1.5rem;
@@ -72,7 +71,6 @@
     color: #ecf0f1;
 }
 
-/* --- Metadata Grid --- */
 .metadata-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -111,7 +109,6 @@
     font-style: italic;
 }
 
-/* --- Form Styles --- */
 .metadata-form {
     width: 100%;
 }
@@ -165,7 +162,6 @@
     font-family: inherit;
 }
 
-/* --- Buttons --- */
 .secondary-btn {
     background: #34495e;
     color: #ecf0f1;
@@ -193,7 +189,6 @@
     min-width: 180px;
 }
 
-/* Add to editMetadata.css */
 .metadata-input.error,
 .metadata-textarea.error {
     border-color: #e74c3c;
@@ -254,7 +249,6 @@
     }
 }
 
-/* Tooltip for copy button */
 .copy-btn::after {
     content: "Copy all metadata to clipboard";
     position: absolute;
@@ -297,12 +291,10 @@
     background: #c0392b;
 }
 
-/* --- View Transitions --- */
 .metadata-view {
     transition: opacity 0.3s ease;
 }
 
-/* --- Responsive --- */
 @media (max-width: 768px) {
 
     .metadata-grid,

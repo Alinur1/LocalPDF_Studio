@@ -2,11 +2,11 @@
 
 import { API } from '../../api/api.js';
 import customAlert from '../../utils/customAlert.js';
+import loadingUI from '../../utils/loading.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await API.init();
 
-    // DOM Elements
     const selectPdfBtn = document.getElementById('select-pdf-btn');
     const removePdfBtn = document.getElementById('remove-pdf-btn');
     const savePdfBtn = document.getElementById('save-pdf-btn');
@@ -17,13 +17,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const editToggleBtn = document.getElementById('edit-toggle-btn');
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const saveMetadataBtn = document.getElementById('save-metadata-btn');
-
-    // Views
     const readonlyView = document.getElementById('readonly-view');
     const editableView = document.getElementById('editable-view');
     const editActions = document.getElementById('edit-actions');
-
-    // Read-only metadata elements
     const metaElements = {
         title: document.getElementById('meta-title'),
         author: document.getElementById('meta-author'),
@@ -35,8 +31,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         modDate: document.getElementById('meta-mod-date'),
         pageCount: document.getElementById('meta-page-count')
     };
-
-    // Editable form elements
     const formElements = {
         title: document.getElementById('edit-title'),
         author: document.getElementById('edit-author'),
@@ -46,7 +40,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         producer: document.getElementById('edit-producer'),
         description: document.getElementById('edit-description')
     };
-
     let selectedFile = null;
     let currentMetadata = null;
     let isEditMode = false;
@@ -86,15 +79,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         File: ${selectedFile?.name || 'Unknown'}
         `.trim();
 
-        // Use the modern Clipboard API
         navigator.clipboard.writeText(metadataText).then(() => {
-            // Show success feedback
             const copyBtn = document.getElementById('copy-metadata-btn');
             const originalText = copyBtn.textContent;
-
             copyBtn.textContent = '✅ Copied!';
             copyBtn.classList.add('copied');
-
             setTimeout(() => {
                 copyBtn.textContent = originalText;
                 copyBtn.classList.remove('copied');
@@ -106,24 +95,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Initialize Event Listeners
     function initializeEventListeners() {
-        // File selection
         selectPdfBtn.addEventListener('click', handleFileSelection);
         removePdfBtn.addEventListener('click', clearAll);
-
-        // Edit mode toggles
         editToggleBtn.addEventListener('click', toggleEditMode);
         cancelEditBtn.addEventListener('click', cancelEdit);
-
-        // Save actions
         saveMetadataBtn.addEventListener('click', saveMetadata);
         savePdfBtn.addEventListener('click', savePdfWithMetadata);
-
         const copyMetadataBtn = document.getElementById('copy-metadata-btn');
         copyMetadataBtn.addEventListener('click', copyMetadataToClipboard);
-
-        // Form input validation
         Object.values(formElements).forEach(input => {
             if (input) {
                 input.addEventListener('input', clearInputError);
@@ -131,55 +111,49 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // File Selection Handler
     async function handleFileSelection() {
-        const files = await window.electronAPI.selectPdfs();
-        if (files && files.length > 0) {
-            const filePath = files[0];
-            const fileName = filePath.split(/[\\/]/).pop();
-            const fileSize = await getFileSize(filePath);
+        try {
+            loadingUI.show('Selecting file...');
+            const files = await window.electronAPI.selectPdfs();
+            if (files && files.length > 0) {
+                const filePath = files[0];
+                const fileName = filePath.split(/[\\/]/).pop();
+                const fileSize = await getFileSize(filePath);
 
-            handleFileSelected({
-                path: filePath,
-                name: fileName,
-                size: fileSize
-            });
+                handleFileSelected({
+                    path: filePath,
+                    name: fileName,
+                    size: fileSize
+                });
+            }
+        } finally {
+            loadingUI.hide();
         }
     }
 
-    // Handle File Selected
     async function handleFileSelected(file) {
         clearAll();
         selectedFile = file;
-
         pdfNameEl.textContent = file.name;
         pdfSizeEl.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-
         selectPdfBtn.style.display = 'none';
         selectedFileInfo.style.display = 'flex';
-
-        // Load and display metadata
         await loadMetadata(file.path);
     }
 
-    // Load PDF Metadata
     async function loadMetadata(filePath) {
         try {
+            loadingUI.show('Loading metadata...');
             metadataContainer.style.display = 'block';
-
-            // Show loading state
             Object.values(metaElements).forEach(el => {
                 el.textContent = 'Loading...';
             });
-
             const requestBody = {
                 filePath: filePath,
                 operation: 'read'
             };
-
             const endpoint = await API.pdf.metadata;
             const result = await API.request.post(endpoint, requestBody);
-
             if (result && result.metadata) {
                 currentMetadata = result.metadata;
                 displayMetadata(currentMetadata);
@@ -191,12 +165,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Error loading metadata:', error);
             displayError('Failed to load PDF metadata. The file might be corrupted or encrypted.');
             savePdfBtn.disabled = true;
+        } finally {
+            loadingUI.hide();
         }
     }
 
-    // Display Metadata in Read-only View
     function displayMetadata(metadata) {
-        // Format dates
         const formatDate = (dateString) => {
             if (!dateString) return 'Not set';
             try {
@@ -218,7 +192,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
-        // Update read-only view
         metaElements.title.textContent = metadata.title || '';
         metaElements.author.textContent = metadata.author || '';
         metaElements.subject.textContent = metadata.subject || '';
@@ -229,7 +202,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         metaElements.modDate.textContent = formatDate(metadata.modificationDate);
         metaElements.pageCount.textContent = metadata.pageCount || 'Unknown';
 
-        // Populate form fields for edit mode
         formElements.title.value = metadata.title || '';
         formElements.author.value = metadata.author || '';
         formElements.subject.value = metadata.subject || '';
@@ -239,24 +211,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         formElements.description.value = metadata.description || '';
     }
 
-    // Toggle Edit Mode
     function toggleEditMode() {
         isEditMode = !isEditMode;
-
         if (isEditMode) {
-            // Switch to edit mode
             readonlyView.style.display = 'none';
             editableView.style.display = 'block';
             editActions.style.display = 'flex';
             editToggleBtn.textContent = 'View Metadata';
-            savePdfBtn.disabled = true; // Disable main save until metadata is saved
+            savePdfBtn.disabled = true;
         } else {
-            // Switch back to read-only mode
             cancelEdit();
         }
     }
 
-    // Cancel Edit
     function cancelEdit() {
         isEditMode = false;
         readonlyView.style.display = 'block';
@@ -264,16 +231,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         editActions.style.display = 'none';
         editToggleBtn.textContent = 'Edit Metadata';
         savePdfBtn.disabled = false;
-
-        // Reset form to original values
         if (currentMetadata) {
             displayMetadata(currentMetadata);
         }
-
         clearErrors();
     }
 
-    // Save Metadata (within edit mode)
     async function saveMetadata() {
         if (!validateForm()) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please fill in all required fields correctly.', ['OK']);
@@ -283,8 +246,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             saveMetadataBtn.disabled = true;
             saveMetadataBtn.textContent = 'Saving...';
-
-            // Update current metadata with form values
             currentMetadata = {
                 ...currentMetadata,
                 title: formElements.title.value.trim(),
@@ -295,21 +256,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 producer: formElements.producer.value.trim(),
                 description: formElements.description.value.trim()
             };
-
-            // Show success feedback
             displayMetadata(currentMetadata);
 
-            // Switch back to read-only mode
             isEditMode = false;
             readonlyView.style.display = 'block';
             editableView.style.display = 'none';
             editActions.style.display = 'none';
             editToggleBtn.textContent = 'Edit Metadata';
             savePdfBtn.disabled = false;
-
-            // Show success message
             showMessage('Metadata updated successfully! Click "Save PDF with Updated Metadata" to apply changes.', 'success');
-
         } catch (error) {
             console.error('Error saving metadata:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to save metadata. Please try again.', ['OK']);
@@ -319,31 +274,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Save PDF with Updated Metadata
     async function savePdfWithMetadata() {
         if (!selectedFile || !currentMetadata) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a PDF file first.', ['OK']);
             return;
         }
-
         try {
+            loadingUI.show('Saving PDF with updated metadata...');
             savePdfBtn.disabled = true;
             savePdfBtn.textContent = 'Saving...';
-
             const requestBody = {
                 filePath: selectedFile.path,
                 operation: 'write',
                 metadata: currentMetadata
             };
-
             const endpoint = await API.pdf.metadata;
             const result = await API.request.post(endpoint, requestBody);
-
             if (result instanceof Blob) {
                 const arrayBuffer = await result.arrayBuffer();
                 const defaultName = selectedFile.name.replace('.pdf', '_updated.pdf');
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
-
                 if (savedPath) {
                     showMessage('PDF saved successfully with updated metadata!\nSaved to: ' + savedPath, 'success');
                 } else {
@@ -352,7 +302,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
+            loadingUI.hide();
         } catch (error) {
+            loadingUI.hide();
             console.error('Save PDF Error:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
         } finally {
@@ -361,11 +313,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Form Validation
     function validateForm() {
         let isValid = true;
-        const requiredFields = ['title', 'author']; // Make title and author required
-
+        const requiredFields = ['title', 'author'];
         requiredFields.forEach(field => {
             const input = formElements[field];
             if (input && !input.value.trim()) {
@@ -373,18 +323,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 isValid = false;
             }
         });
-
         return isValid;
     }
 
-    // Clear Input Error State
     function clearInputError(event) {
         if (event.target.classList.contains('error')) {
             event.target.classList.remove('error');
         }
     }
 
-    // Clear All Errors
     function clearErrors() {
         Object.values(formElements).forEach(input => {
             if (input && input.classList.contains('error')) {
@@ -393,7 +340,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Display Error Message
     function displayError(message) {
         Object.values(metaElements).forEach(el => {
             el.textContent = 'Error';
@@ -402,9 +348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         metaElements.title.textContent = message;
     }
 
-    // Show Message
     function showMessage(message, type = 'info') {
-        // Simple message display - you could enhance this with a toast notification
         if (type === 'success') {
             customAlert.alert('LocalPDF Studio - SUCCESS', '✅ ' + message, ['OK']);
         } else {
@@ -412,33 +356,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Clear All Data
     function clearAll() {
         selectedFile = null;
         currentMetadata = null;
         isEditMode = false;
-
         selectedFileInfo.style.display = 'none';
         metadataContainer.style.display = 'none';
         selectPdfBtn.style.display = 'block';
         savePdfBtn.disabled = true;
-
-        // Reset views
         readonlyView.style.display = 'block';
         editableView.style.display = 'none';
         editActions.style.display = 'none';
         editToggleBtn.textContent = 'Edit Metadata';
-
-        // Clear metadata display
         Object.values(metaElements).forEach(el => {
             el.textContent = '';
             el.style.color = '';
         });
-
         clearErrors();
     }
 
-    // Get File Size
     async function getFileSize(filePath) {
         try {
             if (window.electronAPI?.getFileInfo) {
@@ -450,7 +386,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             return 0;
         }
     }
-
-    // Initialize the application
     initializeEventListeners();
 });

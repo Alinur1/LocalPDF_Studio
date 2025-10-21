@@ -1,4 +1,5 @@
 <!-- src/renderer/tools/editMetadata/editMetadata.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,16 +12,13 @@
     <link rel="stylesheet" href="../../styles/main.css">
     <link rel="stylesheet" href="./editMetadata.css">
 </head>
-
 <body>
     <div id="app">
         <div class="top-bar">
             <a href="../../index.html" class="top-btn">← Back</a>
             <h1 class="tool-title">View and Edit Metadata</h1>
         </div>
-
         <main class="tool-container">
-            <!-- File Selection -->
             <div class="file-selection-area">
                 <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
@@ -31,8 +29,6 @@
                     <button id="remove-pdf-btn" class="remove-btn">×</button>
                 </div>
             </div>
-
-            <!-- Metadata Display -->
             <div id="metadata-container" class="metadata-container" style="display: none;">
                 <div class="metadata-header">
                     <h2>PDF Metadata</h2>
@@ -44,8 +40,6 @@
                         <button id="edit-toggle-btn" class="secondary-btn">Edit Metadata</button>
                     </div>
                 </div>
-
-                <!-- Read-only View -->
                 <div id="readonly-view" class="metadata-view">
                     <div class="metadata-grid">
                         <div class="metadata-item">
@@ -86,8 +80,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Editable View -->
                 <div id="editable-view" class="metadata-view" style="display: none;">
                     <form id="metadata-form" class="metadata-form">
                         <div class="form-grid">
@@ -126,15 +118,11 @@
                         </div>
                     </form>
                 </div>
-
-                <!-- Action Buttons for Edit Mode -->
                 <div id="edit-actions" class="action-buttons" style="display: none; margin-top: 1.5rem;">
                     <button id="cancel-edit-btn" class="secondary-btn">Cancel</button>
                     <button id="save-metadata-btn" class="top-btn">Save Metadata</button>
                 </div>
             </div>
-
-            <!-- Action Buttons -->
             <div class="action-buttons">
                 <button id="save-pdf-btn" class="top-btn" disabled>Save PDF with Updated Metadata</button>
             </div>
