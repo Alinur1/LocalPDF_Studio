@@ -13,21 +13,15 @@
     style-src 'self' 'unsafe-inline';
     img-src 'self' data:;
     connect-src 'self' http://localhost:*;">
-
-    <!-- Global theme -->
     <link rel="stylesheet" href="../../styles/main.css">
-
-    <!-- Tool-specific styles -->
     <link rel="stylesheet" href="./compressPdf.css">
 </head>
-
 <body>
     <div id="app">
         <div class="top-bar">
             <a href="../../index.html" class="top-btn">← Back</a>
             <h1 class="tool-title">Compress PDF</h1>
         </div>
-
         <main class="tool-container">
             <div class="file-selection-area">
                 <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
@@ -39,14 +33,12 @@
                     <button id="remove-pdf-btn" class="remove-btn">×</button>
                 </div>
             </div>
-
             <div class="info-section">
                 <div class="info-card">
                     <h3>Notice</h3>
-                    <p>This tool reduces PDF file size only if the PDF file contains too many images.</p>
+                    <p>This feature might not work properly.</p>
                 </div>
             </div>
-
             <div class="compress-options-container">
                 <h2>Compression Settings</h2>
 
@@ -62,7 +54,6 @@
                             </div>
                         </label>
                     </div>
-
                     <div class="quality-option">
                         <label class="radio-label">
                             <input type="radio" name="quality" value="medium">
@@ -72,7 +63,6 @@
                             </div>
                         </label>
                     </div>
-
                     <div class="quality-option">
                         <label class="radio-label">
                             <input type="radio" name="quality" value="low">
@@ -82,7 +72,6 @@
                             </div>
                         </label>
                     </div>
-
                     <div class="quality-option">
                         <label class="radio-label">
                             <input type="radio" name="quality" value="custom">
@@ -92,7 +81,6 @@
                             </div>
                         </label>
                     </div>
-
                     <div id="custom-quality-section" class="custom-quality-section" style="display: none;">
                         <label for="custom-quality-slider">Quality: <span id="quality-value">75</span>%</label>
                         <input type="range" id="custom-quality-slider" min="1" max="100" value="75">
@@ -102,23 +90,18 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="additional-options">
                     <h3>Additional Options</h3>
-
                     <label class="checkbox-label">
                         <input type="checkbox" id="remove-metadata">
                         <span>Remove metadata (author, title, keywords)</span>
                     </label>
-
                     <label class="checkbox-label">
                         <input type="checkbox" id="remove-unused" checked>
                         <span>Remove unused objects and resources</span>
                     </label>
                 </div>
-
             </div>
-
             <div class="action-buttons">
                 <button id="compress-btn" class="top-btn" disabled>Compress PDF</button>
             </div>

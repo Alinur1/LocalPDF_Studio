@@ -2,6 +2,7 @@
 
 import { API } from '../../api/api.js';
 import customAlert from '../../utils/customAlert.js';
+import loadingUI from '../../utils/loading.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await API.init();
@@ -12,20 +13,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const selectedFileInfo = document.getElementById('selected-file-info');
     const pdfNameEl = document.getElementById('pdf-name');
     const pdfSizeEl = document.getElementById('pdf-size');
-
     const qualityRadios = document.querySelectorAll('input[name="quality"]');
     const customQualitySection = document.getElementById('custom-quality-section');
     const customQualitySlider = document.getElementById('custom-quality-slider');
     const qualityValue = document.getElementById('quality-value');
-
     const removeMetadataCheckbox = document.getElementById('remove-metadata');
     const removeUnusedCheckbox = document.getElementById('remove-unused');
-
-
-
     let selectedFile = null;
 
-    // --- File Selection ---
     selectPdfBtn.addEventListener('click', async () => {
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
@@ -63,7 +58,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         compressBtn.disabled = true;
     }
 
-    // --- Quality Selection ---
     qualityRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             if (radio.value === 'custom') {
@@ -78,10 +72,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         qualityValue.textContent = customQualitySlider.value;
     });
 
-
-
-
-
     function getSelectedQuality() {
         const selected = document.querySelector('input[name="quality"]:checked');
         if (selected.value === 'custom') {
@@ -93,50 +83,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         return { level: selected.value };
     }
 
-    // --- Compress PDF ---
     compressBtn.addEventListener('click', async () => {
         if (!selectedFile) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
             return;
         }
-
         const quality = getSelectedQuality();
         const options = buildCompressOptions(quality);
-
         const requestBody = {
             filePath: selectedFile.path,
             options: options
         };
-
         try {
             compressBtn.disabled = true;
             compressBtn.textContent = 'Compressing...';
-            showLoading('Compressing PDF...<br><small>This may take a while for large files</small>');
-
+            loadingUI.show('Compressing PDF...This may take a while for large files.');
             const compressEndpoint = await API.pdf.compress;
             const response = await fetch(compressEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody)
             });
-
             if (!response.ok) {
                 const errText = await response.text();
                 throw new Error(errText || `Request failed with status ${response.status}`);
             }
-
-            // Get compression stats from headers
             const originalSize = parseInt(response.headers.get('X-Original-Size') || '0');
             const compressedSize = parseInt(response.headers.get('X-Compressed-Size') || '0');
             const compressionRatio = parseFloat(response.headers.get('X-Compression-Ratio') || '0');
-
             const result = await response.blob();
             const arrayBuffer = await result.arrayBuffer();
             const defaultName = `${selectedFile.name.replace('.pdf', '')}_compressed.pdf`;
             const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
-
-            hideLoading();
-
+            loadingUI.hide();
             if (savedPath) {
                 const message = originalSize > 0
                     ? `Success! PDF compressed successfully!\n\n` +
@@ -145,13 +124,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `Space Saved: ${compressionRatio.toFixed(1)}%\n\n` +
                     `Saved to: ${savedPath}`
                     : `Success! PDF compressed successfully!\nSaved to: ${savedPath}`;
-
                 await customAlert.alert('LocalPDF Studio - SUCCESS', message, ['OK']);
             } else {
                 await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
             }
         } catch (error) {
-            hideLoading();
+            loadingUI.hide();
             console.error('Error compressing PDF:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while compressing the PDF:\n${error.message}`, ['OK']);
         } finally {
@@ -166,22 +144,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         switch (quality.level) {
             case 'low':
-                qualityEnum = 0; // CompressionQuality.Low
+                qualityEnum = 0;
                 break;
             case 'medium':
-                qualityEnum = 1; // CompressionQuality.Medium
+                qualityEnum = 1;
                 break;
             case 'high':
-                qualityEnum = 2; // CompressionQuality.High
+                qualityEnum = 2;
                 break;
             case 'custom':
-                qualityEnum = 3; // CompressionQuality.Custom
+                qualityEnum = 3;
                 customQuality = quality.value;
                 break;
             default:
                 qualityEnum = 1;
         }
-
         return {
             quality: qualityEnum,
             customQuality: customQuality,
@@ -207,33 +184,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return 0;
         } catch {
             return 0;
-        }
-    }
-
-    // Loading overlay functions
-    function showLoading(message = 'Loading...') {
-        let overlay = document.getElementById('loading-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'loading-overlay';
-            overlay.className = 'loading-overlay';
-            overlay.innerHTML = `
-                <div class="loading-content">
-                    <h3 id="loading-message">${message}</h3>
-                    <div class="loading-spinner"></div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-        } else {
-            document.getElementById('loading-message').innerHTML = message;
-            overlay.style.display = 'flex';
-        }
-    }
-
-    function hideLoading() {
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay) {
-            overlay.style.display = 'none';
         }
     }
 });
