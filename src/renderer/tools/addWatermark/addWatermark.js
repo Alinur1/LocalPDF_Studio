@@ -3,6 +3,7 @@
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
 import customAlert from '../../utils/customAlert.js';
+import loadingUI from '../../utils/loading.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -125,7 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             watermarkPreviewText.style.color = textColor.value;
             watermarkPreviewText.style.opacity = (opacity.value / 100).toString();
             watermarkPreviewText.style.transform = `rotate(${rotation.value}deg)`;
-        } else { // image
+        } else {
             if (imageFile.files && imageFile.files[0]) {
                 watermarkPreviewText.style.display = 'none';
                 watermarkPreviewImage.style.display = 'block';
@@ -168,8 +169,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadPdfPreview(filePath) {
         try {
+            loadingUI.show('Loading PDF preview...');
             previewContainer.style.display = 'block';
-            previewGrid.innerHTML = '<p style="color: #bdc3c7; text-align: center;">Loading preview...</p>';
+            previewGrid.innerHTML = '';
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
             pdfDoc = await loadingTask.promise;
             pageCountEl.textContent = `Total Pages: ${pdfDoc.numPages}`;
@@ -186,6 +188,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error loading PDF:', error);
             previewGrid.innerHTML = '<p style="color: #e74c3c; text-align: center;">Failed to load PDF preview</p>';
+        } finally {
+            loadingUI.hide();
         }
     }
 
@@ -280,6 +284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
+            loadingUI.show('Adding watermark...');
             addBtn.disabled = true;
             addBtn.textContent = 'Adding Watermark...';
 
@@ -316,7 +321,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error("API returned JSON:", result);
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
+            loadingUI.hide();
         } catch (error) {
+            loadingUI.hide();
             console.error('Error:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
         } finally {
