@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let renderedPages = [];
 
     selectPdfBtn.addEventListener('click', async () => {
+        loadingUI.show("Selecting PDF files...");
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileSize = await getFileSize(filePath);
             handleFileSelected({ path: filePath, name: fileName, size: fileSize });
         }
+        loadingUI.hide();
     });
 
     removePdfBtn.addEventListener('click', () => clearAll());

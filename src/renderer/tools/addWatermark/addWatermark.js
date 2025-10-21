@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let renderedPages = [];
 
     selectPdfBtn.addEventListener('click', async () => {
+        loadingUI.show("Selecting PDF files...");
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -52,6 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileSize = await getFileSize(filePath);
             handleFileSelected({ path: filePath, name: fileName, size: fileSize });
         }
+        loadingUI.hide();
     });
 
     removePdfBtn.addEventListener('click', () => clearAll());
@@ -287,9 +289,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadingUI.show('Adding watermark...');
             addBtn.disabled = true;
             addBtn.textContent = 'Adding Watermark...';
-
             let result;
-
             if (watermarkType.value === 'image') {
                 if (!imageFile.files[0]) {
                     await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select an image file for the watermark.', ['OK']);
@@ -320,13 +320,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 console.error("API returned JSON:", result);
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
-            }
-            loadingUI.hide();
+            }            
         } catch (error) {
-            loadingUI.hide();
             console.error('Error:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
         } finally {
+            loadingUI.hide();
             addBtn.disabled = false;
             addBtn.textContent = 'Add Watermark';
         }

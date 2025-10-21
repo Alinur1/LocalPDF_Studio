@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let totalPages = 0;
 
     selectPdfBtn.addEventListener('click', async () => {
+        loadingUI.show("Selecting PDF files...");
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -45,6 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileSize = await getFileSize(filePath);
             handleFileSelected({ path: filePath, name: fileName, size: fileSize });
         }
+        loadingUI.hide();
     });
 
     removePdfBtn.addEventListener('click', () => clearAll());
@@ -308,23 +310,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const arrayBuffer = await result.arrayBuffer();
                 const defaultName = `${selectedFile.name.replace('.pdf', '')}_removed_pages.pdf`;
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
-
-                loadingUI.hide();
                 if (savedPath) {
                     await customAlert.alert('LocalPDF Studio - SUCCESS', `Success! Pages removed successfully!\nSaved to: ${savedPath}`, ['OK']);
                 } else {
                     await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
                 }
             } else {
-                loadingUI.hide();
                 console.error("Remove API returned JSON:", result);
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
-        } catch (error) {
-            loadingUI.hide();
+        } catch (error) {            
             console.error('Error removing pages:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while removing pages:\n${error.message}`, ['OK']);
         } finally {
+            loadingUI.hide();
             removeBtn.disabled = false;
             removeBtn.textContent = 'Remove Pages';
         }

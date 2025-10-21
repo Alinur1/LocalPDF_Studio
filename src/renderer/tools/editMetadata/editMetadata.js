@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function handleFileSelection() {
         try {
-            loadingUI.show('Selecting file...');
+            loadingUI.show("Selecting PDF files...");
             const files = await window.electronAPI.selectPdfs();
             if (files && files.length > 0) {
                 const filePath = files[0];
@@ -302,12 +302,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
-            loadingUI.hide();
-        } catch (error) {
-            loadingUI.hide();
+        } catch (error) {            
             console.error('Save PDF Error:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
         } finally {
+            loadingUI.hide();
             savePdfBtn.disabled = false;
             savePdfBtn.textContent = 'Save PDF with Updated Metadata';
         }

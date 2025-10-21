@@ -152,20 +152,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a PDF file first.', ['OK']);
             return;
         }
-
         if (!validateForm()) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please fill in all required fields correctly.', ['OK']);
             return;
         }
-
         const selectedOperation = document.querySelector('input[name="operation"]:checked').value;
 
-        try {
-            const loadingMessage = selectedOperation === 'lock' ? 'Locking PDF...' : 'Unlocking PDF...';
-            loadingUI.show(loadingMessage);
+        try {            
+            const loadingMessage = selectedOperation === 'lock' ? 'Locking PDF...' : 'Unlocking PDF...';   
+            loadingUI.show(loadingMessage);         
             processBtn.disabled = true;
             processBtn.textContent = selectedOperation === 'lock' ? 'Locking...' : 'Unlocking...';
-
             const requestBody = {
                 filePath: selectedFile.path,
                 operation: selectedOperation
@@ -210,9 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
-            loadingUI.hide();
-        } catch (error) {
-            loadingUI.hide();
+        } catch (error) {            
             console.error(`${selectedOperation === 'lock' ? 'Lock' : 'Unlock'} Error:`, error);
             if (error.message.includes('password') || error.message.includes('Password')) {
                 await customAlert.alert('LocalPDF Studio - WARNING', 'Incorrect password. Please check the password and try again.', ['OK']);
@@ -224,6 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
             }
         } finally {
+            loadingUI.hide();
             processBtn.disabled = false;
             processBtn.textContent = selectedOperation === 'lock' ? 'Lock PDF' : 'Unlock PDF';
         }

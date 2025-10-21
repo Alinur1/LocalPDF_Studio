@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let renderedPages = [];
 
     selectPdfBtn.addEventListener('click', async () => {
+        loadingUI.show("Selecting PDF files...");
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -41,6 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileSize = await getFileSize(filePath);
             handleFileSelected({ path: filePath, name: fileName, size: fileSize });
         }
+        loadingUI.hide();
     });
 
     removePdfBtn.addEventListener('click', () => clearAll());
@@ -203,11 +205,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadingUI.show('Cropping PDF...');
             cropBtn.disabled = true;
             cropBtn.textContent = 'Cropping...';
-
             const endpoint = await API.pdf.crop;
             const result = await API.request.post(endpoint, requestBody);
-
-            loadingUI.hide();
             if (result instanceof Blob) {
                 const arrayBuffer = await result.arrayBuffer();
                 const defaultName = selectedFile.name.replace('.pdf', '_cropped.pdf');
@@ -220,11 +219,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
-        } catch (error) {
-            loadingUI.hide();
+        } catch (error) {            
             console.error('Crop Error:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
         } finally {
+            loadingUI.hide();
             cropBtn.disabled = false;
             cropBtn.textContent = 'Crop PDF';
         }

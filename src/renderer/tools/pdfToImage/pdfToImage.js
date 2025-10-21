@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let renderedPages = [];
 
     selectPdfBtn.addEventListener('click', async () => {
+        loadingUI.show("Selecting PDF files...");
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileSize = await getFileSize(filePath);
             handleFileSelected({ path: filePath, name: fileName, size: fileSize });
         }
+        loadingUI.hide();
     });
 
     removePdfBtn.addEventListener('click', () => clearAll());
@@ -154,11 +156,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadingUI.show('Converting PDF to images...');
             convertBtn.disabled = true;
             convertBtn.textContent = 'Converting...';
-
             const convertEndpoint = await API.pdf.toJpg;
-            const result = await API.request.post(convertEndpoint, requestBody);
-
-            loadingUI.hide();
+            const result = await API.request.post(convertEndpoint, requestBody);            
             if (result instanceof Blob) {
                 const arrayBuffer = await result.arrayBuffer();
 
@@ -176,11 +175,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error("Convert API returned JSON:", result);
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
-        } catch (error) {
-            loadingUI.hide();
+        } catch (error) {            
             console.error('Error converting PDF:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while converting the PDF:\n${error.message}`, ['OK']);
         } finally {
+            loadingUI.hide();
             convertBtn.disabled = false;
             convertBtn.textContent = 'Convert to Image';
         }

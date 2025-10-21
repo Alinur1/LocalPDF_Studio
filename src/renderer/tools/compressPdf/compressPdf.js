@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedFile = null;
 
     selectPdfBtn.addEventListener('click', async () => {
+        loadingUI.show("Selecting PDF files...");
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileSize = await getFileSize(filePath);
             handleFileSelected({ path: filePath, name: fileName, size: fileSize });
         }
+        loadingUI.hide();
     });
 
     removePdfBtn.addEventListener('click', () => clearAll());
@@ -95,9 +97,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             options: options
         };
         try {
-            compressBtn.disabled = true;
-            compressBtn.textContent = 'Compressing...';
             loadingUI.show('Compressing PDF...This may take a while for large files.');
+            compressBtn.disabled = true;
+            compressBtn.textContent = 'Compressing...';            
             const compressEndpoint = await API.pdf.compress;
             const response = await fetch(compressEndpoint, {
                 method: 'POST',
@@ -115,7 +117,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const arrayBuffer = await result.arrayBuffer();
             const defaultName = `${selectedFile.name.replace('.pdf', '')}_compressed.pdf`;
             const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
-            loadingUI.hide();
             if (savedPath) {
                 const message = originalSize > 0
                     ? `Success! PDF compressed successfully!\n\n` +
@@ -128,11 +129,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
             }
-        } catch (error) {
-            loadingUI.hide();
+        } catch (error) {            
             console.error('Error compressing PDF:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while compressing the PDF:\n${error.message}`, ['OK']);
         } finally {
+            loadingUI.hide();
             compressBtn.disabled = false;
             compressBtn.textContent = 'Compress PDF';
         }

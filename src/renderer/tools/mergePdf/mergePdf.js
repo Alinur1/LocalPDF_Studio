@@ -15,8 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const { addFiles, clearAll, getFiles, destroy } = createPdfList(listContainer);
 
     selectBtn.addEventListener('click', async () => {
+        loadingUI.show("Selecting PDF files...");
         const selected = await window.electronAPI.selectPdfs();
         if (selected?.length) addFiles(selected);
+        loadingUI.hide();
     });
 
     clearBtn.addEventListener('click', () => {
@@ -62,7 +64,7 @@ function createPdfList(container) {
     const listItemCleanup = new Map();
 
     async function addFiles(paths) {
-        loadingUI.show('Generating previews...');
+        loadingUI.show('Loading PDF preview...');
         try {
             const thumbnailPromises = [];
 

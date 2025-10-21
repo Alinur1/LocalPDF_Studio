@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentMode = 'extract';
 
     selectPdfBtn.addEventListener('click', async () => {
+        loadingUI.show("Selecting PDF files...");
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -48,6 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileSize = await getFileSize(filePath);
             handleFileSelected({ path: filePath, name: fileName, size: fileSize });
         }
+        loadingUI.hide();
     });
 
     removePdfBtn.addEventListener('click', () => clearAll());
@@ -313,12 +315,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error("API returned JSON:", result);
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
-            loadingUI.hide();
-        } catch (error) {
-            loadingUI.hide();
+        } catch (error) {            
             console.error('Error processing images:', error);
-            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
+            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred.`, ['OK']);
         } finally {
+            loadingUI.hide();
             processBtn.disabled = false;
             processBtn.textContent = currentMode === 'extract' ? 'Extract Images' : 'Remove Images';
         }
