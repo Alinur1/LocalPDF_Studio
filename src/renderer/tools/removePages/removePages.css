@@ -79,7 +79,6 @@
     background: #c0392b;
 }
 
-/* Preview Container */
 .preview-container {
     background: #2c3e50;
     padding: 1.5rem;
@@ -234,7 +233,6 @@
     font-weight: bold;
 }
 
-/* Remove Options */
 .remove-options-container {
     background: #2c3e50;
     padding: 1.5rem;
@@ -300,7 +298,6 @@
     margin-top: 0.3rem;
 }
 
-/* Quick Actions */
 .quick-actions {
     display: flex;
     gap: 0.5rem;
@@ -323,7 +320,6 @@
     border-color: #2980b9;
 }
 
-/* Pattern Options */
 .pattern-options {
     display: flex;
     flex-direction: column;
@@ -349,7 +345,6 @@
     margin-top: 1rem;
 }
 
-/* Action Buttons */
 .action-buttons {
     display: flex;
     justify-content: flex-end;

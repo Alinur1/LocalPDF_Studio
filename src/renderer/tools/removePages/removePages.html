@@ -13,27 +13,19 @@
     style-src 'self' 'unsafe-inline';
     img-src 'self' data:;
     connect-src 'self' http://localhost:*;">
-
-    <!-- PDF.js (local) -->
     <script type="module">
         import * as pdfjsLib from '../../pdf/build/pdf.mjs';
         window.pdfjsLib = pdfjsLib;
     </script>
-
-    <!-- Global theme -->
     <link rel="stylesheet" href="../../styles/main.css">
-
-    <!-- Tool-specific styles -->
     <link rel="stylesheet" href="./removePages.css">
 </head>
-
 <body>
     <div id="app">
         <div class="top-bar">
             <a href="../../index.html" class="top-btn">← Back</a>
             <h1 class="tool-title">Remove PDF Pages</h1>
         </div>
-
         <main class="tool-container">
             <div class="file-selection-area">
                 <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File</button>
@@ -45,8 +37,6 @@
                     <button id="remove-pdf-btn" class="remove-btn">×</button>
                 </div>
             </div>
-
-            <!-- PDF Preview Section with Page Selection -->
             <div id="preview-container" class="preview-container" style="display: none;">
                 <div class="preview-header">
                     <div>
@@ -60,13 +50,10 @@
                     </div>
                 </div>
                 <div id="preview-grid" class="preview-grid">
-                    <!-- Thumbnails will be inserted here -->
                 </div>
             </div>
-
             <div class="remove-options-container">
                 <h2>Removal Options</h2>
-
                 <div class="option-group">
                     <h3>Quick Actions</h3>
                     <div class="quick-actions">
@@ -75,21 +62,18 @@
                         <button class="quick-action-btn" id="invert-selection">Invert Selection</button>
                     </div>
                 </div>
-
                 <div class="option-group">
                     <h3>Specify Pages Manually</h3>
                     <label for="manual-pages">Individual Pages:</label>
                     <input type="text" id="manual-pages" class="options-input" placeholder="e.g., 1, 3, 5, 10">
                     <small class="help-text">Enter page numbers separated by commas</small>
                 </div>
-
                 <div class="option-group">
                     <h3>Remove Page Ranges</h3>
                     <label for="page-ranges">Page Ranges:</label>
                     <input type="text" id="page-ranges" class="options-input" placeholder="e.g., 1-3, 7-9, 15-20">
                     <small class="help-text">Enter ranges like "1-5, 10-15"</small>
                 </div>
-
                 <div class="option-group">
                     <h3>Pattern-Based Removal</h3>
                     <div class="pattern-options">
@@ -102,7 +86,6 @@
                             Remove all odd pages
                         </label>
                     </div>
-
                     <div class="every-nth-option">
                         <label for="every-nth-page">Remove every Nth page:</label>
                         <div style="display: flex; gap: 1rem; align-items: center;">
@@ -117,7 +100,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="action-buttons">
                 <button id="preview-btn" class="top-btn secondary" disabled>Preview Changes</button>
                 <button id="remove-btn" class="top-btn" disabled>Remove Pages</button>

@@ -3,6 +3,7 @@
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
 import customAlert from '../../utils/customAlert.js';
+import loadingUI from '../../utils/loading.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -21,27 +22,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pageCountEl = document.getElementById('page-count');
     const selectionInfoEl = document.getElementById('selection-info');
     const clearSelectionBtn = document.getElementById('clear-selection-btn');
-
-    // Quick action buttons
     const selectEvenBtn = document.getElementById('select-even-pages');
     const selectOddBtn = document.getElementById('select-odd-pages');
     const invertSelectionBtn = document.getElementById('invert-selection');
-
-    // Input fields
     const manualPagesInput = document.getElementById('manual-pages');
     const pageRangesInput = document.getElementById('page-ranges');
     const removeEvenCheckbox = document.getElementById('remove-even-pages');
     const removeOddCheckbox = document.getElementById('remove-odd-pages');
     const everyNthInput = document.getElementById('every-nth-page');
     const startFromInput = document.getElementById('start-from-page');
-
     let selectedFile = null;
     let pdfDoc = null;
     let renderedPages = [];
     let selectedPages = new Set();
     let totalPages = 0;
 
-    // --- File Selection ---
     selectPdfBtn.addEventListener('click', async () => {
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
@@ -76,8 +71,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadPdfPreview(filePath) {
         try {
+            loadingUI.show('Loading PDF preview...');
             previewContainer.style.display = 'block';
-            previewGrid.innerHTML = '<p style="color: #bdc3c7; text-align: center;">Loading preview...</p>';
+            previewGrid.innerHTML = '';
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
             pdfDoc = await loadingTask.promise;
             totalPages = pdfDoc.numPages;
@@ -89,6 +85,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error loading PDF:', error);
             previewGrid.innerHTML = '<p style="color: #e74c3c; text-align: center;">Failed to load PDF preview</p>';
+        } finally {
+            loadingUI.hide();
         }
     }
 
@@ -113,7 +111,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         thumbWrapper.appendChild(canvas);
         thumbWrapper.appendChild(pageLabel);
 
-        // Click to toggle selection
         thumbWrapper.addEventListener('click', () => {
             togglePageSelection(pageNum, thumbWrapper);
         });
@@ -159,7 +156,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateButtonStates();
     });
 
-    // Quick Actions
     selectEvenBtn.addEventListener('click', () => {
         for (let i = 2; i <= totalPages; i += 2) {
             selectedPages.add(i);
@@ -218,8 +214,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         totalPages = 0;
         selectedFileInfo.style.display = 'none';
         selectPdfBtn.style.display = 'block';
-
-        // Clear all inputs
         manualPagesInput.value = '';
         pageRangesInput.value = '';
         removeEvenCheckbox.checked = false;
@@ -256,13 +250,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         previewBtn.disabled = !hasFile || !hasSelection;
     }
 
-    // Update button states on input changes
     [manualPagesInput, pageRangesInput, removeEvenCheckbox, removeOddCheckbox, everyNthInput, startFromInput].forEach(input => {
         input.addEventListener('input', updateButtonStates);
         input.addEventListener('change', updateButtonStates);
     });
 
-    // Preview Changes
     previewBtn.addEventListener('click', () => {
         const pagesToRemove = collectPagesToRemove();
         if (pagesToRemove.size === 0) {
@@ -279,7 +271,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         customAlert.alert('LocalPDF Studio - NOTICE', `Preview:\n\nPages to remove: ${sortedPages.join(', ')}\nTotal pages to remove: ${pagesToRemove.size}\nRemaining pages: ${remaining}`, ['OK']);
     });
 
-    // Remove Pages
     removeBtn.addEventListener('click', async () => {
         if (!selectedFile) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
@@ -306,6 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
+            loadingUI.show('Removing pages...');
             removeBtn.disabled = true;
             removeBtn.textContent = 'Removing...';
 
@@ -317,16 +309,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const defaultName = `${selectedFile.name.replace('.pdf', '')}_removed_pages.pdf`;
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
 
+                loadingUI.hide();
                 if (savedPath) {
                     await customAlert.alert('LocalPDF Studio - SUCCESS', `Success! Pages removed successfully!\nSaved to: ${savedPath}`, ['OK']);
                 } else {
                     await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
                 }
             } else {
+                loadingUI.hide();
                 console.error("Remove API returned JSON:", result);
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {
+            loadingUI.hide();
             console.error('Error removing pages:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while removing pages:\n${error.message}`, ['OK']);
         } finally {
@@ -337,15 +332,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function collectPagesToRemove() {
         const pagesToRemove = new Set(selectedPages);
-
-        // Add manually entered pages
         const manualPages = manualPagesInput.value.trim();
         if (manualPages) {
             const pages = manualPages.split(',').map(p => parseInt(p.trim())).filter(p => !isNaN(p) && p >= 1 && p <= totalPages);
             pages.forEach(p => pagesToRemove.add(p));
         }
-
-        // Add pages from ranges
         const ranges = pageRangesInput.value.trim();
         if (ranges) {
             const rangeList = ranges.split(',').map(r => r.trim());
@@ -363,21 +354,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // Add even pages if checked
         if (removeEvenCheckbox.checked) {
             for (let i = 2; i <= totalPages; i += 2) {
                 pagesToRemove.add(i);
             }
         }
-
-        // Add odd pages if checked
         if (removeOddCheckbox.checked) {
             for (let i = 1; i <= totalPages; i += 2) {
                 pagesToRemove.add(i);
             }
         }
-
-        // Add every Nth page
         const everyNth = parseInt(everyNthInput.value);
         if (!isNaN(everyNth) && everyNth > 0) {
             const startFrom = parseInt(startFromInput.value) || everyNth;
@@ -385,17 +371,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 pagesToRemove.add(i);
             }
         }
-
         return pagesToRemove;
     }
 
     function buildRemoveOptions(pagesToRemove) {
         const options = {};
-
-        // Convert Set to arrays for the API
         const pagesArray = Array.from(pagesToRemove).sort((a, b) => a - b);
-
-        // Build page ranges for efficiency
         const ranges = [];
         const individualPages = [];
 
@@ -411,7 +392,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else if (currentPage === rangeEnd + 1) {
                 rangeEnd = currentPage;
             } else {
-                // Save the current range
                 if (rangeEnd - rangeStart >= 2) {
                     ranges.push(`${rangeStart}-${rangeEnd}`);
                 } else {
@@ -423,8 +403,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 rangeEnd = currentPage;
             }
         }
-
-        // Don't forget the last range
         if (rangeStart !== null) {
             if (rangeEnd - rangeStart >= 2) {
                 ranges.push(`${rangeStart}-${rangeEnd}`);
@@ -434,18 +412,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
         }
-
         if (individualPages.length > 0) {
             options.pages = individualPages;
         }
-
         if (ranges.length > 0) {
             options.pageRanges = ranges;
         }
-
-        // Note: We're not sending the checkbox values separately since we've already
-        // collected all pages to remove in the pagesToRemove Set
-
         return options;
     }
 });
