@@ -1,6 +1,7 @@
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import { API } from '../../api/api.js';
 import customAlert from '../../utils/customAlert.js';
+import loadingUI from '../../utils/loading.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -19,26 +20,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pageCountEl = document.getElementById('page-count');
     const selectionInfoEl = document.getElementById('selection-info');
     const clearSelectionBtn = document.getElementById('clear-selection-btn');
-
-    // Mode selection
     const operationModeRadios = document.querySelectorAll('input[name="operation-mode"]');
     const extractInfo = document.getElementById('extract-info');
     const removeInfo = document.getElementById('remove-info');
     const extractOptions = document.getElementById('extract-options');
-
-    // Quick action buttons
     const selectAllBtn = document.getElementById('select-all-pages');
     const selectEvenBtn = document.getElementById('select-even-pages');
     const selectOddBtn = document.getElementById('select-odd-pages');
     const invertSelectionBtn = document.getElementById('invert-selection');
-
-    // Input fields
     const manualPagesInput = document.getElementById('manual-pages');
     const pageRangesInput = document.getElementById('page-ranges');
     const preserveQualityCheckbox = document.getElementById('preserve-quality');
     const preserveFormatCheckbox = document.getElementById('preserve-format');
     const preserveMetadataCheckbox = document.getElementById('preserve-metadata');
-
     let selectedFile = null;
     let pdfDoc = null;
     let renderedPages = [];
@@ -46,7 +40,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let totalPages = 0;
     let currentMode = 'extract';
 
-    // --- File Selection ---
     selectPdfBtn.addEventListener('click', async () => {
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
@@ -81,8 +74,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadPdfPreview(filePath) {
         try {
+            loadingUI.show('Loading PDF preview...');
             previewContainer.style.display = 'block';
-            previewGrid.innerHTML = '<p style="color: #bdc3c7; text-align: center;">Loading preview...</p>';
+            previewGrid.innerHTML = '';
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
             pdfDoc = await loadingTask.promise;
             totalPages = pdfDoc.numPages;
@@ -94,6 +88,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error loading PDF:', error);
             previewGrid.innerHTML = '<p style="color: #e74c3c; text-align: center;">Failed to load PDF preview</p>';
+        } finally {
+            loadingUI.hide();
         }
     }
 
@@ -106,22 +102,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         canvas.height = viewport.height;
         canvas.width = viewport.width;
         await page.render({ canvasContext: context, viewport }).promise;
-
         const thumbWrapper = document.createElement('div');
         thumbWrapper.className = 'page-thumbnail';
         thumbWrapper.dataset.pageNum = pageNum;
-
         const pageLabel = document.createElement('div');
         pageLabel.className = 'page-label';
         pageLabel.textContent = `Page ${pageNum}`;
-
         thumbWrapper.appendChild(canvas);
         thumbWrapper.appendChild(pageLabel);
-
         thumbWrapper.addEventListener('click', () => {
             togglePageSelection(pageNum, thumbWrapper);
         });
-
         previewGrid.appendChild(thumbWrapper);
         renderedPages.push(canvas);
     }
@@ -163,7 +154,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateButtonStates();
     });
 
-    // --- Quick Actions ---
     selectAllBtn.addEventListener('click', () => {
         for (let i = 1; i <= totalPages; i++) {
             selectedPages.add(i);
@@ -215,7 +205,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateButtonStates();
     });
 
-    // --- Mode Selection ---
     operationModeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             currentMode = e.target.value;
@@ -238,7 +227,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // --- Input Field Listeners ---
     [manualPagesInput, pageRangesInput].forEach(input => {
         input.addEventListener('input', updateButtonStates);
         input.addEventListener('change', updateButtonStates);
@@ -254,20 +242,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         previewBtn.disabled = !hasFile || !hasSelection;
     }
 
-    // --- Preview Selection ---
     previewBtn.addEventListener('click', () => {
         const pagesToProcess = collectPagesToProcess();
         if (pagesToProcess.size === 0) {
             customAlert.alert('LocalPDF Studio - NOTICE', 'No pages selected.', ['OK']);
             return;
         }
-
         const sortedPages = Array.from(pagesToProcess).sort((a, b) => a - b);
         const modeText = currentMode === 'extract' ? 'extract images from' : 'remove images from';
         customAlert.alert('LocalPDF Studio - NOTICE', `Preview:\n\nPages to ${modeText}: ${sortedPages.join(', ')}\nTotal pages: ${pagesToProcess.size}`, ['OK']);
     });
 
-    // --- Process Images ---
     processBtn.addEventListener('click', async () => {
         if (!selectedFile) {
             await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
@@ -289,6 +274,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
+            const loadingMessage = currentMode === 'extract' ? 'Extracting images...' : 'Removing images...';
+            loadingUI.show(loadingMessage);
             processBtn.disabled = true;
             const originalText = processBtn.textContent;
             processBtn.textContent = currentMode === 'extract' ? 'Extracting...' : 'Removing...';
@@ -301,10 +288,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const result = await API.request.post(endpoint, requestBody);
-
             if (result instanceof Blob) {
                 const arrayBuffer = await result.arrayBuffer();
-
                 if (currentMode === 'extract') {
                     const defaultName = `${selectedFile.name.replace('.pdf', '')}_extracted_images.zip`;
                     const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
@@ -328,7 +313,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error("API returned JSON:", result);
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
+            loadingUI.hide();
         } catch (error) {
+            loadingUI.hide();
             console.error('Error processing images:', error);
             await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
         } finally {
@@ -463,7 +450,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             return 0;
         }
     }
-
-    // Initialize mode UI
     updateModeUI();
 });

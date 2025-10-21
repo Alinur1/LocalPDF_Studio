@@ -79,7 +79,6 @@
     background: #c0392b;
 }
 
-/* Preview Container */
 .preview-container {
     background: #2c3e50;
     padding: 1.5rem;
@@ -234,7 +233,6 @@
     font-weight: bold;
 }
 
-/* Options Container */
 .options-container {
     background: #2c3e50;
     padding: 1.5rem;
@@ -251,7 +249,6 @@
     padding-bottom: 0.8rem;
 }
 
-/* Mode Selection */
 .mode-selection {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -371,7 +368,6 @@
     margin-top: 0.3rem;
 }
 
-/* Quick Actions */
 .quick-actions {
     display: flex;
     gap: 0.5rem;
@@ -394,7 +390,6 @@
     border-color: #2980b9;
 }
 
-/* Extract Settings */
 .extract-settings {
     display: flex;
     flex-direction: column;
@@ -415,7 +410,6 @@
     cursor: pointer;
 }
 
-/* Info Box */
 .info-box {
     display: flex;
     gap: 1rem;
@@ -446,7 +440,6 @@
     color: #e67e22;
 }
 
-/* Action Buttons */
 .action-buttons {
     display: flex;
     justify-content: flex-end;
