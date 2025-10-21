@@ -17,7 +17,6 @@
     max-width: 100%;
 }
 
-/* --- File Selection --- */
 .file-selection-area .select-pdf-btn {
     color: #ecf0f1;
     width: 100%;
@@ -54,7 +53,6 @@
     margin-top: 0.3rem;
 }
 
-/* --- Options Containers --- */
 .options-container {
     background: #2c3e50;
     padding: 1.5rem;
@@ -85,7 +83,6 @@
     font-weight: 500;
 }
 
-/* --- Radio Groups --- */
 .radio-group {
     display: flex;
     gap: 1rem;
@@ -108,7 +105,6 @@
     font-weight: 600;
 }
 
-/* --- Password Inputs --- */
 .password-input-group {
     position: relative;
     display: flex;
@@ -148,7 +144,6 @@
     background: rgba(52, 152, 219, 0.1);
 }
 
-/* --- Permissions Grid --- */
 .permissions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -177,7 +172,6 @@
     margin: 0;
 }
 
-/* --- Select Input --- */
 .options-select {
     background: #1c2833;
     border: 1px solid #34495e;
@@ -194,7 +188,6 @@
     border-color: #3498db;
 }
 
-/* --- Help Text --- */
 .help-text {
     display: block;
     font-size: 0.8rem;
@@ -202,7 +195,6 @@
     margin-top: 0.3rem;
 }
 
-/* --- Actions --- */
 .action-buttons {
     display: flex;
     justify-content: flex-end;
@@ -236,7 +228,6 @@
     background: #c0392b;
 }
 
-/* Security Status Indicators */
 .security-locked {
     color: #e74c3c;
 }
@@ -245,7 +236,6 @@
     color: #2ecc71;
 }
 
-/* Error States */
 .password-input.error {
     border-color: #e74c3c;
     background: #2d1b1c;
