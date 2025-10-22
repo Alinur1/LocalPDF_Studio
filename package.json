@@ -1,15 +1,56 @@
 {
   "name": "LocalPDF_Studio",
   "version": "1.0.0",
+  "description": "Offline, open-source, privacy-first PDF toolkit",
   "main": "src/main/main.js",
+  "author": "Md. Alinur Hossain",
+  "license": "MPL-2.0",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
-    "electron": "^38.3.0"
+    "electron": "^38.3.0",
+    "electron-builder": "^24.6.0"
+  },
+  "build": {
+    "appId": "com.localpdfstudio.app",
+    "productName": "LocalPDF Studio",
+    "directories": {
+      "output": "build",
+      "buildResources": "assets/icons"
+    },
+    "files": [
+      "src/**/*",
+      "assets/icons/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "assets/",
+        "to": "assets/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "assets/backend_windows/**",
+      "assets/backend_linux/**",
+      "assets/backend_macos/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icons/app_icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }
