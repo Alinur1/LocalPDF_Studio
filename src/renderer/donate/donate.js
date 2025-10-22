@@ -1,5 +1,7 @@
 // src/renderer/donate/donate.js
 
+import customAlert from '../utils/customAlert.js';
+
 class DonationManager {
     constructor() {
         this.initialized = false;
@@ -110,7 +112,7 @@ class DonationManager {
     async copyToClipboard(text) {
         try {
             await navigator.clipboard.writeText(text);
-            this.showAlert('Success', 'Share link copied to clipboard! 📋\n\nYou can now paste it anywhere to share.', ['OK']);
+            this.showAlert('Success', 'Share link copied to clipboard! 📋\n\nYou can now paste it anywhere to share.\n\nLink: https://github.com/Alinur1/LocalPDF_Studio', ['OK']);
         } catch (err) {
             this.showAlert('Share', `Share this link:\n\n${text}\n\nCopy and share with others!`, ['OK']);
         }
@@ -125,8 +127,8 @@ class DonationManager {
     }
 
     showAlert(title, message, buttons = ['OK']) {
-        if (window.customAlert && typeof window.customAlert.alert === 'function') {
-            window.customAlert.alert(title, message, buttons);
+        if (customAlert && typeof customAlert.alert === 'function') {
+            customAlert.alert(title, message, buttons);
         } else {
             alert(`${title}\n\n${message}`);
         }
