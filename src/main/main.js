@@ -33,7 +33,8 @@ function startBackend() {
                 return;
         }
 
-        const backendPath = path.join(app.getAppPath(), backendDir, backendFile);
+        const appPath = app.isPackaged ? process.resourcesPath : app.getAppPath();
+        const backendPath = path.join(appPath, backendDir, backendFile);
 
         // Check if backend exists
         if (!fs.existsSync(backendPath)) {
