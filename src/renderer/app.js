@@ -161,8 +161,14 @@ window.addEventListener('DOMContentLoaded', () => {
         try {
             const state = JSON.parse(saved);
             if (restoreSetting === 'restore' && state.tabs && Array.isArray(state.tabs)) {
+                // Disable saving during restoration
+                const originalOnTabChange = manager.onTabChange;
+                const originalOnTabReorder = manager.onTabReorder;
+                manager.onTabChange = null;
+                manager.onTabReorder = null;
+
                 for (const tab of state.tabs) {
-                    createPdfTab(tab.filePath, manager);
+                    createPdfTab(tab.filePath, manager, tab.id);
                 }
                 if (state.tabOrder && Array.isArray(state.tabOrder)) {
                     manager.restoreTabOrder(state.tabOrder);
@@ -170,6 +176,11 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (state.activeTabId) {
                     manager.switchTab(state.activeTabId);
                 }
+
+                // Re-enable saving and save the final state
+                manager.onTabChange = originalOnTabChange;
+                manager.onTabReorder = originalOnTabReorder;
+                saveTabs(manager); // Save the correct state once everything is restored
             }
         } catch (err) {
             console.error('Failed to restore tabs:', err);

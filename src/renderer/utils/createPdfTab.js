@@ -1,7 +1,7 @@
 // src/renderer/utils/createPdfTab.js
 
-export default function createPdfTab(filePath, tabManager) {
-    const tabId = `pdf:${filePath}:${Date.now()}`;
+export default function createPdfTab(filePath, tabManager, existingId = null) {
+    const tabId = existingId || `pdf:${filePath}:${Date.now()}`;
     const title = filePath.split(/[\\/]/).pop();
 
     const iframe = document.createElement('iframe');
