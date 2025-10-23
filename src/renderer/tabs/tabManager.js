@@ -6,8 +6,7 @@ export default class TabManager {
         this.tabContent = document.querySelector(tabContentSelector);
         this.tabs = new Map();
         this.activeTabId = null;
-
-        // Callbacks for persistence
+        this.navigationHistory = [];
         this.onTabChange = null;
         this.onTabClose = null;
         this.onTabReorder = null;
@@ -189,6 +188,11 @@ export default class TabManager {
 
     switchTab(id) {
         if (!this.tabs.has(id)) return;
+
+        // Update navigation history
+        this.navigationHistory = this.navigationHistory.filter(tabId => tabId !== id);
+        this.navigationHistory.push(id);
+
         for (const [_, tab] of this.tabs) {
             tab.tabButton.classList.remove('active');
             tab.contentWrapper.style.display = 'none';
@@ -212,12 +216,21 @@ export default class TabManager {
         tab.contentWrapper.remove();
         this.tabs.delete(id);
 
+        // Remove from history
+        this.navigationHistory = this.navigationHistory.filter(tabId => tabId !== id);
+
         if (this.activeTabId === id) {
-            const remaining = Array.from(this.tabs.keys());
-            if (remaining.length > 0) {
-                this.switchTab(remaining[0]);
+            if (this.navigationHistory.length > 0) {
+                // Switch to the last tab in the history
+                this.switchTab(this.navigationHistory[this.navigationHistory.length - 1]);
             } else {
-                this.activeTabId = null;
+                // Fallback to the first remaining tab if history is empty
+                const remaining = Array.from(this.tabs.keys());
+                if (remaining.length > 0) {
+                    this.switchTab(remaining[0]);
+                } else {
+                    this.activeTabId = null;
+                }
             }
         }
 
