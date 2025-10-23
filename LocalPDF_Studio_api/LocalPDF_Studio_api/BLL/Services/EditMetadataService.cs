@@ -282,9 +282,9 @@ namespace LocalPDF_Studio_api.BLL.Services
                 UpdateMetadataValue(info, "/Producer", request.Metadata.Producer);
 
                 // Set modification date to current time in PDF format
-                var now = DateTime.Now;
-                var modDate = now.ToString("D:yyyyMMddHHmmsszzz").Replace(":", "'") + "'";
-                info.Elements.SetString("/ModDate", modDate);
+                //var now = DateTime.Now;
+                //var modDate = now.ToString("D:yyyyMMddHHmmsszzz").Replace(":", "'") + "'";
+                //info.Elements.SetString("/ModDate", modDate);
 
                 // Save to memory stream and get bytes
                 using var memoryStream = new MemoryStream();
@@ -297,7 +297,8 @@ namespace LocalPDF_Studio_api.BLL.Services
                 return new MetadataResponse
                 {
                     Success = true,
-                    Message = "Metadata updated successfully"
+                    Message = "Metadata updated successfully",
+                    PdfBytes = pdfBytes
                 };
             }
             catch (PdfReaderException ex) when (ex.Message.Contains("password"))

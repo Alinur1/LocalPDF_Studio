@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Pdf.IO;
 using LocalPDF_Studio_api.BLL.Interfaces;
 using LocalPDF_Studio_api.DAL.Models.EditMetadataModel;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace LocalPDF_Studio_api.Controllers
 {
@@ -43,30 +43,15 @@ namespace LocalPDF_Studio_api.Controllers
                     return BadRequest(result.Message);
                 }
 
-                // For write operations, the service should return the PDF bytes
-                // But since our current service interface returns MetadataResponse,
-                // we need to modify the approach
-
                 if (request.Operation.ToLower() == "write")
                 {
-                    // Create a simple write operation that doesn't conflict with the service
-                    var outputName = Path.GetFileNameWithoutExtension(request.FilePath) + "_updated.pdf";
-                    var tempFilePath = Path.GetTempFileName() + ".pdf";
-
-                    using (var document = PdfReader.Open(request.FilePath, PdfDocumentOpenMode.Modify))
+                    if (result.PdfBytes == null)
                     {
-                        var info = document.Info;
-
-                        // Apply metadata updates using proper PDF keys with slash prefix
-                        UpdateMetadata(info, request.Metadata);
-
-                        document.Save(tempFilePath);
+                        return StatusCode(500, "An error occurred while generating the PDF.");
                     }
 
-                    var fileBytes = await System.IO.File.ReadAllBytesAsync(tempFilePath);
-                    System.IO.File.Delete(tempFilePath);
-
-                    return File(fileBytes, "application/pdf", outputName);
+                    var outputName = Path.GetFileNameWithoutExtension(request.FilePath) + "_updated.pdf";
+                    return File(result.PdfBytes, "application/pdf", outputName);
                 }
 
                 // For read operations, return the metadata
@@ -76,33 +61,6 @@ namespace LocalPDF_Studio_api.Controllers
             {
                 _logger.LogError(ex, "Error processing metadata {Operation}: {FilePath}", request.Operation, request.FilePath);
                 return StatusCode(500, $"Error processing metadata: {ex.Message}");
-            }
-        }
-
-        private void UpdateMetadata(PdfDictionary info, PdfMetadata metadata)
-        {
-            if (metadata == null) return;
-
-            UpdateMetadataValue(info, "/Title", metadata.Title);
-            UpdateMetadataValue(info, "/Author", metadata.Author);
-            UpdateMetadataValue(info, "/Subject", metadata.Subject);
-            UpdateMetadataValue(info, "/Keywords", metadata.Keywords);
-            UpdateMetadataValue(info, "/Creator", metadata.Creator);
-            UpdateMetadataValue(info, "/Producer", metadata.Producer);
-        }
-
-        private void UpdateMetadataValue(PdfDictionary info, string key, string value)
-        {
-            // Key should have slash prefix
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                if (info.Elements.ContainsKey(key))
-                    info.Elements.Remove(key);
-            }
-            else
-            {
-                var pdfString = new PdfString(value);
-                info.Elements[key] = pdfString;
             }
         }
     }

@@ -67,17 +67,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const metadataText = `
-        Title: ${currentMetadata.title || 'Not set'}
-        Author: ${currentMetadata.author || 'Not set'}
-        Subject: ${currentMetadata.subject || 'Not set'}
-        Keywords: ${currentMetadata.keywords || 'Not set'}
-        Creator: ${currentMetadata.creator || 'Not set'}
-        Producer: ${currentMetadata.producer || 'Not set'}
-        Creation Date: ${formatDate(currentMetadata.creationDate)}
-        Modification Date: ${formatDate(currentMetadata.modificationDate)}
-        Number of Pages: ${currentMetadata.pageCount || 'Unknown'}
-        File: ${selectedFile?.name || 'Unknown'}
-        `.trim();
+Title: ${currentMetadata.title || 'Not set'}
+Author: ${currentMetadata.author || 'Not set'}
+Subject: ${currentMetadata.subject || 'Not set'}
+Keywords: ${currentMetadata.keywords || 'Not set'}
+Creator: ${currentMetadata.creator || 'Not set'}
+Producer: ${currentMetadata.producer || 'Not set'}
+Creation Date: ${formatDate(currentMetadata.creationDate)}
+Modification Date: ${formatDate(currentMetadata.modificationDate)}
+Number of Pages: ${currentMetadata.pageCount || 'Unknown'}
+File: ${selectedFile?.name || 'Unknown'}
+`.trim();
 
         navigator.clipboard.writeText(metadataText).then(() => {
             const copyBtn = document.getElementById('copy-metadata-btn');
