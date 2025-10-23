@@ -11,8 +11,8 @@
     "dist": "electron-builder"
   },
   "devDependencies": {
-    "electron": "^38.3.0",
-    "electron-builder": "^24.6.0"
+    "electron": "^38.4.0",
+    "electron-builder": "^24.13.3"
   },
   "build": {
     "appId": "com.localpdfstudio.app",
