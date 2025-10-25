@@ -101,10 +101,11 @@ function startBackend() {
 }
 
 const createWindow = () => {
-    //Menu.setApplicationMenu(null);
+    Menu.setApplicationMenu(null);
     const win = new BrowserWindow({
         minWidth: 700,
         minHeight: 600,
+        icon: path.join(app.getAppPath(), 'assets/icons/app_icon.ico'),
         webPreferences: {
             preload: path.resolve(app.getAppPath(), 'src/preload/preload.js'),
             contextIsolation: true,
