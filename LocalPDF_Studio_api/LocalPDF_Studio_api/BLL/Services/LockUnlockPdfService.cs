@@ -50,54 +50,27 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             var lockOptions = request.LockOptions;
 
-            // Validate passwords
             if (string.IsNullOrWhiteSpace(lockOptions.OpenPassword))
                 throw new ArgumentException("Open password is required for locking PDF");
 
             if (lockOptions.OpenPassword.Length < 3)
                 throw new ArgumentException("Open password must be at least 3 characters long");
 
-            // Open the PDF document
             var document = PdfReader.Open(request.FilePath, PdfDocumentOpenMode.Modify);
 
-            // Set up security settings
             document.SecuritySettings.UserPassword = lockOptions.OpenPassword;
-
-            // Set owner password if provided
-            if (!string.IsNullOrWhiteSpace(lockOptions.PermissionsPassword))
-            {
-                document.SecuritySettings.OwnerPassword = lockOptions.PermissionsPassword;
-            }
-            else
-            {
-                // If no permissions password, use open password as owner password
-                document.SecuritySettings.OwnerPassword = lockOptions.OpenPassword;
-            }
+            document.SecuritySettings.OwnerPassword = lockOptions.OpenPassword;
 
             document.SecuritySettings.DocumentSecurityLevel = lockOptions.EncryptionLevel == 40
                 ? PdfDocumentSecurityLevel.Encrypted40Bit
                 : PdfDocumentSecurityLevel.Encrypted128Bit;
 
-            // Note: PdfSharpCore currently supports:
-            // - PdfDocumentSecurityLevel.Encrypted40Bit (weak, compatible)
-            // - PdfDocumentSecurityLevel.Encrypted128Bit (strong, standard)
-
-            // Set permissions
-            document.SecuritySettings.PermitAccessibilityExtractContent = lockOptions.Permissions.AllowCopying;
-            document.SecuritySettings.PermitAnnotations = lockOptions.Permissions.AllowAnnotations;
-            document.SecuritySettings.PermitAssembleDocument = lockOptions.Permissions.AllowModification;
-            document.SecuritySettings.PermitExtractContent = lockOptions.Permissions.AllowCopying;
-            document.SecuritySettings.PermitFormsFill = lockOptions.Permissions.AllowModification;
-            document.SecuritySettings.PermitFullQualityPrint = lockOptions.Permissions.AllowPrinting;
-            document.SecuritySettings.PermitModifyDocument = lockOptions.Permissions.AllowModification;
-            document.SecuritySettings.PermitPrint = lockOptions.Permissions.AllowPrinting;
-
-            // Save to memory stream
             using var memoryStream = new MemoryStream();
             document.Save(memoryStream, false);
             document.Close();
 
-            _logger.LogInformation("PDF locked successfully: {FilePath}", request.FilePath);
+            _logger.LogInformation("PDF locked successfully with {EncryptionLevel}-bit encryption: {FilePath}",
+                lockOptions.EncryptionLevel, request.FilePath);
             return memoryStream.ToArray();
         }
 
@@ -115,24 +88,19 @@ namespace LocalPDF_Studio_api.BLL.Services
             {
                 _logger.LogInformation("Unlocking PDF with password length: {PasswordLength}", unlockOptions.Password.Length);
 
-                // Use Import mode to read the encrypted PDF
                 var sourceDoc = PdfReader.Open(request.FilePath, unlockOptions.Password, PdfDocumentOpenMode.Import);
                 var newDoc = new PdfDocument();
 
-                // Copy all pages to the new document
                 foreach (PdfPage page in sourceDoc.Pages)
                 {
                     newDoc.AddPage(page);
                 }
 
-                // New document has no security by default - completely unlocked
                 using var memoryStream = new MemoryStream();
                 newDoc.Save(memoryStream, false);
 
-                // Clean up
                 sourceDoc.Close();
                 newDoc.Close();
-
                 _logger.LogInformation("PDF unlocked successfully. Original size: {OriginalSize}, Unlocked size: {UnlockedSize}",
                     new FileInfo(request.FilePath).Length, memoryStream.Length);
 

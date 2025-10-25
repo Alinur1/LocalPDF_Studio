@@ -21,11 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const lockOptions = document.getElementById('lock-options');
     const unlockOptions = document.getElementById('unlock-options');
     const openPassword = document.getElementById('open-password');
-    const permissionsPassword = document.getElementById('permissions-password');
-    const allowPrinting = document.getElementById('allow-printing');
-    const allowCopying = document.getElementById('allow-copying');
-    const allowModification = document.getElementById('allow-modification');
-    const allowAnnotations = document.getElementById('allow-annotations');
     const encryptionLevel = document.getElementById('encryption-level');
     const unlockPassword = document.getElementById('unlock-password');
     const togglePasswordBtns = document.querySelectorAll('.toggle-password');
@@ -41,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.addEventListener('click', handleTogglePassword);
         });
         processBtn.addEventListener('click', handleProcessPdf);
-        [openPassword, permissionsPassword, unlockPassword].forEach(input => {
+        [openPassword, unlockPassword].forEach(input => {
             input.addEventListener('input', clearInputError);
         });
     }
@@ -158,9 +153,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const selectedOperation = document.querySelector('input[name="operation"]:checked').value;
 
-        try {            
-            const loadingMessage = selectedOperation === 'lock' ? 'Locking PDF...' : 'Unlocking PDF...';   
-            loadingUI.show(loadingMessage);         
+        try {
+            const loadingMessage = selectedOperation === 'lock' ? 'Locking PDF...' : 'Unlocking PDF...';
+            loadingUI.show(loadingMessage);
             processBtn.disabled = true;
             processBtn.textContent = selectedOperation === 'lock' ? 'Locking...' : 'Unlocking...';
             const requestBody = {
@@ -170,13 +165,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (selectedOperation === 'lock') {
                 requestBody.lockOptions = {
                     openPassword: openPassword.value,
-                    permissionsPassword: permissionsPassword.value || null,
-                    permissions: {
-                        allowPrinting: allowPrinting.checked,
-                        allowCopying: allowCopying.checked,
-                        allowModification: allowModification.checked,
-                        allowAnnotations: allowAnnotations.checked
-                    },
                     encryptionLevel: parseInt(encryptionLevel.value)
                 };
             } else {
@@ -207,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
             }
-        } catch (error) {            
+        } catch (error) {
             console.error(`${selectedOperation === 'lock' ? 'Lock' : 'Unlock'} Error:`, error);
             if (error.message.includes('password') || error.message.includes('Password')) {
                 await customAlert.alert('LocalPDF Studio - WARNING', 'Incorrect password. Please check the password and try again.', ['OK']);
@@ -240,7 +228,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function clearPasswords() {
         openPassword.value = '';
-        permissionsPassword.value = '';
         unlockPassword.value = '';
         document.querySelectorAll('.password-input').forEach(input => {
             input.type = 'password';
