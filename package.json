@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "description": "Offline, open-source, privacy-first PDF toolkit",
   "main": "src/main/main.js",
-  "author": "Md. Alinur Hossain",
+  "author": {
+    "name": "Md. Alinur Hossain",
+    "email": "alinur1160@gmail.com"
+  },
   "license": "MPL-2.0",
   "scripts": {
     "start": "electron .",
