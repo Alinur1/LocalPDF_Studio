@@ -88,7 +88,7 @@ function startBackend() {
             // Timeout in case port is never received
             setTimeout(() => {
                 if (!apiPort) {
-                    const errorMsg = 'Backend failed to start within 10 seconds';
+                    const errorMsg = 'Backend failed to start within 60 seconds';
                     console.error(errorMsg);
                     reject(new Error(errorMsg));
                 }
@@ -162,7 +162,7 @@ app.whenReady().then(async () => {
             });
 
             // Trigger the update check
-            setTimeout(() => autoUpdater.checkForUpdatesAndNotify(), 10000);
+            setTimeout(() => autoUpdater.checkForUpdatesAndNotify(), 60000);
         } catch (updateErr) {
             console.error('Update system failed to initialize:', updateErr);
         }
