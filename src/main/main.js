@@ -4,6 +4,7 @@ const { app, BrowserWindow, dialog, ipcMain, shell, Menu } = require('electron/m
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
+const { autoUpdater } = require('electron-updater');
 
 let apiProcess = null;
 let apiPort = null;
@@ -133,6 +134,38 @@ app.whenReady().then(async () => {
 
         // Create window after backend is ready
         createWindow();
+        try {
+            // Check for updates automatically after the app window is ready
+            autoUpdater.autoDownload = true;
+
+            autoUpdater.on('update-available', () => {
+                dialog.showMessageBox({
+                    type: 'info',
+                    title: 'Update Available',
+                    message: 'A new version of LocalPDF Studio is available and will be downloaded automatically.'
+                });
+            });
+
+            autoUpdater.on('update-downloaded', () => {
+                dialog.showMessageBox({
+                    type: 'info',
+                    title: 'Update Ready',
+                    message: 'An update has been downloaded. Restart LocalPDF Studio to apply it now?',
+                    buttons: ['Restart', 'Later']
+                }).then(result => {
+                    if (result.response === 0) autoUpdater.quitAndInstall();
+                });
+            });
+
+            autoUpdater.on('error', (err) => {
+                console.error('Auto-updater error:', err);
+            });
+
+            // Trigger the update check
+            setTimeout(() => autoUpdater.checkForUpdatesAndNotify(), 10000);
+        } catch (updateErr) {
+            console.error('Update system failed to initialize:', updateErr);
+        }
     } catch (err) {
         console.error('Failed to initialize app:', err);
         dialog.showErrorBox('Startup Error', `Failed to start the application backend.\n\nError: ${err.message}`);

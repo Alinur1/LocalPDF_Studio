@@ -1,6 +1,6 @@
 {
   "name": "LocalPDF_Studio",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Offline, open-source, privacy-first PDF toolkit",
   "main": "src/main/main.js",
   "author": "Md. Alinur Hossain",
@@ -41,9 +41,27 @@
       "assets/backend_linux/**",
       "assets/backend_macos/**"
     ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Alinur1",
+        "repo": "LocalPDF_Studio"
+      }
+    ],
     "win": {
       "target": "nsis",
       "icon": "assets/icons/app_icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility"
     },
     "nsis": {
       "oneClick": false,
@@ -52,5 +70,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
   }
 }
