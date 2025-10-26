@@ -17,6 +17,7 @@
   "build": {
     "appId": "com.localpdfstudio.app",
     "productName": "LocalPDF Studio",
+    "artifactName": "LocalPDF Studio Setup ${os}.${ext}",
     "directories": {
       "output": "build",
       "buildResources": "assets/icons"
@@ -45,23 +46,13 @@
       {
         "provider": "github",
         "owner": "Alinur1",
-        "repo": "LocalPDF_Studio"
+        "repo": "LocalPDF_Studio",
+        "releaseType": "release"
       }
     ],
     "win": {
       "target": "nsis",
       "icon": "assets/icons/app_icon.ico"
-    },
-    "mac": {
-      "target": "dmg",
-      "category": "public.app-category.productivity"
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ],
-      "category": "Utility"
     },
     "nsis": {
       "oneClick": false,
@@ -69,6 +60,19 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity",
+      "icon": "assets/icons/app_icon_mac.icns"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility",
+      "icon": "assets/icons/app_icon.png"
     }
   },
   "dependencies": {
