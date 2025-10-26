@@ -585,3 +585,4 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+/build
