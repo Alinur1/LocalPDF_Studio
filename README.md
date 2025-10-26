@@ -17,20 +17,20 @@ This software is completely free, open-source, and privacy-focused.
 ## For the developers
 LocalPDF Studio is built with modern web technologies and follows open-source principles. We welcome contributions from developers who believe in privacy-focused, offline-first software.
 
-### Development Setup
+### > Development Setup
 - Node.JS v22 or later
 - Git
 - .NET Core SDK and Python (For backend development)
 
-### Clone the repository
+### > Clone the repository
 - git clone https://github.com/Alinur1/LocalPDF_Studio.git
 - cd LocalPDF_Studio
 
-### Install dependencies
+### > Install dependencies
 - npm install electron --save-dev
 - npm start
 
-### How to build one for yourself
+### > How to build one for yourself
 - npm install --save-dev electron-builder
 - npm install electron-updater
 
@@ -45,7 +45,7 @@ LocalPDF Studio is built with modern web technologies and follows open-source pr
 - npm run build-mac (Only for macOS)
 - npm run pack (Create unpacked app for testing)
 
-### Quick Contribution Guide:
+### > Quick Contribution Guide:
 - Fork the repository on GitHub
 - Clone your fork locally.
 - Make changes.
