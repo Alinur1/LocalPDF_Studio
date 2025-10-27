@@ -88,11 +88,11 @@ function startBackend() {
             // Timeout in case port is never received
             setTimeout(() => {
                 if (!apiPort) {
-                    const errorMsg = 'Backend failed to start within 60 seconds';
+                    const errorMsg = 'Backend failed to start within 60 seconds. Please try again.';
                     console.error(errorMsg);
                     reject(new Error(errorMsg));
                 }
-            }, 10000);
+            }, 60000);
 
         } catch (err) {
             console.error('Error starting backend:', err);
