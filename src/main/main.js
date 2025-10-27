@@ -110,7 +110,7 @@ const getIcon = () => {
     } else if (process.platform === 'darwin') {
         iconPath = path.join(appPath, 'assets/icons/app_icon_mac.icns');
     } else {
-        iconPath = path.join(appPath, 'assets/icons/app_icon.png');
+        iconPath = path.join(appPath, 'assets/icons/app_icon_linux.png');
     }
     return fs.existsSync(iconPath) ? iconPath : undefined;
 };
