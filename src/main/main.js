@@ -102,12 +102,25 @@ function startBackend() {
     });
 }
 
+const getIcon = () => {
+    const appPath = app.getAppPath();
+    let iconPath;
+    if (process.platform === 'win32') {
+        iconPath = path.join(appPath, 'assets/icons/app_icon.ico');
+    } else if (process.platform === 'darwin') {
+        iconPath = path.join(appPath, 'assets/icons/app_icon_mac.icns');
+    } else {
+        iconPath = path.join(appPath, 'assets/icons/app_icon.png');
+    }
+    return fs.existsSync(iconPath) ? iconPath : undefined;
+};
+
 const createWindow = () => {
     Menu.setApplicationMenu(null);
     const win = new BrowserWindow({
         minWidth: 700,
         minHeight: 600,
-        icon: path.join(app.getAppPath(), 'assets/icons/app_icon.ico'),
+        icon: getIcon(),
         webPreferences: {
             preload: path.resolve(app.getAppPath(), 'src/preload/preload.js'),
             contextIsolation: true,
