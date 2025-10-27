@@ -28,14 +28,11 @@ LocalPDF Studio is built with modern web technologies and follows open-source pr
 
 ### > Install dependencies
 - npm install electron --save-dev
+- npm install --save-dev electron-builder
+- npm install electron-updater
 - npm run start
 
 ### > How to build one for yourself
-- npm install --save-dev electron-builder
-- npm install electron-updater
-
-   #### Now build the executable
-
 - npm run dist (Works on all platforms)
 
     #### OR Platform-Specific Builds
