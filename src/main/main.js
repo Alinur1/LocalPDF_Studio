@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const { autoUpdater } = require('electron-updater');
+const gotTheLock = app.requestSingleInstanceLock();
 
 let apiProcess = null;
 let apiPort = null;
@@ -127,57 +128,67 @@ const createWindow = () => {
     win.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'));
 };
 
-app.whenReady().then(async () => {
-    try {
-        // Start backend and wait for port
-        await startBackend();
-
-        // Create window after backend is ready
-        createWindow();
-        try {
-            // Check for updates automatically after the app window is ready
-            autoUpdater.autoDownload = true;
-
-            autoUpdater.on('update-available', () => {
-                dialog.showMessageBox({
-                    type: 'info',
-                    title: 'Update Available',
-                    message: 'A new version of LocalPDF Studio is available and will be downloaded automatically.'
-                });
-            });
-
-            autoUpdater.on('update-downloaded', () => {
-                dialog.showMessageBox({
-                    type: 'info',
-                    title: 'Update Ready',
-                    message: 'An update has been downloaded. Restart LocalPDF Studio to apply it now?',
-                    buttons: ['Restart', 'Later']
-                }).then(result => {
-                    if (result.response === 0) autoUpdater.quitAndInstall();
-                });
-            });
-
-            autoUpdater.on('error', (err) => {
-                console.error('Auto-updater error:', err);
-            });
-
-            // Trigger the update check
-            setTimeout(() => autoUpdater.checkForUpdatesAndNotify(), 60000);
-        } catch (updateErr) {
-            console.error('Update system failed to initialize:', updateErr);
-        }
-    } catch (err) {
-        console.error('Failed to initialize app:', err);
-        dialog.showErrorBox('Startup Error', `Failed to start the application backend.\n\nError: ${err.message}`);
-        app.quit();
-    }
-
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
+if (!gotTheLock) {
+    app.whenReady().then(() => {
+        dialog.showMessageBoxSync({
+            type: 'info',
+            buttons: ['OK'],
+            title: 'Already Running',
+            message: 'LocalPDF Studio is already running.'
+        });
+    });
+    app.quit();
+} else {
+    app.on('second-instance', () => {
+        const existingWindow = BrowserWindow.getAllWindows()[0];
+        if (existingWindow) {
+            if (existingWindow.isMinimized()) existingWindow.restore();
+            existingWindow.focus();
         }
     });
-});
+
+    app.whenReady().then(async () => {
+        try {
+            await startBackend();
+            createWindow();
+            try {
+                autoUpdater.autoDownload = true;
+                autoUpdater.on('update-available', () => {
+                    dialog.showMessageBox({
+                        type: 'info',
+                        title: 'Update Available',
+                        message: 'A new version of LocalPDF Studio is available and will be downloaded automatically.'
+                    });
+                });
+                autoUpdater.on('update-downloaded', () => {
+                    dialog.showMessageBox({
+                        type: 'info',
+                        title: 'Update Ready',
+                        message: 'An update has been downloaded. Restart LocalPDF Studio to apply it now?',
+                        buttons: ['Restart', 'Later']
+                    }).then(result => {
+                        if (result.response === 0) autoUpdater.quitAndInstall();
+                    });
+                });
+                autoUpdater.on('error', (err) => {
+                    console.error('Auto-updater error:', err);
+                });
+                setTimeout(() => autoUpdater.checkForUpdatesAndNotify(), 60000);
+            } catch (updateErr) {
+                console.error('Update system failed to initialize:', updateErr);
+            }
+        } catch (err) {
+            console.error('Failed to initialize app:', err);
+            dialog.showErrorBox('Startup Error', `Failed to start the application backend.\n\nError: ${err.message}`);
+            app.quit();
+        }
+        app.on('activate', () => {
+            if (BrowserWindow.getAllWindows().length === 0) {
+                createWindow();
+            }
+        });
+    });
+}
 
 app.on('window-all-closed', () => {
     // Kill the backend process
