@@ -38,7 +38,6 @@ function startBackend() {
         const appPath = app.isPackaged ? process.resourcesPath : app.getAppPath();
         const backendPath = path.join(appPath, backendDir, backendFile);
 
-        // Check if backend exists
         if (!fs.existsSync(backendPath)) {
             const errorMsg = `Backend executable not found at: ${backendPath}`;
             console.error(errorMsg);
@@ -48,7 +47,6 @@ function startBackend() {
         }
 
         try {
-            // Set executable permissions for Linux/macOS
             if (process.platform === 'linux' || process.platform === 'darwin') {
                 try {
                     fs.chmodSync(backendPath, 0o755);
@@ -63,7 +61,6 @@ function startBackend() {
             apiProcess.stdout.on('data', (data) => {
                 const output = data.toString();
                 console.log('Backend:', output);
-
                 const match = output.match(/API_PORT:(\d+)/);
                 if (match) {
                     apiPort = parseInt(match[1]);
@@ -86,7 +83,6 @@ function startBackend() {
                 apiProcess = null;
             });
 
-            // Timeout in case port is never received
             setTimeout(() => {
                 if (!apiPort) {
                     const errorMsg = 'Backend failed to start within 60 seconds. Please try again.';
@@ -103,14 +99,14 @@ function startBackend() {
 }
 
 const getIcon = () => {
-    const appPath = app.getAppPath();
+    const base_path = app.isPackaged ? process.resourcesPath : app.getAppPath();
     let iconPath;
     if (process.platform === 'win32') {
-        iconPath = path.join(appPath, 'assets/icons/app_icon.ico');
+        iconPath = path.join(base_path, 'assets/icons/app_icon.ico');
     } else if (process.platform === 'darwin') {
-        iconPath = path.join(appPath, 'assets/icons/app_icon_mac.icns');
+        iconPath = path.join(base_path, 'assets/icons/app_icon_mac.icns');
     } else {
-        iconPath = path.join(appPath, 'assets/icons/app_icon_linux.png');
+        iconPath = path.join(base_path, 'assets/icons/app_icon_linux.png');
     }
     return fs.existsSync(iconPath) ? iconPath : undefined;
 };
@@ -131,15 +127,70 @@ const createWindow = () => {
 
     win.webContents.on('will-navigate', (event, navigationUrl) => {
         const parsedUrl = new URL(navigationUrl);
-        if (parsedUrl.protocol === 'file:') {
-            return;
-        }
+        if (parsedUrl.protocol === 'file:') return;
         event.preventDefault();
     });
 
     win.maximize();
     win.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'));
 };
+
+function setupAutoUpdater() {
+    autoUpdater.autoDownload = process.platform !== 'linux'; // skip auto-download on Linux
+
+    autoUpdater.on('update-available', () => {
+        if (process.platform === 'linux') {
+            dialog.showMessageBox({
+                type: 'info',
+                title: 'Update Available',
+                message: 'A new version of LocalPDF Studio is available!',
+                detail: 'Auto-update is not supported on Linux (.AppImage). Do you want to open the download page?',
+                buttons: ['Open Download Page', 'Later']
+            }).then(result => {
+                if (result.response === 0) {
+                    shell.openExternal('https://github.com/Alinur1/LocalPDF_Studio/releases/latest');
+                }
+            });
+        } else {
+            dialog.showMessageBox({
+                type: 'info',
+                title: 'Update Available',
+                message: 'A new version of LocalPDF Studio is available and will be downloaded automatically.'
+            });
+        }
+    });
+
+    autoUpdater.on('update-downloaded', () => {
+        dialog.showMessageBox({
+            type: 'info',
+            title: 'Update Ready',
+            message: 'An update has been downloaded. Restart LocalPDF Studio to apply it now?',
+            buttons: ['Restart', 'Later']
+        }).then(result => {
+            if (result.response === 0) autoUpdater.quitAndInstall();
+        });
+    });
+
+    autoUpdater.on('error', (err) => {
+        console.error('Auto-updater error:', err);
+        if (process.platform === 'linux') {
+            dialog.showMessageBox({
+                type: 'warning',
+                title: 'Update Check Failed',
+                message: 'Could not check for updates automatically.',
+                detail: 'You can check manually on the releases page.',
+                buttons: ['Open Download Page', 'Ignore']
+            }).then(result => {
+                if (result.response === 0) {
+                    shell.openExternal('https://github.com/Alinur1/LocalPDF_Studio/releases/latest');
+                }
+            });
+        }
+    });
+
+    // Trigger automatic check
+    setTimeout(() => autoUpdater.checkForUpdatesAndNotify(), 60000);
+}
 
 if (!gotTheLock) {
     app.whenReady().then(() => {
@@ -164,37 +215,13 @@ if (!gotTheLock) {
         try {
             await startBackend();
             createWindow();
-            try {
-                autoUpdater.autoDownload = true;
-                autoUpdater.on('update-available', () => {
-                    dialog.showMessageBox({
-                        type: 'info',
-                        title: 'Update Available',
-                        message: 'A new version of LocalPDF Studio is available and will be downloaded automatically.'
-                    });
-                });
-                autoUpdater.on('update-downloaded', () => {
-                    dialog.showMessageBox({
-                        type: 'info',
-                        title: 'Update Ready',
-                        message: 'An update has been downloaded. Restart LocalPDF Studio to apply it now?',
-                        buttons: ['Restart', 'Later']
-                    }).then(result => {
-                        if (result.response === 0) autoUpdater.quitAndInstall();
-                    });
-                });
-                autoUpdater.on('error', (err) => {
-                    console.error('Auto-updater error:', err);
-                });
-                setTimeout(() => autoUpdater.checkForUpdatesAndNotify(), 60000);
-            } catch (updateErr) {
-                console.error('Update system failed to initialize:', updateErr);
-            }
+            setupAutoUpdater();
         } catch (err) {
             console.error('Failed to initialize app:', err);
             dialog.showErrorBox('Startup Error', `Failed to start the application backend.\n\nError: ${err.message}`);
             app.quit();
         }
+
         app.on('activate', () => {
             if (BrowserWindow.getAllWindows().length === 0) {
                 createWindow();
@@ -204,7 +231,6 @@ if (!gotTheLock) {
 }
 
 app.on('window-all-closed', () => {
-    // Kill the backend process
     if (apiProcess) {
         try {
             apiProcess.kill();
@@ -219,7 +245,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-    // Ensure backend is killed on quit
     if (apiProcess) {
         try {
             apiProcess.kill();
@@ -228,6 +253,7 @@ app.on('before-quit', () => {
         }
     }
 });
+
 
 // IPC handler to get the API port
 ipcMain.handle('get-api-port', () => {
