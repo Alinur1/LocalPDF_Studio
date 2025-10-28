@@ -9,6 +9,7 @@ const gotTheLock = app.requestSingleInstanceLock();
 
 let apiProcess = null;
 let apiPort = null;
+let mainWindow = null;
 
 function startBackend() {
     return new Promise((resolve, reject) => {
@@ -113,7 +114,7 @@ const getIcon = () => {
 
 const createWindow = () => {
     Menu.setApplicationMenu(null);
-    const win = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         minWidth: 700,
         minHeight: 600,
         icon: getIcon(),
@@ -125,22 +126,26 @@ const createWindow = () => {
         }
     });
 
-    win.webContents.on('will-navigate', (event, navigationUrl) => {
+    mainWindow.webContents.on('will-navigate', (event, navigationUrl) => {
         const parsedUrl = new URL(navigationUrl);
         if (parsedUrl.protocol === 'file:') return;
         event.preventDefault();
     });
 
-    win.maximize();
-    win.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'));
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+    });
+
+    mainWindow.maximize();
+    mainWindow.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'));
 };
 
 function setupAutoUpdater() {
     autoUpdater.autoDownload = process.platform !== 'linux'; // skip auto-download on Linux
 
     autoUpdater.on('update-available', () => {
-        if (process.platform === 'linux') {
-            dialog.showMessageBox({
+        if (process.platform === 'linux' && mainWindow) {
+            dialog.showMessageBox(mainWindow, {
                 type: 'info',
                 title: 'Update Available',
                 message: 'A new version of LocalPDF Studio is available!',
@@ -151,8 +156,8 @@ function setupAutoUpdater() {
                     shell.openExternal('https://github.com/Alinur1/LocalPDF_Studio/releases/latest');
                 }
             });
-        } else {
-            dialog.showMessageBox({
+        } else if (mainWindow) {
+            dialog.showMessageBox(mainWindow, {
                 type: 'info',
                 title: 'Update Available',
                 message: 'A new version of LocalPDF Studio is available and will be downloaded automatically.'
@@ -161,7 +166,7 @@ function setupAutoUpdater() {
     });
 
     autoUpdater.on('update-downloaded', () => {
-        dialog.showMessageBox({
+        dialog.showMessageBox(mainWindow, {
             type: 'info',
             title: 'Update Ready',
             message: 'An update has been downloaded. Restart LocalPDF Studio to apply it now?',
@@ -173,8 +178,8 @@ function setupAutoUpdater() {
 
     autoUpdater.on('error', (err) => {
         console.error('Auto-updater error:', err);
-        if (process.platform === 'linux') {
-            dialog.showMessageBox({
+        if (process.platform === 'linux' && mainWindow) {
+            dialog.showMessageBox(mainWindow, {
                 type: 'warning',
                 title: 'Update Check Failed',
                 message: 'Could not check for updates automatically.',
@@ -204,10 +209,9 @@ if (!gotTheLock) {
     app.quit();
 } else {
     app.on('second-instance', () => {
-        const existingWindow = BrowserWindow.getAllWindows()[0];
-        if (existingWindow) {
-            if (existingWindow.isMinimized()) existingWindow.restore();
-            existingWindow.focus();
+        if (mainWindow) {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
         }
     });
 
