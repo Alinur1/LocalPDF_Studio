@@ -363,3 +363,5 @@ ipcMain.handle('save-pdf-file', async (event, { filename, buffer }) => {
         return null;
     }
 });
+
+ipcMain.handle('is-app-packaged', () => app.isPackaged);

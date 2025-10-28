@@ -1,7 +1,8 @@
 // src/preload/preload.js
 
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, app } = require('electron');
 const fs = require('fs');
+const path = require('path');
 
 // Global drag and drop prevention
 document.addEventListener('dragover', (event) => {
@@ -28,5 +29,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveMergedPdf: (buffer) => ipcRenderer.invoke('save-merged-pdf', buffer),
     saveZipFile: (filename, buffer) => ipcRenderer.invoke('save-zip-file', { filename, buffer }),
     savePdfFile: (filename, buffer) => ipcRenderer.invoke('save-pdf-file', { filename, buffer }),
-    getApiPort: () => ipcRenderer.invoke('get-api-port')
+    getApiPort: () => ipcRenderer.invoke('get-api-port'),
+    resolveAsset: async (relativePath) => {
+        try {
+            const isPackaged = await ipcRenderer.invoke('is-app-packaged');
+            const basePath = isPackaged
+                ? process.resourcesPath
+                : path.resolve(__dirname, '../../');
+            return `file://${path.join(basePath, 'assets', relativePath)}`;
+        } catch (err) {
+            console.error('Error resolving asset path:', err);
+            return '';
+        }
+    }
 });
