@@ -82,6 +82,13 @@ function startBackend() {
             apiProcess.on('close', (code) => {
                 console.log(`Backend process exited with code ${code}`);
                 apiProcess = null;
+                apiPort = null;
+            });
+
+            apiProcess.on('exit', (code) => {
+                console.log(`Backend process exited with code ${code}`);
+                apiProcess = null;
+                apiPort = null;
             });
 
             setTimeout(() => {
@@ -261,6 +268,9 @@ app.on('before-quit', () => {
 
 // IPC handler to get the API port
 ipcMain.handle('get-api-port', () => {
+    if (!mainWindow || mainWindow.isDestroyed()) {
+        console.warn('get-api-port called with no active window');
+    }
     return apiPort;
 });
 

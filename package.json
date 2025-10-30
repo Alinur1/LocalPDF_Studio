@@ -23,7 +23,7 @@
   "build": {
     "appId": "com.localpdfstudio.app",
     "productName": "LocalPDF Studio",
-    "artifactName": "LocalPDF Studio Setup ${os}.${ext}",
+    "artifactName": "LocalPDF Studio ${os}.${ext}",
     "directories": {
       "output": "build",
       "buildResources": "assets/icons"
@@ -76,8 +76,16 @@
       "target": [
         "AppImage"
       ],
-      "category": "Utility",
-      "icon": "assets/icons/app_icon_linux.png"
+      "category": "Office",
+      "icon": "assets/icons/app_icon_linux.png",
+      "desktop": {
+        "Name": "LocalPDF Studio",
+        "Comment": "Offline PDF editing suite",
+        "Categories": "Office;",
+        "StartupWMClass": "localpdf-studio",
+        "MimeType": "application/pdf;"
+      },
+      "synopsis": "Offline, open-source PDF toolkit"
     }
   }
 }
