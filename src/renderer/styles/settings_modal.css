@@ -339,3 +339,26 @@
 .modal-body::-webkit-scrollbar-thumb:hover {
     background: #2980b9;
 }
+
+/* Update Status Section */
+.update-status-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem;
+    background: rgba(52, 73, 94, 0.5);
+    border-radius: 8px;
+}
+
+#update-status-message {
+    font-size: 0.9rem;
+    color: #bdc3c7;
+    text-align: center;
+}
+
+#check-for-updates-btn {
+    width: 100%;
+    justify-content: center;
+}

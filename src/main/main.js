@@ -33,6 +33,8 @@ const gotTheLock = app.requestSingleInstanceLock();
 let apiProcess = null;
 let apiPort = null;
 let mainWindow = null;
+let isDownloading = false;
+let lastUpdateStatus = { status: 'No updates checked yet.', details: '' };
 
 function startBackend() {
     return new Promise((resolve, reject) => {
@@ -143,7 +145,7 @@ const getIcon = () => {
 };
 
 const createWindow = () => {
-    //Menu.setApplicationMenu(null);
+    Menu.setApplicationMenu(null);
     mainWindow = new BrowserWindow({
         minWidth: 700,
         minHeight: 600,
@@ -162,6 +164,18 @@ const createWindow = () => {
         event.preventDefault();
     });
 
+    mainWindow.on('close', (event) => {
+        if (isDownloading) {
+            event.preventDefault();
+            dialog.showMessageBox(mainWindow, {
+                type: 'warning',
+                title: 'Update in Progress',
+                message: 'An update is currently downloading. Please do not close the application.',
+                buttons: ['OK']
+            });
+        }
+    });
+
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
@@ -170,11 +184,27 @@ const createWindow = () => {
     mainWindow.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'));
 };
 
-function setupAutoUpdater() {
-    autoUpdater.autoDownload = process.platform !== 'linux'; // skip auto-download on Linux
+function sendUpdateStatus(status, details = '') {
+    lastUpdateStatus = { status, details };
+    if (mainWindow) {
+        mainWindow.webContents.send('update-status', lastUpdateStatus);
+    }
+}
 
-    autoUpdater.on('update-available', () => {
-        if (process.platform === 'linux' && mainWindow) {
+function setupAutoUpdater() {
+    autoUpdater.autoDownload = process.platform !== 'linux';
+
+    autoUpdater.on('checking-for-update', () => {
+        sendUpdateStatus('Checking for update...');
+    });
+
+    autoUpdater.on('update-not-available', () => {
+        sendUpdateStatus('No new update is available.');
+    });
+
+    autoUpdater.on('update-available', (info) => {
+        if (process.platform === 'linux') {
+            sendUpdateStatus('Update available!', `Version ${info.version} is ready to download.`);
             dialog.showMessageBox(mainWindow, {
                 type: 'info',
                 title: 'Update Available',
@@ -186,16 +216,20 @@ function setupAutoUpdater() {
                     shell.openExternal('https://github.com/Alinur1/LocalPDF_Studio/releases/latest');
                 }
             });
-        } else if (mainWindow) {
-            dialog.showMessageBox(mainWindow, {
-                type: 'info',
-                title: 'Update Available',
-                message: 'A new version of LocalPDF Studio is available and will be downloaded automatically.'
-            });
+        } else {
+            sendUpdateStatus('Downloading update...');
+            isDownloading = true;
         }
     });
 
+    autoUpdater.on('download-progress', (progressObj) => {
+        const progress = progressObj.percent.toFixed(2);
+        sendUpdateStatus('Downloading update...', `${progress}%`);
+    });
+
     autoUpdater.on('update-downloaded', () => {
+        isDownloading = false;
+        sendUpdateStatus('Installing update...');
         dialog.showMessageBox(mainWindow, {
             type: 'info',
             title: 'Update Ready',
@@ -207,8 +241,10 @@ function setupAutoUpdater() {
     });
 
     autoUpdater.on('error', (err) => {
-        console.error('Auto-updater error:', err);
-        if (process.platform === 'linux' && mainWindow) {
+        isDownloading = false;
+        const errorMessage = err == null ? "unknown" : (err.message || err).toString();
+        sendUpdateStatus('Update check failed', errorMessage);
+        if (process.platform === 'linux') {
             dialog.showMessageBox(mainWindow, {
                 type: 'warning',
                 title: 'Update Check Failed',
@@ -223,8 +259,15 @@ function setupAutoUpdater() {
         }
     });
 
-    // Trigger automatic check
-    setTimeout(() => autoUpdater.checkForUpdatesAndNotify(), 60000);
+    ipcMain.on('check-for-updates', () => {
+        autoUpdater.checkForUpdates();
+    });
+
+    ipcMain.handle('get-update-status', () => {
+        return lastUpdateStatus;
+    });
+
+    setTimeout(() => autoUpdater.checkForUpdates(), 60000);
 }
 
 if (!gotTheLock) {

@@ -217,6 +217,19 @@ window.addEventListener('DOMContentLoaded', () => {
 
     let originalSettings = {};
 
+    const updateStatusMessage = document.getElementById('update-status-message');
+
+    async function updateStatusUI() {
+        if (window.electronAPI && window.electronAPI.getUpdateStatus) {
+            const { status, details } = await window.electronAPI.getUpdateStatus();
+            let message = status;
+            if (details) {
+                message += ` (${details})`;
+            }
+            updateStatusMessage.textContent = message;
+        }
+    }
+
     settingsBtn.addEventListener('click', () => {
         originalSettings = {
             restoreTabs: localStorage.getItem('restoreTabs') || 'restore',
@@ -226,6 +239,8 @@ window.addEventListener('DOMContentLoaded', () => {
         document.querySelector(`input[name="restore-tabs"][value="${originalSettings.restoreTabs}"]`).checked = true;
         document.getElementById('clock-enabled').checked = originalSettings.clockEnabled;
         document.getElementById('search-enabled').checked = originalSettings.searchEnabled;
+
+        updateStatusUI(); // Fetch current status when modal opens
 
         modal.classList.remove('hidden');
     });
@@ -296,4 +311,23 @@ window.addEventListener('DOMContentLoaded', () => {
     tabManager.onTabChange = () => saveTabs(tabManager);
     tabManager.onTabClose = () => saveTabs(tabManager);
     tabManager.onTabReorder = () => saveTabs(tabManager);
+
+    // Auto-update UI
+    const checkForUpdatesBtn = document.getElementById('check-for-updates-btn');
+
+    if (window.electronAPI && window.electronAPI.onUpdateStatus) {
+        window.electronAPI.onUpdateStatus(({ status, details }) => {
+            let message = status;
+            if (details) {
+                message += ` (${details})`;
+            }
+            updateStatusMessage.textContent = message;
+        });
+    }
+
+    checkForUpdatesBtn.addEventListener('click', () => {
+        if (window.electronAPI && window.electronAPI.checkForUpdates) {
+            window.electronAPI.checkForUpdates();
+        }
+    });
 });

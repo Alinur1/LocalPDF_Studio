@@ -1,6 +1,6 @@
 {
   "name": "LocalPDF_Studio",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "Offline, open-source, privacy-first PDF toolkit",
   "main": "src/main/main.js",
   "author": {
@@ -27,7 +27,7 @@
   "build": {
     "appId": "com.localpdfstudio.app",
     "productName": "LocalPDF Studio",
-    "artifactName": "LocalPDF Studio ${os}.${ext}",
+    "artifactName": "LocalPDF-Studio-${os}.${ext}",
     "directories": {
       "output": "build",
       "buildResources": "assets/icons"
