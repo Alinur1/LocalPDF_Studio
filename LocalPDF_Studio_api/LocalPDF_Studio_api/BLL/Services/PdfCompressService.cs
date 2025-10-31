@@ -278,7 +278,7 @@ namespace LocalPDF_Studio_api.BLL.Services
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 executableName = "compress_pdf.exe";
-                platformFolder = "backend_windows";
+                platformFolder = "backend_win";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {

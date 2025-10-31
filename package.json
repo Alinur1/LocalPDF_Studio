@@ -1,6 +1,6 @@
 {
   "name": "LocalPDF_Studio",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "Offline, open-source, privacy-first PDF toolkit",
   "main": "src/main/main.js",
   "author": {
@@ -11,7 +11,10 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:mac": "electron-builder --mac"
   },
   "devDependencies": {
     "electron": "^38.4.0",
@@ -35,8 +38,15 @@
     ],
     "extraResources": [
       {
-        "from": "assets/",
-        "to": "assets/",
+        "from": "assets/backend_${os}",
+        "to": "assets/backend_${os}",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "assets/icons",
+        "to": "assets/icons",
         "filter": [
           "**/*"
         ]
@@ -44,9 +54,7 @@
     ],
     "asar": true,
     "asarUnpack": [
-      "assets/backend_windows/**",
-      "assets/backend_linux/**",
-      "assets/backend_macos/**"
+      "assets/backend_${os}/**"
     ],
     "publish": [
       {
@@ -61,9 +69,9 @@
       "icon": "assets/icons/app_icon.ico"
     },
     "nsis": {
-      "oneClick": false,
+      "oneClick": true,
       "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
+      "allowToChangeInstallationDirectory": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     },

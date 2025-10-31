@@ -41,7 +41,7 @@ function startBackend() {
 
         switch (process.platform) {
             case 'win32':
-                backendDir = './assets/backend_windows';
+                backendDir = './assets/backend_win';
                 backendFile = 'LocalPDF_Studio_api.exe';
                 break;
             case 'linux':
@@ -143,7 +143,7 @@ const getIcon = () => {
 };
 
 const createWindow = () => {
-    Menu.setApplicationMenu(null);
+    //Menu.setApplicationMenu(null);
     mainWindow = new BrowserWindow({
         minWidth: 700,
         minHeight: 600,
