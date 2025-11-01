@@ -213,7 +213,7 @@ function setupAutoUpdater() {
                 buttons: ['Open Download Page', 'Later']
             }).then(result => {
                 if (result.response === 0) {
-                    shell.openExternal('https://github.com/Alinur1/LocalPDF_Studio/releases/latest');
+                    shell.openExternal('https://alinur1.github.io/LocalPDF_Studio_Website/');
                 }
             });
         } else {
@@ -253,7 +253,7 @@ function setupAutoUpdater() {
                 buttons: ['Open Download Page', 'Ignore']
             }).then(result => {
                 if (result.response === 0) {
-                    shell.openExternal('https://github.com/Alinur1/LocalPDF_Studio/releases/latest');
+                    shell.openExternal('https://alinur1.github.io/LocalPDF_Studio_Website/');
                 }
             });
         }
