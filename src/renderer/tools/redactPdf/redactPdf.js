@@ -29,14 +29,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     let redactionColor = '#000000';
     let redactions = {}; // { pageNum: [{x, y, width, height, color}] }
     let droppedFilePath = null;
-    
-    // Page cache for rendering
-    let pageCache = {}; // { pageNum: { canvas, redactionCanvas, viewport } }
-    let pageElements = {}; // { pageNum: { container, pdfCanvas, redactionCanvas } }
-    let renderQueue = []; // Queue of pages to render
-    let isRendering = false;
 
-    // Initialize color buttons
+    // Continuous rendering system with caching
+    let pageContainers = {}; // { pageNum: domElement }
+    let renderingPages = new Set(); // Pages currently being rendered
+    let visiblePages = new Set(); // Pages currently visible
+    let renderedPages = new Set(); // Pages that have been rendered (cached)
+    let renderQueue = []; // Queue of pages waiting to render
+    let isProcessingQueue = false;
+    let scrollAnimationId = null;
+    const PAGE_PADDING = 20;
+
+    // Color button initialization
     const colorButtons = document.querySelectorAll('.color-btn');
     colorButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -49,10 +53,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Select PDF
     selectBtn.addEventListener('click', async () => {
         loadingUI.show("Selecting PDF file...");
+        const selected = await window.electronAPI.selectPdfs();
         if (droppedFilePath) {
             await window.electronAPI.deleteFile(droppedFilePath);
         }
-        const selected = await window.electronAPI.selectPdfs();
         if (selected?.length) {
             await loadPdf(selected[0]);
         }
@@ -68,7 +72,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         );
         if (result === 'Clear All') {
             redactions = {};
-            renderCurrentPage();
+            // Clear rendered pages cache so they re-render without redactions
+            renderedPages.clear();
+            // Redraw all visible pages
+            for (let pageNum of visiblePages) {
+                redrawPageRedactions(pageNum);
+            }
             updateUI();
         }
     });
@@ -105,18 +114,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             const redactEndpoint = await API.pdf.redact;
             const blob = await API.request.post(redactEndpoint, redactionData);
             const arrayBuffer = await blob.arrayBuffer();
-            const result = await window.electronAPI.savePdfFile('redacted.pdf', arrayBuffer);
+            const fileName = currentFilePath.split(/[\\/]/).pop();
+            const defaultName = `${fileName.replace('.pdf', '')}_redacted.pdf`;
+            const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
 
-            if (result.success) {
+            if (savedPath) {
                 await customAlert.alert(
                     'LocalPDF Studio - SUCCESS',
                     'PDF redacted successfully!',
                     ['OK']
                 );
-                // Clear redactions after successful save
-                redactions = {};
-                renderCurrentPage();
-                updateUI();
+                // redactions = {};
+                // Object.values(pageContainers).forEach((_, pageNum) => {
+                //     redrawPageRedactions(pageNum);
+                // });
+                // updateUI();
             } else {
                 await customAlert.alert(
                     'LocalPDF Studio - WARNING',
@@ -136,217 +148,111 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Page navigation
-    prevBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            renderCurrentPage();
-        }
-    });
-
-    nextBtn.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            renderCurrentPage();
-        }
-    });
-
     pageInput.addEventListener('change', (e) => {
         const page = parseInt(e.target.value);
         if (page >= 1 && page <= totalPages) {
-            currentPage = page;
-            renderCurrentPage();
+            const pageEl = pageContainers[page];
+            if (pageEl) {
+                pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         } else {
             e.target.value = currentPage;
         }
     });
 
-    // Zoom controls
+    // Zoom controls - preserve scroll position
     zoomInBtn.addEventListener('click', () => {
         zoomLevel = Math.min(zoomLevel + 0.25, 3.0);
-        renderCurrentPage();
+        performZoom();
     });
 
     zoomOutBtn.addEventListener('click', () => {
         zoomLevel = Math.max(zoomLevel - 0.25, 0.5);
-        renderCurrentPage();
+        performZoom();
     });
 
     zoomFitBtn.addEventListener('click', () => {
         zoomLevel = 1.0;
-        renderCurrentPage();
+        performZoom();
     });
 
-    let scrollTimeout = null;
-    let lastScrollTime = 0;
-    const SCROLL_THRESHOLD = 300; // ms between page changes
+    // Perform zoom with instant scroll restoration
+    function performZoom() {
+        const scrollTop = canvasWrapper.scrollTop;
 
-    // Smooth page scrolling with mouse wheel
+        // Clear cached pages and queues for re-rendering
+        renderingPages.clear();
+        renderedPages.clear();
+        renderQueue = [];
+        isProcessingQueue = false;
+
+        // Clear canvas content (NOT dimensions - keep layout intact)
+        for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+            const pageEl = pageContainers[pageNum];
+            if (pageEl && pageEl.pdfCanvas.width > 0) {
+                const ctx = pageEl.pdfCanvas.getContext('2d');
+                ctx.clearRect(0, 0, pageEl.pdfCanvas.width, pageEl.pdfCanvas.height);
+
+                const redactionCtx = pageEl.redactionCanvas.getContext('2d');
+                redactionCtx.clearRect(0, 0, pageEl.redactionCanvas.width, pageEl.redactionCanvas.height);
+            }
+        }
+
+        // Restore scroll position (layout is intact, so this works correctly)
+        canvasWrapper.scrollTop = scrollTop;
+
+        // Queue pages for re-rendering
+        updateVisiblePages();
+        updateUI();
+    }
+
+    // Keyboard and mouse wheel zoom (Ctrl/Cmd + Wheel)
     canvasWrapper.addEventListener('wheel', (e) => {
-        if (!pdfDocument) return;
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
 
-        const now = Date.now();
-        
-        // Check if we can scroll within the page (zoom > 1)
-        if (zoomLevel > 1) {
-            const canScrollInternally = canvasWrapper.scrollHeight > canvasWrapper.clientHeight;
-            const isAtTop = canvasWrapper.scrollTop < 5;
-            const isAtBottom = canvasWrapper.scrollTop + canvasWrapper.clientHeight >= canvasWrapper.scrollHeight - 5;
-
-            // Allow normal scrolling when zoomed and not at boundaries
-            if (canScrollInternally && !isAtTop && !isAtBottom) {
-                return;
+            if (e.deltaY < 0) {
+                // Zoom in
+                zoomLevel = Math.min(zoomLevel + 0.1, 3.0);
+            } else {
+                // Zoom out
+                zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
             }
-        }
 
-        // Debounce page changes to prevent rapid navigation
-        if (now - lastScrollTime < SCROLL_THRESHOLD) {
-            return;
+            performZoom();
         }
+    }, { passive: false });
 
-        // Page navigation at boundaries
-        if (e.deltaY > 0) {
-            // Scroll down - go to next page
-            if (currentPage < totalPages && (zoomLevel <= 1 || canvasWrapper.scrollTop + canvasWrapper.clientHeight >= canvasWrapper.scrollHeight - 5)) {
+    // Keyboard zoom shortcuts (Ctrl/Cmd + Plus/Minus)
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=' || e.key === 'ArrowUp')) {
+            if (pdfDocument) {
                 e.preventDefault();
-                lastScrollTime = now;
-                currentPage++;
-                canvasWrapper.scrollTop = 0;
-                renderCurrentPage();
+                zoomLevel = Math.min(zoomLevel + 0.1, 3.0);
+                performZoom();
             }
-        } else {
-            // Scroll up - go to previous page
-            if (currentPage > 1 && (zoomLevel <= 1 || canvasWrapper.scrollTop < 5)) {
+        } else if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_' || e.key === 'ArrowDown')) {
+            if (pdfDocument) {
                 e.preventDefault();
-                lastScrollTime = now;
-                currentPage--;
-                canvasWrapper.scrollTop = 0;
-                renderCurrentPage();
+                zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
+                performZoom();
+            }
+        } else if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+            if (pdfDocument) {
+                e.preventDefault();
+                zoomLevel = 1.0;
+                performZoom();
             }
         }
+    });
+
+    // Efficient scroll handling with requestAnimationFrame (like PDF.js)
+    canvasWrapper.addEventListener('scroll', () => {
+        if (scrollAnimationId) {
+            cancelAnimationFrame(scrollAnimationId);
+        }
+        scrollAnimationId = requestAnimationFrame(updateVisiblePages);
     }, { passive: true });
-
-    // Redaction drawing
-    redactionCanvas.addEventListener('mousedown', (e) => {
-        if (!pdfDocument) return;
-
-        const rect = pdfCanvas.getBoundingClientRect();
-        const scrollX = canvasWrapper.scrollLeft;
-        const scrollY = canvasWrapper.scrollTop;
-        
-        const mouseX = e.clientX - rect.left + scrollX;
-        const mouseY = e.clientY - rect.top + scrollY;
-
-        // Check if clicking on an existing redaction to delete it
-        const pageRedactions = redactions[currentPage] || [];
-        let clickedRedactionIndex = -1;
-
-        for (let i = pageRedactions.length - 1; i >= 0; i--) {
-            const redact = pageRedactions[i];
-            const x = redact.x * redactionCanvas.width;
-            const y = redact.y * redactionCanvas.height;
-            const w = redact.width * redactionCanvas.width;
-            const h = redact.height * redactionCanvas.height;
-
-            if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) {
-                clickedRedactionIndex = i;
-                break;
-            }
-        }
-
-        // If clicked on a redaction, delete it
-        if (clickedRedactionIndex !== -1) {
-            pageRedactions.splice(clickedRedactionIndex, 1);
-            if (pageRedactions.length === 0) {
-                delete redactions[currentPage];
-            }
-            drawRedactions();
-            updateUI();
-            hoveredRedactionIndex = -1;
-            return;
-        }
-
-        // Otherwise, start drawing a new redaction
-        isDrawing = true;
-        startX = mouseX;
-        startY = mouseY;
-    });
-
-    redactionCanvas.addEventListener('mousemove', (e) => {
-        if (!isDrawing) return;
-        const rect = pdfCanvas.getBoundingClientRect();
-        const scrollX = canvasWrapper.scrollLeft;
-        const scrollY = canvasWrapper.scrollTop;
-        
-        const currentX = e.clientX - rect.left + scrollX;
-        const currentY = e.clientY - rect.top + scrollY;
-
-        // Clear and redraw all redactions plus current
-        drawRedactions();
-
-        // Draw current rectangle
-        const ctx = redactionCanvas.getContext('2d');
-        ctx.fillStyle = redactionColor;
-        ctx.globalAlpha = 0.5;
-        ctx.fillRect(startX, startY, currentX - startX, currentY - startY);
-        ctx.globalAlpha = 1.0;
-        ctx.strokeStyle = '#3498db';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
-    });
-
-    redactionCanvas.addEventListener('mouseup', (e) => {
-        if (!isDrawing) return;
-        isDrawing = false;
-        const rect = pdfCanvas.getBoundingClientRect();
-        const scrollX = canvasWrapper.scrollLeft;
-        const scrollY = canvasWrapper.scrollTop;
-        
-        const endX = e.clientX - rect.left + scrollX;
-        const endY = e.clientY - rect.top + scrollY;
-
-        const width = endX - startX;
-        const height = endY - startY;
-
-        // Only add if rectangle has meaningful size
-        if (Math.abs(width) > 5 && Math.abs(height) > 5) {
-            if (!redactions[currentPage]) {
-                redactions[currentPage] = [];
-            }
-
-            // Normalize coordinates (handle negative width/height)
-            const x = width < 0 ? endX : startX;
-            const y = height < 0 ? endY : startY;
-            const w = Math.abs(width);
-            const h = Math.abs(height);
-
-            // Convert canvas coordinates to PDF coordinates
-            const page = pdfDocument.getPage(currentPage);
-            page.then(p => {
-                const viewport = p.getViewport({ scale: zoomLevel });
-                redactions[currentPage].push({
-                    x: x / viewport.width,
-                    y: y / viewport.height,
-                    width: w / viewport.width,
-                    height: h / viewport.height,
-                    color: redactionColor
-                });
-                drawRedactions();
-                updateUI();
-            });
-        } else {
-            drawRedactions();
-        }
-    });
-
-    redactionCanvas.addEventListener('mouseleave', () => {
-        if (isDrawing) {
-            isDrawing = false;
-            drawRedactions();
-        }
-        hoveredRedactionIndex = -1;
-        redactionCanvas.style.cursor = 'crosshair';
-    });
 
     // Drag and drop
     initializeGlobalDragDrop({
@@ -387,12 +293,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Load PDF
+    // Load PDF and initialize continuous rendering
     async function loadPdf(filePath) {
         try {
             loadingUI.show('Loading PDF...');
 
-            // Cleanup previous
             if (pdfDocument) {
                 await pdfDocument.destroy();
             }
@@ -403,24 +308,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentPage = 1;
             redactions = {};
             zoomLevel = 1.0;
+            pageContainers = {};
+            renderingPages.clear();
+            visiblePages.clear();
+            renderedPages.clear();
+            renderQueue = [];
+
+            // Clear canvas
+            canvasWrapper.innerHTML = '';
+            canvasWrapper.classList.add('has-pdf');
+
+            // Create page containers upfront
+            for (let i = 1; i <= totalPages; i++) {
+                const pageContainer = createPageContainer(i);
+                canvasWrapper.appendChild(pageContainer);
+                pageContainers[i] = pageContainer;
+            }
 
             // Update UI
             document.getElementById('page-count').textContent = `${totalPages} pages`;
             document.getElementById('total-pages').textContent = totalPages;
             pageInput.max = totalPages;
             pageInput.disabled = false;
-            canvasWrapper.classList.add('has-pdf');
 
             // Generate thumbnails
             await generateThumbnails();
 
-            // Render first page
-            await renderCurrentPage();
+            // Initial render of visible pages
+            updateVisiblePages();
 
             // Enable controls
-            prevBtn.disabled = false;
-            nextBtn.disabled = false;
-            applyBtn.disabled = false;
+            applyBtn.disabled = true;
             clearBtn.disabled = false;
             zoomInBtn.disabled = false;
             zoomOutBtn.disabled = false;
@@ -438,7 +356,354 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Generate thumbnails
+    // Create a container for a single page
+    function createPageContainer(pageNum) {
+        const container = document.createElement('div');
+        container.className = 'page-container';
+        container.dataset.pageNum = pageNum;
+        container.style.padding = PAGE_PADDING + 'px';
+        container.style.display = 'flex';
+        container.style.justifyContent = 'center';
+
+        const canvasContainer = document.createElement('div');
+        canvasContainer.style.position = 'relative';
+        canvasContainer.style.display = 'inline-block';
+        canvasContainer.style.width = 'fit-content';
+        canvasContainer.style.height = 'fit-content';
+
+        const pdfCanvas = document.createElement('canvas');
+        pdfCanvas.className = 'page-pdf-canvas';
+        pdfCanvas.dataset.pageNum = pageNum;
+        pdfCanvas.style.position = 'relative';
+        pdfCanvas.style.zIndex = '1';
+
+        const redactionCanvas = document.createElement('canvas');
+        redactionCanvas.className = 'page-redaction-canvas';
+        redactionCanvas.dataset.pageNum = pageNum;
+        redactionCanvas.style.cursor = 'crosshair';
+        redactionCanvas.style.position = 'absolute';
+        redactionCanvas.style.top = '0';
+        redactionCanvas.style.left = '0';
+        redactionCanvas.style.zIndex = '2';
+
+        // Store references for later
+        container.pdfCanvas = pdfCanvas;
+        container.redactionCanvas = redactionCanvas;
+        container.pageNum = pageNum;
+
+        canvasContainer.appendChild(pdfCanvas);
+        canvasContainer.appendChild(redactionCanvas);
+        container.appendChild(canvasContainer);
+
+        // Redaction event listeners
+        attachRedactionListeners(pageNum, redactionCanvas, pdfCanvas);
+
+        return container;
+    }
+
+    // Attach redaction drawing and interaction listeners
+    function attachRedactionListeners(pageNum, redactionCanvas, pdfCanvas) {
+        let isDrawing = false;
+        let startX, startY;
+
+        redactionCanvas.addEventListener('mousedown', (e) => {
+            if (!pdfDocument) return;
+
+            const rect = redactionCanvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const pageRedactions = redactions[pageNum] || [];
+            let clickedIndex = -1;
+
+            // Check if clicking on existing redaction
+            for (let i = pageRedactions.length - 1; i >= 0; i--) {
+                const redact = pageRedactions[i];
+                const x = redact.x * redactionCanvas.width;
+                const y = redact.y * redactionCanvas.height;
+                const w = redact.width * redactionCanvas.width;
+                const h = redact.height * redactionCanvas.height;
+
+                if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) {
+                    clickedIndex = i;
+                    break;
+                }
+            }
+
+            if (clickedIndex !== -1) {
+                pageRedactions.splice(clickedIndex, 1);
+                if (pageRedactions.length === 0) {
+                    delete redactions[pageNum];
+                }
+                redrawPageRedactions(pageNum);
+                updateUI();
+            } else {
+                isDrawing = true;
+                startX = mouseX;
+                startY = mouseY;
+            }
+        });
+
+        redactionCanvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+
+            const rect = redactionCanvas.getBoundingClientRect();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+
+            redrawPageRedactions(pageNum);
+
+            const ctx = redactionCanvas.getContext('2d');
+            ctx.fillStyle = redactionColor;
+            ctx.globalAlpha = 0.5;
+            ctx.fillRect(startX, startY, currentX - startX, currentY - startY);
+            ctx.globalAlpha = 1.0;
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+        });
+
+        redactionCanvas.addEventListener('mouseup', (e) => {
+            if (!isDrawing) return;
+            isDrawing = false;
+
+            const rect = redactionCanvas.getBoundingClientRect();
+            const endX = e.clientX - rect.left;
+            const endY = e.clientY - rect.top;
+
+            const width = endX - startX;
+            const height = endY - startY;
+
+            if (Math.abs(width) > 5 && Math.abs(height) > 5) {
+                if (!redactions[pageNum]) {
+                    redactions[pageNum] = [];
+                }
+
+                const x = width < 0 ? endX : startX;
+                const y = height < 0 ? endY : startY;
+                const w = Math.abs(width);
+                const h = Math.abs(height);
+
+                pdfDocument.getPage(pageNum).then(page => {
+                    const viewport = page.getViewport({ scale: zoomLevel });
+                    redactions[pageNum].push({
+                        x: x / viewport.width,
+                        y: y / viewport.height,
+                        width: w / viewport.width,
+                        height: h / viewport.height,
+                        color: redactionColor
+                    });
+                    redrawPageRedactions(pageNum);
+                    updateUI();
+                });
+            } else {
+                redrawPageRedactions(pageNum);
+            }
+        });
+
+        redactionCanvas.addEventListener('mouseleave', () => {
+            if (isDrawing) {
+                isDrawing = false;
+                redrawPageRedactions(pageNum);
+            }
+        });
+    }
+
+    // Update which pages are visible and queue them for rendering
+    function updateVisiblePages() {
+        const wrapperRect = canvasWrapper.getBoundingClientRect();
+        const newVisiblePages = new Set();
+        const pagesToRender = [];
+
+        // Find all visible pages
+        for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+            const pageEl = pageContainers[pageNum];
+            if (!pageEl) continue;
+
+            const rect = pageEl.getBoundingClientRect();
+            const isVisible = !(rect.bottom < wrapperRect.top || rect.top > wrapperRect.bottom);
+
+            if (isVisible) {
+                newVisiblePages.add(pageNum);
+
+                // Only queue for rendering if not already cached
+                if (!renderedPages.has(pageNum) && !renderingPages.has(pageNum)) {
+                    pagesToRender.push(pageNum);
+                }
+            }
+        }
+
+        visiblePages = newVisiblePages;
+
+        // Queue visible pages first, then queue nearby pages for preloading
+        renderQueue = [
+            ...pagesToRender,
+            ...getPreloadPages(Array.from(newVisiblePages))
+        ];
+
+        processRenderQueue();
+        updateCurrentPage();
+    }
+
+    // Get pages to preload (pages just outside viewport)
+    function getPreloadPages(visiblePageNums) {
+        if (visiblePageNums.length === 0) return [];
+
+        const preload = [];
+        const minVisible = Math.min(...visiblePageNums);
+        const maxVisible = Math.max(...visiblePageNums);
+
+        // Preload 2 pages before and after visible area
+        for (let i = Math.max(1, minVisible - 2); i < minVisible; i++) {
+            if (!renderedPages.has(i) && !renderingPages.has(i)) {
+                preload.push(i);
+            }
+        }
+        for (let i = maxVisible + 1; i <= Math.min(totalPages, maxVisible + 2); i++) {
+            if (!renderedPages.has(i) && !renderingPages.has(i)) {
+                preload.push(i);
+            }
+        }
+
+        return preload;
+    }
+
+    // Process render queue efficiently
+    async function processRenderQueue() {
+        if (isProcessingQueue || renderQueue.length === 0) return;
+        if (!pdfDocument) return;
+
+        isProcessingQueue = true;
+
+        while (renderQueue.length > 0) {
+            // Prioritize visible pages
+            let pageNum = null;
+
+            // Find first visible page in queue
+            for (let i = 0; i < renderQueue.length; i++) {
+                if (visiblePages.has(renderQueue[i])) {
+                    pageNum = renderQueue.splice(i, 1)[0];
+                    break;
+                }
+            }
+
+            // If no visible page, take first in queue
+            if (pageNum === null) {
+                pageNum = renderQueue.shift();
+            }
+
+            if (renderedPages.has(pageNum)) {
+                continue;
+            }
+
+            await renderPageOptimized(pageNum);
+        }
+
+        isProcessingQueue = false;
+    }
+
+    // Render a single page (optimized)
+    async function renderPageOptimized(pageNum) {
+        if (renderedPages.has(pageNum) || renderingPages.has(pageNum)) return;
+        if (!pdfDocument) return;
+
+        renderingPages.add(pageNum);
+
+        try {
+            const page = await pdfDocument.getPage(pageNum);
+            const viewport = page.getViewport({ scale: zoomLevel });
+
+            const pageEl = pageContainers[pageNum];
+            if (!pageEl) return; // Page container was removed
+
+            const pdfCanvas = pageEl.pdfCanvas;
+            const redactionCanvas = pageEl.redactionCanvas;
+
+            // Set canvas dimensions
+            pdfCanvas.width = viewport.width;
+            pdfCanvas.height = viewport.height;
+            redactionCanvas.width = viewport.width;
+            redactionCanvas.height = viewport.height;
+
+            // Apply styles
+            pdfCanvas.style.display = 'block';
+            pdfCanvas.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.5)';
+            redactionCanvas.style.position = 'absolute';
+            redactionCanvas.style.top = '0';
+            redactionCanvas.style.left = '0';
+            redactionCanvas.style.cursor = 'crosshair';
+            redactionCanvas.style.display = 'block';
+            redactionCanvas.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.5)';
+
+            // Render page to canvas
+            const ctx = pdfCanvas.getContext('2d');
+            await page.render({ canvasContext: ctx, viewport }).promise;
+
+            // Render redactions
+            redrawPageRedactions(pageNum);
+
+            // Mark as rendered (cached)
+            renderedPages.add(pageNum);
+        } catch (err) {
+            console.error(`Error rendering page ${pageNum}:`, err);
+        } finally {
+            renderingPages.delete(pageNum);
+        }
+    }
+
+    // Redraw redactions for a specific page
+    function redrawPageRedactions(pageNum) {
+        const pageEl = pageContainers[pageNum];
+        if (!pageEl) return;
+
+        const redactionCanvas = pageEl.redactionCanvas;
+        const ctx = redactionCanvas.getContext('2d');
+        ctx.clearRect(0, 0, redactionCanvas.width, redactionCanvas.height);
+
+        const pageRedactions = redactions[pageNum] || [];
+        pageRedactions.forEach(rect => {
+            const x = rect.x * redactionCanvas.width;
+            const y = rect.y * redactionCanvas.height;
+            const w = rect.width * redactionCanvas.width;
+            const h = rect.height * redactionCanvas.height;
+
+            ctx.fillStyle = rect.color;
+            ctx.globalAlpha = 0.5;
+            ctx.fillRect(x, y, w, h);
+            ctx.globalAlpha = 1.0;
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, w, h);
+        });
+    }
+
+    // Re-render all pages when zoom changes
+    async function reRenderAllPages(pageToScrollTo = null) {
+        renderingPages.clear();
+        visiblePages.clear();
+
+        for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+            const pageEl = pageContainers[pageNum];
+            if (pageEl) {
+                pageEl.pdfCanvas.width = 0;
+                pageEl.pdfCanvas.height = 0;
+                pageEl.redactionCanvas.width = 0;
+                pageEl.redactionCanvas.height = 0;
+            }
+        }
+
+        // Re-render and maintain position
+        updateVisiblePages();
+
+        // Scroll to the page we were on before zoom
+        if (pageToScrollTo && pageContainers[pageToScrollTo]) {
+            setTimeout(() => {
+                pageContainers[pageToScrollTo].scrollIntoView({ behavior: 'auto', block: 'start' });
+            }, 50);
+        }
+
+        updateUI();
+    }    // Generate thumbnails
     async function generateThumbnails() {
         thumbnailList.innerHTML = '';
 
@@ -456,7 +721,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const item = document.createElement('div');
             item.className = 'thumbnail-item';
-            if (i === currentPage) item.classList.add('active');
 
             const badge = document.createElement('div');
             badge.className = 'thumbnail-badge';
@@ -469,77 +733,38 @@ document.addEventListener('DOMContentLoaded', async () => {
             item.appendChild(badge);
             item.appendChild(canvas);
             item.appendChild(label);
+
             item.addEventListener('click', () => {
-                currentPage = i;
-                renderCurrentPage();
+                const pageEl = pageContainers[i];
+                if (pageEl) {
+                    pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             });
 
             thumbnailList.appendChild(item);
         }
     }
 
-    // Render current page
-    async function renderCurrentPage() {
-        if (!pdfDocument) return;
+    // Update current page based on scroll position
+    function updateCurrentPage() {
+        if (visiblePages.size === 0) return;
 
-        try {
-            const page = await pdfDocument.getPage(currentPage);
-            const viewport = page.getViewport({ scale: zoomLevel });
+        // Find the topmost visible page
+        let topPage = currentPage;
+        let topPosition = Infinity;
 
-            pdfCanvas.width = viewport.width;
-            pdfCanvas.height = viewport.height;
-            redactionCanvas.width = viewport.width;
-            redactionCanvas.height = viewport.height;
-
-            const ctx = pdfCanvas.getContext('2d');
-            await page.render({ canvasContext: ctx, viewport }).promise;
-
-            drawRedactions();
-            updateUI();
-        } catch (err) {
-            console.error('Error rendering page:', err);
-        }
-    }
-
-    // Draw redactions
-    function drawRedactions() {
-        const ctx = redactionCanvas.getContext('2d');
-        ctx.clearRect(0, 0, redactionCanvas.width, redactionCanvas.height);
-
-        const pageRedactions = redactions[currentPage] || [];
-        pageRedactions.forEach((rect, index) => {
-            const x = rect.x * redactionCanvas.width;
-            const y = rect.y * redactionCanvas.height;
-            const w = rect.width * redactionCanvas.width;
-            const h = rect.height * redactionCanvas.height;
-
-            const isHovered = index === hoveredRedactionIndex;
-
-            ctx.fillStyle = rect.color;
-            ctx.globalAlpha = isHovered ? 0.7 : 0.5;
-            ctx.fillRect(x, y, w, h);
-            ctx.globalAlpha = 1.0;
-            ctx.strokeStyle = isHovered ? '#f39c12' : '#e74c3c';
-            ctx.lineWidth = isHovered ? 3 : 2;
-            ctx.strokeRect(x, y, w, h);
-
-            // Show delete icon when hovered
-            if (isHovered) {
-                ctx.fillStyle = '#e74c3c';
-                ctx.font = 'bold 16px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('✕', x + w / 2, y + h / 2);
+        for (let pageNum of visiblePages) {
+            const pageEl = pageContainers[pageNum];
+            const rect = pageEl.getBoundingClientRect();
+            const distance = Math.abs(rect.top);
+            if (distance < topPosition) {
+                topPosition = distance;
+                topPage = pageNum;
             }
-        });
-    }
+        }
 
-    // Update UI
-    function updateUI() {
-        // Update page controls
+        currentPage = topPage;
         pageInput.value = currentPage;
-        prevBtn.disabled = currentPage === 1;
-        nextBtn.disabled = currentPage === totalPages;
 
         // Update zoom display
         document.getElementById('zoom-level').textContent = `${Math.round(zoomLevel * 100)}%`;
@@ -548,12 +773,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelectorAll('.thumbnail-item').forEach((item, i) => {
             item.classList.toggle('active', i + 1 === currentPage);
         });
+    }
 
-        // Update redaction counts
-        const pageRedactionCount = (redactions[currentPage] || []).length;
-        document.getElementById('redaction-count').textContent =
-            `${pageRedactionCount} redaction${pageRedactionCount !== 1 ? 's' : ''} on this page`;
-
+    // Update UI
+    function updateUI() {
         // Update thumbnail badges
         document.querySelectorAll('.thumbnail-item').forEach((item, i) => {
             const badge = item.querySelector('.thumbnail-badge');
@@ -566,7 +789,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // Enable/disable apply button
+        // Update apply button
         const totalRedactions = Object.values(redactions).reduce((sum, arr) => sum + arr.length, 0);
         applyBtn.disabled = totalRedactions === 0;
     }
