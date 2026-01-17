@@ -22,7 +22,8 @@
     "tool-metadata": "メタデータを表示・編集",
     "tool-extract-images": "画像を抽出",
     "tool-OCR": "OCR PDFまたは画像",
-    "tool-image-to-pdf": "画像をPDFに変換"
+    "tool-image-to-pdf": "画像をPDFに変換",
+    "tool-redact-pdf": "PDF 内容墨消し"
   },
   "error": {
     "empty-message": "PDFが開かれていません。「PDFリーダーを開く」をクリックして開始してください！"
@@ -459,5 +460,17 @@
     "extract_all_pages": "すべてのページを個別の PDF として抽出",
     "extract_all_pages_help": "各ページは個別の PDF ファイルとして保存されます",
     "split_pdf_button": "PDF を分割"
+  },
+  "redact": {
+    "page-title": "PDF 墨消し",
+    "select-pdf-btn": "PDF を選択",
+    "apply-redact-btn": "墨消しを適用",
+    "clear-all-btn": "すべてクリア",
+    "page-nav-sidebar": "ページ",
+    "redaction-color": "墨消し色：",
+    "zoom-section": "ズーム：",
+    "fit-btn": "フィット",
+    "hint-group": "💡 Ctrl+スクロールでズーム || Ctrl+0でリセット || 特定の墨消しを削除するには墨消し部分をクリック",
+    "select-hint": "「PDFを選択」をクリックするか、PDFファイルをここにドラッグ＆ドロップ"
   }
 }

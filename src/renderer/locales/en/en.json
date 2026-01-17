@@ -22,7 +22,8 @@
     "tool-metadata": "View and Edit Metadata",
     "tool-extract-images": "Extract Images",
     "tool-OCR": "OCR PDF or Image",
-    "tool-image-to-pdf": "Image to PDF"
+    "tool-image-to-pdf": "Image to PDF",
+    "tool-redact-pdf": "Redact PDF Content"
   },
   "error": {
     "empty-message": "No PDFs open. Click \"Open PDF Reader\" to get started!"
@@ -459,5 +460,17 @@
     "extract_all_pages": "Extract all pages into separate PDFs",
     "extract_all_pages_help": "Each page will be saved as a separate PDF file",
     "split_pdf_button": "Split PDF"
+  },
+  "redact": {
+    "page-title": "Redact PDF",
+    "select-pdf-btn": "Select PDF",
+    "apply-redact-btn": "Apply Redactions",
+    "clear-all-btn": "Clear All",
+    "page-nav-sidebar": "Pages",
+    "redaction-color": "Redaction Color:",
+    "zoom-section": "Zoom:",
+    "fit-btn": "Fit",
+    "hint-group": "💡 Ctrl+Scroll to zoom || Ctrl+0 to reset || Click on the redacted area to remove a specific redaction",
+    "select-hint": "Click \"Select PDF\" or drag & drop a PDF file here"
   }
 }

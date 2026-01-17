@@ -39,17 +39,17 @@
 <body>
     <div id="app">
         <div class="top-bar">
-            <a href="../../index.html" class="top-btn">← Back</a>
-            <h1 class="tool-title">Redact PDF</h1>
+            <a href="../../index.html" class="top-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="redact.page-title">Redact PDF</h1>
             <div class="toolbar">
                 <button id="select-pdf-btn" class="top-btn">
-                    <span class="btn-icon">📄</span> Select PDF
+                    <span class="btn-icon">📄</span> <span data-i18n="redact.select-pdf-btn">Select PDF</span>
                 </button>
                 <button id="apply-redactions-btn" class="top-btn" disabled>
-                    <span class="btn-icon">✓</span> Apply Redactions
+                    <span class="btn-icon">✓</span> <span data-i18n="redact.apply-redact-btn">Apply Redactions</span>
                 </button>
                 <button id="clear-redactions-btn" class="top-btn secondary" disabled>
-                    <span class="btn-icon">×</span> Clear All
+                    <span class="btn-icon">×</span> <span data-i18n="redact.clear-all-btn">Clear All</span>
                 </button>
             </div>
         </div>
@@ -58,7 +58,7 @@
             <!-- Sidebar for page thumbnails -->
             <aside class="sidebar">
                 <div class="sidebar-header">
-                    <h3>Pages</h3>
+                    <h3 data-i18n="redact.page-nav-sidebar">Pages</h3>
                     <div class="page-count" id="page-count">0 pages</div>
                 </div>
                 <div class="thumbnail-list" id="thumbnail-list">
@@ -70,7 +70,7 @@
             <div class="canvas-area">
                 <div class="canvas-controls">
                     <div class="control-group">
-                        <label>Redaction Color:</label>
+                        <label data-i18n="redact.redaction-color">Redaction Color:</label>
                         <div class="color-options">
                             <button class="color-btn active" data-color="#000000" style="background: #000000;"
                                 title="Black"></button>
@@ -81,15 +81,15 @@
                         </div>
                     </div>
                     <div class="control-group">
-                        <label>Zoom:</label>
+                        <label data-i18n="redact.zoom-section">Zoom:</label>
                         <div class="zoom-controls">
                             <button id="zoom-out-btn" class="zoom-btn" disabled>−</button>
                             <span id="zoom-level">100%</span>
                             <button id="zoom-in-btn" class="zoom-btn" disabled>+</button>
-                            <button id="zoom-fit-btn" class="zoom-btn" disabled>Fit</button>
+                            <button id="zoom-fit-btn" class="zoom-btn" disabled> <span data-i18n="redact.fit-btn">Fit</span> </button>
                         </div>
                     </div>
-                    <div class="control-group hint">
+                    <div class="control-group hint" data-i18n="redact.hint-group">
                         💡 Ctrl+Scroll to zoom || Ctrl+0 to reset || Click on the redacted area to remove a specific redaction
                     </div>
                 </div>
@@ -97,8 +97,7 @@
                 <div class="canvas-wrapper" id="canvas-wrapper">
                     <div class="empty-canvas-state">
                         <div class="empty-icon">📄</div>
-                        <p>Select a PDF to start redacting</p>
-                        <p class="empty-hint">Click "Select PDF" or drag & drop a PDF file here</p>
+                        <p class="empty-hint" data-i18n="redact.select-hint">Click "Select PDF" or drag & drop a PDF file here</p>
                     </div>
                 </div>
 

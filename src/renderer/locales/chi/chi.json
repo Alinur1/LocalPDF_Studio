@@ -22,7 +22,8 @@
     "tool-metadata": "查看和编辑元数据",
     "tool-extract-images": "提取图片",
     "tool-OCR": "OCR辨識PDF或影像",
-    "tool-image-to-pdf": "图片转 PDF"
+    "tool-image-to-pdf": "图片转 PDF",
+    "tool-redact-pdf": "PDF 内容擦除"
   },
   "error": {
     "empty-message": "未打开PDF。点击\"打开PDF阅读器\"开始使用！"
@@ -459,5 +460,17 @@
     "extract_all_pages": "将所有页面提取为单独的 PDF",
     "extract_all_pages_help": "每一页都会保存为一个单独的 PDF 文件",
     "split_pdf_button": "拆分 PDF"
+  },
+  "redact": {
+    "page-title": "PDF 擦除",
+    "select-pdf-btn": "选择 PDF",
+    "apply-redact-btn": "应用擦除",
+    "clear-all-btn": "清除全部",
+    "page-nav-sidebar": "页面",
+    "redaction-color": "擦除颜色：",
+    "zoom-section": "缩放：",
+    "fit-btn": "适应",
+    "hint-group": "💡 Ctrl+滚动缩放 || Ctrl+0重置 || 点击擦除区域移除特定擦除",
+    "select-hint": "点击“选择PDF”或将PDF文件拖放到此处"
   }
 }
