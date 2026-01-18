@@ -38,13 +38,12 @@
 <body>
     <div id="app">
         <div class="top-bar">
-            <a href="../../index.html" class="top-btn">← Back</a>
-            <h1 class="tool-title">OCR PDF</h1>
+            <a href="../../index.html" class="top-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="ocr.page-title">OCR PDF</h1>
         </div>
         <main class="tool-container">
             <div class="file-selection-area">
-                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF or Image File or drop files
-                    here</button>
+                <button id="select-pdf-btn" class="select-pdf-btn" data-i18n="common.btn-select-pdf-image">Click to Select a PDF or Image File or drop files here</button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
                     <div style="flex-grow: 1;">
                         <p id="pdf-name" class="pdf-name"></p>
@@ -56,8 +55,8 @@
             <div id="preview-container" class="preview-container" style="display: none;">
                 <div class="preview-header">
                     <div>
-                        <h3 id="preview-title">PDF Preview - Select Pages</h3>
-                        <p class="selection-info" id="selection-info" style="display: none;">No pages selected</p>
+                        <h3 id="preview-title" data-i18n="ocr.pdf-preview-header">PDF Preview - Select Pages</h3>
+                        <p class="selection-info" id="selection-info" data-i18n="ocr.no-page-selected" style="display: none;">No pages selected</p>
                     </div>
                     <span id="page-count" class="page-count"></span>
                 </div>
@@ -65,36 +64,36 @@
                 </div>
             </div>
             <div class="page-options-container" id="page-options-container" style="display: none;">
-                <h2>Page Selection Options</h2>
+                <h2 data-i18n="ocr.page-selection-header">Page Selection Options</h2>
                 <div class="option-group">
-                    <h3>Quick Actions</h3>
+                    <h3 data-i18n="ocr.quick-action-options">Quick Actions</h3>
                     <div class="quick-actions">
-                        <button class="quick-action-btn" id="select-all-pages">Select All Pages</button>
-                        <button class="quick-action-btn" id="select-even-pages">Select Even Pages</button>
-                        <button class="quick-action-btn" id="select-odd-pages">Select Odd Pages</button>
-                        <button class="quick-action-btn" id="invert-selection">Invert Selection</button>
+                        <button class="quick-action-btn" id="select-all-pages" data-i18n="ocr.quick-action1">Select All Pages</button>
+                        <button class="quick-action-btn" id="select-even-pages" data-i18n="ocr.quick-action2">Select Even Pages</button>
+                        <button class="quick-action-btn" id="select-odd-pages" data-i18n="ocr.quick-action3">Select Odd Pages</button>
+                        <button class="quick-action-btn" id="invert-selection" data-i18n="ocr.quick-action4">Invert Selection</button>
                     </div>
                 </div>
                 <div class="option-group">
-                    <h3>Specify Pages Manually</h3>
-                    <label for="manual-pages">Individual Pages:</label>
+                    <h3 data-i18n="ocr.manual-page-spec">Specify Pages Manually</h3>
+                    <label for="manual-pages" data-i18n="ocr.individual-pages">Individual Pages:</label>
                     <input type="text" id="manual-pages" class="options-input" placeholder="e.g., 1, 3, 5, 10">
-                    <small class="help-text">Enter page numbers separated by commas</small>
+                    <small class="help-text" data-i18n="ocr.manual-page-spec-helpTxt">Enter page numbers separated by commas</small>
                 </div>
                 <div class="option-group">
-                    <h3>Page Ranges</h3>
-                    <label for="page-ranges">Page Ranges:</label>
+                    <h3 data-i18n="ocr.page-ranges">Page Ranges</h3>
+                    <label for="page-ranges" data-i18n="ocr.page-range-spec">Page Ranges:</label>
                     <input type="text" id="page-ranges" class="options-input" placeholder="e.g., 1-3, 7-9, 15-20">
-                    <small class="help-text">Enter ranges like "1-5, 10-15" or mix both: "1, 3-5, 8"</small>
+                    <small class="help-text" data-i18n="ocr.page-range-spec-helpTxt">Enter ranges like "1-5, 10-15" or mix both: "1, 3-5, 8"</small>
                 </div>
                 <div class="option-group">
-                    <button id="clear-selection-btn" class="action-btn secondary">Clear Selection</button>
+                    <button id="clear-selection-btn" class="action-btn secondary" data-i18n="ocr.clear-selection-btn">Clear Selection</button>
                 </div>
             </div>
             <div class="ocr-options-container">
-                <h2>OCR Language Options</h2>
+                <h2 data-i18n="ocr.lang-option">OCR Language Options</h2>
                 <div class="option-group">
-                    <label for="languageDropdown">Select OCR Languages:</label>
+                    <label for="languageDropdown" data-i18n="ocr.lang-selection">Select OCR Languages:</label>
                     <div class="custom-dropdown">
                         <div class="dropdown-header" id="languageDropdown">
                             <div class="language-tags" id="languageTags">
@@ -409,26 +408,25 @@
                         </div>
                         <input type="hidden" id="languageSelect" value="eng">
                     </div>
-                    <small class="help-text">Select one or more languages for text recognition</small>
-                    <p style="color: cyan;">Note: Tesseract needs internet connection only once per language to
-                        download the model.</p>
+                    <small class="help-text" data-i18n="ocr.lang-selection-helpTxt">Select one or more languages for text recognition</small>
+                    <p style="color: cyan;" data-i18n="ocr.lang-selection-note">Note: Tesseract needs internet connection only once per language to download the model.</p>
                 </div>
             </div>
             <div class="action-buttons">
-                <button id="process-btn" class="top-btn" disabled>Process with OCR</button>
+                <button id="process-btn" class="top-btn" data-i18n="ocr.process-btn" disabled>Process with OCR</button>
             </div>
         </main>
     </div>
     <!-- Batch Processing Progress Modal -->
     <div id="batch-progress-modal" class="progress-overlay" style="display: none;">
         <div class="progress-content">
-            <h3 class="progress-title" id="batch-progress-title">Processing PDF with OCR</h3>
+            <h3 class="progress-title" id="batch-progress-title" data-i18n="ocr.ocr-progress">Processing PDF with OCR</h3>
 
             <div class="progress-bar-container">
                 <div class="progress-bar-fill" id="batch-progress-fill"></div>
             </div>
 
-            <div class="progress-info" id="batch-current-action">Initializing...</div>
+            <div class="progress-info" id="batch-current-action" data-i18n="ocr.ocr-initialization">Initializing...</div>
 
             <div class="page-counter">
                 Processing page <span class="current-page" id="batch-current-page">0</span>
@@ -447,10 +445,10 @@
 
             <div class="performance-warning" id="batch-performance-warning" style="display: none;">
                 <span class="warning-icon">⚠</span>
-                <span class="warning-text">Large file detected - Processing in batches for better performance</span>
+                <span class="warning-text" data-i18n="ocr.warning-text">Large file detected - Processing in batches for better performance</span>
             </div>
 
-            <button class="progress-cancel-btn" id="batch-cancel-btn">Cancel OCR Processing</button>
+            <button class="progress-cancel-btn" id="batch-cancel-btn" data-i18n="ocr.cancel-ocr-btn">Cancel OCR Processing</button>
         </div>
     </div>
 

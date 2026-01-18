@@ -37,12 +37,12 @@
 <body>
     <div id="app">
         <div class="top-bar">
-            <a href="../../index.html" class="top-btn">← Back</a>
-            <h1 class="tool-title">PDF to Image</h1>
+            <a href="../../index.html" class="top-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="pdftoImg.page-title">PDF to Image</h1>
         </div>
         <main class="tool-container">
             <div class="file-selection-area">
-                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File or drop PDF here</button>
+                <button id="select-pdf-btn" class="select-pdf-btn" data-i18n="common.btn-select">Click to Select a PDF File or drop PDF here</button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
                     <div style="flex-grow: 1;">
                         <p id="pdf-name" class="pdf-name"></p>
@@ -53,41 +53,41 @@
             </div>
             <div id="preview-container" class="preview-container" style="display: none;">
                 <div class="preview-header">
-                    <h3>PDF Preview</h3>
+                    <h3 data-i18n="pdftoImg.preview-title">PDF Preview</h3>
                     <span id="page-count" class="page-count"></span>
                 </div>
                 <div id="preview-grid" class="preview-grid">
                 </div>
             </div>
             <div class="conversion-options-container">
-                <h2>Conversion Options</h2>
+                <h2 data-i18n="pdftoImg.conversion-options-title">Conversion Options</h2>
                 <div class="option-group">
-                    <label for="imageQuality">Image Quality:</label>
+                    <label for="imageQuality" data-i18n="pdftoImg.image-quality-label">Image Quality:</label>
                     <select id="imageQuality" class="options-select">
-                        <option value="72">Low (72 DPI) - Smaller file size</option>
-                        <option value="150" selected>Medium (150 DPI) - Balanced</option>
-                        <option value="300">High (300 DPI) - Best quality</option>
+                        <option value="72" data-i18n="pdftoImg.quality-low">Low (72 DPI) - Smaller file size</option>
+                        <option value="150" data-i18n="pdftoImg.quality-medium" selected>Medium (150 DPI) - Balanced</option>
+                        <option value="300" data-i18n="pdftoImg.quality-high">High (300 DPI) - Best quality</option>
                     </select>
-                    <small class="help-text">Higher DPI = Better quality but larger file sizes</small>
+                    <small class="help-text" data-i18n="pdftoImg.quality-help">Higher DPI = Better quality but larger file sizes</small>
                 </div>
                 <div class="option-group">
-                    <label for="imageFormat">Output Format:</label>
+                    <label for="imageFormat" data-i18n="pdftoImg.image-format-label">Output Format:</label>
                     <select id="imageFormat" class="options-select">
-                        <option value="jpg" selected>JPG (Smaller size, good for photos)</option>
-                        <option value="png">PNG (Larger size, lossless quality)</option>
+                        <option value="jpg" data-i18n="pdftoImg.format-jpg" selected>JPG (Smaller size, good for photos)</option>
+                        <option value="png" data-i18n="pdftoImg.format-png">PNG (Larger size, lossless quality)</option>
                     </select>
-                    <small class="help-text">All images will be saved as a ZIP file</small>
+                    <small class="help-text" data-i18n="pdftoImg.format-help">All images will be saved as a ZIP file</small>
                 </div>
                 <div class="option-group">
                     <label>
                         <input type="checkbox" id="includePageNumbers" checked>
-                        Include page numbers in filenames
+                        <span data-i18n="pdftoImg.include-page-numbers">Include page numbers in filenames</span>
                     </label>
-                    <small class="help-text">e.g., document_page_001.jpg, document_page_002.jpg</small>
+                    <small class="help-text" data-i18n="pdftoImg.page-number-example">e.g., document_page_001.jpg, document_page_002.jpg</small>
                 </div>
             </div>
             <div class="action-buttons">
-                <button id="convert-btn" class="top-btn" disabled>Convert to Image</button>
+                <button id="convert-btn" class="top-btn" data-i18n="pdftoImg.convert-to-image" disabled>Convert to Image</button>
             </div>
         </main>
     </div>

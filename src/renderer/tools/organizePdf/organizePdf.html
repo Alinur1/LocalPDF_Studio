@@ -37,12 +37,12 @@
 <body>
     <div id="app">
         <div class="top-bar">
-            <a href="../../index.html" class="top-btn">← Back</a>
-            <h1 class="tool-title">Organize/Re-Arrange PDF</h1>
+            <a href="../../index.html" class="top-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="organizePDF.page-title">Organize/Re-Arrange PDF</h1>
         </div>
         <main class="tool-container">
             <div class="file-selection-area">
-                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File or drop PDF here</button>
+                <button id="select-pdf-btn" class="select-pdf-btn" data-i18n="common.btn-select">Click to Select a PDF File or drop PDF here</button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
                     <div style="flex-grow: 1;">
                         <p id="pdf-name" class="pdf-name"></p>
@@ -53,30 +53,30 @@
             </div>
             <div class="organize-info" style="display: none;" id="organize-info">
                 <div class="info-card">
-                    <h3>How to Organize:</h3>
+                    <h3 data-i18n="organizePDF.how-to-organize-title">How to Organize:</h3>
                     <ul>
-                        <li><strong>Drag & Drop</strong> pages to reorder them</li>
-                        <li><strong>Click rotation buttons</strong> to rotate pages 90°</li>
-                        <li><strong>Click duplicate button</strong> to copy a page</li>
-                        <li><strong>Click delete button</strong> to remove a page</li>
+                        <li data-i18n="organizePDF.organize-drag-drop">Drag & Drop pages to reorder them</li>
+                        <li data-i18n="organizePDF.organize-rotate">Click rotation buttons to rotate pages 90°</li>
+                        <li data-i18n="organizePDF.organize-duplicate">Click duplicate button to copy a page</li>
+                        <li data-i18n="organizePDF.organize-delete">Click delete button to remove a page</li>
                     </ul>
                 </div>
             </div>
             <div id="organize-container" class="organize-container" style="display: none;">
                 <div class="organize-header">
                     <div>
-                        <h3>Drag pages to reorder</h3>
+                        <h3 data-i18n="organizePDF.drag-pages-title">Drag pages to reorder</h3>
                         <p class="page-count-info" id="page-count-info"></p>
                     </div>
                     <div class="header-actions">
-                        <button id="reset-order-btn" class="action-btn secondary">Reset to Original</button>
+                        <button id="reset-order-btn" class="action-btn secondary" data-i18n="organizePDF.reset-to-original">Reset to Original</button>
                     </div>
                 </div>
                 <div id="pages-grid" class="pages-grid">
                 </div>
             </div>
             <div class="action-buttons" id="action-buttons" style="display: none;">
-                <button id="organize-btn" class="top-btn">Save Organized PDF</button>
+                <button id="organize-btn" class="top-btn" data-i18n="organizePDF.save-organized-pdf">Save Organized PDF</button>
             </div>
         </main>
     </div>

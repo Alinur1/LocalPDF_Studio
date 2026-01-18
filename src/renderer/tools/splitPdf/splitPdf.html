@@ -39,12 +39,12 @@
 <body>
     <div id="app">
         <div class="top-bar">
-            <a href="../../index.html" class="top-btn">← Back</a>
-            <h1 class="tool-title">Split PDF</h1>
+            <a href="../../index.html" class="top-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="split.page-title">Split PDF</h1>
         </div>
         <main class="tool-container">
             <div class="file-selection-area">
-                <button id="select-pdf-btn" class="select-pdf-btn">Click to Select a PDF File or drop PDF here</button>
+                <button id="select-pdf-btn" class="select-pdf-btn" data-i18n="common.btn-select">Click to Select a PDF File or drop PDF here</button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
                     <div style="flex-grow: 1;">
                         <p id="pdf-name" class="pdf-name"></p>
@@ -55,53 +55,53 @@
             </div>
             <div id="preview-container" class="preview-container" style="display: none;">
                 <div class="preview-header">
-                    <h3>PDF Preview</h3>
+                    <h3 data-i18n="split.preview-title">PDF Preview</h3>
                     <span id="page-count" class="page-count"></span>
                 </div>
                 <div id="preview-grid" class="preview-grid">
                 </div>
             </div>
             <div class="split-options-container">
-                <h2>Split Options</h2>
+                <h2 data-i18n="split.split-options-title">Split Options</h2>
                 <div class="split-method">
                     <input type="radio" id="byPageRanges" name="splitMethod" value="ByPageRanges" checked>
-                    <label for="byPageRanges">Split by page ranges</label>
+                    <label for="byPageRanges" data-i18n="split.split-by-page-ranges">Split by page ranges</label>
                 </div>
                 <div class="options-panel" id="optionsByPageRanges">
                     <input type="text" id="pageRanges" class="options-input" placeholder="e.g., 1-3, 5-7, 8-10">
-                    <small class="help-text">Enter ranges like "1-3, 5-7" or single pages like "1, 3, 5"</small>
+                    <small class="help-text" data-i18n="split.page-ranges-help">Enter ranges like "1-3, 5-7" or single pages like "1, 3, 5"</small>
                 </div>
 
                 <div class="split-method">
                     <input type="radio" id="atSpecificPages" name="splitMethod" value="AtSpecificPages">
-                    <label for="atSpecificPages">Split at specific pages</label>
+                    <label for="atSpecificPages" data-i18n="split.split-at-specific-pages">Split at specific pages</label>
                 </div>
                 <div class="options-panel" id="optionsAtSpecificPages" style="display: none;">
                     <input type="text" id="splitPages" class="options-input"
                         placeholder="e.g., 2, 5, 8 (splits AFTER these pages)">
-                    <small class="help-text">PDF will be split after each specified page number</small>
+                    <small class="help-text" data-i18n="split.split-pages-help">PDF will be split after each specified page number</small>
                 </div>
 
                 <div class="split-method">
                     <input type="radio" id="everyNPages" name="splitMethod" value="EveryNPages">
-                    <label for="everyNPages">Split every N pages</label>
+                    <label for="everyNPages" data-i18n="split.split-every-n-pages">Split every N pages</label>
                 </div>
                 <div class="options-panel" id="optionsEveryNPages" style="display: none;">
                     <input type="number" id="pageInterval" class="options-input" placeholder="e.g., 5" min="1">
-                    <small class="help-text">Creates separate PDFs with the specified number of pages</small>
+                    <small class="help-text" data-i18n="split.every-n-pages-help">Creates separate PDFs with the specified number of pages</small>
                 </div>
 
                 <div class="split-method">
                     <input type="radio" id="extractAllPages" name="splitMethod" value="ExtractAllPages">
-                    <label for="extractAllPages">Extract all pages into separate PDFs</label>
+                    <label for="extractAllPages" data-i18n="split.extract-all-pages">Extract all pages into separate PDFs</label>
                 </div>
                 <div class="options-panel" style="display: none; border: none; padding-left: 2rem;">
-                    <small class="help-text">Each page will be saved as a separate PDF file</small>
+                    <small class="help-text" data-i18n="split.extract-all-pages-help">Each page will be saved as a separate PDF file</small>
                 </div>
             </div>
 
             <div class="action-buttons">
-                <button id="split-btn" class="top-btn" disabled>Split PDF</button>
+                <button id="split-btn" class="top-btn" data-i18n="split.split-pdf-button" disabled>Split PDF</button>
             </div>
         </main>
     </div>
