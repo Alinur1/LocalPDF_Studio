@@ -482,6 +482,26 @@
     "image-quality-helpTxt": "Higher quality = larger file size.",
     "convert-btn": "Convert to PDF"
   },
+  "imageToPdfJS": {
+    "selectingImages": "Selecting images...",
+    "dropImageFiles": "Please drop image files (JPG, PNG, BMP, TIFF).",
+    "dropValidImages": "Please drop valid image files.",
+    "loadingPreviews": "Loading previews...",
+    "selectImages": "Please select image files (JPG, PNG, BMP, TIFF).",
+    "imageSelected": "image selected",
+    "imagesSelected": "images selected",
+    "convertingPdf": "Converting to PDF...",
+    "converting": "Converting...",
+    "successSingle": "LocalPDF Studio - SUCCESS",
+    "successSingleMsg": "Images converted successfully!\nSaved to: ",
+    "successMultiple": "LocalPDF Studio - SUCCESS",
+    "successMultipleMsg": "Images converted to separate PDFs!\nSaved to: ",
+    "warningTitle": "LocalPDF Studio - WARNING",
+    "warningMsg": "Operation cancelled or failed to save the file.",
+    "errorTitle": "LocalPDF Studio - ERROR",
+    "errorMsg": "Failed to convert images to PDF",
+    "selectImagesFirst": "Please select images first."
+  },
   "lockUnlock": {
     "page-title": "Lock/Unlock PDF",
     "operation-header": "Operation",

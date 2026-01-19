@@ -482,6 +482,26 @@
     "image-quality-helpTxt": "বেশি কোয়ালিটি = বড় ফাইল সাইজ।",
     "convert-btn": "PDF-এ কনভার্ট করুন"
   },
+  "imageToPdfJS": {
+    "selectingImages": "ছবি নির্বাচন করা হচ্ছে...",
+    "dropImageFiles": "অনুগ্রহ করে ছবি ফাইল ড্রপ করুন (JPG, PNG, BMP, TIFF)।",
+    "dropValidImages": "অনুগ্রহ করে বৈধ ছবি ফাইল ড্রপ করুন।",
+    "loadingPreviews": "পূর্বরূপ লোড হচ্ছে...",
+    "selectImages": "অনুগ্রহ করে ছবি ফাইল নির্বাচন করুন (JPG, PNG, BMP, TIFF)।",
+    "imageSelected": "ছবি নির্বাচিত",
+    "imagesSelected": "ছবি নির্বাচিত",
+    "convertingPdf": "PDF তে রূপান্তর করা হচ্ছে...",
+    "converting": "রূপান্তর করা হচ্ছে...",
+    "successSingle": "LocalPDF Studio - সাফল্য",
+    "successSingleMsg": "ছবি সফলভাবে রূপান্তরিত হয়েছে!\nসংরক্ষিত অবস্থান: ",
+    "successMultiple": "LocalPDF Studio - সাফল্য",
+    "successMultipleMsg": "ছবি আলাদা PDF তে রূপান্তরিত হয়েছে!\nসংরক্ষিত অবস্থান: ",
+    "warningTitle": "LocalPDF Studio - সতর্কতা",
+    "warningMsg": "অপারেশন বাতিল করা হয়েছে বা ফাইল সংরক্ষণে ব্যর্থ হয়েছে।",
+    "errorTitle": "LocalPDF Studio - ত্রুটি",
+    "errorMsg": "ছবিগুলিকে PDF তে রূপান্তর করতে ব্যর্থ হয়েছে",
+    "selectImagesFirst": "অনুগ্রহ করে প্রথমে ছবি নির্বাচন করুন।"
+  },
   "lockUnlock": {
     "page-title": "PDF লক/আনলক করুন",
     "operation-header": "অপারেশন",

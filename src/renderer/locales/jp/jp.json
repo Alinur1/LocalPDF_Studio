@@ -482,6 +482,26 @@
     "image-quality-helpTxt": "品質が高いほどファイルサイズが大きくなります。",
     "convert-btn": "PDFに変換"
   },
+  "imageToPdfJS": {
+    "selectingImages": "画像を選択中...",
+    "dropImageFiles": "画像ファイルをドラッグ&ドロップしてください (JPG, PNG, BMP, TIFF)。",
+    "dropValidImages": "有効な画像ファイルをドラッグ&ドロップしてください。",
+    "loadingPreviews": "プレビューを読み込み中...",
+    "selectImages": "画像ファイルを選択してください (JPG, PNG, BMP, TIFF)。",
+    "imageSelected": "個の画像を選択",
+    "imagesSelected": "個の画像を選択",
+    "convertingPdf": "PDF に変換中...",
+    "converting": "変換中...",
+    "successSingle": "LocalPDF Studio - 成功",
+    "successSingleMsg": "画像が正常に変換されました!\n保存先: ",
+    "successMultiple": "LocalPDF Studio - 成功",
+    "successMultipleMsg": "画像が個別の PDF に変換されました!\n保存先: ",
+    "warningTitle": "LocalPDF Studio - 警告",
+    "warningMsg": "操作がキャンセルされたか、ファイルの保存に失敗しました。",
+    "errorTitle": "LocalPDF Studio - エラー",
+    "errorMsg": "画像を PDF に変換できませんでした",
+    "selectImagesFirst": "まず画像を選択してください。"
+  },
   "lockUnlock": {
     "page-title": "PDF のロック/アンロック",
     "operation-header": "操作",

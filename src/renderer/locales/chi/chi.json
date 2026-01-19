@@ -482,6 +482,26 @@
     "image-quality-helpTxt": "质量越高 = 文件越大。",
     "convert-btn": "转换为 PDF"
   },
+  "imageToPdfJS": {
+    "selectingImages": "正在选择图片...",
+    "dropImageFiles": "请拖放图片文件 (JPG, PNG, BMP, TIFF)。",
+    "dropValidImages": "请拖放有效的图片文件。",
+    "loadingPreviews": "正在加载预览...",
+    "selectImages": "请选择图片文件 (JPG, PNG, BMP, TIFF)。",
+    "imageSelected": "张图片已选择",
+    "imagesSelected": "张图片已选择",
+    "convertingPdf": "正在转换为 PDF...",
+    "converting": "转换中...",
+    "successSingle": "LocalPDF Studio - 成功",
+    "successSingleMsg": "图片转换成功!\n保存至: ",
+    "successMultiple": "LocalPDF Studio - 成功",
+    "successMultipleMsg": "图片已转换为单独的 PDF!\n保存至: ",
+    "warningTitle": "LocalPDF Studio - 警告",
+    "warningMsg": "操作已取消或保存文件失败。",
+    "errorTitle": "LocalPDF Studio - 错误",
+    "errorMsg": "将图片转换为 PDF 失败",
+    "selectImagesFirst": "请先选择图片。"
+  },
   "lockUnlock": {
     "page-title": "锁定/解锁 PDF",
     "operation-header": "操作",

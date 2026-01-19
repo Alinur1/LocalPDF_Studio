@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
 
             if (imageFiles.length === 0) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop image files (JPG, PNG, BMP, TIFF).', ['OK']);
+                await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('imageToPdfJS.dropImageFiles'), ['OK']);
                 return;
             }
 
@@ -123,12 +123,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop valid image files.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('imageToPdfJS.dropValidImages'), ['OK']);
         }
     });
 
     async function selectImages() {
-        loadingUI.show("Selecting images...");
+        loadingUI.show(i18n.t('imageToPdfJS.selectingImages'));
         try {
             const files = await window.electronAPI.selectPdfsAndImages();
             if (!files || !files.length) return;
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
 
             if (imageFiles.length === 0) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select image files (JPG, PNG, BMP, TIFF).', ['OK']);
+                await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('imageToPdfJS.selectImages'), ['OK']);
                 return;
             }
 
@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     async function renderImagesPreviews() {
-        loadingUI.show("Loading previews...");
+        loadingUI.show(i18n.t('imageToPdfJS.loadingPreviews'));
         previewContainer.style.display = "flex";
         imagesGrid.innerHTML = "";
 
@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     async function handleImagesSelected(newImages) {
-        loadingUI.show("Loading previews...");
+        loadingUI.show(i18n.t('imageToPdfJS.loadingPreviews'));
 
         // Add only new images (avoid duplicates)
         for (const newImage of newImages) {
@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const totalSize = selectedImages.reduce((sum, img) => sum + img.size, 0);
-        filesCountEl.textContent = `${selectedImages.length} image${selectedImages.length > 1 ? 's' : ''} selected`;
+        filesCountEl.textContent = `${selectedImages.length} ${selectedImages.length > 1 ? i18n.t('imageToPdfJS.imagesSelected') : i18n.t('imageToPdfJS.imageSelected')}`;
         filesSizeEl.textContent = `(${(totalSize / 1024 / 1024).toFixed(2)} MB)`;
 
         selectImagesBtn.style.display = "none";
@@ -315,7 +315,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             clearAll();
         } else {
             const totalSize = selectedImages.reduce((sum, img) => sum + img.size, 0);
-            filesCountEl.textContent = `${selectedImages.length} image${selectedImages.length > 1 ? 's' : ''} selected`;
+            filesCountEl.textContent = `${selectedImages.length} ${selectedImages.length > 1 ? i18n.t('imageToPdfJS.imagesSelected') : i18n.t('imageToPdfJS.imageSelected')}`;
             filesSizeEl.textContent = `(${(totalSize / 1024 / 1024).toFixed(2)} MB)`;
             await renderImagesPreviews();
         }
@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function convertToPdf() {
         if (!selectedImages || selectedImages.length === 0) {
-            await customAlert.alert("LocalPDF Studio - NOTICE", "Please select images first.", ["OK"]);
+            await customAlert.alert("LocalPDF Studio - NOTICE", i18n.t('imageToPdfJS.selectImagesFirst'), ["OK"]);
             return;
         }
 
@@ -333,9 +333,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         const quality = parseInt(imageQualitySlider.value);
 
         try {
-            loadingUI.show("Converting to PDF...");
+            loadingUI.show(i18n.t('imageToPdfJS.convertingPdf'));
             convertBtn.disabled = true;
-            convertBtn.textContent = "Converting...";
+            convertBtn.textContent = i18n.t('imageToPdfJS.converting');
 
             // Create FormData
             const formData = new FormData();
@@ -368,13 +368,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                     );
                     if (saved) {
                         await customAlert.alert(
-                            "LocalPDF Studio - SUCCESS",
-                            `Images converted successfully!\nSaved to: ${saved}`,
+                            i18n.t('imageToPdfJS.successSingle'),
+                            i18n.t('imageToPdfJS.successSingleMsg') + `${saved}`,
                             ["OK"]
                         );
                     }
                     else {
-                        await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
+                        await customAlert.alert(i18n.t('imageToPdfJS.warningTitle'), i18n.t('imageToPdfJS.warningMsg'), ['OK']);
                     }
                 } else {
                     // Multiple PDF files in a ZIP
@@ -385,8 +385,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     );
                     if (saved) {
                         await customAlert.alert(
-                            "LocalPDF Studio - SUCCESS",
-                            `Images converted to separate PDFs!\nSaved to: ${saved}`,
+                            i18n.t('imageToPdfJS.successMultiple'),
+                            i18n.t('imageToPdfJS.successMultipleMsg') + `${saved}`,
                             ["OK"]
                         );
                     }
@@ -394,11 +394,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         } catch (err) {
             console.error(err);
-            await customAlert.alert("LocalPDF Studio - ERROR", err.message || "Failed to convert images to PDF", ["OK"]);
+            await customAlert.alert(i18n.t('imageToPdfJS.errorTitle'), err.message || i18n.t('imageToPdfJS.errorMsg'), ["OK"]);
         } finally {
             loadingUI.hide();
             convertBtn.disabled = false;
-            convertBtn.textContent = "Convert to PDF";
+            convertBtn.textContent = i18n.t('imageToPdf.convert-btn');
         }
     }
 
