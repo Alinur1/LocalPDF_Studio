@@ -700,7 +700,7 @@
     "split-by-page-ranges": "পৃষ্ঠা পরিসর -নুযায়ী বিভক্ত করুন",
     "page-ranges-placeholder": "যেমন: 1-3, 5-7, 8-10",
     "page-ranges-help": "\"1-3, 5-7\" অথবা একক পৃষ্ঠা \"1, 3, 5\" লিখুন",
-    "split-at-pecific-pages": "নির্দিষ্ট পৃষ্ঠায় বিভক্ত করুন",
+    "split-at-specific-pages": "নির্দিষ্ট পৃষ্ঠায় বিভক্ত করুন",
     "split-pages-placeholder": "যেমন: 2, 5, 8 (এই পৃষ্ঠার পরে বিভক্ত হবে)",
     "split-pages-help": "প্রতিটি নির্ধারিত পৃষ্ঠা নম্বরের পরে পিডিএফ বিভক্ত হবে",
     "split-every-n-pages": "প্রতি N পৃষ্ঠা পর বিভক্ত করুন",
