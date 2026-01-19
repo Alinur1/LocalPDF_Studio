@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let renderedPages = [];
 
     selectPdfBtn.addEventListener('click', async () => {
-        loadingUI.show("Selecting PDF files...");
+        loadingUI.show(i18n.t('splitPdfJS.selectingPdfs'));
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadPdfPreview(filePath) {
-        loadingUI.show('Loading PDF preview...');
+        loadingUI.show(i18n.t('splitPdfJS.loadingPreview'));
         try {
             previewContainer.style.display = 'block';
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             console.error('Error loading PDF:', error);
-            previewGrid.innerHTML = '<p style="color: #e74c3c; text-align: center;">Failed to load PDF preview</p>';
+            previewGrid.innerHTML = `<p style="color: #e74c3c; text-align: center;">${i18n.t('splitPdfJS.failedToLoadPreview')}</p>`;
         } finally {
             loadingUI.hide();
         }
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         thumbWrapper.dataset.pageNum = pageNum;
         const pageLabel = document.createElement('div');
         pageLabel.className = 'page-label';
-        pageLabel.textContent = `Page ${pageNum}`;
+        pageLabel.textContent = i18n.t('splitPdfJS.pageLabel') + pageNum;
         thumbWrapper.appendChild(canvas);
         thumbWrapper.appendChild(pageLabel);
         previewGrid.appendChild(thumbWrapper);
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop only one PDF file.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfJS.dropOnlyOne'), ['OK']);
                 return;
             }
 
@@ -195,11 +195,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     size: fileSize
                 });
             } else {
-                await customAlert.alert('LocalPDF Studio - ERROR', `Failed to save dropped file: ${result.error}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfJS.failedToSaveDrop') + result.error, ['OK']);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a PDF file.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfJS.dropPdfFile'), ['OK']);
         }
     });
 
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     splitBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfJS.selectFileFirst'), ['OK']);
             return;
         }
 
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pageRanges = document.getElementById('pageRanges').value.trim();
                 if (!pageRanges) {
                     isValid = false;
-                    await customAlert.alert('LocalPDF Studio - WARNING', 'Page ranges cannot be empty.', ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.pageRangesEmpty'), ['OK']);
                 } else {
                     options.pageRanges = pageRanges.split(',').map(r => r.trim());
                 }
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const splitPages = document.getElementById('splitPages').value.trim();
                 if (!splitPages) {
                     isValid = false;
-                    await customAlert.alert('LocalPDF Studio - WARNING', 'Specific pages cannot be empty.', ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.specificPagesEmpty'), ['OK']);
                 } else {
                     options.splitPages = splitPages.split(',')
                         .map(p => parseInt(p.trim()))
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pageInterval = document.getElementById('pageInterval').value;
                 if (!pageInterval || parseInt(pageInterval) <= 0) {
                     isValid = false;
-                    await customAlert.alert('LocalPDF Studio - WARNING', 'Please enter a valid number of pages.', ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.invalidPageInterval'), ['OK']);
                 } else {
                     options.pageInterval = parseInt(pageInterval);
                 }
@@ -267,9 +267,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            loadingUI.show('Splitting PDF...');
+            loadingUI.show(i18n.t('splitPdfJS.splittingPdf'));
             splitBtn.disabled = true;
-            splitBtn.textContent = 'Splitting...';
+            splitBtn.textContent = i18n.t('splitPdfJS.splittingBtn');
 
             const splitEndpoint = await API.pdf.split;
             const result = await API.request.post(splitEndpoint, requestBody);
@@ -282,21 +282,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
-                    await customAlert.alert('LocalPDF Studio - SUCCESS', 'PDF split successfully!\nSaved to: ' + savedPath, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('splitPdfJS.successMsg') + '\n' + i18n.t('splitPdfJS.successSavedTo') + savedPath, ['OK']);
                 } else {
-                    await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.cancelledMsg'), ['OK']);
                 }
             } else {
                 console.error("Split API returned JSON:", result);
-                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfJS.errorMsg') + JSON.stringify(result), ['OK']);
             }
         } catch (error) {
             console.error('Error splitting PDF:', error);
-            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while splitting the PDF:\n${error.message}`, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfJS.errorSplitting') + error.message, ['OK']);
         } finally {
             loadingUI.hide();
             splitBtn.disabled = false;
-            splitBtn.textContent = 'Split PDF';
+            splitBtn.textContent = i18n.t('splitPdfJS.splitPdfBtn');
         }
     });
 

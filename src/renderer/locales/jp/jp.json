@@ -710,6 +710,27 @@
     "extract-all-pages-help": "各ページは個別の PDF ファイルとして保存されます",
     "split-pdf-button": "PDF を分割"
   },
+  "splitPdfJS": {
+    "selectingPdfs": "PDF ファイルを選択中...",
+    "loadingPreview": "PDF プレビューを読み込み中...",
+    "failedToLoadPreview": "PDF プレビューの読み込みに失敗",
+    "pageLabel": "ページ ",
+    "dropOnlyOne": "1 つの PDF ファイルのみをドラッグ&ドロップしてください。",
+    "failedToSaveDrop": "ドラッグ&ドロップされたファイルの保存に失敗: ",
+    "dropPdfFile": "PDF ファイルをドラッグ&ドロップしてください。",
+    "selectFileFirst": "最初にファイルを選択してください。",
+    "pageRangesEmpty": "ページ範囲を空にすることはできません。",
+    "specificPagesEmpty": "特定のページを空にすることはできません。",
+    "invalidPageInterval": "有効なページ数を入力してください。",
+    "splittingPdf": "PDF を分割中...",
+    "splittingBtn": "分割中...",
+    "successMsg": "PDF が正常に分割されました！",
+    "successSavedTo": "保存先: ",
+    "cancelledMsg": "操作がキャンセルされたか、ファイルの保存に失敗しました。",
+    "errorMsg": "エラー: ",
+    "errorSplitting": "PDF の分割中にエラーが発生しました: ",
+    "splitPdfBtn": "PDF を分割"
+  },
   "redact": {
     "page-title": "PDF 墨消し",
     "select-pdf-btn": "PDF を選択",

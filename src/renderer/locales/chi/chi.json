@@ -710,6 +710,27 @@
     "extract-all-pages-help": "每一页都会保存为一个单独的 PDF 文件",
     "split-pdf-button": "拆分 PDF"
   },
+  "splitPdfJS": {
+    "selectingPdfs": "正在选择 PDF 文件...",
+    "loadingPreview": "正在加载 PDF 预览...",
+    "failedToLoadPreview": "加载 PDF 预览失败",
+    "pageLabel": "第 ",
+    "dropOnlyOne": "请仅拖放一个 PDF 文件。",
+    "failedToSaveDrop": "保存拖放的文件失败: ",
+    "dropPdfFile": "请拖放 PDF 文件。",
+    "selectFileFirst": "请先选择一个文件。",
+    "pageRangesEmpty": "页面范围不能为空。",
+    "specificPagesEmpty": "特定页面不能为空。",
+    "invalidPageInterval": "请输入有效的页数。",
+    "splittingPdf": "正在分割 PDF...",
+    "splittingBtn": "分割中...",
+    "successMsg": "PDF 已成功分割！",
+    "successSavedTo": "已保存到: ",
+    "cancelledMsg": "操作已取消或文件保存失败。",
+    "errorMsg": "错误: ",
+    "errorSplitting": "分割 PDF 时出错: ",
+    "splitPdfBtn": "分割 PDF"
+  },
   "redact": {
     "page-title": "PDF 擦除",
     "select-pdf-btn": "选择 PDF",

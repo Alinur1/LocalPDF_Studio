@@ -710,6 +710,27 @@
     "extract-all-pages-help": "Each page will be saved as a separate PDF file",
     "split-pdf-button": "Split PDF"
   },
+  "splitPdfJS": {
+    "selectingPdfs": "Selecting PDF files...",
+    "loadingPreview": "Loading PDF preview...",
+    "failedToLoadPreview": "Failed to load PDF preview",
+    "pageLabel": "Page ",
+    "dropOnlyOne": "Please drop only one PDF file.",
+    "failedToSaveDrop": "Failed to save dropped file: ",
+    "dropPdfFile": "Please drop a PDF file.",
+    "selectFileFirst": "Please select a file first.",
+    "pageRangesEmpty": "Page ranges cannot be empty.",
+    "specificPagesEmpty": "Specific pages cannot be empty.",
+    "invalidPageInterval": "Please enter a valid number of pages.",
+    "splittingPdf": "Splitting PDF...",
+    "splittingBtn": "Splitting...",
+    "successMsg": "PDF split successfully!",
+    "successSavedTo": "Saved to: ",
+    "cancelledMsg": "Operation cancelled or failed to save the file.",
+    "errorMsg": "Error: ",
+    "errorSplitting": "An error occurred while splitting the PDF: ",
+    "splitPdfBtn": "Split PDF"
+  },
   "redact": {
     "page-title": "Redact PDF",
     "select-pdf-btn": "Select PDF",
