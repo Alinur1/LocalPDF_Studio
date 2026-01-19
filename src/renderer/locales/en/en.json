@@ -576,7 +576,13 @@
     "ocr-progress": "Processing PDF with OCR",
     "ocr-initialization": "Initializing...",
     "warning-text": "Large file detected - Processing in batches for better performance",
-    "cancel-ocr-btn": "Cancel OCR Processing"
+    "cancel-ocr-btn": "Cancel OCR Processing",
+    "manual-pages-placeholder": "e.g., 1, 3, 5, 10",
+    "page-ranges-placeholder": "e.g., 1-3, 7-9, 15-20",
+    "search-language-placeholder": "Search language...",
+    "processing-page": "Processing page",
+    "of": "of",
+    "time-label": "Time:"
   },
   "ocrPdfJS": {
     "selectingFiles": "Selecting files...",

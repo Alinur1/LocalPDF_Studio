@@ -576,7 +576,13 @@
     "ocr-progress": "使用 OCR 处理 PDF",
     "ocr-initialization": "初始化中...",
     "warning-text": "检测到大文件 - 为获得更好性能将分批处理",
-    "cancel-ocr-btn": "取消 OCR 处理"
+    "cancel-ocr-btn": "取消 OCR 处理",
+    "manual-pages-placeholder": "例如：1, 3, 5, 10",
+    "page-ranges-placeholder": "例如：1-3, 7-9, 15-20",
+    "search-language-placeholder": "搜索语言...",
+    "processing-page": "正在处理页面",
+    "of": "共",
+    "time-label": "时间："
   },
   "ocrPdfJS": {
     "selectingFiles": "正在选择文件...",

@@ -576,7 +576,13 @@
     "ocr-progress": "OCR দিয়ে PDF প্রসেস করা হচ্ছে",
     "ocr-initialization": "ইনিশিয়ালাইজ করা হচ্ছে...",
     "warning-text": "বড় ফাইল শনাক্ত করা হয়েছে - ভাল পারফরম্যান্সের জন্য ব্যাচে প্রসেস করা হবে",
-    "cancel-ocr-btn": "OCR প্রসেসিং বাতিল করুন"
+    "cancel-ocr-btn": "OCR প্রসেসিং বাতিল করুন",
+    "manual-pages-placeholder": "যেমন: 1, 3, 5, 10",
+    "page-ranges-placeholder": "যেমন: 1-3, 7-9, 15-20",
+    "search-language-placeholder": "ভাষা অনুসন্ধান করুন...",
+    "processing-page": "পৃষ্ঠা প্রক্রিয়াকরণ",
+    "of": "এর",
+    "time-label": "সময়:"
   },
   "ocrPdfJS": {
     "selectingFiles": "ফাইল নির্বাচন করা হচ্ছে...",

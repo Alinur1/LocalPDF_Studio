@@ -576,7 +576,13 @@
     "ocr-progress": "OCR で PDF を処理中",
     "ocr-initialization": "初期化中...",
     "warning-text": "大きなファイルを検出 - パフォーマンス向上のためバッチ処理します",
-    "cancel-ocr-btn": "OCR 処理をキャンセル"
+    "cancel-ocr-btn": "OCR 処理をキャンセル",
+    "manual-pages-placeholder": "例: 1, 3, 5, 10",
+    "page-ranges-placeholder": "例: 1-3, 7-9, 15-20",
+    "search-language-placeholder": "言語を検索...",
+    "processing-page": "処理中のページ",
+    "of": "/",
+    "time-label": "時間:"
   },
   "ocrPdfJS": {
     "selectingFiles": "ファイルを選択中...",

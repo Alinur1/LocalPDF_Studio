@@ -77,13 +77,13 @@
                 <div class="option-group">
                     <h3 data-i18n="ocr.manual-page-spec">Specify Pages Manually</h3>
                     <label for="manual-pages" data-i18n="ocr.individual-pages">Individual Pages:</label>
-                    <input type="text" id="manual-pages" class="options-input" placeholder="e.g., 1, 3, 5, 10">
+                    <input type="text" id="manual-pages" class="options-input"   data-i18n-placeholder="ocr.manual-pages-placeholder">
                     <small class="help-text" data-i18n="ocr.manual-page-spec-helpTxt">Enter page numbers separated by commas</small>
                 </div>
                 <div class="option-group">
                     <h3 data-i18n="ocr.page-ranges">Page Ranges</h3>
                     <label for="page-ranges" data-i18n="ocr.page-range-spec">Page Ranges:</label>
-                    <input type="text" id="page-ranges" class="options-input" placeholder="e.g., 1-3, 7-9, 15-20">
+                    <input type="text" id="page-ranges" class="options-input" data-i18n-placeholder="ocr.page-ranges-placeholder">
                     <small class="help-text" data-i18n="ocr.page-range-spec-helpTxt">Enter ranges like "1-5, 10-15" or mix both: "1, 3-5, 8"</small>
                 </div>
                 <div class="option-group">
@@ -105,7 +105,7 @@
                             <span class="dropdown-arrow">▼</span>
                         </div>
                         <div class="dropdown-menu">
-                            <input type="text" class="dropdown-search" placeholder="Search language...">
+                            <input type="text" class="dropdown-search" data-i18n-placeholder="ocr.search-language-placeholder">
                             <div class="dropdown-options">
                                 <div class="dropdown-option" data-value="eng">
                                     <input type="checkbox" class="option-checkbox" checked> English
@@ -429,9 +429,12 @@
             <div class="progress-info" id="batch-current-action" data-i18n="ocr.ocr-initialization">Initializing...</div>
 
             <div class="page-counter">
-                Processing page <span class="current-page" id="batch-current-page">0</span>
-                of <span class="total-pages" id="batch-total-pages">0</span>
+                <span data-i18n="ocr.processing-page"></span>
+                 <span class="current-page" id="batch-current-page">0</span>
+                <span data-i18n="ocr.of"></span>
+                <span class="total-pages" id="batch-total-pages">0</span>
             </div>
+
 
             <div class="batch-status" id="batch-status-dots">
                 <!-- Dots will be added dynamically -->
@@ -439,7 +442,7 @@
 
             <div class="time-tracking">
                 <div class="time-elapsed">
-                    Time: <span class="time-value" id="batch-time-elapsed">0s</span>
+                  <span data-i18n="ocr.time-label">Time:</span>   <span class="time-value" id="batch-time-elapsed" >0s</span>
                 </div>
             </div>
 
