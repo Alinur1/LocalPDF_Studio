@@ -539,6 +539,18 @@
     "clear-btn": "すべてクリア",
     "merge-btn": "PDF を結合"
   },
+  "mergePdfJS": {
+    "selectingPdfs": "PDF ファイルを選択中...",
+    "loadingPreview": "PDF プレビューを読み込み中...",
+    "selectAtLeastOne": "少なくとも 1 つの PDF を選択してください。",
+    "mergingPdfs": "PDF をマージ中...",
+    "successMsg": "PDF が正常に保存されました！",
+    "cancelledMsg": "保存がキャンセルされました。",
+    "errorMsg": "PDF のマージ中にエラーが発生しました: ",
+    "dropAtLeastOne": "少なくとも 1 つの PDF ファイルをドラッグ&ドロップしてください。",
+    "failedToSaveDrop": "ドラッグ&ドロップされたファイルの保存に失敗しました: ",
+    "dropPdfFiles": "PDF ファイルをドラッグ&ドロップしてください。"
+  },
   "ocr": {
     "page-title": "OCR PDF",
     "pdf-preview-header": "PDF プレビュー - ページを選択",

@@ -539,6 +539,18 @@
     "clear-btn": "সব ক্লিয়ার করুন",
     "merge-btn": "PDF মার্জ করুন"
   },
+  "mergePdfJS": {
+    "selectingPdfs": "PDF ফাইল নির্বাচন করা হচ্ছে...",
+    "loadingPreview": "PDF পূর্বরূপ লোড হচ্ছে...",
+    "selectAtLeastOne": "অনুগ্রহ করে অন্তত একটি PDF নির্বাচন করুন।",
+    "mergingPdfs": "PDF একীভূত করা হচ্ছে...",
+    "successMsg": "PDF সফলভাবে সংরক্ষিত হয়েছে!",
+    "cancelledMsg": "সংরক্ষণ বাতিল করা হয়েছে।",
+    "errorMsg": "PDF একীভূত করতে ত্রুটি: ",
+    "dropAtLeastOne": "অনুগ্রহ করে অন্তত একটি PDF ফাইল ড্রপ করুন।",
+    "failedToSaveDrop": "ড্রপ করা ফাইল সংরক্ষণে ব্যর্থ: ",
+    "dropPdfFiles": "অনুগ্রহ করে PDF ফাইল ড্রপ করুন।"
+  },
   "ocr": {
     "page-title": "OCR PDF",
     "pdf-preview-header": "PDF প্রিভিউ - পৃষ্ঠা নির্বাচন করুন",

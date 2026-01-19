@@ -539,6 +539,18 @@
     "clear-btn": "Clear All",
     "merge-btn": "Merge PDFs"
   },
+  "mergePdfJS": {
+    "selectingPdfs": "Selecting PDF files...",
+    "loadingPreview": "Loading PDF preview...",
+    "selectAtLeastOne": "Please select at least one PDF.",
+    "mergingPdfs": "Merging PDFs...",
+    "successMsg": "PDF saved successfully!",
+    "cancelledMsg": "Save canceled.",
+    "errorMsg": "Error merging PDFs: ",
+    "dropAtLeastOne": "Please drop at least one PDF file.",
+    "failedToSaveDrop": "Failed to save dropped file: ",
+    "dropPdfFiles": "Please drop PDF files."
+  },
   "ocr": {
     "page-title": "OCR PDF",
     "pdf-preview-header": "PDF Preview - Select Pages",

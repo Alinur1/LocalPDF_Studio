@@ -539,6 +539,18 @@
     "clear-btn": "清除全部",
     "merge-btn": "合并 PDF"
   },
+  "mergePdfJS": {
+    "selectingPdfs": "正在选择 PDF 文件...",
+    "loadingPreview": "正在加载 PDF 预览...",
+    "selectAtLeastOne": "请至少选择一个 PDF。",
+    "mergingPdfs": "正在合并 PDF...",
+    "successMsg": "PDF 已成功保存！",
+    "cancelledMsg": "保存已取消。",
+    "errorMsg": "合并 PDF 时出错: ",
+    "dropAtLeastOne": "请至少拖放一个 PDF 文件。",
+    "failedToSaveDrop": "保存拖放的文件失败: ",
+    "dropPdfFiles": "请拖放 PDF 文件。"
+  },
   "ocr": {
     "page-title": "OCR PDF",
     "pdf-preview-header": "PDF 预览 - 选择页面",

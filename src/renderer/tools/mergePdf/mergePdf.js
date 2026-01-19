@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async() => {
     let droppedFilePaths = [];
 
     selectBtn.addEventListener('click', async () => {
-        loadingUI.show("Selecting PDF files...");
+        loadingUI.show(i18n.t('mergePdfJS.selectingPdfs'));
         const selected = await window.electronAPI.selectPdfs();
         if (selected?.length) addFiles(selected);
         loadingUI.hide();
@@ -66,24 +66,24 @@ document.addEventListener('DOMContentLoaded', async() => {
     mergeBtn.addEventListener('click', async () => {
         const files = getFiles();
         if (!files.length) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', "Please select at least one PDF.", ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('mergePdfJS.selectAtLeastOne'), ['OK']);
             return;
         }
         try {
-            loadingUI.show('Merging PDFs...');
+            loadingUI.show(i18n.t('mergePdfJS.mergingPdfs'));
             const mergeEndpoint = await API.pdf.merge;
             const blob = await API.request.post(mergeEndpoint, { files });
             const arrayBuffer = await blob.arrayBuffer();
             const result = await window.electronAPI.saveMergedPdf(arrayBuffer);
 
             if (result.success) {
-                await customAlert.alert('LocalPDF Studio - SUCCESS', "PDF saved successfully!", ['OK']);
+                await customAlert.alert(i18n.t('alerts.success'), i18n.t('mergePdfJS.successMsg'), ['OK']);
             } else {
-                await customAlert.alert('LocalPDF Studio - WARNING', "Save canceled.", ['OK']);
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('mergePdfJS.cancelledMsg'), ['OK']);
             }
         } catch (err) {
             console.error(err);
-            await customAlert.alert('LocalPDF Studio - ERROR', "Error merging PDFs: " + err.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('mergePdfJS.errorMsg') + err.message, ['OK']);
         } finally {
             loadingUI.hide();
         }
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async() => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length === 0) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop at least one PDF file.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('mergePdfJS.dropAtLeastOne'), ['OK']);
                 return;
             }
 
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                 if (result.success) {
                     droppedPaths.push(result.filePath);
                 } else {
-                    await customAlert.alert('LocalPDF Studio - ERROR', `Failed to save dropped file: ${result.error}`, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.error'), i18n.t('mergePdfJS.failedToSaveDrop') + result.error, ['OK']);
                     return;
                 }
             }
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async() => {
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop PDF files.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('mergePdfJS.dropPdfFiles'), ['OK']);
         }
     });
 
@@ -150,7 +150,7 @@ function createPdfList(container) {
     const listItemCleanup = new Map();
 
     async function addFiles(paths) {
-        loadingUI.show('Loading PDF preview...');
+        loadingUI.show(i18n.t('mergePdfJS.loadingPreview'));
         try {
             const thumbnailPromises = [];
 
