@@ -578,6 +578,25 @@
     "warning-text": "Large file detected - Processing in batches for better performance",
     "cancel-ocr-btn": "Cancel OCR Processing"
   },
+  "ocrPdfJS": {
+    "selectingFiles": "Selecting files...",
+    "loadingPreview": "Loading file preview...",
+    "failedToLoadPreview": "Failed to load file preview",
+    "imagePreview": "Image Preview",
+    "pdfPreviewTitle": "PDF Preview - Select Pages",
+    "dropPdfOrImage": "Please drop a PDF or Image file (excluding GIF).",
+    "selectFileFirst": "Please select a file first.",
+    "selectPages": "Please select at least one page.",
+    "selectLanguages": "Please select at least one language.",
+    "initializingOcr": "Initializing OCR engine...",
+    "processingPage": "Processing page",
+    "of": "of",
+    "successMsg": "OCR processing completed successfully!",
+    "successSavedTo": "Saved to: ",
+    "cancelledMsg": "OCR processing was cancelled.",
+    "errorMsg": "Error: ",
+    "errorOcr": "An error occurred while processing with OCR: "
+  },
   "organizePDF": {
     "page-title": "Organize/Re-Arrange PDF",
     "how-to-organize-title": "How to Organize:",

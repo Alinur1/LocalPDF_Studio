@@ -409,7 +409,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     selectPdfBtn.addEventListener('click', async () => {
-        loadingUI.show("Selecting files...");
+        loadingUI.show(i18n.t('ocrPdfJS.selectingFiles'));
         const files = await window.electronAPI.selectPdfsAndImages();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -453,7 +453,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadPdfPreview(filePath) {
         try {
-            loadingUI.show('Loading file preview...');
+            loadingUI.show(i18n.t('ocrPdfJS.loadingPreview'));
             previewContainer.style.display = 'block';
             previewGrid.innerHTML = '';
             selectedPages.clear();
@@ -464,7 +464,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const isImage = /\.(jpg|jpeg|png|bmp|tiff)$/i.test(filePath);
 
             if (isImage) {
-                previewTitle.textContent = 'Image Preview';
+                previewTitle.textContent = i18n.t('ocrPdfJS.imagePreview');
                 pageOptionsContainer.style.display = 'none';
                 pageCountEl.textContent = '';
 
@@ -478,7 +478,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 imageWrapper.appendChild(img);
                 previewGrid.appendChild(imageWrapper);
             } else {
-                previewTitle.textContent = 'PDF Preview - Select Pages';
+                previewTitle.textContent = i18n.t('ocrPdfJS.pdfPreviewTitle');
                 pageOptionsContainer.style.display = 'block';
 
                 const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
@@ -492,7 +492,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             console.error('Error loading file:', error);
-            previewGrid.innerHTML = '<p style="color: #e74c3c; text-align: center;">Failed to load file preview</p>';
+            previewGrid.innerHTML = `<p style="color: #e74c3c; text-align: center;">${i18n.t('ocrPdfJS.failedToLoadPreview')}</p>`;
         } finally {
             loadingUI.hide();
         }
@@ -707,7 +707,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDropForOCR({
         onFilesDropped: async (files) => {
             if (files.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop one file at a time.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('ocrPdfJS.dropPdfOrImage'), ['OK']);
                 return;
             }
             await cleanupDroppedFile();
@@ -727,28 +727,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                     isImage: /\.(jpg|jpeg|png|bmp|tiff)$/i.test(file.name)
                 });
             } else {
-                await customAlert.alert('LocalPDF Studio - ERROR', `Failed to save dropped file: ${result.error}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.dropPdfOrImage'), ['OK']);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a PDF or Image file (excluding GIF).', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('ocrPdfJS.dropPdfOrImage'), ['OK']);
         }
     });
 
     // NEW: UPDATED PROCESS BUTTON HANDLER WITH BATCH PROCESSING
     processBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio - WARNING', 'Please select a file first.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.warning'), i18n.t('ocrPdfJS.selectFileFirst'), ['OK']);
             return;
         }
 
         if (!isImageFile && selectedPages.size === 0) {
-            await customAlert.alert('LocalPDF Studio - ERROR', 'Please select at least one page to process.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.selectPages'), ['OK']);
             return;
         }
 
         if (selectedLanguages.size === 0) {
-            await customAlert.alert('LocalPDF Studio - ERROR', 'Please select at least one language.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.selectLanguages'), ['OK']);
             return;
         }
 
@@ -762,7 +762,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Show batch progress modal
         batchProgressModal.style.display = 'flex';
-        batchCurrentAction.textContent = 'Initializing OCR engine...';
+        batchCurrentAction.textContent = i18n.t('ocrPdfJS.initializingOcr');
         batchProgressFill.style.width = '0%';
         batchTotalPages.textContent = selectedPages.size > 0 ? selectedPages.size : totalPages;
         batchCurrentPage.textContent = '0';
@@ -865,7 +865,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             batchProgressModal.style.display = 'none';
             clearInterval(timeInterval);
 
-            await customAlert.alert('LocalPDF Studio - SUCCESS', 'OCR completed successfully! Text file saved.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.success'), i18n.t('ocrPdfJS.successMsg'), ['OK']);
 
         } catch (error) {
             console.error('OCR processing failed:', error);
@@ -875,9 +875,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             clearInterval(timeInterval);
 
             if (error.message === 'OCR cancelled by user' || batchProcessingCancelled) {
-                await customAlert.alert('LocalPDF Studio - INFO', 'OCR processing was cancelled.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('ocrPdfJS.cancelledMsg'), ['OK']);
             } else {
-                await customAlert.alert('LocalPDF Studio - ERROR', `OCR processing failed: ${error.message}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.errorOcr') + error.message, ['OK']);
             }
         } finally {
             loadingUI.forceHide();
