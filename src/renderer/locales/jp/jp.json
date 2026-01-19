@@ -589,6 +589,24 @@
     "reset-to-original": "元の順序にリセット",
     "save-organized-pdf": "整理された PDF を保存"
   },
+  "organizePdfJS": {
+    "selectingPdfs": "PDF ファイルを選択中...",
+    "loadingPreview": "PDF プレビューを読み込み中...",
+    "resettingOrder": "元の順序にリセット中...",
+    "organizingPdf": "PDF を整理中...",
+    "failedToLoadPdf": "PDF の読み込みに失敗: ",
+    "cannotDeleteLastPage": "最後のページは削除できません。PDF には少なくとも 1 ページ必要です。",
+    "selectFileFirst": "最初にファイルを選択してください。",
+    "noPagesToOrganize": "整理するページはありません。",
+    "successMsg": "成功！PDF が正常に整理されました！",
+    "successSavedTo": "保存先: ",
+    "cancelledMsg": "操作がキャンセルされたか、ファイルの保存に失敗しました。",
+    "errorMsg": "エラー: ",
+    "errorOrganizing": "PDF の整理中にエラーが発生しました: ",
+    "dropOnlyOne": "1 つの PDF ファイルのみをドラッグ&ドロップしてください。",
+    "failedToSaveDrop": "ドラッグ&ドロップされたファイルの保存に失敗: ",
+    "dropPdfFile": "PDF ファイルをドラッグ&ドロップしてください。"
+  },
   "pdftoImg": {
     "page-title": "PDF を画像に変換",
     "preview-title": "PDF プレビュー",

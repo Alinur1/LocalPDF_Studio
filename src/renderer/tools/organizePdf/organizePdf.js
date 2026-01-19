@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let nextId = 1;
 
     selectPdfBtn.addEventListener('click', async () => {
-        loadingUI.show("Selecting PDF files...");
+        loadingUI.show(i18n.t('organizePdfJS.selectingPdfs'));
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadPdfPages(filePath) {
         try {
-            loadingUI.show('Loading PDF preview...');
+            loadingUI.show(i18n.t('organizePdfJS.loadingPreview'));
             let pdfPath = filePath;
             if (navigator.platform.indexOf('Win') > -1) {
                 pdfPath = filePath.startsWith('file:///') ? filePath : `file:///${filePath.replace(/\\/g, '/')}`;
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             loadingUI.hide();
             console.error('Error loading PDF:', error);
-            await customAlert.alert('LocalPDF Studio - ERROR', `Failed to load PDF: ${error.message}`, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.failedToLoadPdf') + error.message, ['OK']);
         }
     }
 
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function deletePage(pageId) {
         if (pages.length <= 1) {
-            customAlert.alert('LocalPDF Studio - NOTICE', 'Cannot delete the last page. PDF must have at least one page.', ['OK']);
+            customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.cannotDeleteLastPage'), ['OK']);
             return;
         }
 
@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     resetOrderBtn.addEventListener('click', async () => {
         if (selectedFile && pdfDoc) {
-            loadingUI.show('Resetting to original order...');
+            loadingUI.show(i18n.t('organizePdfJS.resettingOrder'));
             pages = [];
             nextId = 1;
 
@@ -369,12 +369,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     organizeBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.selectFileFirst'), ['OK']);
             return;
         }
 
         if (pages.length === 0) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'No pages to organize.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.noPagesToOrganize'), ['OK']);
             return;
         }
 
@@ -391,9 +391,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            loadingUI.show('Organizing PDF...');
+            loadingUI.show(i18n.t('organizePdfJS.organizingPdf'));
             organizeBtn.disabled = true;
-            organizeBtn.textContent = 'Organizing...';
+            organizeBtn.textContent = i18n.t('organizePdfJS.organizingPdf');
             const organizeEndpoint = await API.pdf.organize;
             const result = await API.request.post(organizeEndpoint, requestBody);
             if (result instanceof Blob) {
@@ -401,21 +401,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const defaultName = `${selectedFile.name.replace('.pdf', '')}_organized.pdf`;
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
                 if (savedPath) {
-                    await customAlert.alert('LocalPDF Studio - SUCCESS', `Success! PDF organized successfully!\nSaved to: ${savedPath}`, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('organizePdfJS.successMsg') + '\n' + i18n.t('organizePdfJS.successSavedTo') + savedPath, ['OK']);
                 } else {
-                    await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('organizePdfJS.cancelledMsg'), ['OK']);
                 }
             } else {
                 console.error("Organize API returned JSON:", result);
-                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.errorMsg') + JSON.stringify(result), ['OK']);
             }
         } catch (error) {
             console.error('Error organizing PDF:', error);
-            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while organizing the PDF:\n${error.message}`, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.errorOrganizing') + error.message, ['OK']);
         } finally {
             loadingUI.hide();
             organizeBtn.disabled = false;
-            organizeBtn.textContent = 'Save Organized PDF';
+            organizeBtn.textContent = i18n.t('organizePDF.save-organized-pdf');
         }
     });
 
@@ -464,7 +464,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop only one PDF file.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.dropOnlyOne'), ['OK']);
                 return;
             }
             await cleanupDroppedFile();
@@ -483,11 +483,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     size: fileSize
                 });
             } else {
-                await customAlert.alert('LocalPDF Studio - ERROR', `Failed to save dropped file: ${result.error}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.failedToSaveDrop') + result.error, ['OK']);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a PDF file.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.dropPdfFile'), ['OK']);
         }
     });
 });

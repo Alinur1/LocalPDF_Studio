@@ -589,6 +589,24 @@
     "reset-to-original": "重置为原始顺序",
     "save-organized-pdf": "保存整理后的 PDF"
   },
+  "organizePdfJS": {
+    "selectingPdfs": "正在选择 PDF 文件...",
+    "loadingPreview": "正在加载 PDF 预览...",
+    "resettingOrder": "重置为原始顺序...",
+    "organizingPdf": "正在整理 PDF...",
+    "failedToLoadPdf": "加载 PDF 失败: ",
+    "cannotDeleteLastPage": "无法删除最后一页。PDF 必须至少有一页。",
+    "selectFileFirst": "请先选择一个文件。",
+    "noPagesToOrganize": "没有页面可以整理。",
+    "successMsg": "成功！PDF 已成功整理！",
+    "successSavedTo": "已保存到: ",
+    "cancelledMsg": "操作已取消或文件保存失败。",
+    "errorMsg": "错误: ",
+    "errorOrganizing": "整理 PDF 时出错: ",
+    "dropOnlyOne": "请仅拖放一个 PDF 文件。",
+    "failedToSaveDrop": "保存拖放的文件失败: ",
+    "dropPdfFile": "请拖放 PDF 文件。"
+  },
   "pdftoImg": {
     "page-title": "PDF を画像に変換",
     "preview-title": "PDF プレビュー",

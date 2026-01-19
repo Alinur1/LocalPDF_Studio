@@ -589,6 +589,24 @@
     "reset-to-original": "মূল অবস্থায় ফিরিয়ে নিন",
     "save-organized-pdf": "সাজানো পিডিএফ সংরক্ষণ করুন"
   },
+  "organizePdfJS": {
+    "selectingPdfs": "PDF ফাইল নির্বাচন করা হচ্ছে...",
+    "loadingPreview": "PDF পূর্বরূপ লোড হচ্ছে...",
+    "resettingOrder": "মূল অবস্থায় পুনরুদ্ধার করা হচ্ছে...",
+    "organizingPdf": "PDF সাজানো হচ্ছে...",
+    "failedToLoadPdf": "PDF লোড করতে ব্যর্থ: ",
+    "cannotDeleteLastPage": "শেষ পৃষ্ঠা মুছতে পারবেন না। PDF এর কমপক্ষে এক পৃষ্ঠা থাকতে হবে।",
+    "selectFileFirst": "প্রথমে একটি ফাইল নির্বাচন করুন।",
+    "noPagesToOrganize": "সাজানোর জন্য কোন পৃষ্ঠা নেই।",
+    "successMsg": "সাফল্য! PDF সফলভাবে সাজানো হয়েছে!",
+    "successSavedTo": "এতে সংরক্ষিত: ",
+    "cancelledMsg": "অপারেশন বাতিল করা হয়েছে বা ফাইল সংরক্ষণে ব্যর্থ হয়েছে।",
+    "errorMsg": "ত্রুটি: ",
+    "errorOrganizing": "PDF সাজাতে একটি ত্রুটি ঘটেছে: ",
+    "dropOnlyOne": "শুধুমাত্র একটি PDF ফাইল ড্রপ করুন।",
+    "failedToSaveDrop": "ড্রপ করা ফাইল সংরক্ষণে ব্যর্থ: ",
+    "dropPdfFile": "একটি PDF ফাইল ড্রপ করুন।"
+  },
   "pdftoImg": {
     "page-title": "পিডিএফ থেকে ছবি",
     "preview-title": "পিডিএফ প্রিভিউ",

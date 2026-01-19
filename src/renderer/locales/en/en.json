@@ -589,6 +589,24 @@
     "reset-to-original": "Reset to Original",
     "save-organized-pdf": "Save Organized PDF"
   },
+  "organizePdfJS": {
+    "selectingPdfs": "Selecting PDF files...",
+    "loadingPreview": "Loading PDF preview...",
+    "resettingOrder": "Resetting to original order...",
+    "organizingPdf": "Organizing PDF...",
+    "failedToLoadPdf": "Failed to load PDF: ",
+    "cannotDeleteLastPage": "Cannot delete the last page. PDF must have at least one page.",
+    "selectFileFirst": "Please select a file first.",
+    "noPagesToOrganize": "No pages to organize.",
+    "successMsg": "Success! PDF organized successfully!",
+    "successSavedTo": "Saved to: ",
+    "cancelledMsg": "Operation cancelled or failed to save the file.",
+    "errorMsg": "Error: ",
+    "errorOrganizing": "An error occurred while organizing the PDF: ",
+    "dropOnlyOne": "Please drop only one PDF file.",
+    "failedToSaveDrop": "Failed to save dropped file: ",
+    "dropPdfFile": "Please drop a PDF file."
+  },
   "pdftoImg": {
     "page-title": "PDF to Image",
     "preview-title": "PDF Preview",
