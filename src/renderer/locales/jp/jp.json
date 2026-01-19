@@ -312,6 +312,18 @@
     "crop-btn": "PDF をトリミング",
     "no-page-warning": "ページが利用できません。"
   },
+  "cropPdfJS": {
+    "selectingPdf": "PDF を選択しています...",
+    "renderingPdf": "PDF をレンダリングしています...",
+    "dropOneFile": "1 つの PDF ファイルのみをドロップしてください。",
+    "failedToSaveDrop": "ドロップされたファイルの保存に失敗しました: ",
+    "dropPdfFile": "PDF ファイルをドロップしてください。",
+    "selectPdfFirst": "最初に PDF を選択してください。",
+    "croppingPdf": "PDF をトリミングしています...",
+    "croppingBtn": "トリミング中...",
+    "successMessage": "PDF が正常にトリミングされました！\n保存先: ",
+    "pageLabel": "ページ "
+  },
   "editMetadata": {
     "page-title": "メタデータの表示と編集",
     "metadata-form": "PDF メタデータ",

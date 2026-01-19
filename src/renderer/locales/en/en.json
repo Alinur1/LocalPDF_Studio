@@ -312,6 +312,18 @@
     "crop-btn": "Crop PDF",
     "no-page-warning": "Page not available."
   },
+  "cropPdfJS": {
+    "selectingPdf": "Selecting PDF...",
+    "renderingPdf": "Rendering PDF...",
+    "dropOneFile": "Please drop only one PDF file.",
+    "failedToSaveDrop": "Failed to save dropped file: ",
+    "dropPdfFile": "Please drop a PDF file.",
+    "selectPdfFirst": "Please select a PDF first.",
+    "croppingPdf": "Cropping PDF...",
+    "croppingBtn": "Cropping...",
+    "successMessage": "PDF cropped successfully!\nSaved to: ",
+    "pageLabel": "Page "
+  },
   "editMetadata": {
     "page-title": "View and Edit Metadata",
     "metadata-form": "PDF Metadata",

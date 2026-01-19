@@ -312,6 +312,18 @@
     "crop-btn": "PDF ক্রপ করুন",
     "no-page-warning": "পৃষ্ঠা পাওয়া যায়নি।"
   },
+  "cropPdfJS": {
+    "selectingPdf": "PDF নির্বাচন করা হচ্ছে...",
+    "renderingPdf": "PDF রেন্ডার করা হচ্ছে...",
+    "dropOneFile": "শুধুমাত্র একটি PDF ফাইল ড্রপ করুন।",
+    "failedToSaveDrop": "ড্রপ করা ফাইল সংরক্ষণ করতে ব্যর্থ হয়েছে: ",
+    "dropPdfFile": "একটি PDF ফাইল ড্রপ করুন।",
+    "selectPdfFirst": "প্রথমে একটি PDF নির্বাচন করুন।",
+    "croppingPdf": "PDF ক্রপ করা হচ্ছে...",
+    "croppingBtn": "ক্রপ করা হচ্ছে...",
+    "successMessage": "PDF সফলভাবে ক্রপ করা হয়েছে!\nসংরক্ষিত: ",
+    "pageLabel": "পৃষ্ঠা "
+  },
   "editMetadata": {
     "page-title": "মেটাডাটা দেখুন এবং সম্পাদনা করুন",
     "metadata-form": "PDF মেটাডাটা",

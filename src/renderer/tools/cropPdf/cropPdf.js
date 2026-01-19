@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeGlobalDragDrop({
     onFilesDropped: async (pdfFiles) => {
       if (pdfFiles.length > 1) {
-        await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop only one PDF file.', ['OK']);
+        await customAlert.alert(i18n.t('alerts.notice'), i18n.t('cropPdfJS.dropOneFile'), [i18n.t('common.ok')]);
         return;
       }
       await cleanupDroppedFile();
@@ -182,17 +182,17 @@ document.addEventListener("DOMContentLoaded", async () => {
           size: fileSize
         });
       } else {
-        await customAlert.alert('LocalPDF Studio - ERROR', `Failed to save dropped file: ${result.error}`, ['OK']);
+        await customAlert.alert(i18n.t('alerts.error'), i18n.t('cropPdfJS.failedToSaveDrop') + result.error, [i18n.t('common.ok')]);
       }
     },
     onInvalidFiles: async () => {
-      await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a PDF file.', ['OK']);
+      await customAlert.alert(i18n.t('alerts.notice'), i18n.t('cropPdfJS.dropPdfFile'), [i18n.t('common.ok')]);
     }
   });
 
   // ================ FUNCTIONS ================
   async function selectPdf() {
-    loadingUI.show("Selecting PDF...");
+    loadingUI.show(i18n.t('cropPdfJS.selectingPdf'));
     try {
       const files = await window.electronAPI.selectPdfs();
       if (!files || !files.length) return;
@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function renderPdfPreview(path) {
-    loadingUI.show("Rendering PDF...");
+    loadingUI.show(i18n.t('cropPdfJS.renderingPdf'));
     previewContainer.style.display = "flex";
     previewContainer.style.flexDirection = "column";
     previewGrid.innerHTML = "";
@@ -342,7 +342,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const label = document.createElement('div');
     label.className = 'page-label';
-    label.textContent = `Page ${pageNum}`;
+    label.textContent = i18n.t('cropPdfJS.pageLabel') + pageNum;
 
     wrapper.appendChild(canvas);
     wrapper.appendChild(label);
@@ -528,7 +528,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function cropPdf() {
     if (!selectedFile) {
-      customAlert.alert("NOTICE", "Please select a PDF first.", ["OK"]);
+      customAlert.alert(i18n.t('alerts.notice'), i18n.t('cropPdfJS.selectPdfFirst'), [i18n.t('common.ok')]);
       return;
     }
 
@@ -546,9 +546,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     try {
-      loadingUI.show("Cropping PDF...");
+      loadingUI.show(i18n.t('cropPdfJS.croppingPdf'));
       cropBtn.disabled = true;
-      cropBtn.textContent = "Cropping...";
+      cropBtn.textContent = i18n.t('cropPdfJS.croppingBtn');
 
       const endpoint = await API.pdf.crop;
       const result = await API.request.post(endpoint, body, {
@@ -565,19 +565,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
         if (saved) {
           customAlert.alert(
-            "SUCCESS",
-            `PDF cropped successfully!\nSaved to: ${saved}`,
-            ["OK"]
+            i18n.t('alerts.success'),
+            i18n.t('cropPdfJS.successMessage') + saved,
+            [i18n.t('common.ok')]
           );
         }
       }
     } catch (err) {
       console.error(err);
-      customAlert.alert("ERROR", err.message, ["OK"]);
+      customAlert.alert(i18n.t('alerts.error'), err.message, [i18n.t('common.ok')]);
     } finally {
       loadingUI.hide();
       cropBtn.disabled = false;
-      cropBtn.textContent = "Crop PDF";
+      cropBtn.textContent = i18n.t('cropPdf.crop-btn');
     }
   }
 

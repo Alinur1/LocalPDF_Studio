@@ -312,6 +312,18 @@
     "crop-btn": "裁剪 PDF",
     "no-page-warning": "页面不可用。"
   },
+  "cropPdfJS": {
+    "selectingPdf": "正在选择 PDF...",
+    "renderingPdf": "正在呈现 PDF...",
+    "dropOneFile": "请只拖放一个 PDF 文件。",
+    "failedToSaveDrop": "保存拖放文件失败: ",
+    "dropPdfFile": "请拖放一个 PDF 文件。",
+    "selectPdfFirst": "请先选择一个 PDF。",
+    "croppingPdf": "正在裁剪 PDF...",
+    "croppingBtn": "正在裁剪...",
+    "successMessage": "PDF 成功裁剪！\n保存到: ",
+    "pageLabel": "第 "
+  },
   "editMetadata": {
     "page-title": "查看和编辑元数据",
     "metadata-form": "PDF 元数据",
