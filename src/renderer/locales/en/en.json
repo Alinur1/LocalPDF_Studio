@@ -624,6 +624,22 @@
     "page-number-example": "e.g., document_page_001.jpg, document_page_002.jpg",
     "convert-to-image": "Convert to Image"
   },
+  "pdfToImageJS": {
+    "selectingPdfs": "Selecting PDF files...",
+    "loadingPreview": "Loading PDF preview...",
+    "failedToLoadPreview": "Failed to load PDF preview",
+    "dropOnlyOne": "Please drop only one PDF file.",
+    "failedToSaveDrop": "Failed to save dropped file: ",
+    "dropPdfFile": "Please drop a PDF file.",
+    "selectFileFirst": "Please select a file first.",
+    "convertingPdf": "Converting PDF to images...",
+    "successMsg": "PDF converted successfully!",
+    "successSavedTo": "Saved to: ",
+    "cancelledMsg": "Operation cancelled or failed to save the file.",
+    "errorMsg": "Error: ",
+    "errorConverting": "An error occurred while converting the PDF: ",
+    "convertToImage": "Convert to Image"
+  },
   "removepages": {
     "page-title": "Remove PDF Pages",
     "preview-title": "PDF Preview - Select Pages to Remove",

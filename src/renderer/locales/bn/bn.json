@@ -624,6 +624,22 @@
     "page-number-example": "যেমন: document_page_001.jpg, document_page_002.jpg",
     "convert-to-image": "ছবিতে রূপান্তর করুন"
   },
+  "pdfToImageJS": {
+    "selectingPdfs": "PDF ফাইল নির্বাচন করা হচ্ছে...",
+    "loadingPreview": "PDF পূর্বরূপ লোড হচ্ছে...",
+    "failedToLoadPreview": "PDF পূর্বরূপ লোড করতে ব্যর্থ",
+    "dropOnlyOne": "শুধুমাত্র একটি PDF ফাইল ড্রপ করুন।",
+    "failedToSaveDrop": "ড্রপ করা ফাইল সংরক্ষণে ব্যর্থ: ",
+    "dropPdfFile": "একটি PDF ফাইল ড্রপ করুন।",
+    "selectFileFirst": "প্রথমে একটি ফাইল নির্বাচন করুন।",
+    "convertingPdf": "PDF ইমেজে রূপান্তর করা হচ্ছে...",
+    "successMsg": "PDF সফলভাবে রূপান্তরিত হয়েছে!",
+    "successSavedTo": "এতে সংরক্ষিত: ",
+    "cancelledMsg": "অপারেশন বাতিল করা হয়েছে বা ফাইল সংরক্ষণে ব্যর্থ হয়েছে।",
+    "errorMsg": "ত্রুটি: ",
+    "errorConverting": "PDF রূপান্তরে একটি ত্রুটি ঘটেছে: ",
+    "convertToImage": "ইমেজে রূপান্তর করুন"
+  },
   "removepages": {
     "page-title": "পিডিএফ পৃষ্ঠা মুছুন",
     "preview-title": "পিডিএফ প্রিভিউ - মুছে ফেলার জন্য পৃষ্ঠা নির্বাচন করুন",
