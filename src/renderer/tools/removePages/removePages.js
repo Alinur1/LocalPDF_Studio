@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let totalPages = 0;
 
     selectPdfBtn.addEventListener('click', async () => {
-        loadingUI.show("Selecting PDF files...");
+        loadingUI.show(i18n.t('removePagesJS.selectingPdfs'));
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadPdfPreview(filePath) {
         try {
-            loadingUI.show('Loading PDF preview...');
+            loadingUI.show(i18n.t('removePagesJS.loadingPreview'));
             previewContainer.style.display = 'block';
             previewGrid.innerHTML = '';
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             console.error('Error loading PDF:', error);
-            previewGrid.innerHTML = '<p style="color: #e74c3c; text-align: center;">Failed to load PDF preview</p>';
+            previewGrid.innerHTML = `<p style="color: #e74c3c; text-align: center;">${i18n.t('removePagesJS.failedToLoadPreview')}</p>`;
         } finally {
             loadingUI.hide();
         }
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const pageLabel = document.createElement('div');
         pageLabel.className = 'page-label';
-        pageLabel.textContent = `Page ${pageNum}`;
+        pageLabel.textContent = i18n.t('removePagesJS.pageLabel') + pageNum;
 
         thumbWrapper.appendChild(canvas);
         thumbWrapper.appendChild(pageLabel);
@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updateSelectionInfo() {
         const count = selectedPages.size;
         if (count === 0) {
-            selectionInfoEl.textContent = 'No pages selected';
+            selectionInfoEl.textContent = i18n.t('removePagesJS.noPagesSelected');
             clearSelectionBtn.style.display = 'none';
         } else {
             const sortedPages = Array.from(selectedPages).sort((a, b) => a - b);
@@ -300,23 +300,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     previewBtn.addEventListener('click', () => {
         const pagesToRemove = collectPagesToRemove();
         if (pagesToRemove.size === 0) {
-            customAlert.alert('LocalPDF Studio - NOTICE', 'No pages selected for removal.', ['OK']);
+            customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.noPagesToRemove'), ['OK']);
             return;
         }
         if (pagesToRemove.size >= totalPages) {
-            customAlert.alert('LocalPDF Studio - WARNING', 'Cannot remove all pages from the PDF.', ['OK']);
+            customAlert.alert(i18n.t('alerts.warning'), i18n.t('removePagesJS.cannotRemoveAllPages'), ['OK']);
             return;
         }
 
         const sortedPages = Array.from(pagesToRemove).sort((a, b) => a - b);
         const remaining = totalPages - pagesToRemove.size;
-        customAlert.alert('LocalPDF Studio - NOTICE', `Preview:\n\nPages to remove: ${sortedPages.join(', ')}\nTotal pages to remove: ${pagesToRemove.size}\nRemaining pages: ${remaining}`, ['OK']);
+        customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.previewTitle') + '\n\n' + i18n.t('removePagesJS.pagesToRemoveLabel') + sortedPages.join(', ') + '\n' + i18n.t('removePagesJS.totalPagesToRemoveLabel') + pagesToRemove.size + '\n' + i18n.t('removePagesJS.remainingPagesLabel') + remaining, ['OK']);
     });
 
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop only one PDF file.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.dropOnlyOne'), ['OK']);
                 return;
             }
 
@@ -338,29 +338,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                     size: fileSize
                 });
             } else {
-                await customAlert.alert('LocalPDF Studio - ERROR', `Failed to save dropped file: ${result.error}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('removePagesJS.failedToSaveDrop') + result.error, ['OK']);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a PDF file.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.dropPdfFile'), ['OK']);
         }
     });
 
     removeBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.selectFileFirst'), ['OK']);
             return;
         }
 
         const pagesToRemove = collectPagesToRemove();
 
         if (pagesToRemove.size === 0) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select at least one page to remove.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.selectAtLeastOne'), ['OK']);
             return;
         }
 
         if (pagesToRemove.size >= totalPages) {
-            await customAlert.alert('LocalPDF Studio - WARNING', 'Cannot remove all pages from the PDF.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.warning'), i18n.t('removePagesJS.cannotRemoveAllPages'), ['OK']);
             return;
         }
 
@@ -372,9 +372,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            loadingUI.show('Removing pages...');
+            loadingUI.show(i18n.t('removePagesJS.removingPages'));
             removeBtn.disabled = true;
-            removeBtn.textContent = 'Removing...';
+            removeBtn.textContent = i18n.t('removePagesJS.removingBtn');
 
             const removeEndpoint = await API.pdf.removePages;
             const result = await API.request.post(removeEndpoint, requestBody);
@@ -384,21 +384,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const defaultName = `${selectedFile.name.replace('.pdf', '')}_removed_pages.pdf`;
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
                 if (savedPath) {
-                    await customAlert.alert('LocalPDF Studio - SUCCESS', `Success! Pages removed successfully!\nSaved to: ${savedPath}`, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('removePagesJS.successMsg') + '\n' + i18n.t('removePagesJS.successSavedTo') + savedPath, ['OK']);
                 } else {
-                    await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('removePagesJS.cancelledMsg'), ['OK']);
                 }
             } else {
                 console.error("Remove API returned JSON:", result);
-                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('removePagesJS.errorMsg') + JSON.stringify(result), ['OK']);
             }
         } catch (error) {            
             console.error('Error removing pages:', error);
-            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while removing pages:\n${error.message}`, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('removePagesJS.errorRemoving') + error.message, ['OK']);
         } finally {
             loadingUI.hide();
             removeBtn.disabled = false;
-            removeBtn.textContent = 'Remove Pages';
+            removeBtn.textContent = i18n.t('removepages.remove-pages');
         }
     });
 
