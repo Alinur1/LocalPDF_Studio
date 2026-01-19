@@ -355,27 +355,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
 
                     if (savedPath) {
-                        await customAlert.alert(i18n.t('extractImageJS.successExtract'), i18n.t('extractImageJS.successExtractMsg') + savedPath, ['OK']);
+                        await customAlert.alert(i18n.t('alerts.success'), i18n.t('extractImageJS.successExtractMsg') + savedPath, ['OK']);
                     } else {
-                        await customAlert.alert(i18n.t('extractImageJS.warningTitle'), i18n.t('extractImageJS.warningMsg'), ['OK']);
+                        await customAlert.alert(i18n.t('alerts.warning'), i18n.t('extractImageJS.warningMsg'), ['OK']);
                     }
                 } else {
                     const defaultName = `${selectedFile.name.replace('.pdf', '')}_images_removed.pdf`;
                     const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
 
                     if (savedPath) {
-                        await customAlert.alert(i18n.t('extractImageJS.successRemove'), i18n.t('extractImageJS.successRemoveMsg') + savedPath, ['OK']);
+                        await customAlert.alert(i18n.t('alerts.success'), i18n.t('extractImageJS.successRemoveMsg') + savedPath, ['OK']);
                     } else {
-                        await customAlert.alert(i18n.t('extractImageJS.warningTitle'), i18n.t('extractImageJS.warningMsg'), ['OK']);
+                        await customAlert.alert(i18n.t('alerts.warning'), i18n.t('extractImageJS.warningMsg'), ['OK']);
                     }
                 }
             } else {
                 console.error("API returned JSON:", result);
-                await customAlert.alert(i18n.t('extractImageJS.errorTitle'), `Error: ${JSON.stringify(result)}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), `Error: ${JSON.stringify(result)}`, ['OK']);
             }
         } catch (error) {            
             console.error('Error processing images:', error);
-            await customAlert.alert(i18n.t('extractImageJS.errorTitle'), i18n.t('extractImageJS.errorMsg'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('extractImageJS.errorMsg'), ['OK']);
         } finally {
             loadingUI.hide();
             processBtn.disabled = false;

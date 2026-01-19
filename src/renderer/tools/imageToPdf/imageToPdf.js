@@ -368,13 +368,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                     );
                     if (saved) {
                         await customAlert.alert(
-                            i18n.t('imageToPdfJS.successSingle'),
+                            i18n.t('alerts.success'),
                             i18n.t('imageToPdfJS.successSingleMsg') + `${saved}`,
                             ["OK"]
                         );
                     }
                     else {
-                        await customAlert.alert(i18n.t('imageToPdfJS.warningTitle'), i18n.t('imageToPdfJS.warningMsg'), ['OK']);
+                        await customAlert.alert(i18n.t('alerts.warning'), i18n.t('imageToPdfJS.warningMsg'), ['OK']);
                     }
                 } else {
                     // Multiple PDF files in a ZIP
@@ -385,7 +385,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     );
                     if (saved) {
                         await customAlert.alert(
-                            i18n.t('imageToPdfJS.successMultiple'),
+                            i18n.t('alerts.success'),
                             i18n.t('imageToPdfJS.successMultipleMsg') + `${saved}`,
                             ["OK"]
                         );
@@ -394,7 +394,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         } catch (err) {
             console.error(err);
-            await customAlert.alert(i18n.t('imageToPdfJS.errorTitle'), err.message || i18n.t('imageToPdfJS.errorMsg'), ["OK"]);
+            await customAlert.alert(i18n.t('alerts.error'), err.message || i18n.t('imageToPdfJS.errorMsg'), ["OK"]);
         } finally {
             loadingUI.hide();
             convertBtn.disabled = false;
