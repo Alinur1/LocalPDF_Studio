@@ -148,6 +148,7 @@
     "visit-url": "ウェブサイトを訪問"
   },
   "common": {
+    "ok": "OK",
     "back-btn": "← 戻る",
     "btn-select": "PDFファイルを選択するか、ここにPDFをドロップしてください",
     "btn-select-merge": "PDFファイルを選択するか、ここにPDFをドロップしてください",
@@ -155,6 +156,12 @@
     "btn-select-pdf-image": "PDFまたは画像ファイルを選択するか、ファイルをここにドロップしてください",
     "pdf-preview": "PDF プレビュー",
     "image-preview": "画像プレビュー"
+  },
+  "alerts": {
+    "notice": "LocalPDF Studio - 通知",
+    "success": "LocalPDF Studio - 成功",
+    "warning": "LocalPDF Studio - 警告",
+    "error": "LocalPDF Studio - エラー"
   },
   "addPageNumbers": {
     "page-title": "ページ番号を追加",
@@ -173,6 +180,24 @@
     "startingNumber-label": "開始番号:",
     "startingNumber-hlpTxt-label": "最初のページにこの番号が表示されます",
     "addPageNumberBtn": "ページ番号を追加"
+  },
+  "addPageNumbersJS": {
+    "selectingPdfs": "PDFファイルを選択しています...",
+    "loadingPreview": "PDFプレビューを読み込み中...",
+    "failedToLoad": "PDFプレビューの読み込みに失敗しました",
+    "selectFileFirst": "まずファイルを選択してください。",
+    "addingPageNumbers": "ページ番号を追加しています...",
+    "successMessage": "ページ番号が正常に追加されました！\n保存先：",
+    "cancelOrFailed": "操作がキャンセルされたか、ファイルの保存に失敗しました。",
+    "error": "エラー：",
+    "errorOccurred": "エラーが発生しました：\n",
+    "dropOneFile": "1つのPDFファイルのみをドロップしてください。",
+    "dropPdfFile": "PDFファイルをドロップしてください。",
+    "totalPages": "総ページ数：",
+    "morePages": " ページ他",
+    "pageLabel": "ページ ",
+    "failedToSave": "ドロップされたファイルの保存に失敗しました：",
+    "addPageNumbersBtn": "ページ番号を追加"
   },
   "addWatermark": {
     "page-title": "透かしを追加",

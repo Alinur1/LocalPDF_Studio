@@ -148,6 +148,7 @@
     "visit-url": "Visit Website"
   },
   "common": {
+    "ok": "OK",
     "back-btn": "← Back",
     "btn-select": "Click to Select a PDF File or drop PDF here",
     "btn-select-merge": "Click to Select PDF Files or drop PDFs here",
@@ -155,6 +156,12 @@
     "btn-select-pdf-image": "Click to Select a PDF or Image File or drop files here",
     "pdf-preview": "PDF Preview",
     "image-preview": "Images Preview"
+  },
+  "alerts": {
+    "notice": "LocalPDF Studio - NOTICE",
+    "success": "LocalPDF Studio - SUCCESS",
+    "warning": "LocalPDF Studio - WARNING",
+    "error": "LocalPDF Studio - ERROR"
   },
   "addPageNumbers": {
     "page-title": "Add Page Numbers",
@@ -173,6 +180,24 @@
     "startingNumber-label": "Starting Number:",
     "startingNumber-hlpTxt-label": "First page will have this number",
     "addPageNumberBtn": "Add Page Numbers"
+  },
+  "addPageNumbersJS": {
+    "selectingPdfs": "Selecting PDF files...",
+    "loadingPreview": "Loading PDF preview...",
+    "failedToLoad": "Failed to load PDF preview",
+    "selectFileFirst": "Please select a file first.",
+    "addingPageNumbers": "Adding page numbers...",
+    "successMessage": "Page numbers added successfully!\nSaved to: ",
+    "cancelOrFailed": "Operation cancelled or failed to save the file.",
+    "error": "Error: ",
+    "errorOccurred": "An error occurred:\n",
+    "dropOneFile": "Please drop only one PDF file.",
+    "dropPdfFile": "Please drop a PDF file.",
+    "totalPages": "Total Pages: ",
+    "morePages": " more",
+    "pageLabel": "Page ",
+    "failedToSave": "Failed to save dropped file: ",
+    "addPageNumbersBtn": "Add Page Numbers"
   },
   "addWatermark": {
     "page-title": "Add Watermark",

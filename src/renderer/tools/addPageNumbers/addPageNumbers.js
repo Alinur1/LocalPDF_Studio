@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let renderedPages = [];
 
     selectPdfBtn.addEventListener('click', async () => {
-        loadingUI.show("Selecting PDF files...");
+        loadingUI.show(i18n.t('addPageNumbersJS.selectingPdfs'));
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -84,12 +84,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadPdfPreview(filePath) {
         try {
-            loadingUI.show('Loading PDF preview...');
+            loadingUI.show(i18n.t('addPageNumbersJS.loadingPreview'));
             previewContainer.style.display = 'block';
             previewGrid.innerHTML = '';
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
             pdfDoc = await loadingTask.promise;
-            pageCountEl.textContent = `Total Pages: ${pdfDoc.numPages}`;
+            pageCountEl.textContent = i18n.t('addPageNumbersJS.totalPages') + pdfDoc.numPages;
             previewGrid.innerHTML = '';
             const pagesToShow = Math.min(pdfDoc.numPages, 6);
             for (let i = 1; i <= pagesToShow; i++) await renderPageThumbnail(i);
@@ -97,12 +97,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const more = document.createElement('div');
                 more.className = 'page-thumbnail';
                 more.style.cssText = 'display:flex;align-items:center;justify-content:center;';
-                more.innerHTML = `<p style="color:#7f8c8d;text-align:center;font-size:0.8rem;">+${pdfDoc.numPages - 6} more</p>`;
+                more.innerHTML = `<p style="color:#7f8c8d;text-align:center;font-size:0.8rem;">+${pdfDoc.numPages - 6}${i18n.t('addPageNumbersJS.morePages')}</p>`;
                 previewGrid.appendChild(more);
             }
         } catch (error) {
             console.error('Error loading PDF:', error);
-            previewGrid.innerHTML = '<p style="color: #e74c3c; text-align: center;">Failed to load PDF preview</p>';
+            previewGrid.innerHTML = `<p style="color: #e74c3c; text-align: center;">${i18n.t('addPageNumbersJS.failedToLoad')}</p>`;
         } finally {
             loadingUI.hide();
         }
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         wrapper.className = 'page-thumbnail';
         const label = document.createElement('div');
         label.className = 'page-label';
-        label.textContent = `Page ${pageNum}`;
+        label.textContent = i18n.t('addPageNumbersJS.pageLabel') + pageNum;
         wrapper.appendChild(canvas);
         wrapper.appendChild(label);
         previewGrid.appendChild(wrapper);
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     addBtn.addEventListener('click', async () => {
-        if (!selectedFile) { await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']); return; }
+        if (!selectedFile) { await customAlert.alert(i18n.t('alerts.notice'), i18n.t('addPageNumbersJS.selectFileFirst'), [i18n.t('common.ok')]); return; }
 
         const positionMap = {
             'TopLeft': 0, 'TopCenter': 1, 'TopRight': 2,
@@ -190,28 +190,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            loadingUI.show('Adding page numbers...');
+            loadingUI.show(i18n.t('addPageNumbersJS.addingPageNumbers'));
             addBtn.disabled = true;
-            addBtn.textContent = 'Adding Page Numbers...';
+            addBtn.textContent = i18n.t('addPageNumbersJS.addingPageNumbers');
             const endpoint = await API.pdf.addPageNumbers;
             const result = await API.request.post(endpoint, requestBody);
             if (result instanceof Blob) {
                 const arrayBuffer = await result.arrayBuffer();
                 const defaultName = selectedFile.name.replace('.pdf', '_numbered.pdf');
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
-                if (savedPath) await customAlert.alert('LocalPDF Studio - SUCCESS', 'Page numbers added successfully!\nSaved to: ' + savedPath, ['OK']);
-                else await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
+                if (savedPath) await customAlert.alert(i18n.t('alerts.success'), i18n.t('addPageNumbersJS.successMessage') + savedPath, [i18n.t('common.ok')]);
+                else await customAlert.alert(i18n.t('alerts.warning'), i18n.t('addPageNumbersJS.cancelOrFailed'), [i18n.t('common.ok')]);
             } else {
                 console.error("API returned JSON:", result);
-                await customAlert.alert('LocalPDF Studio - ERROR', `Error: ${JSON.stringify(result)}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('addPageNumbersJS.error') + JSON.stringify(result), [i18n.t('common.ok')]);
             }
         } catch (error) {
             console.error('Error:', error);
-            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred:\n${error.message}`, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('addPageNumbersJS.errorOccurred') + error.message, [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
             addBtn.disabled = false;
-            addBtn.textContent = 'Add Page Numbers';
+            addBtn.textContent = i18n.t('addPageNumbers.addPageNumberBtn');
         }
     });
 
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log(`Files dropped: ${pdfFiles.length} file(s), current droppedFilePath: ${droppedFilePath}`);
 
             if (pdfFiles.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop only one PDF file.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('addPageNumbersJS.dropOneFile'), [i18n.t('common.ok')]);
                 return;
             }
 
@@ -245,11 +245,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     size: fileSize
                 });
             } else {
-                await customAlert.alert('LocalPDF Studio - ERROR', `Failed to save dropped file: ${result.error}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('addPageNumbersJS.failedToSave') + result.error, [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a PDF file.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('addPageNumbersJS.dropPdfFile'), [i18n.t('common.ok')]);
         }
     });
 });

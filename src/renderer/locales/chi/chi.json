@@ -148,6 +148,7 @@
     "visit-url": "访问网站"
   },
   "common": {
+    "ok": "确定",
     "back-btn": "← 返回",
     "btn-select": "点击选择 PDF 文件或将 PDF 拖放到此处",
     "btn-select-merge": "点击选择 PDF 文件或将 PDF 拖放到此处",
@@ -155,6 +156,12 @@
     "btn-select-pdf-image": "点击选择 PDF 或图片文件或将文件拖放到此处",
     "pdf-preview": "PDF 预览",
     "image-preview": "图片预览"
+  },
+  "alerts": {
+    "notice": "LocalPDF Studio - 通知",
+    "success": "LocalPDF Studio - 成功",
+    "warning": "LocalPDF Studio - 警告",
+    "error": "LocalPDF Studio - 错误"
   },
   "addPageNumbers": {
     "page-title": "添加页码",
@@ -173,6 +180,24 @@
     "startingNumber-label": "起始数字：",
     "startingNumber-hlpTxt-label": "第一页将显示此数字",
     "addPageNumberBtn": "添加页码"
+  },
+  "addPageNumbersJS": {
+    "selectingPdfs": "正在选择PDF文件...",
+    "loadingPreview": "正在加载PDF预览...",
+    "failedToLoad": "加载PDF预览失败",
+    "selectFileFirst": "请先选择一个文件。",
+    "addingPageNumbers": "正在添加页码...",
+    "successMessage": "页码添加成功！\n保存到：",
+    "cancelOrFailed": "操作已取消或保存文件失败。",
+    "error": "错误：",
+    "errorOccurred": "发生错误：\n",
+    "dropOneFile": "请只拖放一个PDF文件。",
+    "dropPdfFile": "请拖放一个PDF文件。",
+    "totalPages": "总页数：",
+    "morePages": " 更多",
+    "pageLabel": "第 ",
+    "failedToSave": "保存拖放文件失败：",
+    "addPageNumbersBtn": "添加页码"
   },
   "addWatermark": {
     "page-title": "添加水印",

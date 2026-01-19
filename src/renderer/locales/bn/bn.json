@@ -148,6 +148,7 @@
     "visit-url": "ওয়েবসাইট ভিজিট করুন"
   },
   "common": {
+    "ok": "ঠিক আছে",
     "back-btn": "← পিছনে",
     "btn-select": "PDF ফাইল নির্বাচন করতে ক্লিক করুন অথবা PDF এখানে ড্রপ করুন",
     "btn-select-merge": "PDF ফাইল নির্বাচন করতে ক্লিক করুন অথবা PDF এখানে ড্রপ করুন",
@@ -155,6 +156,12 @@
     "btn-select-pdf-image": "PDF বা ইমেজ ফাইল নির্বাচন করতে ক্লিক করুন অথবা ফাইল এখানে ড্রপ করুন",
     "pdf-preview": "PDF প্রিভিউ",
     "image-preview": "ইমেজ প্রিভিউ"
+  },
+  "alerts": {
+    "notice": "LocalPDF Studio - বিজ্ঞপ্তি",
+    "success": "LocalPDF Studio - সফল",
+    "warning": "LocalPDF Studio - সতর্কতা",
+    "error": "LocalPDF Studio - ত্রুটি"
   },
   "addPageNumbers": {
     "page-title": "পৃষ্ঠা নম্বর যোগ করুন",
@@ -173,6 +180,24 @@
     "startingNumber-label": "শুরুর নম্বর:",
     "startingNumber-hlpTxt-label": "প্রথম পৃষ্ঠায় এই নম্বর থাকবে",
     "addPageNumberBtn": "পৃষ্ঠা নম্বর যোগ করুন"
+  },
+  "addPageNumbersJS": {
+    "selectingPdfs": "PDF ফাইল নির্বাচন করা হচ্ছে...",
+    "loadingPreview": "PDF প্রিভিউ লোড করা হচ্ছে...",
+    "failedToLoad": "PDF প্রিভিউ লোড করতে ব্যর্থ হয়েছে",
+    "selectFileFirst": "প্রথমে একটি ফাইল নির্বাচন করুন।",
+    "addingPageNumbers": "পৃষ্ঠা নম্বর যোগ করা হচ্ছে...",
+    "successMessage": "পৃষ্ঠা নম্বর সফলভাবে যোগ করা হয়েছে!\nসংরক্ষণ করা হয়েছে: ",
+    "cancelOrFailed": "অপারেশন বাতিল করা হয়েছে বা ফাইল সংরক্ষণ করতে ব্যর্থ হয়েছে।",
+    "error": "ত্রুটি: ",
+    "errorOccurred": "একটি ত্রুটি ঘটেছে:\n",
+    "dropOneFile": "একটি মাত্র PDF ফাইল ড্রপ করুন।",
+    "dropPdfFile": "একটি PDF ফাইল ড্রপ করুন।",
+    "totalPages": "মোট পৃষ্ঠা: ",
+    "morePages": " টি অতিরিক্ত",
+    "pageLabel": "পৃষ্ঠা ",
+    "failedToSave": "ড্রপ করা ফাইল সংরক্ষণ করতে ব্যর্থ হয়েছে: ",
+    "addPageNumbersBtn": "পৃষ্ঠা নম্বর যোগ করুন"
   },
   "addWatermark": {
     "page-title": "ওয়াটারমার্ক যোগ করুন",
