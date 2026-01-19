@@ -578,6 +578,25 @@
     "warning-text": "检测到大文件 - 为获得更好性能将分批处理",
     "cancel-ocr-btn": "取消 OCR 处理"
   },
+  "ocrPdfJS": {
+    "selectingFiles": "正在选择文件...",
+    "loadingPreview": "正在加载文件预览...",
+    "failedToLoadPreview": "加载文件预览失败",
+    "imagePreview": "图像预览",
+    "pdfPreviewTitle": "PDF 预览 - 选择页面",
+    "dropPdfOrImage": "请拖放 PDF 或图像文件（不包括 GIF）。",
+    "selectFileFirst": "请先选择一个文件。",
+    "selectPages": "请至少选择一个页面。",
+    "selectLanguages": "请至少选择一种语言。",
+    "initializingOcr": "正在初始化 OCR 引擎...",
+    "processingPage": "正在处理第",
+    "of": "页，共",
+    "successMsg": "OCR 处理完成！",
+    "successSavedTo": "已保存到: ",
+    "cancelledMsg": "OCR 处理已取消。",
+    "errorMsg": "错误: ",
+    "errorOcr": "OCR 处理出错: "
+  },
   "organizePDF": {
     "page-title": "整理 / 重新排列 PDF",
     "how-to-organize-title": "如何整理：",
@@ -709,6 +728,27 @@
     "extract-all-pages": "将所有页面提取为单独的 PDF",
     "extract-all-pages-help": "每一页都会保存为一个单独的 PDF 文件",
     "split-pdf-button": "拆分 PDF"
+  },
+  "splitPdfJS": {
+    "selectingPdfs": "正在选择 PDF 文件...",
+    "loadingPreview": "正在加载 PDF 预览...",
+    "failedToLoadPreview": "加载 PDF 预览失败",
+    "pageLabel": "第 ",
+    "dropOnlyOne": "请仅拖放一个 PDF 文件。",
+    "failedToSaveDrop": "保存拖放的文件失败: ",
+    "dropPdfFile": "请拖放 PDF 文件。",
+    "selectFileFirst": "请先选择一个文件。",
+    "pageRangesEmpty": "页面范围不能为空。",
+    "specificPagesEmpty": "特定页面不能为空。",
+    "invalidPageInterval": "请输入有效的页数。",
+    "splittingPdf": "正在分割 PDF...",
+    "splittingBtn": "分割中...",
+    "successMsg": "PDF 已成功分割！",
+    "successSavedTo": "已保存到: ",
+    "cancelledMsg": "操作已取消或文件保存失败。",
+    "errorMsg": "错误: ",
+    "errorSplitting": "分割 PDF 时出错: ",
+    "splitPdfBtn": "分割 PDF"
   },
   "redact": {
     "page-title": "PDF 擦除",

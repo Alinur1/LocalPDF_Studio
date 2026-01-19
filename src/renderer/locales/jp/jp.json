@@ -578,6 +578,25 @@
     "warning-text": "大きなファイルを検出 - パフォーマンス向上のためバッチ処理します",
     "cancel-ocr-btn": "OCR 処理をキャンセル"
   },
+  "ocrPdfJS": {
+    "selectingFiles": "ファイルを選択中...",
+    "loadingPreview": "ファイル プレビューを読み込み中...",
+    "failedToLoadPreview": "ファイル プレビューの読み込みに失敗",
+    "imagePreview": "画像プレビュー",
+    "pdfPreviewTitle": "PDF プレビュー - ページ選択",
+    "dropPdfOrImage": "PDF またはイメージ ファイルをドラッグ&ドロップしてください（GIF を除く）。",
+    "selectFileFirst": "最初にファイルを選択してください。",
+    "selectPages": "少なくとも 1 つのページを選択してください。",
+    "selectLanguages": "少なくとも 1 つの言語を選択してください。",
+    "initializingOcr": "OCR エンジンを初期化中...",
+    "processingPage": "ページを処理中",
+    "of": "（全",
+    "successMsg": "OCR の処理が正常に完了しました！",
+    "successSavedTo": "保存先: ",
+    "cancelledMsg": "OCR の処理がキャンセルされました。",
+    "errorMsg": "エラー: ",
+    "errorOcr": "OCR の処理中にエラーが発生しました: "
+  },
   "organizePDF": {
     "page-title": "PDF を整理 / 再配置",
     "how-to-organize-title": "整理方法：",
@@ -709,6 +728,27 @@
     "extract-all-pages": "すべてのページを個別の PDF として抽出",
     "extract-all-pages-help": "各ページは個別の PDF ファイルとして保存されます",
     "split-pdf-button": "PDF を分割"
+  },
+  "splitPdfJS": {
+    "selectingPdfs": "PDF ファイルを選択中...",
+    "loadingPreview": "PDF プレビューを読み込み中...",
+    "failedToLoadPreview": "PDF プレビューの読み込みに失敗",
+    "pageLabel": "ページ ",
+    "dropOnlyOne": "1 つの PDF ファイルのみをドラッグ&ドロップしてください。",
+    "failedToSaveDrop": "ドラッグ&ドロップされたファイルの保存に失敗: ",
+    "dropPdfFile": "PDF ファイルをドラッグ&ドロップしてください。",
+    "selectFileFirst": "最初にファイルを選択してください。",
+    "pageRangesEmpty": "ページ範囲を空にすることはできません。",
+    "specificPagesEmpty": "特定のページを空にすることはできません。",
+    "invalidPageInterval": "有効なページ数を入力してください。",
+    "splittingPdf": "PDF を分割中...",
+    "splittingBtn": "分割中...",
+    "successMsg": "PDF が正常に分割されました！",
+    "successSavedTo": "保存先: ",
+    "cancelledMsg": "操作がキャンセルされたか、ファイルの保存に失敗しました。",
+    "errorMsg": "エラー: ",
+    "errorSplitting": "PDF の分割中にエラーが発生しました: ",
+    "splitPdfBtn": "PDF を分割"
   },
   "redact": {
     "page-title": "PDF 墨消し",
