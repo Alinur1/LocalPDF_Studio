@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Select PDF
     selectBtn.addEventListener('click', async () => {
-        loadingUI.show("Selecting PDF file...");
+        loadingUI.show(i18n.t('redactPdfJS.selectingPdf'));
         const selected = await window.electronAPI.selectPdfs();
         if (droppedFilePath) {
             await window.electronAPI.deleteFile(droppedFilePath);
@@ -85,11 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Clear all redactions
     clearBtn.addEventListener('click', async () => {
-        const result = await customAlert.alert(
-            'LocalPDF Studio - CONFIRM',
-            'Are you sure you want to clear all redactions?',
-            ['Cancel', 'Clear All']
-        );
+        const result = await customAlert.alert(i18n.t('alerts.notice'), i18n.t('redactPdfJS.clearAllConfirm'), ['Cancel', 'Clear All']);
         if (result === 'Clear All') {
             redactions = {};
             // Clear rendered pages cache so they re-render without redactions
@@ -105,16 +101,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Apply redactions
     applyBtn.addEventListener('click', async () => {
         if (!currentFilePath || Object.keys(redactions).length === 0) {
-            await customAlert.alert(
-                'LocalPDF Studio - NOTICE',
-                'Please add at least one redaction before applying.',
-                ['OK']
-            );
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('redactPdfJS.addRedactionFirst'), [i18n.t('common.ok')]);
             return;
         }
 
         try {
-            loadingUI.show('Applying redactions...');
+            loadingUI.show(i18n.t('redactPdfJS.applyingRedactions'));
 
             // Prepare redaction data for API
             const redactionData = {
@@ -139,30 +131,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
 
             if (savedPath) {
-                await customAlert.alert(
-                    'LocalPDF Studio - SUCCESS',
-                    'PDF redacted successfully!',
-                    ['OK']
-                );
+                await customAlert.alert(i18n.t('alerts.success'), i18n.t('redactPdfJS.pdfRedactedSuccess'), [i18n.t('common.ok')]);
                 // redactions = {};
                 // Object.values(pageContainers).forEach((_, pageNum) => {
                 //     redrawPageRedactions(pageNum);
                 // });
                 // updateUI();
             } else {
-                await customAlert.alert(
-                    'LocalPDF Studio - WARNING',
-                    'Save canceled.',
-                    ['OK']
-                );
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('redactPdfJS.saveCanceled'), [i18n.t('common.ok')]);
             }
         } catch (err) {
             console.error(err);
-            await customAlert.alert(
-                'LocalPDF Studio - ERROR',
-                'Error applying redactions: ' + err.message,
-                ['OK']
-            );
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('redactPdfJS.errorApplyingRedactions') + err.message, [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
         }
@@ -278,7 +258,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop only one PDF file.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('redactPdfJS.dropOneFile'), [i18n.t('common.ok')]);
                 return;
             }
 
@@ -297,26 +277,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 droppedFilePath = result.filePath;
                 await loadPdf(result.filePath);
             } else {
-                await customAlert.alert(
-                    'LocalPDF Studio - ERROR',
-                    `Failed to save dropped file: ${result.error}`,
-                    ['OK']
-                );
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('redactPdfJS.failedToSave') + result.error, [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert(
-                'LocalPDF Studio - NOTICE',
-                'Please drop a PDF file.',
-                ['OK']
-            );
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('redactPdfJS.dropPdfFile'), [i18n.t('common.ok')]);
         }
     });
 
     // Load PDF and initialize continuous rendering
     async function loadPdf(filePath) {
         try {
-            loadingUI.show('Loading PDF...');
+            loadingUI.show(i18n.t('redactPdfJS.loadingPdf'));
 
             if (pdfDocument) {
                 await pdfDocument.destroy();
@@ -346,7 +318,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Update UI
-            document.getElementById('page-count').textContent = `${totalPages} pages`;
+            document.getElementById('page-count').textContent = totalPages + i18n.t('redactPdfJS.pagesText');
             document.getElementById('total-pages').textContent = totalPages;
             pageInput.max = totalPages;
             pageInput.disabled = false;
@@ -368,11 +340,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (err) {
             console.error(err);
             loadingUI.hide();
-            await customAlert.alert(
-                'LocalPDF Studio - ERROR',
-                'Error loading PDF: ' + err.message,
-                ['OK']
-            );
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('redactPdfJS.errorLoadingPdf') + err.message, [i18n.t('common.ok')]);
         }
     }
 
@@ -748,7 +716,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const label = document.createElement('div');
             label.className = 'thumbnail-label';
-            label.textContent = `Page ${i}`;
+            label.textContent = i18n.t('redactPdfJS.pageLabel') + i;
 
             item.appendChild(badge);
             item.appendChild(canvas);

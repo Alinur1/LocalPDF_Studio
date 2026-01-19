@@ -767,5 +767,27 @@
     "fit-btn": "Fit",
     "hint-group": "💡 Ctrl+Scroll to zoom || Ctrl+0 to reset || Click on the redacted area to remove a specific redaction",
     "select-hint": "Click \"Select PDF\" or drag & drop a PDF file here"
+  },
+  "redactPdfJS": {
+    "selectingPdf": "Selecting PDF file...",
+    "clearAllConfirm": "Are you sure you want to clear all redactions?",
+    "addRedactionFirst": "Please add at least one redaction before applying.",
+    "applyingRedactions": "Applying redactions...",
+    "pdfRedactedSuccess": "PDF redacted successfully!",
+    "saveCanceled": "Save canceled.",
+    "errorApplyingRedactions": "Error applying redactions: ",
+    "dropOneFile": "Please drop only one PDF file.",
+    "failedToSave": "Failed to save dropped file: ",
+    "dropPdfFile": "Please drop a PDF file.",
+    "loadingPdf": "Loading PDF...",
+    "errorLoadingPdf": "Error loading PDF: ",
+    "pagesText": " pages",
+    "pageLabel": "Page ",
+    "pageNavPage": "Page ",
+    "pageNavOf": " of ",
+    "previousBtn": "← Previous",
+    "nextBtn": "Next →",
+    "cancel": "Cancel",
+    "clearAll": "Clear All"
   }
 }

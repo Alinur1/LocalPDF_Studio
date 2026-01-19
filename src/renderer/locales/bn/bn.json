@@ -767,5 +767,27 @@
     "fit-btn": "ফিট করুন",
     "hint-group": "💡 Ctrl+Scroll দিয়ে জুম করুন || Ctrl+0 দিয়ে রিসেট করুন || নির্দিষ্ট রিড্যাকশন সরাতে রিড্যাক্ট করা অংশে ক্লিক করুন",
     "select-hint": "\"PDF নির্বাচন করুন\" ক্লিক করুন অথবা PDF ফাইল এখানে ড্রাগ & ড্রপ করুন"
+  },
+  "redactPdfJS": {
+    "selectingPdf": "PDF ফাইল নির্বাচন করা হচ্ছে...",
+    "clearAllConfirm": "আপনি কি নিশ্চিত যে আপনি সব রিড্যাকশন পরিষ্কার করতে চান?",
+    "addRedactionFirst": "প্রয়োগ করার আগে অন্তত একটি রিড্যাকশন যোগ করুন।",
+    "applyingRedactions": "রিড্যাকশন প্রয়োগ করা হচ্ছে...",
+    "pdfRedactedSuccess": "PDF সফলভাবে রিড্যাক্ট করা হয়েছে!",
+    "saveCanceled": "সংরক্ষণ বাতিল করা হয়েছে।",
+    "errorApplyingRedactions": "রিড্যাকশন প্রয়োগ করতে ত্রুটি: ",
+    "dropOneFile": "একটি মাত্র PDF ফাইল ড্রপ করুন।",
+    "failedToSave": "ড্রপ করা ফাইল সংরক্ষণ করতে ব্যর্থ হয়েছে: ",
+    "dropPdfFile": "একটি PDF ফাইল ড্রপ করুন।",
+    "loadingPdf": "PDF লোড করা হচ্ছে...",
+    "errorLoadingPdf": "PDF লোড করতে ত্রুটি: ",
+    "pagesText": " পৃষ্ঠা",
+    "pageLabel": "পৃষ্ঠা ",
+    "pageNavPage": "পৃষ্ঠা ",
+    "pageNavOf": " / ",
+    "previousBtn": "← পূর্ববর্তী",
+    "nextBtn": "পরবর্তী →",
+    "cancel": "বাতিল করুন",
+    "clearAll": "সব পরিষ্কার করুন"
   }
 }

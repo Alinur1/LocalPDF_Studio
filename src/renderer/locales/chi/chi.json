@@ -767,5 +767,27 @@
     "fit-btn": "适应",
     "hint-group": "💡 Ctrl+滚动缩放 || Ctrl+0重置 || 点击擦除区域移除特定擦除",
     "select-hint": "点击“选择PDF”或将PDF文件拖放到此处"
+  },
+  "redactPdfJS": {
+    "selectingPdf": "正在选择PDF文件...",
+    "clearAllConfirm": "您确定要清除所有擦除吗？",
+    "addRedactionFirst": "请至少添加一个擦除再应用。",
+    "applyingRedactions": "正在应用擦除...",
+    "pdfRedactedSuccess": "PDF擦除成功！",
+    "saveCanceled": "保存已取消。",
+    "errorApplyingRedactions": "应用擦除时出错：",
+    "dropOneFile": "请只拖放一个PDF文件。",
+    "failedToSave": "保存拖放文件失败：",
+    "dropPdfFile": "请拖放一个PDF文件。",
+    "loadingPdf": "正在加载PDF...",
+    "errorLoadingPdf": "加载PDF时出错：",
+    "pagesText": " 页",
+    "pageLabel": "第 ",
+    "pageNavPage": "第 ",
+    "pageNavOf": " / ",
+    "previousBtn": "← 上一页",
+    "nextBtn": "下一页 →",
+    "cancel": "取消",
+    "clearAll": "清除全部"
   }
 }

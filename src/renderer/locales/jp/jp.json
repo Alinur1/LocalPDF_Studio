@@ -767,5 +767,27 @@
     "fit-btn": "フィット",
     "hint-group": "💡 Ctrl+スクロールでズーム || Ctrl+0でリセット || 特定の墨消しを削除するには墨消し部分をクリック",
     "select-hint": "「PDFを選択」をクリックするか、PDFファイルをここにドラッグ＆ドロップ"
+  },
+  "redactPdfJS": {
+    "selectingPdf": "PDFファイルを選択しています...",
+    "clearAllConfirm": "すべての墨消しをクリアしてもよろしいですか？",
+    "addRedactionFirst": "適用する前に少なくとも1つの墨消しを追加してください。",
+    "applyingRedactions": "墨消しを適用しています...",
+    "pdfRedactedSuccess": "PDFの墨消しが成功しました！",
+    "saveCanceled": "保存がキャンセルされました。",
+    "errorApplyingRedactions": "墨消しの適用中にエラー：",
+    "dropOneFile": "1つのPDFファイルのみをドロップしてください。",
+    "failedToSave": "ドロップされたファイルの保存に失敗しました：",
+    "dropPdfFile": "PDFファイルをドロップしてください。",
+    "loadingPdf": "PDFを読み込み中...",
+    "errorLoadingPdf": "PDFの読み込み中にエラー：",
+    "pagesText": " ページ",
+    "pageLabel": "ページ ",
+    "pageNavPage": "ページ ",
+    "pageNavOf": " / ",
+    "previousBtn": "← 前へ",
+    "nextBtn": "次へ →",
+    "cancel": "キャンセル",
+    "clearAll": "すべてクリア"
   }
 }
