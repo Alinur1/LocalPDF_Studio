@@ -228,7 +228,31 @@
     "wm-pgRange-label": "页面范围：",
     "wm-pgRang-helpTxt": "输入页码或范围，用逗号分隔（例如：1-5, 7, 9-12）",
     "wm-preview": "水印预览：",
-    "add-wm-btn": "添加水印"
+    "add-wm-btn": "添加水印",
+    "placeholderText": "输入水印文本",
+    "placeholderPageRange": "例如：1-5, 7, 9-12"
+  },
+  "addWatermarkJS": {
+    "selectingPdfs": "正在选择PDF文件...",
+    "loadingPreview": "正在加载PDF预览...",
+    "totalPages": "总页数：",
+    "morePages": " 更多",
+    "pageLabel": "第 ",
+    "failedToLoad": "加载PDF预览失败",
+    "invalidImageFile": "请选择有效的图像文件（PNG、JPG、JPEG、GIF、BMP）",
+    "dropOneFile": "请只拖放一个PDF文件。",
+    "dropPdfFile": "请拖放一个PDF文件。",
+    "selectPdfFirst": "请先选择一个PDF文件。",
+    "addingWatermark": "正在添加水印...",
+    "addingWatermarkBtn": "正在添加水印...",
+    "selectImageForWatermark": "请为水印选择图像文件。",
+    "successMessage": "水印添加成功！\n保存到：",
+    "cancelOrFailed": "操作已取消或保存文件失败。",
+    "error": "错误：",
+    "errorOccurred": "发生错误：\n",
+    "addWatermarkBtn": "添加水印",
+    "imageWatermarkPlaceholder": "[图像水印]",
+    "failedToSave": "保存拖放文件失败："
   },
   "compressPdf": {
     "page-title": "压缩 PDF",

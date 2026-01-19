@@ -228,7 +228,31 @@
     "wm-pgRange-label": "ページ範囲：",
     "wm-pgRang-helpTxt": "ページ番号または範囲をカンマで区切って入力（例：1-5, 7, 9-12）",
     "wm-preview": "透かしプレビュー：",
-    "add-wm-btn": "透かしを追加"
+    "add-wm-btn": "透かしを追加",
+    "placeholderText": "透かしテキストを入力",
+    "placeholderPageRange": "例：1-5, 7, 9-12"
+  },
+  "addWatermarkJS": {
+    "selectingPdfs": "PDFファイルを選択しています...",
+    "loadingPreview": "PDFプレビューを読み込み中...",
+    "totalPages": "総ページ数：",
+    "morePages": " ページ他",
+    "pageLabel": "ページ ",
+    "failedToLoad": "PDFプレビューの読み込みに失敗しました",
+    "invalidImageFile": "有効な画像ファイルを選択してください（PNG、JPG、JPEG、GIF、BMP）",
+    "dropOneFile": "1つのPDFファイルのみをドロップしてください。",
+    "dropPdfFile": "PDFファイルをドロップしてください。",
+    "selectPdfFirst": "まずPDFファイルを選択してください。",
+    "addingWatermark": "透かしを追加しています...",
+    "addingWatermarkBtn": "透かしを追加しています...",
+    "selectImageForWatermark": "透かし用の画像ファイルを選択してください。",
+    "successMessage": "透かしが正常に追加されました！\n保存先：",
+    "cancelOrFailed": "操作がキャンセルされたか、ファイルの保存に失敗しました。",
+    "error": "エラー：",
+    "errorOccurred": "エラーが発生しました：\n",
+    "addWatermarkBtn": "透かしを追加",
+    "imageWatermarkPlaceholder": "[画像透かし]",
+    "failedToSave": "ドロップされたファイルの保存に失敗しました："
   },
   "compressPdf": {
     "page-title": "PDF 圧縮",

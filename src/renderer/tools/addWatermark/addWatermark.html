@@ -39,7 +39,8 @@
         </div>
         <main class="tool-container">
             <div class="file-selection-area">
-                <button id="select-pdf-btn" class="select-pdf-btn" data-i18n="common.btn-select">Click to Select a PDF File or drop PDF here</button>
+                <button id="select-pdf-btn" class="select-pdf-btn" data-i18n="common.btn-select">Click to Select a PDF
+                    File or drop PDF here</button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
                     <div style="flex-grow: 1;">
                         <p id="pdf-name" class="pdf-name"></p>
@@ -67,8 +68,8 @@
                 <div id="text-options">
                     <div class="option-group">
                         <label data-i18n="addWatermark.wm-text-label">Watermark Text:</label>
-                        <textarea id="watermark-text" class="options-textarea"
-                            placeholder="Enter watermark text">CONFIDENTIAL</textarea>
+                        <textarea id="watermark-text" class="options-textarea" placeholder="Enter watermark text"
+                            data-i18n-placeholder="addWatermark.placeholderText">CONFIDENTIAL</textarea>
                     </div>
                     <div class="option-group">
                         <label data-i18n="addWatermark.wm-fontSize-label">Font Size:</label>
@@ -89,7 +90,8 @@
                     <div class="option-group">
                         <label data-i18n="addWatermark.wm-slctImage-label">Select Image:</label>
                         <input type="file" id="image-file" class="options-input" accept=".png,.jpg,.jpeg,.gif,.bmp">
-                        <small class="help-text" data-i18n="addWatermark.wm-slctImage-helpTxt">Supported formats: PNG, JPG, JPEG, GIF, BMP</small>
+                        <small class="help-text" data-i18n="addWatermark.wm-slctImage-helpTxt">Supported formats: PNG,
+                            JPG, JPEG, GIF, BMP</small>
                     </div>
                     <div class="option-group">
                         <label data-i18n="addWatermark.wm-imgScale-label">Image Scale:</label>
@@ -135,8 +137,9 @@
                 </div>
                 <div id="custom-pages-group" class="option-group" style="display: none;">
                     <label data-i18n="addWatermark.wm-pgRange-label">Page Range:</label>
-                    <input type="text" id="custom-pages" class="options-input" placeholder="e.g., 1-5, 7, 9-12">
-                    <small class="help-text" data-i18n="addWatermark.wm-pgRang-helpTxt">Enter page numbers or ranges separated by commas (e.g., 1-5, 7,
+                    <input type="text" id="custom-pages" class="options-input" placeholder="e.g., 1-5, 7, 9-12" data-i18n-placeholder="addWatermark.placeholderPageRange">
+                    <small class="help-text" data-i18n="addWatermark.wm-pgRang-helpTxt">Enter page numbers or ranges
+                        separated by commas (e.g., 1-5, 7,
                         9-12)</small>
                 </div>
                 <div class="option-group">

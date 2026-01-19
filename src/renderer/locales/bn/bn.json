@@ -228,7 +228,31 @@
     "wm-pgRange-label": "পৃষ্ঠা রেঞ্জ:",
     "wm-pgRang-helpTxt": "পৃষ্ঠা নম্বর বা রেঞ্জ কমা দিয়ে আলাদা করে লিখুন (যেমন: 1-5, 7, 9-12)",
     "wm-preview": "ওয়াটারমার্ক প্রিভিউ:",
-    "add-wm-btn": "ওয়াটারমার্ক যোগ করুন"
+    "add-wm-btn": "ওয়াটারমার্ক যোগ করুন",
+    "placeholderText": "ওয়াটারমার্ক টেক্সট লিখুন",
+    "placeholderPageRange": "যেমন: 1-5, 7, 9-12"
+  },
+  "addWatermarkJS": {
+    "selectingPdfs": "PDF ফাইল নির্বাচন করা হচ্ছে...",
+    "loadingPreview": "PDF প্রিভিউ লোড করা হচ্ছে...",
+    "totalPages": "মোট পৃষ্ঠা: ",
+    "morePages": " টি অতিরিক্ত",
+    "pageLabel": "পৃষ্ঠা ",
+    "failedToLoad": "PDF প্রিভিউ লোড করতে ব্যর্থ হয়েছে",
+    "invalidImageFile": "দয়া করে একটি বৈধ ইমেজ ফাইল নির্বাচন করুন (PNG, JPG, JPEG, GIF, BMP)",
+    "dropOneFile": "একটি মাত্র PDF ফাইল ড্রপ করুন।",
+    "dropPdfFile": "একটি PDF ফাইল ড্রপ করুন।",
+    "selectPdfFirst": "প্রথমে একটি PDF ফাইল নির্বাচন করুন।",
+    "addingWatermark": "ওয়াটারমার্ক যোগ করা হচ্ছে...",
+    "addingWatermarkBtn": "ওয়াটারমার্ক যোগ করা হচ্ছে...",
+    "selectImageForWatermark": "ওয়াটারমার্কের জন্য একটি ইমেজ ফাইল নির্বাচন করুন।",
+    "successMessage": "ওয়াটারমার্ক সফলভাবে যোগ করা হয়েছে!\nসংরক্ষণ করা হয়েছে: ",
+    "cancelOrFailed": "অপারেশন বাতিল করা হয়েছে বা ফাইল সংরক্ষণ করতে ব্যর্থ হয়েছে।",
+    "error": "ত্রুটি: ",
+    "errorOccurred": "একটি ত্রুটি ঘটেছে:\n",
+    "addWatermarkBtn": "ওয়াটারমার্ক যোগ করুন",
+    "imageWatermarkPlaceholder": "[ইমেজ ওয়াটারমার্ক]",
+    "failedToSave": "ড্রপ করা ফাইল সংরক্ষণ করতে ব্যর্থ হয়েছে: "
   },
   "compressPdf": {
     "page-title": "PDF কম্প্রেস করুন",

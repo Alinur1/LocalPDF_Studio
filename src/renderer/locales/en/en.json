@@ -228,7 +228,31 @@
     "wm-pgRange-label": "Page Range:",
     "wm-pgRang-helpTxt": "Enter page numbers or ranges separated by commas (e.g., 1-5, 7, 9-12)",
     "wm-preview": "Watermark Preview:",
-    "add-wm-btn": "Add Watermark"
+    "add-wm-btn": "Add Watermark",
+    "placeholderText": "Enter watermark text",
+    "placeholderPageRange": "e.g., 1-5, 7, 9-12"
+  },
+  "addWatermarkJS": {
+    "selectingPdfs": "Selecting PDF files...",
+    "loadingPreview": "Loading PDF preview...",
+    "totalPages": "Total Pages: ",
+    "morePages": " more",
+    "pageLabel": "Page ",
+    "failedToLoad": "Failed to load PDF preview",
+    "invalidImageFile": "Please select a valid image file (PNG, JPG, JPEG, GIF, BMP)",
+    "dropOneFile": "Please drop only one PDF file.",
+    "dropPdfFile": "Please drop a PDF file.",
+    "selectPdfFirst": "Please select a PDF file first.",
+    "addingWatermark": "Adding watermark...",
+    "addingWatermarkBtn": "Adding Watermark...",
+    "selectImageForWatermark": "Please select an image file for the watermark.",
+    "successMessage": "Watermark added successfully!\nSaved to: ",
+    "cancelOrFailed": "Operation cancelled or failed to save the file.",
+    "error": "Error: ",
+    "errorOccurred": "An error occurred:\n",
+    "addWatermarkBtn": "Add Watermark",
+    "imageWatermarkPlaceholder": "[Image Watermark]",
+    "failedToSave": "Failed to save dropped file: "
   },
   "compressPdf": {
     "page-title": "Compress PDF",
