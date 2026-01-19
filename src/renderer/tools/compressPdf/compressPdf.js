@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     selectPdfBtn.addEventListener('click', async () => {
         // First check if Ghostscript is available
-        loadingUI.show('Checking for Ghostscript...');
+        loadingUI.show(i18n.t('compressPdfJS.checkingGhostscript'));
 
         try {
             const isGhostscriptAvailable = await checkGhostscriptAvailability();
@@ -52,25 +52,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 loadingUI.hide();
                 const result = await customAlert.alert(
                     'LocalPDF Studio - REQUIREMENT',
-                    'Ghostscript is required to use the Compress PDF feature.\n' +
-                    'Please install Ghostscript on your system to continue:\n\n' +
-                    '• Windows: Download from https://www.ghostscript.com/\n' +
-                    '• macOS: Install using Homebrew: "brew install ghostscript"\n' +
-                    '• Linux: Install using your package manager\n' +
-                    '   - Ubuntu/Debian: "sudo apt install ghostscript"\n' +
-                    '   - Fedora: "sudo dnf install ghostscript"\n' +
-                    '   - Arch: "sudo pacman -S ghostscript"\n' +
-                    'Note: Most modern linux distros have ghostscript pre-installed. Checking command=> gs -v',
-                    ['OK', 'Tutorial']
+                    i18n.t('compressPdfJS.ghostscriptRequired'),
+                    [i18n.t('common.ok'), i18n.t('compressPdfJS.tutorial')]
                 );
-                if (result === 'Tutorial') {
+                if (result === i18n.t('compressPdfJS.tutorial')) {
                     window.electronAPI.openExternal('https://youtu.be/fKrnSytg_z4');
                 }
                 return;
             }
 
             // Ghostscript is available, continue with file selection
-            loadingUI.updateMessage('Selecting PDF files...');
+            loadingUI.updateMessage(i18n.t('compressPdfJS.selectingPdfs'));
             const files = await window.electronAPI.selectPdfs();
             if (files && files.length > 0) {
                 const filePath = files[0];
@@ -82,8 +74,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Error during Ghostscript check:', error);
             await customAlert.alert(
                 'LocalPDF Studio - ERROR',
-                `An error occurred while checking for Ghostscript:\n${error.message}`,
-                ['OK']
+                i18n.t('compressPdfJS.errorCheckingGhostscript') + error.message,
+                [i18n.t('common.ok')]
             );
         } finally {
             loadingUI.hide();
@@ -174,20 +166,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     compressBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a file first.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('compressPdfJS.selectFileFirst'), [i18n.t('common.ok')]);
             return;
         }
 
         // Double-check Ghostscript availability before compression
-        loadingUI.show('Verifying Ghostscript...');
+        loadingUI.show(i18n.t('compressPdfJS.verifyingGhostscript'));
         try {
             const isGhostscriptAvailable = await checkGhostscriptAvailability();
             if (!isGhostscriptAvailable) {
                 loadingUI.hide();
                 await customAlert.alert(
                     'LocalPDF Studio - REQUIREMENT',
-                    'Ghostscript is no longer available. Please ensure Ghostscript is installed and try again.',
-                    ['OK']
+                    i18n.t('compressPdfJS.ghostscriptNotAvailable'),
+                    [i18n.t('common.ok')]
                 );
                 return;
             }
@@ -195,8 +187,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadingUI.hide();
             await customAlert.alert(
                 'LocalPDF Studio - ERROR',
-                `Failed to verify Ghostscript:\n${error.message}`,
-                ['OK']
+                i18n.t('compressPdfJS.failedToVerifyGhostscript') + error.message,
+                [i18n.t('common.ok')]
             );
             return;
         }
@@ -209,9 +201,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            loadingUI.show('Compressing PDF...This may take a while for large files.');
+            loadingUI.show(i18n.t('compressPdfJS.compressingPdf'));
             compressBtn.disabled = true;
-            compressBtn.textContent = 'Compressing...';
+            compressBtn.textContent = i18n.t('compressPdfJS.compressingBtn');
             const compressEndpoint = await API.pdf.compress;
             const response = await fetch(compressEndpoint, {
                 method: 'POST',
@@ -234,23 +226,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (savedPath) {
                 const message = originalSize > 0
-                    ? `Success! PDF compressed successfully!\n\n` +
-                    `Original Size: ${formatFileSize(originalSize)}\n` +
-                    `Compressed Size: ${formatFileSize(compressedSize)}\n` +
-                    `Space Saved: ${compressionRatio.toFixed(1)}%\n\n` +
-                    `Saved to: ${savedPath}`
-                    : `Success! PDF compressed successfully!\nSaved to: ${savedPath}`;
-                await customAlert.alert('LocalPDF Studio - SUCCESS', message, ['OK']);
+                    ? i18n.t('compressPdfJS.successMessageDetails') + formatFileSize(originalSize) + '\n' +
+                    i18n.t('compressPdfJS.compressedSize') + formatFileSize(compressedSize) + '\n' +
+                    i18n.t('compressPdfJS.spaceSaved') + compressionRatio.toFixed(1) + '%\n\n' +
+                    'Saved to: ' + savedPath
+                    : i18n.t('compressPdfJS.successMessageSimple') + savedPath;
+                await customAlert.alert(i18n.t('alerts.success'), message, [i18n.t('common.ok')]);
             } else {
-                await customAlert.alert('LocalPDF Studio - WARNING', 'Operation cancelled or failed to save the file.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('compressPdfJS.operationCancelledOrFailed'), [i18n.t('common.ok')]);
             }
         } catch (error) {
             console.error('Error compressing PDF:', error);
-            await customAlert.alert('LocalPDF Studio - ERROR', `An error occurred while compressing the PDF:\n${error.message}`, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('compressPdfJS.errorCompressingPdf') + error.message, [i18n.t('common.ok')]);
         } finally {
             loadingUI.forceHide();
             compressBtn.disabled = false;
-            compressBtn.textContent = 'Compress PDF';
+            compressBtn.textContent = i18n.t('compressPdf.compress-btn');
         }
     });
 
@@ -315,12 +306,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop only one PDF file.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('compressPdfJS.dropOneFile'), [i18n.t('common.ok')]);
                 return;
             }
 
             // Check if Ghostscript is available
-            loadingUI.show('Checking for Ghostscript...');
+            loadingUI.show(i18n.t('compressPdfJS.checkingGhostscript'));
             try {
                 const isGhostscriptAvailable = await checkGhostscriptAvailability();
 
@@ -328,25 +319,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     loadingUI.hide();
                     const result = await customAlert.alert(
                         'LocalPDF Studio - REQUIREMENT',
-                        'Ghostscript is required to use the Compress PDF feature.\n' +
-                        'Please install Ghostscript on your system to continue:\n\n' +
-                        '• Windows: Download from https://www.ghostscript.com/\n' +
-                        '• macOS: Install using Homebrew: "brew install ghostscript"\n' +
-                        '• Linux: Install using your package manager\n' +
-                        '   - Ubuntu/Debian: "sudo apt install ghostscript"\n' +
-                        '   - Fedora: "sudo dnf install ghostscript"\n' +
-                        '   - Arch: "sudo pacman -S ghostscript"\n' +
-                        'Note: Most modern linux distros have ghostscript pre-installed. Checking command=> gs -v',
-                        ['OK', 'Tutorial']
+                        i18n.t('compressPdfJS.ghostscriptRequired'),
+                        [i18n.t('common.ok'), i18n.t('compressPdfJS.tutorial')]
                     );
-                    if (result === 'Tutorial') {
+                    if (result === i18n.t('compressPdfJS.tutorial')) {
                         window.electronAPI.openExternal('https://youtu.be/fKrnSytg_z4');
                     }
                     return;
                 }
 
                 // Ghostscript is available, proceed with file processing
-                loadingUI.updateMessage('Processing dropped file...');
+                loadingUI.updateMessage(i18n.t('compressPdfJS.processingDroppedFile'));
                 await cleanupDroppedFile();
                 const file = pdfFiles[0];
                 const buffer = await file.arrayBuffer();
@@ -363,21 +346,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                         size: fileSize
                     });
                 } else {
-                    await customAlert.alert('LocalPDF Studio - ERROR', `Failed to save dropped file: ${saveResult.error}`, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.error'), i18n.t('compressPdfJS.failedToSaveDrop') + saveResult.error, [i18n.t('common.ok')]);
                 }
             } catch (error) {
                 console.error('Error during Ghostscript check:', error);
                 await customAlert.alert(
                     'LocalPDF Studio - ERROR',
-                    `An error occurred while checking for Ghostscript:\n${error.message}`,
-                    ['OK']
+                    i18n.t('compressPdfJS.errorCheckingGhostscript') + error.message,
+                    [i18n.t('common.ok')]
                 );
             } finally {
                 loadingUI.hide();
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a PDF file.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('compressPdfJS.dropPdfFile'), [i18n.t('common.ok')]);
         }
     });
 });
