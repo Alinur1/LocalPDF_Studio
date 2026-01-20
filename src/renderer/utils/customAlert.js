@@ -18,10 +18,74 @@
 
 // src/renderer/utils/customAlert.js
 
+/**
+ * Enhanced Custom Alert with internationalization support
+ * Returns button indices (0, 1, 2...) instead of text for language-agnostic comparisons
+ * 
+ * @example
+ * // Basic usage (returns index)
+ * const result = await customAlert.alert('Title', 'Message', ['Cancel', 'Delete']);
+ * if (result === 1) { // Delete button (second button)
+ *   // Handle delete
+ * }
+ * 
+ * // With translation
+ * const result = await customAlert.alert(
+ *   i18n.t('titleKey'),
+ *   i18n.t('messageKey'),
+ *   [i18n.t('alerts.cancel'), i18n.t('alerts.delete')]
+ * );
+ * if (result === 1) { // Still works with any language!
+ *   // Handle delete
+ * }
+ * 
+ * // Backward compatibility (returns text)
+ * const result = await customAlert.alertLegacy('Title', 'Message', ['OK']);
+ * if (result === 'OK') { // String comparison still works
+ *   // Handle OK
+ * }
+ */
+
 class CustomAlert {
     constructor() {
         this.container = null;
         this.createContainer();
+
+        // Button index constants (for readability)
+        this.BUTTON = {
+            // For 1-button alerts
+            OK: 0,
+
+            // For 2-button alerts (OK/Cancel pattern)
+            OK_CANCEL: {
+                OK: 0,
+                CANCEL: 1
+            },
+
+            // For 2-button alerts (Cancel/Action pattern)
+            CANCEL_ACTION: {
+                CANCEL: 0,
+                ACTION: 1  // DELETE, CLEAR_ALL, etc.
+            },
+
+            // For 3-button alerts
+            OK_CANCEL_CONTINUE: {
+                OK: 0,
+                CANCEL: 1,
+                CONTINUE: 2
+            },
+
+            // Common patterns
+            YES_NO: {
+                NO: 0,     // Usually first button
+                YES: 1     // Usually second button
+            },
+
+            SAVE_DISCARD: {
+                DISCARD: 0,
+                SAVE: 1
+            }
+        };
     }
 
     createContainer() {
@@ -43,6 +107,13 @@ class CustomAlert {
         document.body.appendChild(this.container);
     }
 
+    /**
+     * Main alert method - returns button index (0, 1, 2...)
+     * @param {string} title - Alert title
+     * @param {string} description - Alert message
+     * @param {Array} buttons - Array of button texts
+     * @returns {Promise<number>} Button index that was clicked
+     */
     alert(title, description, buttons = ['OK']) {
         return new Promise((resolve) => {
             // Create modal content
@@ -97,17 +168,17 @@ class CustomAlert {
                 const textToCopy = `${title}\n\n${description}`;
                 try {
                     await navigator.clipboard.writeText(textToCopy);
-                    
+
                     // Visual feedback
                     const originalHTML = copyButton.innerHTML;
                     copyButton.innerHTML = '✅';
                     copyButton.style.color = '#2ecc71';
-                    
+
                     setTimeout(() => {
                         copyButton.innerHTML = originalHTML;
                         copyButton.style.color = '#bdc3c7';
                     }, 2000);
-                    
+
                 } catch (err) {
                     // Fallback for older browsers
                     try {
@@ -117,12 +188,12 @@ class CustomAlert {
                         textArea.select();
                         document.execCommand('copy');
                         document.body.removeChild(textArea);
-                        
+
                         // Visual feedback for fallback
                         const originalHTML = copyButton.innerHTML;
                         copyButton.innerHTML = '✅';
                         copyButton.style.color = '#2ecc71';
-                        
+
                         setTimeout(() => {
                             copyButton.innerHTML = originalHTML;
                             copyButton.style.color = '#bdc3c7';
@@ -131,7 +202,7 @@ class CustomAlert {
                         console.error('Failed to copy text: ', fallbackErr);
                         copyButton.innerHTML = '❌';
                         copyButton.style.color = '#e74c3c';
-                        
+
                         setTimeout(() => {
                             copyButton.innerHTML = '📋';
                             copyButton.style.color = '#bdc3c7';
@@ -213,7 +284,7 @@ class CustomAlert {
 
                 button.addEventListener('click', () => {
                     this.hide();
-                    resolve(buttonText);
+                    resolve(index); // Return button index instead of text
                 });
 
                 buttonsContainer.appendChild(button);
@@ -234,6 +305,126 @@ class CustomAlert {
             const firstActionButton = buttonsContainer.querySelector('button');
             if (firstActionButton) firstActionButton.focus();
         });
+    }
+
+    /**
+     * Legacy alert method - returns button text (for backward compatibility)
+     * Use this if you're not ready to update your comparisons yet
+     */
+    alertLegacy(title, description, buttons = ['OK']) {
+        return new Promise((resolve) => {
+            this.alert(title, description, buttons).then((index) => {
+                // Return the button text instead of index
+                resolve(buttons[index]);
+            });
+        });
+    }
+
+    /**
+     * Quick confirmation dialog with Yes/No buttons
+     * Returns: 0 for No (first), 1 for Yes (second)
+     */
+    confirm(title, description) {
+        return this.alert(title, description, ['No', 'Yes']);
+    }
+
+    /**
+     * Quick OK dialog
+     * Returns: 0 for OK
+     */
+    ok(title, description) {
+        return this.alert(title, description, ['OK']);
+    }
+
+    /**
+     * Quick error dialog with OK button
+     */
+    error(title, description) {
+        return this.alert(title, description, ['OK']);
+    }
+
+    /**
+     * Quick warning dialog with OK button
+     */
+    warning(title, description) {
+        return this.alert(title, description, ['OK']);
+    }
+
+    /**
+     * Quick success dialog with OK button
+     */
+    success(title, description) {
+        return this.alert(title, description, ['OK']);
+    }
+
+    /**
+     * Helper to migrate code from string comparisons to index comparisons
+     * Call this method in console to get migration hints
+     * @param {string} code - The code snippet to analyze
+     */
+    static getMigrationHint(code) {
+        const hints = [];
+
+        // Check for string comparisons
+        const stringComparisons = code.match(/result\s*===?\s*['"]([^'"]+)['"]/g);
+        if (stringComparisons) {
+            hints.push("⚠️ Found string comparisons. Update to use button indices:");
+            stringComparisons.forEach(comp => {
+                hints.push(`   Change: ${comp}`);
+                hints.push(`   To:     // Check button index instead`);
+            });
+        }
+
+        // Check for switch statements on result
+        if (code.includes('switch (result)') || code.includes('switch(result)')) {
+            hints.push("⚠️ Found switch statement on result. Update case values to indices:");
+            hints.push("   case 'Delete': → case 1:");
+            hints.push("   case 'Cancel': → case 0:");
+        }
+
+        if (hints.length === 0) {
+            hints.push("✅ Code looks good! Using button indices.");
+        }
+
+        return hints.join('\n');
+    }
+
+    /**
+     * Example patterns for common button layouts
+     * @returns {Object} Example patterns
+     */
+    static getExamplePatterns() {
+        return {
+            // Pattern 1: OK/Cancel (2 buttons)
+            okCancel: {
+                buttons: ['OK', 'Cancel'],
+                explanation: "result: 0 = OK, 1 = Cancel"
+            },
+
+            // Pattern 2: Cancel/Delete (2 buttons)
+            cancelDelete: {
+                buttons: ['Cancel', 'Delete'],
+                explanation: "result: 0 = Cancel, 1 = Delete"
+            },
+
+            // Pattern 3: Cancel/Clear All (2 buttons)
+            cancelClearAll: {
+                buttons: ['Cancel', 'Clear All'],
+                explanation: "result: 0 = Cancel, 1 = Clear All"
+            },
+
+            // Pattern 4: OK only (1 button)
+            okOnly: {
+                buttons: ['OK'],
+                explanation: "result: 0 = OK (always)"
+            },
+
+            // Pattern 5: Three buttons
+            threeButtons: {
+                buttons: ['OK', 'Cancel', 'Continue Anyway'],
+                explanation: "result: 0 = OK, 1 = Cancel, 2 = Continue Anyway"
+            }
+        };
     }
 
     show() {
@@ -259,55 +450,122 @@ export default customAlert;
 // Also add to window for global access
 window.customAlert = customAlert;
 
+// Add helper to window for easy debugging
+window.CustomAlertHelpers = {
+    /**
+     * Get migration instructions for a file
+     */
+    migrateFile: function (fileContent) {
+        console.log("=== Migration Analysis ===");
+
+        // Find all customAlert calls
+        const alertCalls = fileContent.match(/customAlert\.(alert|alertLegacy)\(([\s\S]*?)\)/g);
+        if (alertCalls) {
+            alertCalls.forEach((call, index) => {
+                console.log(`\nCall #${index + 1}: ${call.substring(0, 100)}...`);
+
+                // Check if it's using alertLegacy (backward compatible)
+                if (call.includes('alertLegacy')) {
+                    console.log("   → Already using alertLegacy (backward compatible)");
+                } else {
+                    console.log("   → Using alert (returns index)");
+
+                    // Try to guess button count
+                    const buttonMatch = call.match(/\[(.*?)\]/);
+                    if (buttonMatch) {
+                        const buttons = buttonMatch[1].split(',').filter(b => b.trim());
+                        console.log(`   → Detected ${buttons.length} button(s)`);
+
+                        if (buttons.length === 2) {
+                            console.log("   → Common pattern: result 0 = first button, 1 = second button");
+                        }
+                    }
+                }
+            });
+        }
+
+        // Find comparisons
+        console.log("\n=== String Comparisons Found ===");
+        const comparisons = fileContent.match(/result\s*===?\s*['"]([^'"]+)['"]/g);
+        if (comparisons) {
+            comparisons.forEach(comp => {
+                console.log(`   ${comp}`);
+                console.log(`   → Change to: // Check button index`);
+            });
+        } else {
+            console.log("   No string comparisons found ✓");
+        }
+
+        console.log("\n=== Migration Summary ===");
+        console.log("1. Update customAlert.alert() calls to use translated text");
+        console.log("2. Change string comparisons to index comparisons (0, 1, 2...)");
+        console.log("3. Test each dialog to ensure buttons work correctly");
+    },
+
+    /**
+     * Show common patterns
+     */
+    showPatterns: function () {
+        const patterns = CustomAlert.getExamplePatterns();
+        console.log("=== Common Button Patterns ===");
+        Object.keys(patterns).forEach(key => {
+            console.log(`\n${key}:`);
+            console.log(`  Buttons: ${JSON.stringify(patterns[key].buttons)}`);
+            console.log(`  Result:  ${patterns[key].explanation}`);
+        });
+    }
+};
+
 
 /*
-Example usage:
+================================================================
+EXAMPLES & MIGRATION GUIDE
+================================================================
 
-
-// Import in the modules
-import customAlert from '../utils/customAlert.js';
-
-// Basic usage (replaces alert)
-await custom.alert('LocalPDF Studio - Error', 'Something went wrong. Try again.');
-
-// With error message
-await custom.alert(
-    'LocalPDF Studio - Error', 
-    `Something went wrong. Try again.\n${error.message}`, 
-    ['OK']
-);
-
-// Multiple buttons
-const result = await custom.alert(
-    'Confirm Action',
-    'Are you sure you want to delete this file?',
-    ['Cancel', 'Yes, Delete']
-);
-
-if (result === 'Yes, Delete') {
-    // Perform deletion
+// OLD WAY (returns text - will break with translations)
+const result = await customAlert.alert('Title', 'Message', ['Cancel', 'Delete']);
+if (result === 'Delete') {
+    // delete logic
 }
 
-// Complex scenarios
-const action = await custom.alert(
-    'Processing Complete',
-    'What would you like to do next?',
-    ['Open File', 'Show in Folder', 'Close']
-);
-
-switch (action) {
-    case 'Open File':
-        // Open file logic
-        break;
-    case 'Show in Folder':
-        // Show in folder logic
-        break;
-    case 'Close':
-        // Close logic
-        break;
+// NEW WAY (returns index - works with any language)
+const result = await customAlert.alert('Title', 'Message', ['Cancel', 'Delete']);
+if (result === 1) { // Second button (Delete)
+    // delete logic
 }
 
+// WITH TRANSLATION (recommended)
+const result = await customAlert.alert(
+    i18n.t('alerts.confirmDelete'),
+    i18n.t('alerts.deleteMessage'),
+    [i18n.t('alerts.cancel'), i18n.t('alerts.delete')]
+);
+if (result === 1) { // Still works with any language!
+    // delete logic
+}
 
+// BACKWARD COMPATIBILITY (if you're not ready to change)
+const result = await customAlert.alertLegacy('Title', 'Message', ['OK']);
+if (result === 'OK') { // String comparison still works
+    // OK logic
+}
 
+// QUICK HELPERS
+await customAlert.ok('Success', 'Operation completed!'); // Returns 0
+await customAlert.error('Error', 'Something went wrong'); // Returns 0
+const confirm = await customAlert.confirm('Confirm', 'Are you sure?');
+// confirm = 0 (No) or 1 (Yes)
 
+// DEBUGGING HELP
+// In browser console:
+CustomAlertHelpers.showPatterns();
+CustomAlertHelpers.migrateFile(yourFileContent);
+
+// GET MIGRATION HINTS
+console.log(CustomAlert.getMigrationHint(`
+const result = await customAlert.alert('Title', 'Message', ['Cancel', 'Delete']);
+if (result === 'Delete') {
+    console.log('Deleted');
+}
+`));
 */
