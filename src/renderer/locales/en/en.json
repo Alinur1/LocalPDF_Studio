@@ -64,10 +64,10 @@
   "history-lang": {
     "history-cleared-title": "Search History Cleared",
     "history-cleared-msg": "All search history has been removed.",
-    "lang-en": "English",
-    "lang-bn": "Bengali",
-    "lang-chi": "Chinese",
-    "lang-jp": "Japanese"
+    "lang-en": "English | English",
+    "lang-bn": "Bengali | বাংলা",
+    "lang-chi": "Chinese | 中文",
+    "lang-jp": "Japanese | 日本語"
   },
   "about": {
     "back-btn": "← Back to App",

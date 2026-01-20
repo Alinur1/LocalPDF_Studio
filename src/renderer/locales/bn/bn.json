@@ -64,10 +64,10 @@
   "history-lang": {
     "history-cleared-title": "অনুসন্ধান ইতিহাস মুছে ফেলা হয়েছে",
     "history-cleared-msg": "সমস্ত অনুসন্ধান ইতিহাস সরানো হয়েছে।",
-    "lang-en": "English  | ইংরেজি",
-    "lang-bn": "Bengali  | বাংলা",
-    "lang-chi": "Chinese | চীনা",
-    "lang-jp": "Japanese | জাপানি"
+    "lang-en": "English | English",
+    "lang-bn": "Bengali | বাংলা",
+    "lang-chi": "Chinese | 中文",
+    "lang-jp": "Japanese | 日本語"
   },
   "about": {
     "back-btn": "← অ্যাপে ফিরুন",

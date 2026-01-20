@@ -64,10 +64,10 @@
   "history-lang": {
     "history-cleared-title": "搜索历史已清除",
     "history-cleared-msg": "所有搜索历史记录已删除。",
-    "lang-en": "English  | 英语",
-    "lang-bn": "Bengali  | 孟加拉语",
+    "lang-en": "English | English",
+    "lang-bn": "Bengali | বাংলা",
     "lang-chi": "Chinese | 中文",
-    "lang-jp": "Japanese | 日语"
+    "lang-jp": "Japanese | 日本語"
   },
   "about": {
     "back-btn": "← 返回应用",

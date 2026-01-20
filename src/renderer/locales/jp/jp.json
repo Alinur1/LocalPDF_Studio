@@ -64,9 +64,9 @@
   "history-lang": {
     "history-cleared-title": "検索履歴がクリアされました",
     "history-cleared-msg": "すべての検索履歴が削除されました。",
-    "lang-en": "English  | 英語",
-    "lang-bn": "Bengali  | ベンガル語",
-    "lang-chi": "Chinese |中国語",
+    "lang-en": "English | English",
+    "lang-bn": "Bengali | বাংলা",
+    "lang-chi": "Chinese | 中文",
     "lang-jp": "Japanese | 日本語"
   },
   "about": {
