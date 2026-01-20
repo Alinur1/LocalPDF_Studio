@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             console.error("File selection error:", error);
-            customAlert.alert('LocalPDF Studio - ERROR', i18n.t('lockUnlockPdfJS.failedAnalyze'), ['OK']);
+            customAlert.alert(i18n.t('alerts.error'), i18n.t('lockUnlockPdfJS.failedAnalyze'), [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
         }
@@ -169,11 +169,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function handleProcessPdf() {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('lockUnlockPdfJS.selectPdfFirst'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('lockUnlockPdfJS.selectPdfFirst'), [i18n.t('common.ok')]);
             return;
         }
         if (!validateForm()) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('lockUnlockPdfJS.fillRequiredFields'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('lockUnlockPdfJS.fillRequiredFields'), [i18n.t('common.ok')]);
             return;
         }
         const selectedOperation = document.querySelector('input[name="operation"]:checked').value;
@@ -212,24 +212,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
                 if (savedPath) {
                     const successMsg = selectedOperation === 'lock' ? i18n.t('lockUnlockPdfJS.successLockedMsg') : i18n.t('lockUnlockPdfJS.successUnlockedMsg');
-                    await customAlert.alert(i18n.t('alerts.success'), successMsg + savedPath, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.success'), successMsg + savedPath, [i18n.t('common.ok')]);
                     clearPasswords();
                 } else {
-                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('lockUnlockPdfJS.warningMsg'), ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('lockUnlockPdfJS.warningMsg'), [i18n.t('common.ok')]);
                 }
             } else {
-                await customAlert.alert(i18n.t('alerts.error'), `Error: ${JSON.stringify(result)}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), `Error: ${JSON.stringify(result)}`, [i18n.t('common.ok')]);
             }
         } catch (error) {
             console.error(`${selectedOperation === 'lock' ? 'Lock' : 'Unlock'} Error:`, error);
             if (error.message.includes('password') || error.message.includes('Password')) {
-                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('lockUnlockPdfJS.incorrectPassword'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('lockUnlockPdfJS.incorrectPassword'), [i18n.t('common.ok')]);
                 if (selectedOperation === 'unlock') {
                     unlockPassword.classList.add('error');
                     unlockPassword.focus();
                 }
             } else {
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('lockUnlockPdfJS.errorMsg') + `\n${error.message}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('lockUnlockPdfJS.errorMsg') + `\n${error.message}`, [i18n.t('common.ok')]);
             }
         } finally {
             loadingUI.hide();
@@ -359,17 +359,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                         securityStatus: securityStatus
                     });
                 } else {
-                    await customAlert.alert('LocalPDF Studio - ERROR', i18n.t('lockUnlockPdfJS.failedSaveDrop') + result.error, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.error'), i18n.t('lockUnlockPdfJS.failedSaveDrop') + result.error, [i18n.t('common.ok')]);
                 }
             } catch (error) {
                 console.error('Error processing dropped file:', error);
-                await customAlert.alert('LocalPDF Studio - ERROR', i18n.t('lockUnlockPdfJS.processingDroppedError') + `\n${error.message}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('lockUnlockPdfJS.processingDroppedError') + `\n${error.message}`, [i18n.t('common.ok')]);
             } finally {
                 loadingUI.hide();
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('lockUnlockPdfJS.dropPdfFile'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('lockUnlockPdfJS.dropPdfFile'), [i18n.t('common.ok')]);
         }
     });
 });

@@ -85,8 +85,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Clear all redactions
     clearBtn.addEventListener('click', async () => {
-        const result = await customAlert.alert(i18n.t('alerts.notice'), i18n.t('redactPdfJS.clearAllConfirm'), ['Cancel', 'Clear All']);
-        if (result === 'Clear All') {
+        const result = await customAlert.alert(i18n.t('alerts.notice'), i18n.t('redactPdfJS.clearAllConfirm'), [i18n.t('redactPdfJS.cancel'), i18n.t('redactPdfJS.clearAll')]);
+        if (result === 1) {
             redactions = {};
             // Clear rendered pages cache so they re-render without redactions
             renderedPages.clear();

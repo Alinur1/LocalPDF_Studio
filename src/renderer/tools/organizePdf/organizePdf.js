@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             loadingUI.hide();
             console.error('Error loading PDF:', error);
-            await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.failedToLoadPdf') + error.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.failedToLoadPdf') + error.message, [i18n.t('common.ok')]);
         }
     }
 
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function deletePage(pageId) {
         if (pages.length <= 1) {
-            customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.cannotDeleteLastPage'), ['OK']);
+            customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.cannotDeleteLastPage'), [i18n.t('common.ok')]);
             return;
         }
 
@@ -369,12 +369,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     organizeBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.selectFileFirst'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.selectFileFirst'), [i18n.t('common.ok')]);
             return;
         }
 
         if (pages.length === 0) {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.noPagesToOrganize'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.noPagesToOrganize'), [i18n.t('common.ok')]);
             return;
         }
 
@@ -401,17 +401,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const defaultName = `${selectedFile.name.replace('.pdf', '')}_organized.pdf`;
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
                 if (savedPath) {
-                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('organizePdfJS.successMsg') + '\n' + i18n.t('organizePdfJS.successSavedTo') + savedPath, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('organizePdfJS.successMsg') + '\n' + i18n.t('organizePdfJS.successSavedTo') + savedPath, [i18n.t('common.ok')]);
                 } else {
-                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('organizePdfJS.cancelledMsg'), ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('organizePdfJS.cancelledMsg'), [i18n.t('common.ok')]);
                 }
             } else {
                 console.error("Organize API returned JSON:", result);
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.errorMsg') + JSON.stringify(result), ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.errorMsg') + JSON.stringify(result), [i18n.t('common.ok')]);
             }
         } catch (error) {
             console.error('Error organizing PDF:', error);
-            await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.errorOrganizing') + error.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.errorOrganizing') + error.message, [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
             organizeBtn.disabled = false;
@@ -464,7 +464,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.dropOnlyOne'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.dropOnlyOne'), [i18n.t('common.ok')]);
                 return;
             }
             await cleanupDroppedFile();
@@ -483,11 +483,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     size: fileSize
                 });
             } else {
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.failedToSaveDrop') + result.error, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('organizePdfJS.failedToSaveDrop') + result.error, [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.dropPdfFile'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('organizePdfJS.dropPdfFile'), [i18n.t('common.ok')]);
         }
     });
 });

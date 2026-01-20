@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
 
             if (imageFiles.length === 0) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('imageToPdfJS.dropImageFiles'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageToPdfJS.dropImageFiles'), [i18n.t('common.ok')]);
                 return;
             }
 
@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('imageToPdfJS.dropValidImages'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageToPdfJS.dropValidImages'), [i18n.t('common.ok')]);
         }
     });
 
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
 
             if (imageFiles.length === 0) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('imageToPdfJS.selectImages'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageToPdfJS.selectImages'), [i18n.t('common.ok')]);
                 return;
             }
 
@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function convertToPdf() {
         if (!selectedImages || selectedImages.length === 0) {
-            await customAlert.alert("LocalPDF Studio - NOTICE", i18n.t('imageToPdfJS.selectImagesFirst'), ["OK"]);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageToPdfJS.selectImagesFirst'), [i18n.t('common.ok')]);
             return;
         }
 
@@ -370,11 +370,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                         await customAlert.alert(
                             i18n.t('alerts.success'),
                             i18n.t('imageToPdfJS.successSingleMsg') + `${saved}`,
-                            ["OK"]
+                            [i18n.t('common.ok')]
                         );
                     }
                     else {
-                        await customAlert.alert(i18n.t('alerts.warning'), i18n.t('imageToPdfJS.warningMsg'), ['OK']);
+                        await customAlert.alert(i18n.t('alerts.warning'), i18n.t('imageToPdfJS.warningMsg'), [i18n.t('common.ok')]);
                     }
                 } else {
                     // Multiple PDF files in a ZIP
@@ -387,14 +387,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                         await customAlert.alert(
                             i18n.t('alerts.success'),
                             i18n.t('imageToPdfJS.successMultipleMsg') + `${saved}`,
-                            ["OK"]
+                            [i18n.t('common.ok')]
                         );
                     }
                 }
             }
         } catch (err) {
             console.error(err);
-            await customAlert.alert(i18n.t('alerts.error'), err.message || i18n.t('imageToPdfJS.errorMsg'), ["OK"]);
+            await customAlert.alert(i18n.t('alerts.error'), err.message || i18n.t('imageToPdfJS.errorMsg'), [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
             convertBtn.disabled = false;

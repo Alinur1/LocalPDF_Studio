@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfJS.dropOnlyOne'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfJS.dropOnlyOne'), [i18n.t('common.ok')]);
                 return;
             }
 
@@ -195,11 +195,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     size: fileSize
                 });
             } else {
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfJS.failedToSaveDrop') + result.error, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfJS.failedToSaveDrop') + result.error, [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfJS.dropPdfFile'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfJS.dropPdfFile'), [i18n.t('common.ok')]);
         }
     });
 
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     splitBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfJS.selectFileFirst'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfJS.selectFileFirst'), [i18n.t('common.ok')]);
             return;
         }
 
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pageRanges = document.getElementById('pageRanges').value.trim();
                 if (!pageRanges) {
                     isValid = false;
-                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.pageRangesEmpty'), ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.pageRangesEmpty'), [i18n.t('common.ok')]);
                 } else {
                     options.pageRanges = pageRanges.split(',').map(r => r.trim());
                 }
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const splitPages = document.getElementById('splitPages').value.trim();
                 if (!splitPages) {
                     isValid = false;
-                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.specificPagesEmpty'), ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.specificPagesEmpty'), [i18n.t('common.ok')]);
                 } else {
                     options.splitPages = splitPages.split(',')
                         .map(p => parseInt(p.trim()))
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pageInterval = document.getElementById('pageInterval').value;
                 if (!pageInterval || parseInt(pageInterval) <= 0) {
                     isValid = false;
-                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.invalidPageInterval'), ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.invalidPageInterval'), [i18n.t('common.ok')]);
                 } else {
                     options.pageInterval = parseInt(pageInterval);
                 }
@@ -282,17 +282,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
-                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('splitPdfJS.successMsg') + '\n' + i18n.t('splitPdfJS.successSavedTo') + savedPath, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('splitPdfJS.successMsg') + '\n' + i18n.t('splitPdfJS.successSavedTo') + savedPath, [i18n.t('common.ok')]);
                 } else {
-                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.cancelledMsg'), ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfJS.cancelledMsg'), [i18n.t('common.ok')]);
                 }
             } else {
                 console.error("Split API returned JSON:", result);
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfJS.errorMsg') + JSON.stringify(result), ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfJS.errorMsg') + JSON.stringify(result), [i18n.t('common.ok')]);
             }
         } catch (error) {
             console.error('Error splitting PDF:', error);
-            await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfJS.errorSplitting') + error.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfJS.errorSplitting') + error.message, [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
             splitBtn.disabled = false;

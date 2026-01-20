@@ -707,7 +707,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDropForOCR({
         onFilesDropped: async (files) => {
             if (files.length > 1) {
-                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('ocrPdfJS.dropPdfOrImage'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('ocrPdfJS.dropPdfOrImage'), [i18n.t('common.ok')]);
                 return;
             }
             await cleanupDroppedFile();
@@ -727,28 +727,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                     isImage: /\.(jpg|jpeg|png|bmp|tiff)$/i.test(file.name)
                 });
             } else {
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.dropPdfOrImage'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.dropPdfOrImage'), [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('ocrPdfJS.dropPdfOrImage'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('ocrPdfJS.dropPdfOrImage'), [i18n.t('common.ok')]);
         }
     });
 
     // NEW: UPDATED PROCESS BUTTON HANDLER WITH BATCH PROCESSING
     processBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert(i18n.t('alerts.warning'), i18n.t('ocrPdfJS.selectFileFirst'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.warning'), i18n.t('ocrPdfJS.selectFileFirst'), [i18n.t('common.ok')]);
             return;
         }
 
         if (!isImageFile && selectedPages.size === 0) {
-            await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.selectPages'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.selectPages'), [i18n.t('common.ok')]);
             return;
         }
 
         if (selectedLanguages.size === 0) {
-            await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.selectLanguages'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.selectLanguages'), [i18n.t('common.ok')]);
             return;
         }
 
@@ -865,7 +865,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             batchProgressModal.style.display = 'none';
             clearInterval(timeInterval);
 
-            await customAlert.alert(i18n.t('alerts.success'), i18n.t('ocrPdfJS.successMsg'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.success'), i18n.t('ocrPdfJS.successMsg'), [i18n.t('common.ok')]);
 
         } catch (error) {
             console.error('OCR processing failed:', error);
@@ -875,9 +875,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             clearInterval(timeInterval);
 
             if (error.message === 'OCR cancelled by user' || batchProcessingCancelled) {
-                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('ocrPdfJS.cancelledMsg'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('ocrPdfJS.cancelledMsg'), [i18n.t('common.ok')]);
             } else {
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.errorOcr') + error.message, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.errorOcr') + error.message, [i18n.t('common.ok')]);
             }
         } finally {
             loadingUI.forceHide();

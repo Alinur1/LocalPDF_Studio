@@ -51,11 +51,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!isGhostscriptAvailable) {
                 loadingUI.hide();
                 const result = await customAlert.alert(
-                    'LocalPDF Studio - REQUIREMENT',
+                    i18n.t('alerts.requirement'),
                     i18n.t('compressPdfJS.ghostscriptRequired'),
                     [i18n.t('common.ok'), i18n.t('compressPdfJS.tutorial')]
                 );
-                if (result === i18n.t('compressPdfJS.tutorial')) {
+                if (result === 1) {
                     window.electronAPI.openExternal('https://youtu.be/fKrnSytg_z4');
                 }
                 return;
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error during Ghostscript check:', error);
             await customAlert.alert(
-                'LocalPDF Studio - ERROR',
+                i18n.t('alerts.error'),
                 i18n.t('compressPdfJS.errorCheckingGhostscript') + error.message,
                 [i18n.t('common.ok')]
             );
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!isGhostscriptAvailable) {
                 loadingUI.hide();
                 await customAlert.alert(
-                    'LocalPDF Studio - REQUIREMENT',
+                    i18n.t('alerts.requirement'),
                     i18n.t('compressPdfJS.ghostscriptNotAvailable'),
                     [i18n.t('common.ok')]
                 );
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             loadingUI.hide();
             await customAlert.alert(
-                'LocalPDF Studio - ERROR',
+                i18n.t('alerts.error'),
                 i18n.t('compressPdfJS.failedToVerifyGhostscript') + error.message,
                 [i18n.t('common.ok')]
             );
@@ -318,11 +318,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!isGhostscriptAvailable) {
                     loadingUI.hide();
                     const result = await customAlert.alert(
-                        'LocalPDF Studio - REQUIREMENT',
+                        i18n.t('alerts.requirement'),
                         i18n.t('compressPdfJS.ghostscriptRequired'),
                         [i18n.t('common.ok'), i18n.t('compressPdfJS.tutorial')]
                     );
-                    if (result === i18n.t('compressPdfJS.tutorial')) {
+                    if (result === 1) {
                         window.electronAPI.openExternal('https://youtu.be/fKrnSytg_z4');
                     }
                     return;
@@ -351,7 +351,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (error) {
                 console.error('Error during Ghostscript check:', error);
                 await customAlert.alert(
-                    'LocalPDF Studio - ERROR',
+                    i18n.t('alerts.error'),
                     i18n.t('compressPdfJS.errorCheckingGhostscript') + error.message,
                     [i18n.t('common.ok')]
                 );

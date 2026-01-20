@@ -300,23 +300,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     previewBtn.addEventListener('click', () => {
         const pagesToRemove = collectPagesToRemove();
         if (pagesToRemove.size === 0) {
-            customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.noPagesToRemove'), ['OK']);
+            customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.noPagesToRemove'), [i18n.t('common.ok')]);
             return;
         }
         if (pagesToRemove.size >= totalPages) {
-            customAlert.alert(i18n.t('alerts.warning'), i18n.t('removePagesJS.cannotRemoveAllPages'), ['OK']);
+            customAlert.alert(i18n.t('alerts.warning'), i18n.t('removePagesJS.cannotRemoveAllPages'), [i18n.t('common.ok')]);
             return;
         }
 
         const sortedPages = Array.from(pagesToRemove).sort((a, b) => a - b);
         const remaining = totalPages - pagesToRemove.size;
-        customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.previewTitle') + '\n\n' + i18n.t('removePagesJS.pagesToRemoveLabel') + sortedPages.join(', ') + '\n' + i18n.t('removePagesJS.totalPagesToRemoveLabel') + pagesToRemove.size + '\n' + i18n.t('removePagesJS.remainingPagesLabel') + remaining, ['OK']);
+        customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.previewTitle') + '\n\n' + i18n.t('removePagesJS.pagesToRemoveLabel') + sortedPages.join(', ') + '\n' + i18n.t('removePagesJS.totalPagesToRemoveLabel') + pagesToRemove.size + '\n' + i18n.t('removePagesJS.remainingPagesLabel') + remaining, [i18n.t('common.ok')]);
     });
 
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.dropOnlyOne'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.dropOnlyOne'), [i18n.t('common.ok')]);
                 return;
             }
 
@@ -338,29 +338,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                     size: fileSize
                 });
             } else {
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('removePagesJS.failedToSaveDrop') + result.error, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('removePagesJS.failedToSaveDrop') + result.error, [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.dropPdfFile'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.dropPdfFile'), [i18n.t('common.ok')]);
         }
     });
 
     removeBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.selectFileFirst'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.selectFileFirst'), [i18n.t('common.ok')]);
             return;
         }
 
         const pagesToRemove = collectPagesToRemove();
 
         if (pagesToRemove.size === 0) {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.selectAtLeastOne'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.selectAtLeastOne'), [i18n.t('common.ok')]);
             return;
         }
 
         if (pagesToRemove.size >= totalPages) {
-            await customAlert.alert(i18n.t('alerts.warning'), i18n.t('removePagesJS.cannotRemoveAllPages'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.warning'), i18n.t('removePagesJS.cannotRemoveAllPages'), [i18n.t('common.ok')]);
             return;
         }
 
@@ -384,17 +384,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const defaultName = `${selectedFile.name.replace('.pdf', '')}_removed_pages.pdf`;
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
                 if (savedPath) {
-                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('removePagesJS.successMsg') + '\n' + i18n.t('removePagesJS.successSavedTo') + savedPath, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('removePagesJS.successMsg') + '\n' + i18n.t('removePagesJS.successSavedTo') + savedPath, [i18n.t('common.ok')]);
                 } else {
-                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('removePagesJS.cancelledMsg'), ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('removePagesJS.cancelledMsg'), [i18n.t('common.ok')]);
                 }
             } else {
                 console.error("Remove API returned JSON:", result);
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('removePagesJS.errorMsg') + JSON.stringify(result), ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('removePagesJS.errorMsg') + JSON.stringify(result), [i18n.t('common.ok')]);
             }
         } catch (error) {            
             console.error('Error removing pages:', error);
-            await customAlert.alert(i18n.t('alerts.error'), i18n.t('removePagesJS.errorRemoving') + error.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('removePagesJS.errorRemoving') + error.message, [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
             removeBtn.disabled = false;

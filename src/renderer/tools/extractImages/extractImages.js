@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('extractImageJS.dropOneFile'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('extractImageJS.dropOneFile'), [i18n.t('common.ok')]);
                 return;
             }
             await cleanupDroppedFile();
@@ -284,11 +284,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     size: fileSize
                 });
             } else {
-                await customAlert.alert('LocalPDF Studio - ERROR', i18n.t('extractImageJS.failedToSaveDrop') + result.error, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('extractImageJS.failedToSaveDrop') + result.error, [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('extractImageJS.dropPdfFile'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('extractImageJS.dropPdfFile'), [i18n.t('common.ok')]);
         }
     });
 
@@ -305,24 +305,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     previewBtn.addEventListener('click', () => {
         const pagesToProcess = collectPagesToProcess();
         if (pagesToProcess.size === 0) {
-            customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('extractImageJS.noPages'), ['OK']);
+            customAlert.alert(i18n.t('alerts.notice'), i18n.t('extractImageJS.noPages'), [i18n.t('common.ok')]);
             return;
         }
         const sortedPages = Array.from(pagesToProcess).sort((a, b) => a - b);
         const modeText = currentMode === 'extract' ? i18n.t('extractImageJS.extractModeText') : i18n.t('extractImageJS.removeModeText');
-        customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('extractImageJS.previewTitle') + '\n\n' + i18n.t('extractImageJS.pagesText') + modeText + ': ' + sortedPages.join(', ') + '\n' + i18n.t('extractImageJS.totalPagesText') + pagesToProcess.size, ['OK']);
+        customAlert.alert(i18n.t('alerts.notice'), i18n.t('extractImageJS.previewTitle') + '\n\n' + i18n.t('extractImageJS.pagesText') + modeText + ': ' + sortedPages.join(', ') + '\n' + i18n.t('extractImageJS.totalPagesText') + pagesToProcess.size, [i18n.t('common.ok')]);
     });
 
     processBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('extractImageJS.selectFile'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('extractImageJS.selectFile'), [i18n.t('common.ok')]);
             return;
         }
 
         const pagesToProcess = collectPagesToProcess();
 
         if (pagesToProcess.size === 0) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('extractImageJS.selectPages'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('extractImageJS.selectPages'), [i18n.t('common.ok')]);
             return;
         }
 
@@ -355,27 +355,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
 
                     if (savedPath) {
-                        await customAlert.alert(i18n.t('alerts.success'), i18n.t('extractImageJS.successExtractMsg') + savedPath, ['OK']);
+                        await customAlert.alert(i18n.t('alerts.success'), i18n.t('extractImageJS.successExtractMsg') + savedPath, [i18n.t('common.ok')]);
                     } else {
-                        await customAlert.alert(i18n.t('alerts.warning'), i18n.t('extractImageJS.warningMsg'), ['OK']);
+                        await customAlert.alert(i18n.t('alerts.warning'), i18n.t('extractImageJS.warningMsg'), [i18n.t('common.ok')]);
                     }
                 } else {
                     const defaultName = `${selectedFile.name.replace('.pdf', '')}_images_removed.pdf`;
                     const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
 
                     if (savedPath) {
-                        await customAlert.alert(i18n.t('alerts.success'), i18n.t('extractImageJS.successRemoveMsg') + savedPath, ['OK']);
+                        await customAlert.alert(i18n.t('alerts.success'), i18n.t('extractImageJS.successRemoveMsg') + savedPath, [i18n.t('common.ok')]);
                     } else {
-                        await customAlert.alert(i18n.t('alerts.warning'), i18n.t('extractImageJS.warningMsg'), ['OK']);
+                        await customAlert.alert(i18n.t('alerts.warning'), i18n.t('extractImageJS.warningMsg'), [i18n.t('common.ok')]);
                     }
                 }
             } else {
                 console.error("API returned JSON:", result);
-                await customAlert.alert(i18n.t('alerts.error'), `Error: ${JSON.stringify(result)}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), `Error: ${JSON.stringify(result)}`, [i18n.t('common.ok')]);
             }
         } catch (error) {            
             console.error('Error processing images:', error);
-            await customAlert.alert(i18n.t('alerts.error'), i18n.t('extractImageJS.errorMsg'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('extractImageJS.errorMsg'), [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
             processBtn.disabled = false;

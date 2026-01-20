@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             console.error('Error selecting file:', error);
-            await customAlert.alert('LocalPDF Studio - ERROR', i18n.t('editMetadataJS.failedToSelectPdf'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('editMetadataJS.failedToSelectPdf'), [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
         }
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
         } catch (error) {
             console.error('Error loading file:', error);
-            await customAlert.alert('LocalPDF Studio - ERROR', i18n.t('editMetadataJS.failedToReadMetadata'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('editMetadataJS.failedToReadMetadata'), [i18n.t('common.ok')]);
             clearAll();
         } finally {
             loadingUI.hide();
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 errorMessage = i18n.t('editMetadataJS.invalidPdf');
             }
             
-            await customAlert.alert('LocalPDF Studio - ERROR', errorMessage, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), errorMessage, [i18n.t('common.ok')]);
             displayError(errorMessage);
             savePdfBtn.disabled = true;
         } finally {
@@ -215,19 +215,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function sanitizeAndSaveMetadata() {
         if (!currentFilePath) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('editMetadataJS.selectPdfFirst'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('editMetadataJS.selectPdfFirst'), [i18n.t('common.ok')]);
             return;
         }
 
         try {
             // Show confirmation dialog
             const clickedButton = await customAlert.alert(
-                i18n.t('editMetadataJS.sanitizeTitle'),
+                i18n.t('alerts.notice'),
                 i18n.t('editMetadataJS.confirmSanitize'),
-                ['Cancel', 'Yes, Remove All Metadata']
+                [i18n.t('editMetadataJS.cancel'), i18n.t('editMetadataJS.removeAllMetadata')]
             );
 
-            if (clickedButton !== 'Yes, Remove All Metadata') {
+            if (clickedButton !== 1) {
                 return;
             }
 
@@ -267,9 +267,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 hasUnsavedChanges = false;
 
                 await customAlert.alert(
-                    i18n.t('editMetadataJS.sanitizeSuccess'),
+                    i18n.t('alerts.success'),
                     i18n.t('editMetadataJS.sanitizeSuccessMsg') + result.path + "\n\n" + i18n.t('editMetadataJS.sanitizeSuccessEnd'),
-                    ['OK']
+                    [i18n.t('common.ok')]
                 );
             } else {
                 throw new Error(result.error || 'Failed to sanitize PDF metadata');
@@ -278,9 +278,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error sanitizing metadata:', error);
             await customAlert.alert(
-                i18n.t('editMetadataJS.sanitizeFailed'),
+                i18n.t('alerts.warning'),
                 i18n.t('editMetadataJS.sanitizeFailedMsg') + error.message,
-                ['OK']
+                [i18n.t('common.ok')]
             );
         } finally {
             loadingUI.hide();
@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Save metadata changes (in memory)
     async function saveMetadata() {
         if (!validateForm()) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('editMetadataJS.formValidationError'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('editMetadataJS.formValidationError'), [i18n.t('common.ok')]);
             return;
         }
 
@@ -401,10 +401,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             editToggleBtn.textContent = i18n.t('editMetadata.edit-metadata-btn');
             savePdfBtn.disabled = false;
             
-            await customAlert.alert(i18n.t('editMetadataJS.metadataUpdated'), i18n.t('editMetadataJS.metadataUpdatedMsg'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.success'), i18n.t('editMetadataJS.metadataUpdatedMsg'), [i18n.t('common.ok')]);
         } catch (error) {
             console.error('Error saving metadata:', error);
-            await customAlert.alert('LocalPDF Studio - ERROR', i18n.t('editMetadataJS.failedToSaveMetadata'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('editMetadataJS.failedToSaveMetadata'), [i18n.t('common.ok')]);
         } finally {
             saveMetadataBtn.disabled = false;
             saveMetadataBtn.textContent = i18n.t('editMetadata.save-btn1');
@@ -414,7 +414,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Save PDF with updated metadata using Electron
     async function savePdfWithMetadata() {
         if (!currentFilePath || !currentMetadata) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('editMetadataJS.selectPdfFirst'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('editMetadataJS.selectPdfFirst'), [i18n.t('common.ok')]);
             return;
         }
 
@@ -439,14 +439,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (result.success) {
                 hasUnsavedChanges = false;
-                await customAlert.alert(i18n.t('editMetadataJS.saveSuccess'), i18n.t('editMetadataJS.saveSuccessMsg') + result.path, ['OK']);
+                await customAlert.alert(i18n.t('alerts.success'), i18n.t('editMetadataJS.saveSuccessMsg') + result.path, [i18n.t('common.ok')]);
             } else {
                 throw new Error(result.error || 'Failed to save PDF');
             }
             
         } catch (error) {
             console.error('Error saving PDF:', error);
-            await customAlert.alert(i18n.t('editMetadataJS.saveFailed'), i18n.t('editMetadataJS.saveFailedMsg') + error.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.warning'), i18n.t('editMetadataJS.saveFailedMsg') + error.message, [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
             savePdfBtn.disabled = false;
@@ -500,7 +500,7 @@ File: ${selectedFile?.name || 'Unknown'}
             }, 2000);
         }).catch(err => {
             console.error('Failed to copy:', err);
-            customAlert.alert(i18n.t('editMetadataJS.copyFailed'), i18n.t('editMetadataJS.copyFailedMsg'), ['OK']);
+            customAlert.alert(i18n.t('alerts.error'), i18n.t('editMetadataJS.copyFailedMsg'), [i18n.t('common.ok')]);
         });
     }
 
@@ -603,7 +603,7 @@ File: ${selectedFile?.name || 'Unknown'}
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('editMetadataJS.dropOneFile'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('editMetadataJS.dropOneFile'), [i18n.t('common.ok')]);
                 return;
             }
 
@@ -625,11 +625,11 @@ File: ${selectedFile?.name || 'Unknown'}
                     size: fileSize
                 });
             } else {
-                await customAlert.alert('LocalPDF Studio - ERROR', i18n.t('editMetadataJS.failedToSaveDrop') + result.error, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('editMetadataJS.failedToSaveDrop') + result.error, [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', i18n.t('editMetadataJS.dropPdfFile'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('editMetadataJS.dropPdfFile'), [i18n.t('common.ok')]);
         }
     });
 

@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async() => {
     mergeBtn.addEventListener('click', async () => {
         const files = getFiles();
         if (!files.length) {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('mergePdfJS.selectAtLeastOne'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('mergePdfJS.selectAtLeastOne'), [i18n.t('common.ok')]);
             return;
         }
         try {
@@ -77,13 +77,13 @@ document.addEventListener('DOMContentLoaded', async() => {
             const result = await window.electronAPI.saveMergedPdf(arrayBuffer);
 
             if (result.success) {
-                await customAlert.alert(i18n.t('alerts.success'), i18n.t('mergePdfJS.successMsg'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.success'), i18n.t('mergePdfJS.successMsg'), [i18n.t('common.ok')]);
             } else {
-                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('mergePdfJS.cancelledMsg'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('mergePdfJS.cancelledMsg'), [i18n.t('common.ok')]);
             }
         } catch (err) {
             console.error(err);
-            await customAlert.alert(i18n.t('alerts.error'), i18n.t('mergePdfJS.errorMsg') + err.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('mergePdfJS.errorMsg') + err.message, [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
         }
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async() => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length === 0) {
-                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('mergePdfJS.dropAtLeastOne'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('mergePdfJS.dropAtLeastOne'), [i18n.t('common.ok')]);
                 return;
             }
 
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                 if (result.success) {
                     droppedPaths.push(result.filePath);
                 } else {
-                    await customAlert.alert(i18n.t('alerts.error'), i18n.t('mergePdfJS.failedToSaveDrop') + result.error, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.error'), i18n.t('mergePdfJS.failedToSaveDrop') + result.error, [i18n.t('common.ok')]);
                     return;
                 }
             }
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async() => {
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('mergePdfJS.dropPdfFiles'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('mergePdfJS.dropPdfFiles'), [i18n.t('common.ok')]);
         }
     });
 

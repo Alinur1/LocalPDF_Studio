@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('pdfToImageJS.dropOnlyOne'), ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('pdfToImageJS.dropOnlyOne'), [i18n.t('common.ok')]);
                 return;
             }
             await cleanupDroppedFile();
@@ -198,17 +198,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     size: fileSize
                 });
             } else {
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('pdfToImageJS.failedToSaveDrop') + result.error, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('pdfToImageJS.failedToSaveDrop') + result.error, [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('pdfToImageJS.dropPdfFile'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('pdfToImageJS.dropPdfFile'), [i18n.t('common.ok')]);
         }
     });
 
     convertBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('pdfToImageJS.selectFileFirst'), ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('pdfToImageJS.selectFileFirst'), [i18n.t('common.ok')]);
             return;
         }
 
@@ -238,17 +238,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
-                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('pdfToImageJS.successMsg') + '\n' + i18n.t('pdfToImageJS.successSavedTo') + savedPath, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('pdfToImageJS.successMsg') + '\n' + i18n.t('pdfToImageJS.successSavedTo') + savedPath, [i18n.t('common.ok')]);
                 } else {
-                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('pdfToImageJS.cancelledMsg'), ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('pdfToImageJS.cancelledMsg'), [i18n.t('common.ok')]);
                 }
             } else {
                 console.error("Convert API returned JSON:", result);
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('pdfToImageJS.errorMsg') + JSON.stringify(result), ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('pdfToImageJS.errorMsg') + JSON.stringify(result), [i18n.t('common.ok')]);
             }
         } catch (error) {            
             console.error('Error converting PDF:', error);
-            await customAlert.alert(i18n.t('alerts.error'), i18n.t('pdfToImageJS.errorConverting') + error.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('pdfToImageJS.errorConverting') + error.message, [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
             convertBtn.disabled = false;
