@@ -647,7 +647,7 @@ ipcMain.handle('save-text-file', async (event, { filename, text }) => {
     });
 
     if (canceled || !filePath) {
-        return null;
+        return { success: false };
     }
 
     try {
@@ -666,10 +666,10 @@ ipcMain.handle('save-text-file', async (event, { filename, text }) => {
         }
 
         fs.writeFileSync(filePath, nodeBuffer);
-        return filePath;
+        return { success: true, path: filePath };
     } catch (err) {
         console.error("Failed to save text file:", err);
-        return null;
+        return { success: false, error: err.message };
     }
 });
 

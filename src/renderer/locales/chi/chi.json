@@ -597,7 +597,9 @@
     "successSavedTo": "已保存到: ",
     "cancelledMsg": "OCR 处理已取消。",
     "errorMsg": "错误: ",
-    "errorOcr": "OCR 处理出错: "
+    "errorOcr": "OCR 处理出错: ",
+    "ocrSaved": "OCR 保存成功",
+    "ocrSaveCanceled": "操作已取消或失败。"
   },
   "organizePDF": {
     "page-title": "整理 / 重新排列 PDF",

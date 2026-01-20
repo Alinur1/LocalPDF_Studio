@@ -597,7 +597,9 @@
     "successSavedTo": "Saved to: ",
     "cancelledMsg": "OCR processing was cancelled.",
     "errorMsg": "Error: ",
-    "errorOcr": "An error occurred while processing with OCR: "
+    "errorOcr": "An error occurred while processing with OCR: ",
+    "ocrSaved": "OCR saved successfully",
+    "ocrSaveCanceled": "Operation cancelled or failed."
   },
   "organizePDF": {
     "page-title": "Organize/Re-Arrange PDF",

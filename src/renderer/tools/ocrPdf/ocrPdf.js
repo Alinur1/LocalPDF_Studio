@@ -859,14 +859,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Save result
             updateBatchProgress(100, 'Saving text file...');
             const fileName = selectedFile.name.replace(/\.[^/.]+$/, "") + '_ocr.txt';
-            await window.electronAPI.saveTextFile(fileName, extractedText);
+            const result = await window.electronAPI.saveTextFile(fileName, extractedText);
+
+            if (result.success) {
+                await customAlert.alert(i18n.t('alerts.success'), i18n.t('ocrPdfJS.ocrSaved'), [i18n.t('common.ok')]);
+            } else {
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('ocrPdfJS.ocrSaveCanceled'), [i18n.t('common.ok')]);
+            }
 
             // Hide progress modal
             batchProgressModal.style.display = 'none';
             clearInterval(timeInterval);
-
-            await customAlert.alert(i18n.t('alerts.success'), i18n.t('ocrPdfJS.successMsg'), [i18n.t('common.ok')]);
-
         } catch (error) {
             console.error('OCR processing failed:', error);
 

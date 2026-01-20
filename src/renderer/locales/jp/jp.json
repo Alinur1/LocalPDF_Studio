@@ -597,7 +597,9 @@
     "successSavedTo": "保存先: ",
     "cancelledMsg": "OCR の処理がキャンセルされました。",
     "errorMsg": "エラー: ",
-    "errorOcr": "OCR の処理中にエラーが発生しました: "
+    "errorOcr": "OCR の処理中にエラーが発生しました: ",
+    "ocrSaved": "OCR が正常に保存されました",
+    "ocrSaveCanceled": "操作がキャンセルされたか失敗しました。"
   },
   "organizePDF": {
     "page-title": "PDF を整理 / 再配置",
