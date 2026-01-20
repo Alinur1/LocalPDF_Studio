@@ -52,7 +52,12 @@
     "check-updates-btn": "更新を確認",
     "update-checker": "まだ更新は確認されていません。",
     "cancel-btn": "キャンセル",
-    "save-changes-btn": "変更を保存"
+    "save-changes-btn": "変更を保存",
+    "theme-title": "テーマ",
+    "theme-dark": "ダーク",
+    "theme-light": "ライト",
+    "theme-system": "システム（自動）",
+    "theme-system-desc": "オペレーティングシステムのテーマに自動的に合わせます"
   },
   "search": {
     "placeholder": "開いたPDFを検索...",

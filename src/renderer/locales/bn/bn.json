@@ -52,7 +52,12 @@
     "check-updates-btn": "আপডেট পরীক্ষা করুন",
     "update-checker": "এখনও কোনও আপডেট চেক করা হয়নি।",
     "cancel-btn": "বাতিল",
-    "save-changes-btn": "পরিবর্তন সংরক্ষণ করুন"
+    "save-changes-btn": "পরিবর্তন সংরক্ষণ করুন",
+    "theme-title": "থিম",
+    "theme-dark": "ডার্ক",
+    "theme-light": "লাইট",
+    "theme-system": "সিস্টেম (স্বয়ংক্রিয়)",
+    "theme-system-desc": "আপনার অপারেটিং সিস্টেমের থিম অনুযায়ী স্বয়ংক্রিয়ভাবে পরিবর্তন হবে"
   },
   "search": {
     "placeholder": "খোলা PDF খুঁজুন...",

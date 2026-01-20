@@ -97,6 +97,37 @@
 
             <div class="modal-body">
                 <div class="settings-category">
+                     <h3 class="category-title">
+        <span class="category-icon">🎨</span>
+        <span data-i18n="settings.theme-title">Theme</span>
+    </h3>
+
+    <div class="settings-options">
+        <label class="option-item radio-option">
+            <input type="radio" name="theme-mode" value="dark" aria-label="Dark theme">
+            <span class="option-content">
+                <span class="option-title" data-i18n="settings.theme-dark">Dark</span>
+            </span>
+        </label>
+
+        <label class="option-item radio-option">
+            <input type="radio" name="theme-mode" value="light">
+            <span class="option-content">
+                <span class="option-title" data-i18n="settings.theme-light">Light</span>
+            </span>
+        </label>
+
+        <label class="option-item radio-option">
+            <input type="radio" name="theme-mode" value="system" checked>
+            <span class="option-content">
+                <span class="option-title" data-i18n="settings.theme-system">System (Auto)</span>
+                <span class="option-description"
+                      data-i18n="settings.theme-system-desc">
+                    Automatically match your operating system theme
+                </span>
+            </span>
+        </label>
+    </div>
                     <h3 class="category-title">
                         <span class="category-icon">🚀</span>
                         <span data-i18n="settings.startup-behavior">Startup Behavior</span>
@@ -137,10 +168,10 @@
                                 <span class="option-description" data-i18n="settings.interface-language-desc">Select your preferred language for the application</span>
                             </span>
                             <select id="language-select" class="styled-select">
-                                <option value="en" selected>English | English</option>
-                                <option value="bn">Bengali | বাংলা</option>
-                                <option value="chi">Chinese | 中文</option>
-                                <option value="jp">Japanese | 日本語</option>
+                                <option value="en" selected>English</option>
+                                <option value="bn">Bangla</option>
+                                <option value="chi">Chinese</option>
+                                <option value="jp">Japanese</option>
                             </select>
                         </label>
                     </div>

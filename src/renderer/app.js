@@ -30,6 +30,7 @@ window.addEventListener('DOMContentLoaded', async() => {
 
     await i18n.init();
 
+    const themeRadios = document.querySelectorAll('input[name="theme-mode"]');
     const tabManager = new TabManager('#tab-bar', '#tab-content');
     const clockManager = new ClockManager();
     const searchIndexManager = new SearchIndexManager();
@@ -273,7 +274,8 @@ window.addEventListener('DOMContentLoaded', async() => {
             restoreTabs: localStorage.getItem('restoreTabs') || 'restore',
             clockEnabled: localStorage.getItem('clockEnabled') !== 'false',
             searchEnabled: searchIndexManager.isEnabled(),
-            language: localStorage.getItem('language') || 'en'
+            language: localStorage.getItem('language') || 'en',
+            theme: localStorage.getItem('theme') || 'system'
         };
         document.querySelector(`input[name="restore-tabs"][value="${originalSettings.restoreTabs}"]`).checked = true;
         document.getElementById('clock-enabled').checked = originalSettings.clockEnabled;
@@ -312,6 +314,10 @@ window.addEventListener('DOMContentLoaded', async() => {
         const clockEnabled = document.getElementById('clock-enabled').checked;
         const searchEnabled = document.getElementById('search-enabled').checked;
         const selectedLanguage = languageSelect.value;
+        // ✅ ADD Theme
+        const selectedTheme =document.querySelector('input[name="theme-mode"]:checked')?.value || 'system';
+        localStorage.setItem('theme', selectedTheme);
+        applyTheme(selectedTheme);
         localStorage.setItem('language', selectedLanguage);
         localStorage.setItem('restoreTabs', selectedRestore);
         localStorage.setItem('clockEnabled', clockEnabled.toString());
@@ -329,12 +335,15 @@ window.addEventListener('DOMContentLoaded', async() => {
         localStorage.setItem('language', originalSettings.language || 'en');
         localStorage.setItem('restoreTabs', originalSettings.restoreTabs);
         localStorage.setItem('clockEnabled', originalSettings.clockEnabled.toString());
+        localStorage.setItem('theme', originalSettings.theme);
+        applyTheme(originalSettings.theme);
         searchIndexManager.setEnabled(originalSettings.searchEnabled);
         searchBar.setVisible(originalSettings.searchEnabled);
         clockManager.setEnabled(originalSettings.clockEnabled);
         document.querySelector(`input[name="restore-tabs"][value="${originalSettings.restoreTabs}"]`).checked = true;
         document.getElementById('clock-enabled').checked = originalSettings.clockEnabled;
         document.getElementById('search-enabled').checked = originalSettings.searchEnabled;
+        document.querySelector(`input[name="theme-mode"][value="${originalSettings.theme}"]`).checked = true;
         languageSelect.value = originalSettings.language;
 
         await i18n.setLanguage(originalSettings.language);
@@ -385,5 +394,49 @@ window.addEventListener('DOMContentLoaded', async() => {
     languageSelect.addEventListener('change', async (e) => {
         await i18n.setLanguage(e.target.value);
         searchBar.updateLanguage();
+    });
+
+    // Theme Utility functions
+    function applyTheme(theme) {
+    document.body.classList.remove('dark', 'light');
+
+    if (theme === 'system') {
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.body.classList.add(isDark ? 'dark' : 'light');
+    } else {
+        document.body.classList.add(theme);
+    }
+}
+
+function getSystemTheme() {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+}
+
+// Initial Theme on startup
+
+const savedTheme = localStorage.getItem('theme') || 'system';
+
+// Apply theme
+applyTheme(savedTheme);
+
+// Set radio state
+document.querySelector(`input[name="theme-mode"][value="${savedTheme}"]`).checked = true;
+
+themeRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        const selectedTheme = e.target.value;
+        localStorage.setItem('theme', selectedTheme);
+        applyTheme(selectedTheme);
+    });
+});
+
+window.matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', () => {
+        const currentTheme = localStorage.getItem('theme') || 'system';
+        if (currentTheme === 'system') {
+            applyTheme('system');
+        }
     });
 });

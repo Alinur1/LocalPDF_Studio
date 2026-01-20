@@ -52,7 +52,12 @@
     "check-updates-btn": "Check for Updates",
     "update-checker": "No updates checked yet.",
     "cancel-btn": "Cancel",
-    "save-changes-btn": "Save Changes"
+    "save-changes-btn": "Save Changes",
+    "theme-title": "Theme",
+    "theme-dark": "Dark",
+    "theme-light": "Light",
+    "theme-system": "System (Auto)",
+    "theme-system-desc": "Automatically match your operating system theme"
   },
   "search": {
     "placeholder": "Search opened PDFs...",
