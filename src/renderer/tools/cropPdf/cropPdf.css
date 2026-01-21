@@ -17,10 +17,146 @@
 
 /* src/renderer/tools/cropPdf/cropPdf.css */
 
+:root {
+  --tool-title-color: #ecf0f1;
+  --select-btn-color: #ecf0f1;
+  --select-btn-bg: #2c3e50;
+  --select-btn-border: #3498db;
+  --select-btn-hover-bg: #34495e;
+  --select-btn-hover-border: #2980b9;
+  --selected-file-bg: #2c3e50;
+  --selected-file-border: #18222e;
+  --selected-file-color: #ecf0f1;
+  --pdf-name-color: #ecf0f1;
+  --pdf-size-color: #bdc3c7;
+  --remove-btn-bg: #e74c3c;
+  --remove-btn-hover: #c0392b;
+  --preview-container-bg: #2c3e50;
+  --preview-container-border: #18222e;
+  --preview-header-color: #ecf0f1;
+  --preview-header-border: #34495e;
+  --page-count-bg: #34495e;
+  --page-count-color: #bdc3c7;
+  --page-input-bg: #1c2833;
+  --page-input-border: #34495e;
+  --page-input-color: #ecf0f1;
+  --page-input-focus-border: #3498db;
+  --page-display-bg: #34495e;
+  --page-display-color: #bdc3c7;
+  --secondary-btn-bg: #34495e;
+  --secondary-btn-color: #ecf0f1;
+  --secondary-btn-hover-bg: #3d566e;
+  --active-btn-bg: #1abc9c;
+  --active-btn-color: #fff;
+  --active-btn-border: #1abc9c;
+  --active-btn-hover: #16a085;
+  --separator-bg: #34495e;
+  --zoom-level-color: #bdc3c7;
+  --preview-grid-bg: #1c2833;
+  --preview-grid-border: #34495e;
+  --page-label-color: #bdc3c7;
+  --options-container-bg: #2c3e50;
+  --options-container-border: #18222e;
+  --options-title-color: #ecf0f1;
+  --options-title-border: #34495e;
+  --option-label-color: #bdc3c7;
+  --radio-label-color: #bdc3c7;
+  --options-input-bg: #1c2833;
+  --options-input-border: #34495e;
+  --options-input-color: #ecf0f1;
+  --options-input-focus-border: #3498db;
+  --help-text-color: #95a5a6;
+  --margin-input-bg: #1c2833;
+  --margin-input-border: #34495e;
+  --margin-input-color: #ecf0f1;
+  --margin-input-focus-border: #3498db;
+  --error-border: #e74c3c;
+  --error-bg: #fdecea;
+  --error-text-color: #e74c3c;
+  --modal-bg: #2c3e50;
+  --modal-border: #34495e;
+  --modal-color: #ecf0f1;
+  --close-btn-color: #95a5a6;
+  --close-btn-hover: #ecf0f1;
+  --scrollbar-track: #1c2833;
+  --scrollbar-thumb: #34495e;
+  --scrollbar-thumb-hover: #3d566e;
+  --disabled-btn-bg: #34495e;
+  --disabled-btn-color: #ecf0f1;
+}
+
+body.light {
+  --tool-title-color: #1a1a1a;
+  --select-btn-color: #1a1a1a;
+  --select-btn-bg: #F0EFEA;
+  --select-btn-border: #D97757;
+  --select-btn-hover-bg: #E6E5E0;
+  --select-btn-hover-border: #C06647;
+  --selected-file-bg: #F0EFEA;
+  --selected-file-border: #D1CEC5;
+  --selected-file-color: #1a1a1a;
+  --pdf-name-color: #1a1a1a;
+  --pdf-size-color: #666666;
+  --remove-btn-bg: #e74c3c;
+  --remove-btn-hover: #c0392b;
+  --preview-container-bg: #F0EFEA;
+  --preview-container-border: #D1CEC5;
+  --preview-header-color: #1a1a1a;
+  --preview-header-border: #E6E5E0;
+  --page-count-bg: #E6E5E0;
+  --page-count-color: #666666;
+  --page-input-bg: #FFFFFF;
+  --page-input-border: #D1CEC5;
+  --page-input-color: #1a1a1a;
+  --page-input-focus-border: #D97757;
+  --page-display-bg: #E6E5E0;
+  --page-display-color: #666666;
+  --secondary-btn-bg: #E6E5E0;
+  --secondary-btn-color: #1a1a1a;
+  --secondary-btn-hover-bg: #D1CEC5;
+  --active-btn-bg: #1abc9c;
+  --active-btn-color: #fff;
+  --active-btn-border: #1abc9c;
+  --active-btn-hover: #16a085;
+  --separator-bg: #D1CEC5;
+  --zoom-level-color: #666666;
+  --preview-grid-bg: #FAF9F5;
+  --preview-grid-border: #D1CEC5;
+  --page-label-color: #666666;
+  --options-container-bg: #F0EFEA;
+  --options-container-border: #D1CEC5;
+  --options-title-color: #1a1a1a;
+  --options-title-border: #E6E5E0;
+  --option-label-color: #666666;
+  --radio-label-color: #666666;
+  --options-input-bg: #FFFFFF;
+  --options-input-border: #D1CEC5;
+  --options-input-color: #1a1a1a;
+  --options-input-focus-border: #D97757;
+  --help-text-color: #888888;
+  --margin-input-bg: #FFFFFF;
+  --margin-input-border: #D1CEC5;
+  --margin-input-color: #1a1a1a;
+  --margin-input-focus-border: #D97757;
+  --error-border: #e74c3c;
+  --error-bg: #fdecea;
+  --error-text-color: #e74c3c;
+  --modal-bg: #F0EFEA;
+  --modal-border: #D1CEC5;
+  --modal-color: #1a1a1a;
+  --close-btn-color: #888888;
+  --close-btn-hover: #1a1a1a;
+  --scrollbar-track: #E6E5E0;
+  --scrollbar-thumb: #D1CEC5;
+  --scrollbar-thumb-hover: #D97757;
+  --disabled-btn-bg: #E2B09F;
+  --disabled-btn-color: #1a1a1a;
+}
+
 .tool-title {
   font-size: 1.2rem;
   margin: 0;
-  color: #ecf0f1;
+  color: var(--tool-title-color);
 }
 
 /* --- Main Container --- */
@@ -43,22 +179,22 @@
 }
 
 .select-pdf-btn {
-  color: #ecf0f1;
+  color: var(--select-btn-color);
   width: 100%;
-  border: 2px dashed #3498db;
+  border: 2px dashed var(--select-btn-border);
   border-radius: 8px;
   padding: 2rem;
   text-align: center;
   cursor: pointer;
-  background: #2c3e50;
+  background: var(--select-btn-bg);
   font-size: 1.1rem;
   font-weight: 500;
   transition: background 0.2s, border-color 0.2s;
 }
 
 .select-pdf-btn:hover {
-  background: #34495e;
-  border-color: #2980b9;
+  background: var(--select-btn-hover-bg);
+  border-color: var(--select-btn-hover-border);
 }
 
 .selected-file-info {
@@ -66,27 +202,27 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  background: #2c3e50;
+  background: var(--selected-file-bg);
   border-radius: 6px;
   gap: 1rem;
-  color: #ecf0f1;
-  border: 1px solid #18222e;
+  color: var(--selected-file-color);
+  border: 1px solid var(--selected-file-border);
 }
 
 .pdf-name {
   margin: 0;
   font-weight: 500;
-  color: #ecf0f1;
+  color: var(--pdf-name-color);
 }
 
 .pdf-size {
   margin: 0.3rem 0 0 0;
   font-size: 0.85rem;
-  color: #bdc3c7;
+  color: var(--pdf-size-color);
 }
 
 .remove-btn {
-  background: #e74c3c;
+  background: var(--remove-btn-bg);
   color: #fff;
   border: none;
   border-radius: 50%;
@@ -103,7 +239,7 @@
 }
 
 .remove-btn:hover {
-  background: #c0392b;
+  background: var(--remove-btn-hover);
 }
 
 /* --- PDF Crop Layout --- */
@@ -120,10 +256,10 @@
   flex: 2;
   display: flex;
   flex-direction: column;
-  background: #2c3e50;
+  background: var(--preview-container-bg);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid #18222e;
+  border: 1px solid var(--preview-container-border);
   min-height: 0;
   overflow: hidden;
 }
@@ -131,10 +267,10 @@
 /* Right Panel: Crop Options */
 .options-container {
   flex: 1;
-  background: #2c3e50;
+  background: var(--options-container-bg);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid #18222e;
+  border: 1px solid var(--options-container-border);
   min-height: 0;
   overflow-y: auto;
   display: flex;
@@ -148,7 +284,7 @@
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.8rem;
-  border-bottom: 1px solid #34495e;
+  border-bottom: 1px solid var(--preview-header-border);
   flex-wrap: wrap;
   gap: 1rem;
   flex-shrink: 0;
@@ -157,14 +293,14 @@
 .preview-header h3 {
   margin: 0;
   font-size: 1.1rem;
-  color: #ecf0f1;
+  color: var(--preview-header-color);
   flex: 0 0 auto;
 }
 
 .page-count {
   font-size: 0.85rem;
-  color: #bdc3c7;
-  background: #34495e;
+  color: var(--page-count-color);
+  background: var(--page-count-bg);
   padding: 0.3rem 0.8rem;
   border-radius: 4px;
   flex: 0 0 auto;
@@ -181,10 +317,10 @@
 
 .page-input {
   width: 50px;
-  background: #1c2833;
-  border: 1px solid #34495e;
+  background: var(--page-input-bg);
+  border: 1px solid var(--page-input-border);
   border-radius: 4px;
-  color: #ecf0f1;
+  color: var(--page-input-color);
   font-size: 0.9rem;
   padding: 0.4rem;
   text-align: center;
@@ -192,13 +328,13 @@
 
 .page-input:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: var(--page-input-focus-border);
 }
 
 .page-display {
   font-size: 0.85rem;
-  color: #bdc3c7;
-  background: #34495e;
+  color: var(--page-display-color);
+  background: var(--page-display-bg);
   padding: 0.3rem 0.8rem;
   border-radius: 4px;
   white-space: nowrap;
@@ -221,23 +357,23 @@
 }
 
 .zoom-controls .secondary-btn:hover {
-  background: #3d566e;
+  background: var(--secondary-btn-hover-bg);
 }
 
 .zoom-controls .secondary-btn.active {
-  background: #1abc9c;
-  color: #fff;
-  border-color: #1abc9c;
+  background: var(--active-btn-bg);
+  color: var(--active-btn-color);
+  border-color: var(--active-btn-border);
 }
 
 .zoom-controls .secondary-btn.active:hover {
-  background: #16a085;
+  background: var(--active-btn-hover);
 }
 
 .separator {
   width: 1px;
   height: 24px;
-  background: #34495e;
+  background: var(--separator-bg);
   margin: 0 0.3rem;
 }
 
@@ -245,7 +381,7 @@
   font-weight: 500;
   min-width: 50px;
   text-align: center;
-  color: #bdc3c7;
+  color: var(--zoom-level-color);
   font-size: 0.85rem;
   white-space: nowrap;
 }
@@ -301,10 +437,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #1c2833;
+  background: var(--preview-grid-bg);
   border-radius: 6px;
   padding: 1rem;
-  border: 2px solid #34495e;
+  border: 2px solid var(--preview-grid-border);
   min-height: auto;
   transition: transform 0.2s, box-shadow 0.2s;
   will-change: transform;
@@ -328,7 +464,7 @@
 .page-label {
   margin-top: 1rem;
   font-size: 0.9rem;
-  color: #bdc3c7;
+  color: var(--page-label-color);
   text-align: center;
 }
 
@@ -336,8 +472,8 @@
 .options-container h2 {
   margin: 0 0 1.5rem 0;
   font-size: 1.1rem;
-  color: #ecf0f1;
-  border-bottom: 1px solid #34495e;
+  color: var(--options-title-color);
+  border-bottom: 1px solid var(--options-title-border);
   padding-bottom: 0.8rem;
   flex-shrink: 0;
 }
@@ -348,7 +484,7 @@
 
 .option-group label {
   display: block;
-  color: #bdc3c7;
+  color: var(--option-label-color);
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
   font-weight: 500;
@@ -366,6 +502,7 @@
   gap: 0.5rem;
   cursor: pointer;
   margin: 0;
+  color: var(--radio-label-color);
 }
 
 .radio-group input[type="radio"] {
@@ -373,10 +510,10 @@
 }
 
 .options-input {
-  background: #1c2833;
-  border: 1px solid #34495e;
+  background: var(--options-input-bg);
+  border: 1px solid var(--options-input-border);
   border-radius: 4px;
-  color: #ecf0f1;
+  color: var(--options-input-color);
   font-size: 0.9rem;
   padding: 0.6rem;
   width: 100%;
@@ -384,12 +521,12 @@
 
 .options-input:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: var(--options-input-focus-border);
 }
 
 .help-text {
   display: block;
-  color: #95a5a6;
+  color: var(--help-text-color);
   font-size: 0.8rem;
   margin-top: 0.3rem;
 }
@@ -408,10 +545,10 @@
 }
 
 .margin-input {
-  background: #1c2833;
-  border: 1px solid #34495e;
+  background: var(--margin-input-bg);
+  border: 1px solid var(--margin-input-border);
   border-radius: 4px;
-  color: #ecf0f1;
+  color: var(--margin-input-color);
   font-size: 0.9rem;
   padding: 0.6rem;
   text-align: center;
@@ -419,24 +556,24 @@
 
 .margin-input:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: var(--margin-input-focus-border);
 }
 
 input.error {
-  border: 1px solid #e74c3c !important;
-  background: #fdecea;
+  border: 1px solid var(--error-border) !important;
+  background: var(--error-bg);
 }
 
 .error-text {
-  color: #e74c3c;
+  color: var(--error-text-color);
   font-size: 0.9rem;
   text-align: center;
 }
 
 /* --- Buttons --- */
 .secondary-btn {
-  background: #34495e;
-  color: #ecf0f1;
+  background: var(--secondary-btn-bg);
+  color: var(--secondary-btn-color);
   border: none;
   border-radius: 6px;
   padding: 0.7rem 1.2rem;
@@ -446,7 +583,7 @@ input.error {
 }
 
 .secondary-btn:hover {
-  background: #3d566e;
+  background: var(--secondary-btn-hover-bg);
 }
 
 .secondary-btn:active {
@@ -468,17 +605,20 @@ input.error {
 
 .action-buttons .top-btn {
   min-width: 180px;
-  background: #34495e;
+  background: var(--secondary-btn-bg);
+  color: var(--secondary-btn-color);
 }
 
 .action-buttons .top-btn:hover {
-  min-width: 180px;
-  background: #3498db;
+  background: var(--active-btn-bg);
+  color: var(--active-btn-color);
 }
 
 .action-buttons .top-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;    
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--disabled-btn-bg);
+  color: var(--disabled-btn-color);
 }
 
 /* --- Modal Styles --- */
@@ -497,20 +637,20 @@ input.error {
 }
 
 .modal-content {
-  background-color: #2c3e50;
+  background-color: var(--modal-bg);
   margin: auto;
   padding: 20px;
-  border: 1px solid #34495e;
+  border: 1px solid var(--modal-border);
   width: 80%;
   max-width: 400px;
   border-radius: 8px;
   text-align: center;
   position: relative;
-  color: #ecf0f1;
+  color: var(--modal-color);
 }
 
 .close-btn {
-  color: #95a5a6;
+  color: var(--close-btn-color);
   position: absolute;
   top: 10px;
   right: 15px;
@@ -522,7 +662,7 @@ input.error {
 
 .close-btn:hover,
 .close-btn:focus {
-  color: #ecf0f1;
+  color: var(--close-btn-hover);
 }
 
 /* --- Scrollbar Styling --- */
@@ -532,16 +672,16 @@ input.error {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1c2833;
+  background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #34495e;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3d566e;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* --- Responsive Design --- */
