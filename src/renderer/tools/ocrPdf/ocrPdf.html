@@ -33,6 +33,7 @@
     connect-src 'self' http://localhost:*;">
     <link rel="stylesheet" href="../../styles/main.css">
     <link rel="stylesheet" href="./ocrPdf.css">
+    <script type="module" src="../../utils/themeManager.js"></script>
 </head>
 
 <body>
@@ -409,7 +410,7 @@
                         <input type="hidden" id="languageSelect" value="eng">
                     </div>
                     <small class="help-text" data-i18n="ocr.lang-selection-helpTxt">Select one or more languages for text recognition</small>
-                    <p style="color: cyan;" data-i18n="ocr.lang-selection-note">Note: Tesseract needs internet connection only once per language to download the model.</p>
+                    <strong><mark style="background-color: azure; color:black;" data-i18n="ocr.lang-selection-note">Note: Tesseract needs internet connection only once per language to download the model.</mark></strong>
                 </div>
             </div>
             <div class="action-buttons">

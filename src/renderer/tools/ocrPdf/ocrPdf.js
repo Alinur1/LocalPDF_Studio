@@ -24,12 +24,14 @@ import { initializeGlobalDragDropForOCR } from '../../utils/globalDragDrop.js';
 import i18n from '../../utils/i18n.js';
 import loadingUI from '../../utils/loading.js';
 import tesseractOcr from '../../utils/tesseractOcr.js';
+import { ThemeManager } from '../../utils/themeManager.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 window.pdfjsLib = pdfjsLib;
 
 document.addEventListener('DOMContentLoaded', async () => {
     await i18n.init();
+    ThemeManager.init();
     const selectPdfBtn = document.getElementById('select-pdf-btn');
     const removePdfBtn = document.getElementById('remove-pdf-btn');
     const processBtn = document.getElementById('process-btn');
