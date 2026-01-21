@@ -17,10 +17,82 @@
 
 /* src/renderer/tools/editMetadata/editMetadata.css */
 
+:root {
+    --tool-title-color: #ecf0f1;
+    --select-btn-color: #ecf0f1;
+    --select-btn-bg: #2c3e50;
+    --select-btn-border: #3498db;
+    --select-btn-hover-bg: #34495e;
+    --select-btn-hover-border: #3498db;
+    --selected-file-bg: #2c3e50;
+    --selected-file-border: #18222e;
+    --selected-file-color: #ecf0f1;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --metadata-container-bg: #2c3e50;
+    --metadata-container-border: #18222e;
+    --metadata-header-color: #ecf0f1;
+    --metadata-header-border: #34495e;
+    --metadata-label-color: #bdc3c7;
+    --meta-value-color: #ecf0f1;
+    --meta-value-border: #34495e;
+    --meta-value-empty-color: #7f8c8d;
+    --metadata-input-bg: #1c2833;
+    --metadata-input-border: #34495e;
+    --metadata-input-color: #ecf0f1;
+    --metadata-input-focus-border: #3498db;
+    --secondary-btn-bg: #34495e;
+    --secondary-btn-color: #ecf0f1;
+    --secondary-btn-hover-bg: #3d566e;
+    --error-border: #e74c3c;
+    --error-bg: #2d1b1c;
+    --error-focus-shadow: rgba(231, 76, 60, 0.2);
+    --meta-value-error-color: #e74c3c;
+    --copy-clean-btn-bg: #27ae60;
+    --copy-clean-btn-hover: #219653;
+    --copy-clean-btn-copied: #2ecc71;
+}
+
+body.light {
+    --tool-title-color: #1a1a1a;
+    --select-btn-color: #1a1a1a;
+    --select-btn-bg: #F0EFEA;
+    --select-btn-border: #D97757;
+    --select-btn-hover-bg: #E6E5E0;
+    --select-btn-hover-border: #D97757;
+    --selected-file-bg: #F0EFEA;
+    --selected-file-border: #D1CEC5;
+    --selected-file-color: #1a1a1a;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --metadata-container-bg: #F0EFEA;
+    --metadata-container-border: #D1CEC5;
+    --metadata-header-color: #1a1a1a;
+    --metadata-header-border: #E6E5E0;
+    --metadata-label-color: #666666;
+    --meta-value-color: #1a1a1a;
+    --meta-value-border: #E6E5E0;
+    --meta-value-empty-color: #888888;
+    --metadata-input-bg: #FFFFFF;
+    --metadata-input-border: #D1CEC5;
+    --metadata-input-color: #1a1a1a;
+    --metadata-input-focus-border: #D97757;
+    --secondary-btn-bg: #E6E5E0;
+    --secondary-btn-color: #1a1a1a;
+    --secondary-btn-hover-bg: #D1CEC5;
+    --error-border: #e74c3c;
+    --error-bg: #FFE8E0;
+    --error-focus-shadow: rgba(231, 76, 60, 0.2);
+    --meta-value-error-color: #e74c3c;
+    --copy-clean-btn-bg: #27ae60;
+    --copy-clean-btn-hover: #219653;
+    --copy-clean-btn-copied: #2ecc71;
+}
+
 .tool-title {
     font-size: 1.2rem;
     margin-left: 1rem;
-    color: #ecf0f1;
+    color: var(--tool-title-color);
 }
 
 .tool-container {
@@ -35,40 +107,40 @@
 }
 
 .file-selection-area .select-pdf-btn {
-    color: #ecf0f1;
+    color: var(--select-btn-color);
     width: 100%;
-    border: 2px dashed #3498db;
+    border: 2px dashed var(--select-btn-border);
     border-radius: 8px;
     padding: 2rem;
     text-align: center;
     cursor: pointer;
-    background: #2c3e50;
+    background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
     transition: background 0.2s, border-color 0.2s;
 }
 
 .file-selection-area .select-pdf-btn:hover {
-    background: #34495e;
-    border-color: #3498db;
+    background: var(--select-btn-hover-bg);
+    border-color: var(--select-btn-hover-border);
 }
 
 .selected-file-info {
     display: flex;
     align-items: center;
     padding: 1rem;
-    background: #2c3e50;
+    background: var(--selected-file-bg);
     border-radius: 6px;
     gap: 1rem;
-    color: #ecf0f1;
-    border: 1px solid #18222e;
+    color: var(--selected-file-color);
+    border: 1px solid var(--selected-file-border);
 }
 
 .metadata-container {
-    background: #2c3e50;
+    background: var(--metadata-container-bg);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid #18222e;
+    border: 1px solid var(--metadata-container-border);
     max-width: 100%;
     box-sizing: border-box;
 }
@@ -79,13 +151,13 @@
     align-items: center;
     margin-bottom: 1.5rem;
     padding-bottom: 0.8rem;
-    border-bottom: 1px solid #34495e;
+    border-bottom: 1px solid var(--metadata-header-border);
 }
 
 .metadata-header h2 {
     margin: 0;
     font-size: 1.1rem;
-    color: #ecf0f1;
+    color: var(--metadata-header-color);
 }
 
 .metadata-grid {
@@ -105,7 +177,7 @@
 }
 
 .metadata-item label {
-    color: #bdc3c7;
+    color: var(--metadata-label-color);
     font-size: 0.85rem;
     font-weight: 500;
     text-transform: uppercase;
@@ -113,16 +185,16 @@
 }
 
 .meta-value {
-    color: #ecf0f1;
+    color: var(--meta-value-color);
     font-size: 0.95rem;
     padding: 0.5rem 0;
-    border-bottom: 1px solid #34495e;
+    border-bottom: 1px solid var(--meta-value-border);
     min-height: 1.2rem;
 }
 
 .meta-value:empty::before {
     content: "Not set";
-    color: #7f8c8d;
+    color: var(--meta-value-empty-color);
     font-style: italic;
 }
 
@@ -147,7 +219,7 @@
 }
 
 .form-group label {
-    color: #bdc3c7;
+    color: var(--metadata-label-color);
     font-size: 0.85rem;
     font-weight: 500;
     text-transform: uppercase;
@@ -156,10 +228,10 @@
 
 .metadata-input,
 .metadata-textarea {
-    background: #1c2833;
-    border: 1px solid #34495e;
+    background: var(--metadata-input-bg);
+    border: 1px solid var(--metadata-input-border);
     border-radius: 4px;
-    color: #ecf0f1;
+    color: var(--metadata-input-color);
     font-size: 0.95rem;
     padding: 0.6rem;
     width: 100%;
@@ -170,7 +242,7 @@
 .metadata-input:focus,
 .metadata-textarea:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: var(--metadata-input-focus-border);
 }
 
 .metadata-textarea {
@@ -180,8 +252,8 @@
 }
 
 .secondary-btn {
-    background: #34495e;
-    color: #ecf0f1;
+    background: var(--secondary-btn-bg);
+    color: var(--secondary-btn-color);
     border: none;
     border-radius: 6px;
     padding: 0.7rem 1.2rem;
@@ -191,7 +263,7 @@
 }
 
 .secondary-btn:hover {
-    background: #3d566e;
+    background: var(--secondary-btn-hover-bg);
 }
 
 .action-buttons {
@@ -208,18 +280,18 @@
 
 .metadata-input.error,
 .metadata-textarea.error {
-    border-color: #e74c3c;
-    background: #2d1b1c;
+    border-color: var(--error-border);
+    background: var(--error-bg);
 }
 
 .metadata-input.error:focus,
 .metadata-textarea.error:focus {
-    border-color: #e74c3c;
-    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+    border-color: var(--error-border);
+    box-shadow: 0 0 0 2px var(--error-focus-shadow);
 }
 
 .meta-value.error {
-    color: #e74c3c;
+    color: var(--meta-value-error-color);
     font-style: italic;
 }
 
@@ -230,7 +302,7 @@
 }
 
 .copy-clean-metadata-btn {
-    background: #27ae60;
+    background: var(--copy-clean-btn-bg);
     color: white;
     border: none;
     border-radius: 6px;
@@ -244,11 +316,11 @@
 }
 
 .copy-clean-metadata-btn:hover {
-    background: #219653;
+    background: var(--copy-clean-btn-hover);
 }
 
 .copy-clean-metadata-btn.copied {
-    background: #2ecc71;
+    background: var(--copy-clean-btn-copied);
     animation: pulse 0.5s ease-in-out;
 }
 
@@ -272,8 +344,8 @@
     bottom: -30px;
     left: 50%;
     transform: translateX(-50%);
-    background: #34495e;
-    color: white;
+    background: var(--secondary-btn-bg);
+    color: var(--secondary-btn-color);
     padding: 0.3rem 0.6rem;
     border-radius: 4px;
     font-size: 0.8rem;
@@ -288,7 +360,7 @@
 }
 
 .remove-btn {
-    background: #e74c3c;
+    background: var(--remove-btn-bg);
     color: #fff;
     border: none;
     border-radius: 50%;
@@ -305,7 +377,7 @@
 }
 
 .remove-btn:hover {
-    background: #c0392b;
+    background: var(--remove-btn-hover);
 }
 
 .metadata-view {
