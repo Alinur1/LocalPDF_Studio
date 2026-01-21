@@ -20,6 +20,7 @@
 
 import customAlert from '../utils/customAlert.js';
 import i18n from '../utils/i18n.js';
+import { ThemeManager } from '../utils/themeManager.js';
 
 class DonationManager {
     constructor() {
@@ -197,6 +198,7 @@ class DonationManager {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    ThemeManager.init();
     await i18n.init();
     new DonationManager();
 });

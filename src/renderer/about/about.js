@@ -19,8 +19,10 @@
 // src/renderer/about/about.js
 
 import i18n from '../utils/i18n.js';
+import { ThemeManager } from '../utils/themeManager.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    ThemeManager.init();
     await i18n.init();
     fixImagePaths();
     setupButtons();

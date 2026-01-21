@@ -17,6 +17,29 @@
 
 /* src/renderer/about/about.css */
 
+:root {
+  /* About Page - Dark Theme (override defaults) */
+  --about-bg-card: #2c3e50;
+  --about-border: #34495e;
+  --about-text: #ecf0f1;
+  --about-text-secondary: #bdc3c7;
+  --about-gradient-start: #3498db;
+  --about-gradient-end: #2ecc71;
+  --about-gradient-dark: #2980b9;
+  --about-shadow: rgba(0, 0, 0, 0.3);
+}
+
+body.light {
+  --about-bg-card: #FFFFFF;
+  --about-border: #D1CEC5;
+  --about-text: #1a1a1a;
+  --about-text-secondary: #666666;
+  --about-gradient-start: #D97757;
+  --about-gradient-end: #C06647;
+  --about-gradient-dark: #B85A3D;
+  --about-shadow: rgba(0, 0, 0, 0.08);
+}
+
 .about-container {
   max-width: 1920px;
   padding: 1rem;
@@ -30,13 +53,14 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: var(--bg-primary);
 }
 
 main {
   flex: 1;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #3498db #1e2a38;
+  scrollbar-color: var(--about-gradient-start) var(--bg-primary);
 }
 
 main::-webkit-scrollbar {
@@ -44,20 +68,20 @@ main::-webkit-scrollbar {
 }
 
 main::-webkit-scrollbar-track {
-  background: #1e2a38;
+  background: var(--bg-primary);
 }
 
 main::-webkit-scrollbar-thumb {
-  background: #3498db;
+  background: var(--about-gradient-start);
   border-radius: 4px;
 }
 
 main::-webkit-scrollbar-thumb:hover {
-  background: #2980b9;
+  background: var(--about-gradient-dark);
 }
 
 .page-title {
-  color: #ecf0f1;
+  color: var(--about-text);
   font-size: 1.5rem;
   margin: 0;
   text-align: center;
@@ -67,7 +91,7 @@ main::-webkit-scrollbar-thumb:hover {
 .hero-section {
   text-align: left;
   padding: 2rem 0;
-  border-bottom: 1px solid #34495e;
+  border-bottom: 1px solid var(--about-border);
   width: 100%;
 }
 
@@ -79,7 +103,7 @@ main::-webkit-scrollbar-thumb:hover {
   font-size: 4rem;
   width: 120px;
   height: 120px;
-  background: linear-gradient(135deg, #3498db, #2980b9);
+  background: linear-gradient(135deg, var(--about-gradient-start), var(--about-gradient-dark));
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -90,9 +114,9 @@ main::-webkit-scrollbar-thumb:hover {
 .app-name {
   font-size: 3rem;
   font-weight: 700;
-  color: #ecf0f1;
+  color: var(--about-text);
   margin: 0 0 0.5rem 0;
-  background: linear-gradient(135deg, #3498db, #2ecc71);
+  background: linear-gradient(135deg, var(--about-gradient-start), var(--about-gradient-end));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -100,20 +124,20 @@ main::-webkit-scrollbar-thumb:hover {
 
 .app-version {
   font-size: 1.2rem;
-  color: #bdc3c7;
+  color: var(--about-text-secondary);
   margin: 0 0 1rem 0;
 }
 
 .app-tagline {
   font-size: 1.5rem;
-  color: #3498db;
+  color: var(--about-gradient-start);
   font-weight: 600;
   margin: 0 0 1rem 0;
 }
 
 .app-description {
   font-size: 1.1rem;
-  color: #bdc3c7;
+  color: var(--about-text-secondary);
   line-height: 1.6;
   max-width: 700px;
   margin: 0;
@@ -121,7 +145,7 @@ main::-webkit-scrollbar-thumb:hover {
 
 .section-title {
   font-size: 2rem;
-  color: #ecf0f1;
+  color: var(--about-text);
   text-align: left;
   margin: 0 0 2rem 0;
   position: relative;
@@ -135,7 +159,7 @@ main::-webkit-scrollbar-thumb:hover {
   left: 0;
   width: 60px;
   height: 3px;
-  background: linear-gradient(90deg, #3498db, #2ecc71);
+  background: linear-gradient(90deg, var(--about-gradient-start), var(--about-gradient-end));
   border-radius: 2px;
 }
 
@@ -151,11 +175,11 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .feature-card {
-  background: #2c3e50;
+  background: var(--about-bg-card);
   padding: 2rem 1.5rem;
   border-radius: 12px;
   text-align: left;
-  border: 1px solid #34495e;
+  border: 1px solid var(--about-border);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -168,13 +192,13 @@ main::-webkit-scrollbar-thumb:hover {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #3498db, #2ecc71);
+  background: linear-gradient(90deg, var(--about-gradient-start), var(--about-gradient-end));
 }
 
 .feature-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  border-color: #3498db;
+  box-shadow: 0 10px 30px var(--about-shadow);
+  border-color: var(--about-gradient-start);
 }
 
 .feature-icon {
@@ -184,13 +208,13 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .feature-card h3 {
-  color: #ecf0f1;
+  color: var(--about-text);
   margin: 0 0 0.75rem 0;
   font-size: 1.2rem;
 }
 
 .feature-card p {
-  color: #bdc3c7;
+  color: var(--about-text-secondary);
   line-height: 1.5;
   margin: 0;
   font-size: 0.95rem;
@@ -213,9 +237,9 @@ main::-webkit-scrollbar-thumb:hover {
   align-items: center;
   gap: 0.875rem;
   padding: 1.5rem 1rem;
-  background: #2c3e50;
+  background: var(--about-bg-card);
   border-radius: 12px;
-  border: 1px solid #34495e;
+  border: 1px solid var(--about-border);
   transition: all 0.3s ease;
   position: relative;
   cursor: help;
@@ -223,7 +247,7 @@ main::-webkit-scrollbar-thumb:hover {
 
 .tech-item:hover {
   transform: translateY(-3px);
-  border-color: #3498db;
+  border-color: var(--about-gradient-start);
   box-shadow: 0 5px 20px rgba(52, 152, 219, 0.2);
 }
 
@@ -234,7 +258,7 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .tech-name {
-  color: #ecf0f1;
+  color: var(--about-text);
   font-weight: 600;
   text-align: center;
   font-size: 0.9rem;
@@ -246,8 +270,8 @@ main::-webkit-scrollbar-thumb:hover {
   bottom: -40px;
   left: 50%;
   transform: translateX(-50%);
-  background: #2c3e50;
-  color: #ecf0f1;
+  background: var(--about-bg-card);
+  color: var(--about-text);
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-size: 0.8rem;
@@ -256,7 +280,7 @@ main::-webkit-scrollbar-thumb:hover {
   visibility: hidden;
   transition: all 0.3s ease;
   z-index: 1000;
-  border: 1px solid #34495e;
+  border: 1px solid var(--about-border);
 }
 
 .tech-item:hover::after {
@@ -266,21 +290,21 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .developer-card {
-  background: #2c3e50;
+  background: var(--about-bg-card);
   padding: 2rem;
   border-radius: 12px;
-  border: 1px solid #34495e;
+  border: 1px solid var(--about-border);
   text-align: left;
 }
 
 .developer-info h3 {
-  color: #ecf0f1;
+  color: var(--about-text);
   font-size: 1.5rem;
   margin: 0 0 1rem 0;
 }
 
 .developer-bio {
-  color: #bdc3c7;
+  color: var(--about-text-secondary);
   line-height: 1.6;
   margin-bottom: 1.5rem;
   font-size: 1rem;
@@ -298,15 +322,15 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .license-card {
-  background: #2c3e50;
+  background: var(--about-bg-card);
   padding: 2rem;
   border-radius: 12px;
-  border: 1px solid #34495e;
+  border: 1px solid var(--about-border);
   text-align: left;
 }
 
 .license-card p {
-  color: #bdc3c7;
+  color: var(--about-text-secondary);
   line-height: 1.6;
   margin: 0 0 1rem 0;
   font-size: 1rem;
@@ -349,8 +373,8 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .support-btn.primary {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  color: white;
+  background: linear-gradient(135deg, var(--button-bg), var(--accent-hover));
+  color: var(--button-text);
   font-size: 1.1rem;
   justify-content: center;
   min-width: 200px;
@@ -358,18 +382,18 @@ main::-webkit-scrollbar-thumb:hover {
 
 .support-btn.primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+  box-shadow: 0 8px 25px var(--about-shadow);
 }
 
 .support-btn.secondary {
-  background: #34495e;
-  color: #ecf0f1;
-  border: 1px solid #4a6572;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .support-btn.secondary:hover {
-  background: #3d566e;
-  border-color: #3498db;
+  background: var(--bg-tertiary);
+  border-color: var(--about-gradient-start);
   transform: translateY(-1px);
 }
 
