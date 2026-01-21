@@ -18,10 +18,44 @@
 
 /* src/renderer/tools/mergePdf/mergePdf.css */
 
+:root {
+    --tool-title-color: #ecf0f1;
+    --select-btn-color: #ecf0f1;
+    --select-btn-bg: #2c3e50;
+    --select-btn-border: #3498db;
+    --select-btn-hover-bg: #34495e;
+    --list-item-bg: #2c3e50;
+    --list-item-border: #18222e;
+    --list-item-color: #ecf0f1;
+    --pdf-name-color: #ecf0f1;
+    --pdf-size-color: #bdc3c7;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --secondary-btn-bg: #7f8c8d;
+    --secondary-btn-hover: #95a5a6;
+}
+
+body.light {
+    --tool-title-color: #1a1a1a;
+    --select-btn-color: #1a1a1a;
+    --select-btn-bg: #F0EFEA;
+    --select-btn-border: #D97757;
+    --select-btn-hover-bg: #E6E5E0;
+    --list-item-bg: #F0EFEA;
+    --list-item-border: #D1CEC5;
+    --list-item-color: #1a1a1a;
+    --pdf-name-color: #1a1a1a;
+    --pdf-size-color: #666666;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --secondary-btn-bg: #E2B09F;
+    --secondary-btn-hover: #D97757;
+}
+
 .tool-title {
     font-size: 1.2rem;
     margin-left: 1rem;
-    color: #ecf0f1;
+    color: var(--tool-title-color);
 }
 
 .tool-container {
@@ -34,22 +68,22 @@
 }
 
 .select-pdf-btn {
-    color: #ecf0f1;
+    color: var(--select-btn-color);
     width: 100%;
-    border: 2px dashed #3498db;
+    border: 2px dashed var(--select-btn-border);
     border-radius: 8px;
     padding: 2rem;
     text-align: center;
     cursor: pointer;
-    background: #2c3e50;
+    background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
     transition: background 0.2s, border-color 0.2s;
 }
 
 .select-pdf-btn:hover {
-    background: #34495e;
-    border-color: #3498db;
+    background: var(--select-btn-hover-bg);
+    border-color: var(--select-btn-border);
 }
 
 .pdf-list {
@@ -63,18 +97,18 @@
     align-items: center;
     padding: 1rem;
     margin: 0.3rem 0;
-    background: #2c3e50;
+    background: var(--list-item-bg);
     border-radius: 6px;
     cursor: grab;
     gap: 0.8rem;
-    color: #ecf0f1;
-    border: 1px solid #18222e;
+    color: var(--list-item-color);
+    border: 1px solid var(--list-item-border);
 }
 
 .pdf-thumbnail {
     width: 90px;
     height: 140px;
-    border: 1px solid #18222e;
+    border: 1px solid var(--list-item-border);
     border-radius: 4px;
     flex-shrink: 0;
     background: white;
@@ -91,16 +125,16 @@
 .pdf-name {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #ecf0f1;
+    color: var(--pdf-name-color);
 }
 
 .pdf-size {
     font-size: 0.75rem;
-    color: #bdc3c7;
+    color: var(--pdf-size-color);
 }
 
 .remove-btn {
-    background: #e74c3c;
+    background: var(--remove-btn-bg);
     color: #fff;
     border: none;
     border-radius: 50%;
@@ -115,7 +149,7 @@
 }
 
 .remove-btn:hover {
-    background: #c0392b;
+    background: var(--remove-btn-hover);
 }
 
 .action-buttons {
@@ -127,9 +161,9 @@
 }
 
 .top-btn.secondary {
-    background: #7f8c8d;
+    background: var(--secondary-btn-bg);
 }
 
 .top-btn.secondary:hover {
-    background: #95a5a6;
+    background: var(--secondary-btn-hover);
 }

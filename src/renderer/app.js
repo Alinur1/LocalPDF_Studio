@@ -314,8 +314,7 @@ window.addEventListener('DOMContentLoaded', async() => {
         const clockEnabled = document.getElementById('clock-enabled').checked;
         const searchEnabled = document.getElementById('search-enabled').checked;
         const selectedLanguage = languageSelect.value;
-        // ✅ ADD Theme
-        const selectedTheme =document.querySelector('input[name="theme-mode"]:checked')?.value || 'system';
+        const selectedTheme = document.querySelector('input[name="theme-mode"]:checked')?.value || 'system';
         localStorage.setItem('theme', selectedTheme);
         applyTheme(selectedTheme);
         localStorage.setItem('language', selectedLanguage);
@@ -398,13 +397,14 @@ window.addEventListener('DOMContentLoaded', async() => {
 
     // Theme Utility functions
     function applyTheme(theme) {
-    document.body.classList.remove('dark', 'light');
+    document.body.classList.remove('light');
 
     if (theme === 'system') {
         const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.body.classList.add(isDark ? 'dark' : 'light');
-    } else {
-        document.body.classList.add(theme);
+        // Only add 'light' class if system is light
+        if (!isDark) document.body.classList.add('light');
+    } else if (theme === 'light') {
+        document.body.classList.add('light');
     }
 }
 
@@ -422,7 +422,10 @@ const savedTheme = localStorage.getItem('theme') || 'system';
 applyTheme(savedTheme);
 
 // Set radio state
-document.querySelector(`input[name="theme-mode"][value="${savedTheme}"]`).checked = true;
+const themeRadio = document.querySelector(`input[name="theme-mode"][value="${savedTheme}"]`);
+if (themeRadio) {
+    themeRadio.checked = true;
+}
 
 themeRadios.forEach(radio => {
     radio.addEventListener('change', (e) => {

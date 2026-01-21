@@ -36,7 +36,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--modal-overlay);
   backdrop-filter: blur(5px);
 }
 
@@ -47,15 +47,15 @@
 /* --- Modal Container --- */
 .modal-container {
   position: relative;
-  background: #2c3e50;
+  background: var(--modal-bg);
   border-radius: 12px;
   width: 500px;
   max-width: 90vw;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  border: 1px solid #34495e;
+  box-shadow: 0 20px 60px var(--shadow-color);
+  border: 1px solid var(--border-color);
   overflow: hidden;
   animation: modalSlideIn 0.3s ease-out;
 }
@@ -78,14 +78,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid #34495e;
-  background: rgba(44, 62, 80, 0.9);
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(44, 62, 80, 0.05);
 }
 
 .modal-title {
   margin: 0;
   font-size: 1.4rem;
-  color: #ecf0f1;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -99,7 +99,7 @@
 .modal-close {
   background: none;
   border: none;
-  color: #bdc3c7;
+  color: var(--text-secondary);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.25rem;
@@ -123,7 +123,7 @@
   flex: 1;
   padding: 1.5rem;
   overflow-y: auto;
-  background: #2c3e50;
+  background: var(--modal-bg);
 }
 
 /* Settings Categories */
@@ -133,7 +133,7 @@
 
 .category-title {
   font-size: 1.1rem;
-  color: #3498db;
+  color: var(--accent-color);
   margin: 0 0 1rem 0;
   display: flex;
   align-items: center;
@@ -147,7 +147,7 @@
 
 .settings-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, #34495e, transparent);
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
   margin: 1.5rem 0;
 }
 
@@ -164,8 +164,8 @@
   gap: 1rem;
   padding: 1rem;
   border-radius: 8px;
-  background: rgba(52, 73, 94, 0.5);
-  border: 1px solid transparent;
+  background: rgba(52, 73, 94, 0.05);
+  border: 1px solid var(--border-color);
   transition: all 0.2s ease;
   cursor: pointer;
 }
@@ -174,9 +174,9 @@
   width: 150px;
   padding: 0.5rem;
   border-radius: 6px;
-  background: #34495e;
-  color: #ecf0f1;
-  border: 1px solid #4a5f7a;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   font-size: 0.9rem;
   cursor: pointer;
   -webkit-appearance: none;
@@ -190,19 +190,19 @@
 }
 
 .styled-select:hover {
-  background: #3d566e;
-  border-color: #3498db;
+  background: var(--input-bg);
+  border-color: var(--accent-color);
 }
 
 .styled-select:focus {
   outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.2);
 }
 
 .option-item:hover {
-  background: rgba(52, 73, 94, 0.8);
-  border-color: #3498db;
+  background: rgba(52, 73, 94, 0.1);
+  border-color: var(--accent-color);
   transform: translateY(-1px);
 }
 
@@ -215,20 +215,20 @@
 
 .option-title {
   font-weight: 600;
-  color: #ecf0f1;
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
 .option-description {
   font-size: 0.85rem;
-  color: #bdc3c7;
+  color: var(--text-secondary);
   line-height: 1.4;
 }
 
 /* Radio Options */
 .radio-option input[type="radio"] {
   margin-top: 0.25rem;
-  accent-color: #3498db;
+  accent-color: var(--accent-color);
   transform: scale(1.2);
 }
 
@@ -241,7 +241,7 @@
   position: relative;
   width: 50px;
   height: 24px;
-  background: #34495e;
+  background: var(--border-color);
   border-radius: 12px;
   transition: background 0.3s ease;
   flex-shrink: 0;
@@ -253,7 +253,7 @@
   position: absolute;
   width: 18px;
   height: 18px;
-  background: #ecf0f1;
+  background: var(--bg-primary);
   border-radius: 50%;
   top: 3px;
   left: 3px;
@@ -265,7 +265,7 @@
 }
 
 .toggle-option input[type="checkbox"]:checked + .toggle-slider {
-  background: #3498db;
+  background: var(--accent-color);
 }
 
 .toggle-option input[type="checkbox"]:checked + .toggle-slider::after {
@@ -278,11 +278,11 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: rgba(52, 152, 219, 0.1);
-  border: 1px solid rgba(52, 152, 219, 0.3);
+  background: rgba(217, 119, 87, 0.1);
+  border: 1px solid rgba(217, 119, 87, 0.3);
   border-radius: 6px;
   font-size: 0.8rem;
-  color: #7f8c8d;
+  color: var(--text-secondary);
   margin-top: 0.5rem;
 }
 
@@ -293,8 +293,8 @@
 /* --- Modal Footer --- */
 .modal-footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid #34495e;
-  background: rgba(44, 62, 80, 0.9);
+  border-top: 1px solid var(--border-color);
+  background: rgba(44, 62, 80, 0.05);
 }
 
 .footer-actions {
@@ -319,25 +319,25 @@
 }
 
 .btn-primary {
-  background: #3498db;
+  background: var(--accent-color);
   color: white;
 }
 
 .btn-primary:hover {
-  background: #2980b9;
+  background: var(--accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3);
 }
 
 .btn-secondary {
-  background: #34495e;
-  color: #bdc3c7;
-  border: 1px solid #4a5f7a;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-  background: #3d566e;
-  color: #ecf0f1;
+  background: var(--input-bg);
+  color: var(--text-primary);
   transform: translateY(-1px);
 }
 
@@ -351,17 +351,17 @@
 }
 
 .modal-body::-webkit-scrollbar-track {
-  background: #34495e;
+  background: var(--border-color);
   border-radius: 3px;
 }
 
 .modal-body::-webkit-scrollbar-thumb {
-  background: #3498db;
+  background: var(--accent-color);
   border-radius: 3px;
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover {
-  background: #2980b9;
+  background: var(--accent-hover);
 }
 
 /* Update Status Section */
@@ -372,17 +372,37 @@
   gap: 1rem;
   width: 100%;
   padding: 1rem;
-  background: rgba(52, 73, 94, 0.5);
+  background: rgba(52, 73, 94, 0.05);
   border-radius: 8px;
+  border: 1px solid var(--border-color);
 }
 
 #update-status-message {
   font-size: 0.9rem;
-  color: #bdc3c7;
+  color: var(--text-secondary);
   text-align: center;
 }
 
 #check-for-updates-btn {
   width: 100%;
   justify-content: center;
+}
+
+/* Dark mode specific overrides for modal header */
+body.dark .modal-header,
+body.dark .modal-footer {
+  background: rgba(44, 62, 80, 0.9);
+}
+
+body.dark .option-item {
+  background: rgba(52, 73, 94, 0.5);
+}
+
+body.dark .update-status-container {
+  background: rgba(52, 73, 94, 0.5);
+}
+
+body.dark .option-note {
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid rgba(52, 152, 219, 0.3);
 }

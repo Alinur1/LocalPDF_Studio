@@ -15,10 +15,10 @@
  * - PDF Engine: PdfSharp + Mozilla PDF.js
 **/
 
-import i18n from "./i18n.js";
-
 
 // src/renderer/utils/searchBar.js
+
+import i18n from "./i18n.js";
 
 export class SearchBar {
     constructor(searchIndexManager, tabManager) {
@@ -31,6 +31,7 @@ export class SearchBar {
 
         this.createSearchBar();
         this.setupEventListeners();
+        this.setupThemeObserver(); // Add theme observer
     }
 
     createSearchBar() {
@@ -48,11 +49,31 @@ export class SearchBar {
         this.results = this.container.querySelector('.search-results');
         const topBar = document.querySelector('.top-bar');
         topBar.appendChild(this.container);
-        
+
         // Set initial placeholder
         this.updatePlaceholder();
+        // Apply initial theme styles
+        this.applyThemeStyles();
     }
-    
+
+    setupThemeObserver() {
+        // Observe theme changes on body
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    this.applyThemeStyles();
+                }
+            });
+        });
+
+        observer.observe(document.body, { attributes: true });
+    }
+
+    applyThemeStyles() {
+        // This will automatically use CSS variables defined in main.css
+        // No additional styling needed here since we're using CSS variables
+    }
+
     updatePlaceholder() {
         this.input.placeholder = i18n.t('search.placeholder');
     }
@@ -77,6 +98,13 @@ export class SearchBar {
         this.input.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.input.blur();
+                this.hideResults();
+            }
+        });
+
+        // Close results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!this.container.contains(e.target)) {
                 this.hideResults();
             }
         });
@@ -109,20 +137,52 @@ export class SearchBar {
             const isValid = await this.searchIndexManager.validateFile(file.filePath);
             resultItem.classList.toggle('file-missing', !isValid);
 
+            // Use CSS variables for inline styles
+            resultItem.style.cssText = `
+                border-bottom: 1px solid var(--border-color);
+                color: var(--text-primary);
+                transition: background-color 0.2s ease;
+            `;
+
             resultItem.innerHTML = `
                 <div class="search-result-content">
-                    <div class="search-result-title">${file.fileName}</div>
-                    <div class="search-result-path">${file.filePath}</div>
-                    <div class="search-result-meta">
+                    <div class="search-result-title" style="color: var(--text-primary);">${file.fileName}</div>
+                    <div class="search-result-path" style="color: var(--text-secondary);">${file.filePath}</div>
+                    <div class="search-result-meta" style="color: var(--text-tertiary);">
                         ${i18n.t('search.opened')} ${file.openCount} ${i18n.t('search.times')} • ${new Date(file.lastOpened).toLocaleDateString()}
                     </div>
                 </div>
-                ${!isValid ? `<div class="file-missing-badge">${i18n.t('search.fileNotFound')}</div>` : ''}
+                ${!isValid ? `<div class="file-missing-badge" style="background: #e74c3c; color: white;">${i18n.t('search.fileNotFound')}</div>` : ''}
             `;
 
             if (isValid) {
                 resultItem.addEventListener('click', () => {
                     this.openFile(file.filePath);
+                });
+
+                resultItem.addEventListener('mouseenter', () => {
+                    resultItem.style.backgroundColor = 'var(--accent-color)';
+                    resultItem.style.color = 'white';
+                    resultItem.querySelector('.search-result-title').style.color = 'white';
+                    resultItem.querySelector('.search-result-path').style.color = 'rgba(255, 255, 255, 0.9)';
+                    resultItem.querySelector('.search-result-meta').style.color = 'rgba(255, 255, 255, 0.8)';
+                });
+
+                resultItem.addEventListener('mouseleave', () => {
+                    resultItem.style.backgroundColor = '';
+                    resultItem.style.color = 'var(--text-primary)';
+                    resultItem.querySelector('.search-result-title').style.color = 'var(--text-primary)';
+                    resultItem.querySelector('.search-result-path').style.color = 'var(--text-secondary)';
+                    resultItem.querySelector('.search-result-meta').style.color = 'var(--text-tertiary)';
+                });
+            } else {
+                resultItem.style.cursor = 'not-allowed';
+                resultItem.addEventListener('mouseenter', () => {
+                    resultItem.style.backgroundColor = '#e74c3c';
+                });
+
+                resultItem.addEventListener('mouseleave', () => {
+                    resultItem.style.backgroundColor = '';
                 });
             }
 
@@ -195,6 +255,21 @@ export class SearchBar {
 
     showResults() {
         this.results.classList.remove('hidden');
+        // Ensure proper styling when showing results
+        this.results.style.cssText = `
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 8px 24px var(--shadow-color);
+            z-index: 1003;
+        `;
     }
 
     hideResults() {
@@ -209,7 +284,7 @@ export class SearchBar {
             this.hideResults();
         }
     }
-    
+
     // Called when language changes to update dynamic text
     updateLanguage() {
         this.updatePlaceholder();
