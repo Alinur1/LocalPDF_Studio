@@ -18,10 +18,96 @@
 
 /* src/renderer/tools/splitPdf/splitPdf.css */
 
+:root {
+    --tool-title-color: #ecf0f1;
+    --select-btn-color: #ecf0f1;
+    --select-btn-bg: #2c3e50;
+    --select-btn-border: #3498db;
+    --select-btn-hover-bg: #34495e;
+    --selected-file-bg: #2c3e50;
+    --selected-file-border: #18222e;
+    --selected-file-color: #ecf0f1;
+    --pdf-name-color: #ecf0f1;
+    --pdf-size-color: #bdc3c7;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --preview-container-bg: #2c3e50;
+    --preview-container-border: #18222e;
+    --preview-header-color: #ecf0f1;
+    --preview-header-border: #34495e;
+    --page-count-bg: #34495e;
+    --page-count-color: #bdc3c7;
+    --preview-grid-bg: #1c2833;
+    --preview-grid-scroll-track: #1c2833;
+    --preview-grid-scroll-thumb: #34495e;
+    --preview-grid-scroll-thumb-hover: #4a5f7f;
+    --page-thumbnail-bg: #1c2833;
+    --page-thumbnail-border: #34495e;
+    --page-thumbnail-hover-border: #3498db;
+    --page-label-color: #bdc3c7;
+    --split-options-bg: #2c3e50;
+    --split-options-border: #18222e;
+    --split-options-title-color: #ecf0f1;
+    --split-options-title-border: #34495e;
+    --radio-label-color: #bdc3c7;
+    --radio-accent: #3498db;
+    --options-panel-border: #34495e;
+    --options-input-bg: #1c2833;
+    --options-input-border: #34495e;
+    --options-input-color: #ecf0f1;
+    --options-input-focus-border: #3498db;
+    --options-label-color: #bdc3c7;
+    --help-text-color: #7f8c8d;
+    --disabled-btn-bg: #34495e;
+}
+
+body.light {
+    --tool-title-color: #1a1a1a;
+    --select-btn-color: #1a1a1a;
+    --select-btn-bg: #F0EFEA;
+    --select-btn-border: #D97757;
+    --select-btn-hover-bg: #E6E5E0;
+    --selected-file-bg: #F0EFEA;
+    --selected-file-border: #D1CEC5;
+    --selected-file-color: #1a1a1a;
+    --pdf-name-color: #1a1a1a;
+    --pdf-size-color: #666666;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --preview-container-bg: #F0EFEA;
+    --preview-container-border: #D1CEC5;
+    --preview-header-color: #1a1a1a;
+    --preview-header-border: #E6E5E0;
+    --page-count-bg: #E6E5E0;
+    --page-count-color: #666666;
+    --preview-grid-bg: #FAF9F5;
+    --preview-grid-scroll-track: #E6E5E0;
+    --preview-grid-scroll-thumb: #D1CEC5;
+    --preview-grid-scroll-thumb-hover: #D97757;
+    --page-thumbnail-bg: #FAF9F5;
+    --page-thumbnail-border: #D1CEC5;
+    --page-thumbnail-hover-border: #D97757;
+    --page-label-color: #666666;
+    --split-options-bg: #F0EFEA;
+    --split-options-border: #D1CEC5;
+    --split-options-title-color: #1a1a1a;
+    --split-options-title-border: #E6E5E0;
+    --radio-label-color: #666666;
+    --radio-accent: #D97757;
+    --options-panel-border: #E6E5E0;
+    --options-input-bg: #FFFFFF;
+    --options-input-border: #D1CEC5;
+    --options-input-color: #1a1a1a;
+    --options-input-focus-border: #D97757;
+    --options-label-color: #666666;
+    --help-text-color: #888888;
+    --disabled-btn-bg: #E2B09F;
+}
+
 .tool-title {
     font-size: 1.2rem;
     margin-left: 1rem;
-    color: #ecf0f1;
+    color: var(--tool-title-color);
 }
 
 .tool-container {
@@ -34,50 +120,50 @@
 }
 
 .file-selection-area .select-pdf-btn {
-    color: #ecf0f1;
+    color: var(--select-btn-color);
     width: 100%;
-    border: 2px dashed #3498db;
+    border: 2px dashed var(--select-btn-border);
     border-radius: 8px;
     padding: 2rem;
     text-align: center;
     cursor: pointer;
-    background: #2c3e50;
+    background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
     transition: background 0.2s, border-color 0.2s;
 }
 
 .file-selection-area .select-pdf-btn:hover {
-    background: #34495e;
-    border-color: #3498db;
+    background: var(--select-btn-hover-bg);
+    border-color: var(--select-btn-border);
 }
 
 .selected-file-info {
     display: flex;
     align-items: center;
     padding: 1rem;
-    background: #2c3e50;
+    background: var(--selected-file-bg);
     border-radius: 6px;
     gap: 1rem;
-    color: #ecf0f1;
-    border: 1px solid #18222e;
+    color: var(--selected-file-color);
+    border: 1px solid var(--selected-file-border);
 }
 
 .pdf-name {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #ecf0f1;
+    color: var(--pdf-name-color);
     margin: 0 0 0.3rem 0;
 }
 
 .pdf-size {
     font-size: 0.75rem;
-    color: #bdc3c7;
+    color: var(--pdf-size-color);
     margin: 0;
 }
 
 .remove-btn {
-    background: #e74c3c;
+    background: var(--remove-btn-bg);
     color: #fff;
     border: none;
     border-radius: 50%;
@@ -94,14 +180,14 @@
 }
 
 .remove-btn:hover {
-    background: #c0392b;
+    background: var(--remove-btn-hover);
 }
 
 .preview-container {
-    background: #2c3e50;
+    background: var(--preview-container-bg);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid #18222e;
+    border: 1px solid var(--preview-container-border);
     max-height: 500px;
     display: flex;
     flex-direction: column;
@@ -113,19 +199,19 @@
     align-items: center;
     margin-bottom: 1rem;
     padding-bottom: 0.8rem;
-    border-bottom: 1px solid #34495e;
+    border-bottom: 1px solid var(--preview-header-border);
 }
 
 .preview-header h3 {
     margin: 0;
     font-size: 1.1rem;
-    color: #ecf0f1;
+    color: var(--preview-header-color);
 }
 
 .page-count {
     font-size: 0.85rem;
-    color: #bdc3c7;
-    background: #34495e;
+    color: var(--page-count-color);
+    background: var(--page-count-bg);
     padding: 0.3rem 0.8rem;
     border-radius: 4px;
 }
@@ -144,33 +230,33 @@
 }
 
 .preview-grid::-webkit-scrollbar-track {
-    background: #1c2833;
+    background: var(--preview-grid-scroll-track);
     border-radius: 4px;
 }
 
 .preview-grid::-webkit-scrollbar-thumb {
-    background: #34495e;
+    background: var(--preview-grid-scroll-thumb);
     border-radius: 4px;
 }
 
 .preview-grid::-webkit-scrollbar-thumb:hover {
-    background: #4a5f7f;
+    background: var(--preview-grid-scroll-thumb-hover);
 }
 
 .page-thumbnail {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #1c2833;
+    background: var(--page-thumbnail-bg);
     border-radius: 6px;
     padding: 0.5rem;
-    border: 2px solid #34495e;
+    border: 2px solid var(--page-thumbnail-border);
     transition: border-color 0.2s, transform 0.2s;
     cursor: pointer;
 }
 
 .page-thumbnail:hover {
-    border-color: #3498db;
+    border-color: var(--page-thumbnail-hover-border);
     transform: translateY(-2px);
 }
 
@@ -184,23 +270,23 @@
 .page-label {
     margin-top: 0.5rem;
     font-size: 0.75rem;
-    color: #bdc3c7;
+    color: var(--page-label-color);
     text-align: center;
 }
 
 .split-options-container {
-    background: #2c3e50;
+    background: var(--split-options-bg);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid #18222e;
+    border: 1px solid var(--split-options-border);
 }
 
 .split-options-container h2 {
     margin-top: 0;
     margin-bottom: 1.5rem;
     font-size: 1.1rem;
-    color: #ecf0f1;
-    border-bottom: 1px solid #34495e;
+    color: var(--split-options-title-color);
+    border-bottom: 1px solid var(--split-options-title-border);
     padding-bottom: 0.8rem;
 }
 
@@ -213,39 +299,39 @@
 .split-method label {
     margin-left: 0.5rem;
     cursor: pointer;
-    color: #bdc3c7;
+    color: var(--radio-label-color);
     font-size: 0.95rem;
 }
 
 .split-method input[type="radio"] {
-    accent-color: #3498db;
+    accent-color: var(--radio-accent);
     cursor: pointer;
 }
 
 .options-panel {
     padding-left: 2rem;
     margin-bottom: 1rem;
-    border-left: 2px solid #34495e;
+    border-left: 2px solid var(--options-panel-border);
 }
 
 .options-input {
     width: 100%;
     padding: 0.6rem;
-    background: #1c2833;
-    border: 1px solid #34495e;
+    background: var(--options-input-bg);
+    border: 1px solid var(--options-input-border);
     border-radius: 4px;
-    color: #ecf0f1;
+    color: var(--options-input-color);
     font-size: 0.9rem;
     margin-bottom: 0.3rem;
 }
 
 .options-input:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: var(--options-input-focus-border);
 }
 
 .options-panel label {
-    color: #bdc3c7;
+    color: var(--options-label-color);
     font-size: 0.9rem;
     display: block;
     margin-bottom: 0.5rem;
@@ -253,7 +339,7 @@
 
 .help-text {
     display: block;
-    color: #7f8c8d;
+    color: var(--help-text-color);
     font-size: 0.75rem;
     font-style: italic;
     margin-top: 0.3rem;
@@ -274,9 +360,9 @@
 .action-buttons .top-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: #34495e;
+    background: var(--disabled-btn-bg);
 }
 
 .action-buttons .top-btn:disabled:hover {
-    background: #34495e;
+    background: var(--disabled-btn-bg);
 }
