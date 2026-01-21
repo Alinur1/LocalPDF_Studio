@@ -17,6 +17,8 @@
 
 /* src/renderer/styles/main.css */
 
+@import "./loading.css";
+
 :root {
   /* Dark Theme */
   --bg-primary: #1e2a38;
@@ -63,8 +65,6 @@ body.light {
   --modal-bg: #FFFFFF;
   --modal-overlay: rgba(0, 0, 0, 0.3);
 }
-
-@import "./loading.css";
 
 * {
   margin: 0;
