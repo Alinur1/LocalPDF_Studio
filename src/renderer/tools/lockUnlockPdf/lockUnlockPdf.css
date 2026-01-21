@@ -18,10 +18,94 @@
 
 /* src/renderer/tools/lockUnlockPdf/lockUnlockPdf.css */
 
+:root {
+    --tool-title-color: #ecf0f1;
+    --select-btn-color: #ecf0f1;
+    --select-btn-bg: #2c3e50;
+    --select-btn-border: #3498db;
+    --select-btn-hover-bg: #34495e;
+    --select-btn-hover-border: #3498db;
+    --selected-file-bg: #2c3e50;
+    --selected-file-border: #18222e;
+    --selected-file-color: #ecf0f1;
+    --pdf-security-color: #f39c12;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --options-container-bg: #2c3e50;
+    --options-container-border: #18222e;
+    --options-title-color: #ecf0f1;
+    --options-title-border: #34495e;
+    --option-label-color: #bdc3c7;
+    --radio-label-color: #bdc3c7;
+    --operation-label-color: #ecf0f1;
+    --password-input-bg: #1c2833;
+    --password-input-border: #34495e;
+    --password-input-color: #ecf0f1;
+    --password-input-focus-border: #3498db;
+    --toggle-password-color: #bdc3c7;
+    --toggle-password-hover-color: #3498db;
+    --toggle-password-hover-bg: rgba(52, 152, 219, 0.1);
+    --permissions-grid-bg: #1c2833;
+    --permissions-grid-border: #34495e;
+    --permission-item-hover-bg: #2c3e50;
+    --options-select-bg: #1c2833;
+    --options-select-border: #34495e;
+    --options-select-color: #ecf0f1;
+    --options-select-focus-border: #3498db;
+    --help-text-color: #7f8c8d;
+    --security-locked-color: #e74c3c;
+    --security-unlocked-color: #2ecc71;
+    --password-error-border: #e74c3c;
+    --password-error-bg: #2d1b1c;
+    --password-error-focus-shadow: rgba(231, 76, 60, 0.2);
+}
+
+body.light {
+    --tool-title-color: #1a1a1a;
+    --select-btn-color: #1a1a1a;
+    --select-btn-bg: #F0EFEA;
+    --select-btn-border: #D97757;
+    --select-btn-hover-bg: #E6E5E0;
+    --select-btn-hover-border: #D97757;
+    --selected-file-bg: #F0EFEA;
+    --selected-file-border: #D1CEC5;
+    --selected-file-color: #1a1a1a;
+    --pdf-security-color: #D97757;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --options-container-bg: #F0EFEA;
+    --options-container-border: #D1CEC5;
+    --options-title-color: #1a1a1a;
+    --options-title-border: #E6E5E0;
+    --option-label-color: #666666;
+    --radio-label-color: #666666;
+    --operation-label-color: #1a1a1a;
+    --password-input-bg: #FFFFFF;
+    --password-input-border: #D1CEC5;
+    --password-input-color: #1a1a1a;
+    --password-input-focus-border: #D97757;
+    --toggle-password-color: #666666;
+    --toggle-password-hover-color: #D97757;
+    --toggle-password-hover-bg: rgba(217, 119, 87, 0.1);
+    --permissions-grid-bg: #FAF9F5;
+    --permissions-grid-border: #D1CEC5;
+    --permission-item-hover-bg: #E6E5E0;
+    --options-select-bg: #FFFFFF;
+    --options-select-border: #D1CEC5;
+    --options-select-color: #1a1a1a;
+    --options-select-focus-border: #D97757;
+    --help-text-color: #888888;
+    --security-locked-color: #e74c3c;
+    --security-unlocked-color: #27ae60;
+    --password-error-border: #e74c3c;
+    --password-error-bg: #FFE8E0;
+    --password-error-focus-shadow: rgba(231, 76, 60, 0.2);
+}
+
 .tool-title {
     font-size: 1.2rem;
     margin-left: 1rem;
-    color: #ecf0f1;
+    color: var(--tool-title-color);
 }
 
 .tool-container {
@@ -36,46 +120,46 @@
 }
 
 .file-selection-area .select-pdf-btn {
-    color: #ecf0f1;
+    color: var(--select-btn-color);
     width: 100%;
-    border: 2px dashed #3498db;
+    border: 2px dashed var(--select-btn-border);
     border-radius: 8px;
     padding: 2rem;
     text-align: center;
     cursor: pointer;
-    background: #2c3e50;
+    background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
     transition: background 0.2s, border-color 0.2s;
 }
 
 .file-selection-area .select-pdf-btn:hover {
-    background: #34495e;
-    border-color: #3498db;
+    background: var(--select-btn-hover-bg);
+    border-color: var(--select-btn-hover-border);
 }
 
 .selected-file-info {
     display: flex;
     align-items: center;
     padding: 1rem;
-    background: #2c3e50;
+    background: var(--selected-file-bg);
     border-radius: 6px;
     gap: 1rem;
-    color: #ecf0f1;
-    border: 1px solid #18222e;
+    color: var(--selected-file-color);
+    border: 1px solid var(--selected-file-border);
 }
 
 .pdf-security {
     font-size: 0.85rem;
-    color: #f39c12;
+    color: var(--pdf-security-color);
     margin-top: 0.3rem;
 }
 
 .options-container {
-    background: #2c3e50;
+    background: var(--options-container-bg);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid #18222e;
+    border: 1px solid var(--options-container-border);
     max-width: 100%;
     box-sizing: border-box;
 }
@@ -84,8 +168,8 @@
     margin-top: 0;
     margin-bottom: 1.5rem;
     font-size: 1.1rem;
-    color: #ecf0f1;
-    border-bottom: 1px solid #34495e;
+    color: var(--options-title-color);
+    border-bottom: 1px solid var(--options-title-border);
     padding-bottom: 0.8rem;
 }
 
@@ -95,7 +179,7 @@
 
 .option-group label {
     display: block;
-    color: #bdc3c7;
+    color: var(--option-label-color);
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
     font-weight: 500;
@@ -112,6 +196,7 @@
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
+    color: var(--radio-label-color);
 }
 
 .operation-group {
@@ -121,6 +206,7 @@
 .operation-group label {
     font-size: 1rem;
     font-weight: 600;
+    color: var(--operation-label-color);
 }
 
 .password-input-group {
@@ -130,10 +216,10 @@
 }
 
 .password-input {
-    background: #1c2833;
-    border: 1px solid #34495e;
+    background: var(--password-input-bg);
+    border: 1px solid var(--password-input-border);
     border-radius: 4px;
-    color: #ecf0f1;
+    color: var(--password-input-color);
     font-size: 0.9rem;
     padding: 0.6rem;
     width: 100%;
@@ -142,7 +228,7 @@
 
 .password-input:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: var(--password-input-focus-border);
 }
 
 .toggle-password {
@@ -150,16 +236,16 @@
     right: 0.5rem;
     background: none;
     border: none;
-    color: #bdc3c7;
+    color: var(--toggle-password-color);
     cursor: pointer;
     padding: 0.2rem;
     border-radius: 3px;
-    transition: color 0.2s;
+    transition: color 0.2s, background 0.2s;
 }
 
 .toggle-password:hover {
-    color: #3498db;
-    background: rgba(52, 152, 219, 0.1);
+    color: var(--toggle-password-hover-color);
+    background: var(--toggle-password-hover-bg);
 }
 
 .permissions-grid {
@@ -167,9 +253,9 @@
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 0.8rem;
     padding: 0.8rem;
-    background: #1c2833;
+    background: var(--permissions-grid-bg);
     border-radius: 6px;
-    border: 1px solid #34495e;
+    border: 1px solid var(--permissions-grid-border);
 }
 
 .permission-item {
@@ -183,7 +269,7 @@
 }
 
 .permission-item:hover {
-    background: #2c3e50;
+    background: var(--permission-item-hover-bg);
 }
 
 .permission-item input[type="checkbox"] {
@@ -191,10 +277,10 @@
 }
 
 .options-select {
-    background: #1c2833;
-    border: 1px solid #34495e;
+    background: var(--options-select-bg);
+    border: 1px solid var(--options-select-border);
     border-radius: 4px;
-    color: #ecf0f1;
+    color: var(--options-select-color);
     font-size: 0.9rem;
     padding: 0.6rem;
     width: 100%;
@@ -203,13 +289,13 @@
 
 .options-select:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: var(--options-select-focus-border);
 }
 
 .help-text {
     display: block;
     font-size: 0.8rem;
-    color: #7f8c8d;
+    color: var(--help-text-color);
     margin-top: 0.3rem;
 }
 
@@ -226,7 +312,7 @@
 }
 
 .remove-btn {
-    background: #e74c3c;
+    background: var(--remove-btn-bg);
     color: #fff;
     border: none;
     border-radius: 50%;
@@ -243,23 +329,23 @@
 }
 
 .remove-btn:hover {
-    background: #c0392b;
+    background: var(--remove-btn-hover);
 }
 
 .security-locked {
-    color: #e74c3c;
+    color: var(--security-locked-color);
 }
 
 .security-unlocked {
-    color: #2ecc71;
+    color: var(--security-unlocked-color);
 }
 
 .password-input.error {
-    border-color: #e74c3c;
-    background: #2d1b1c;
+    border-color: var(--password-error-border);
+    background: var(--password-error-bg);
 }
 
 .password-input.error:focus {
-    border-color: #e74c3c;
-    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+    border-color: var(--password-error-border);
+    box-shadow: 0 0 0 2px var(--password-error-focus-shadow);
 }
