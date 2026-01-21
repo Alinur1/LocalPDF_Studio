@@ -23,10 +23,12 @@ import customAlert from '../../utils/customAlert.js';
 import loadingUI from '../../utils/loading.js';
 import { initializeGlobalDragDrop } from '../../utils/globalDragDrop.js';
 import i18n from '../../utils/i18n.js';
+import { ThemeManager } from '../../utils/themeManager.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await API.init();
     await i18n.init();
+    ThemeManager.init();
 
     const selectPdfBtn = document.getElementById('select-pdf-btn');
     const removePdfBtn = document.getElementById('remove-pdf-btn');

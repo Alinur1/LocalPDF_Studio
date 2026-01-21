@@ -18,10 +18,92 @@
 
 /* src/renderer/tools/compressPdf/compressPdf.css */
 
+:root {
+    --tool-title-color: #ecf0f1;
+    --select-btn-color: #ecf0f1;
+    --select-btn-bg: #2c3e50;
+    --select-btn-border: #3498db;
+    --select-btn-hover-bg: #34495e;
+    --selected-file-bg: #2c3e50;
+    --selected-file-border: #18222e;
+    --selected-file-color: #ecf0f1;
+    --pdf-name-color: #ecf0f1;
+    --pdf-size-color: #bdc3c7;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --info-section-bg: #2c3e50;
+    --info-section-border: #18222e;
+    --info-section-color: red;
+    --info-card-h3-color: #ecf0f1;
+    --compress-options-bg: #2c3e50;
+    --compress-options-border: #18222e;
+    --compress-options-title-color: #ecf0f1;
+    --compress-options-title-border: #34495e;
+    --quality-section-h3-color: #ecf0f1;
+    --radio-label-bg: #1c2833;
+    --radio-label-border: #34495e;
+    --radio-label-hover-bg: #243342;
+    --radio-label-hover-border: #3498db;
+    --radio-label-checked-bg: #1e3545;
+    --radio-label-checked-border: #3498db;
+    --radio-accent-color: #3498db;
+    --option-title-color: #ecf0f1;
+    --option-desc-color: #95a5a6;
+    --custom-quality-bg: #1c2833;
+    --custom-quality-border: #34495e;
+    --custom-quality-label-color: #ecf0f1;
+    --quality-value-color: #3498db;
+    --slider-bg: #34495e;
+    --slider-accent: #3498db;
+    --slider-labels-color: #7f8c8d;
+    --disabled-btn-bg: #34495e;
+}
+
+body.light {
+    --tool-title-color: #1a1a1a;
+    --select-btn-color: #1a1a1a;
+    --select-btn-bg: #F0EFEA;
+    --select-btn-border: #D97757;
+    --select-btn-hover-bg: #E6E5E0;
+    --selected-file-bg: #F0EFEA;
+    --selected-file-border: #D1CEC5;
+    --selected-file-color: #1a1a1a;
+    --pdf-name-color: #1a1a1a;
+    --pdf-size-color: #666666;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --info-section-bg: #F0EFEA;
+    --info-section-border: #D1CEC5;
+    --info-section-color: #D97757;
+    --info-card-h3-color: #1a1a1a;
+    --compress-options-bg: #F0EFEA;
+    --compress-options-border: #D1CEC5;
+    --compress-options-title-color: #1a1a1a;
+    --compress-options-title-border: #E6E5E0;
+    --quality-section-h3-color: #1a1a1a;
+    --radio-label-bg: #FAF9F5;
+    --radio-label-border: #D1CEC5;
+    --radio-label-hover-bg: #E6E5E0;
+    --radio-label-hover-border: #D97757;
+    --radio-label-checked-bg: #FFE8E0;
+    --radio-label-checked-border: #D97757;
+    --radio-accent-color: #D97757;
+    --option-title-color: #1a1a1a;
+    --option-desc-color: #888888;
+    --custom-quality-bg: #FAF9F5;
+    --custom-quality-border: #D1CEC5;
+    --custom-quality-label-color: #1a1a1a;
+    --quality-value-color: #D97757;
+    --slider-bg: #E6E5E0;
+    --slider-accent: #D97757;
+    --slider-labels-color: #888888;
+    --disabled-btn-bg: #E2B09F;
+}
+
 .tool-title {
     font-size: 1.2rem;
     margin-left: 1rem;
-    color: #ecf0f1;
+    color: var(--tool-title-color);
 }
 
 .tool-container {
@@ -34,50 +116,50 @@
 }
 
 .file-selection-area .select-pdf-btn {
-    color: #ecf0f1;
+    color: var(--select-btn-color);
     width: 100%;
-    border: 2px dashed #3498db;
+    border: 2px dashed var(--select-btn-border);
     border-radius: 8px;
     padding: 2rem;
     text-align: center;
     cursor: pointer;
-    background: #2c3e50;
+    background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
     transition: background 0.2s, border-color 0.2s;
 }
 
 .file-selection-area .select-pdf-btn:hover {
-    background: #34495e;
-    border-color: #3498db;
+    background: var(--select-btn-hover-bg);
+    border-color: var(--select-btn-border);
 }
 
 .selected-file-info {
     display: flex;
     align-items: center;
     padding: 1rem;
-    background: #2c3e50;
+    background: var(--selected-file-bg);
     border-radius: 6px;
     gap: 1rem;
-    color: #ecf0f1;
-    border: 1px solid #18222e;
+    color: var(--selected-file-color);
+    border: 1px solid var(--selected-file-border);
 }
 
 .pdf-name {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #ecf0f1;
+    color: var(--pdf-name-color);
     margin: 0 0 0.3rem 0;
 }
 
 .pdf-size {
     font-size: 0.75rem;
-    color: #bdc3c7;
+    color: var(--pdf-size-color);
     margin: 0;
 }
 
 .remove-btn {
-    background: #e74c3c;
+    background: var(--remove-btn-bg);
     color: #fff;
     border: none;
     border-radius: 50%;
@@ -94,15 +176,15 @@
 }
 
 .remove-btn:hover {
-    background: #c0392b;
+    background: var(--remove-btn-hover);
 }
 
 .info-section {
-    background: #2c3e50;
+    background: var(--info-section-bg);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid #18222e;
-    color: red;
+    border: 1px solid var(--info-section-border);
+    color: var(--info-section-color);
 }
 
 .info-card h3 {
@@ -117,18 +199,18 @@
 }
 
 .compress-options-container {
-    background: #2c3e50;
+    background: var(--compress-options-bg);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid #18222e;
+    border: 1px solid var(--compress-options-border);
 }
 
 .compress-options-container h2 {
     margin-top: 0;
     margin-bottom: 1.5rem;
     font-size: 1.1rem;
-    color: #ecf0f1;
-    border-bottom: 1px solid #34495e;
+    color: var(--compress-options-title-color);
+    border-bottom: 1px solid var(--compress-options-title-border);
     padding-bottom: 0.8rem;
 }
 
@@ -138,7 +220,7 @@
 
 .quality-section h3 {
     font-size: 1rem;
-    color: #ecf0f1;
+    color: var(--quality-section-h3-color);
     margin: 0 0 1rem 0;
 }
 
@@ -151,32 +233,32 @@
     align-items: flex-start;
     cursor: pointer;
     padding: 1rem;
-    background: #1c2833;
+    background: var(--radio-label-bg);
     border-radius: 6px;
-    border: 2px solid #34495e;
+    border: 2px solid var(--radio-label-border);
     transition: all 0.2s;
 }
 
 .radio-label:hover {
-    border-color: #3498db;
-    background: #243342;
+    border-color: var(--radio-label-hover-border);
+    background: var(--radio-label-hover-bg);
 }
 
 .radio-label input[type="radio"] {
     margin-top: 0.2rem;
     margin-right: 0.8rem;
-    accent-color: #3498db;
+    accent-color: var(--radio-accent-color);
     cursor: pointer;
     flex-shrink: 0;
 }
 
 .radio-label input[type="radio"]:checked~.option-content {
-    color: #3498db;
+    color: var(--radio-accent-color);
 }
 
 .radio-label:has(input[type="radio"]:checked) {
-    border-color: #3498db;
-    background: #1e3545;
+    border-color: var(--radio-label-checked-border);
+    background: var(--radio-label-checked-bg);
 }
 
 .option-content {
@@ -188,49 +270,49 @@
 .option-title {
     font-size: 0.95rem;
     font-weight: 500;
-    color: #ecf0f1;
+    color: var(--option-title-color);
 }
 
 .option-desc {
     font-size: 0.8rem;
-    color: #95a5a6;
+    color: var(--option-desc-color);
 }
 
 .custom-quality-section {
     margin-top: 1rem;
     padding: 1rem;
-    background: #1c2833;
+    background: var(--custom-quality-bg);
     border-radius: 6px;
-    border: 1px solid #34495e;
+    border: 1px solid var(--custom-quality-border);
 }
 
 .custom-quality-section label {
     display: block;
-    color: #ecf0f1;
+    color: var(--custom-quality-label-color);
     font-size: 0.9rem;
     margin-bottom: 0.8rem;
 }
 
 #quality-value {
-    color: #3498db;
+    color: var(--quality-value-color);
     font-weight: bold;
 }
 
 #custom-quality-slider {
     width: 100%;
     height: 6px;
-    background: #34495e;
+    background: var(--slider-bg);
     outline: none;
     border-radius: 3px;
     margin-bottom: 0.5rem;
-    accent-color: #3498db;
+    accent-color: var(--slider-accent);
 }
 
 .slider-labels {
     display: flex;
     justify-content: space-between;
     font-size: 0.75rem;
-    color: #7f8c8d;
+    color: var(--slider-labels-color);
 }
 
 .action-buttons {
@@ -248,11 +330,11 @@
 .action-buttons .top-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: #34495e;
+    background: var(--disabled-btn-bg);
 }
 
 .action-buttons .top-btn:disabled:hover {
-    background: #34495e;
+    background: var(--disabled-btn-bg);
 }
 
 .loading-overlay {
@@ -269,21 +351,22 @@
 }
 
 .loading-content {
-    background: #2c3e50;
+    background: var(--compress-options-bg);
     padding: 2rem 3rem;
     border-radius: 8px;
     text-align: center;
-    color: #ecf0f1;
+    color: var(--option-title-color);
+    border: 1px solid var(--compress-options-border);
 }
 
 .loading-content h3 {
     margin: 0 0 1rem 0;
-    color: #3498db;
+    color: var(--radio-accent-color);
 }
 
 .loading-spinner {
-    border: 4px solid #34495e;
-    border-top: 4px solid #3498db;
+    border: 4px solid var(--radio-label-border);
+    border-top: 4px solid var(--radio-accent-color);
     border-radius: 50%;
     width: 40px;
     height: 40px;
