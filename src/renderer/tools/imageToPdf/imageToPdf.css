@@ -16,11 +16,137 @@
 **/
 
 /* src/renderer/tools/imageToPdf/imageToPdf.css */
+:root {
+    /* Dark mode colors */
+    --tool-title-color: #ecf0f1;
+    --select-btn-color: #ecf0f1;
+    --select-btn-bg: #2c3e50;
+    --select-btn-border: #3498db;
+    --select-btn-hover-bg: #34495e;
+    --selected-file-bg: #2c3e50;
+    --selected-file-border: #18222e;
+    --selected-file-color: #ecf0f1;
+    --pdf-name-color: #ecf0f1;
+    --pdf-size-color: #bdc3c7;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --info-section-bg: #2c3e50;
+    --info-section-border: #18222e;
+    --info-section-color: red;
+    --info-card-h3-color: #ecf0f1;
+    --compress-options-bg: #2c3e50;
+    --compress-options-border: #18222e;
+    --compress-options-title-color: #ecf0f1;
+    --compress-options-title-border: #34495e;
+    --quality-section-h3-color: #ecf0f1;
+    --radio-label-bg: #1c2833;
+    --radio-label-border: #34495e;
+    --radio-label-hover-bg: #243342;
+    --radio-label-hover-border: #3498db;
+    --radio-label-checked-bg: #1e3545;
+    --radio-label-checked-border: #3498db;
+    --radio-accent-color: #3498db;
+    --option-title-color: #ecf0f1;
+    --option-desc-color: #95a5a6;
+    --custom-quality-bg: #1c2833;
+    --custom-quality-border: #34495e;
+    --custom-quality-label-color: #ecf0f1;
+    --quality-value-color: #3498db;
+    --slider-bg: #34495e;
+    --slider-accent: #3498db;
+    --slider-labels-color: #7f8c8d;
+    --disabled-btn-bg: #34495e;
+    
+    /* Image to PDF specific dark colors */
+    --image-item-bg: #1c2833;
+    --image-item-border: #34495e;
+    --image-item-hover-shadow: rgba(0, 0, 0, 0.4);
+    --image-preview-bg: #0f1419;
+    --image-preview-fallback-bg: #0f1419;
+    --image-preview-fallback-color: #bdc3c7;
+    --drag-over-border: #2ecc71;
+    --drag-over-bg: #1e3a2e;
+    --image-order-bg: #3498db;
+    --modal-bg: #2c3e50;
+    --modal-border: #34495e;
+    --modal-overlay: rgba(0, 0, 0, 0.6);
+    --close-btn-color: #95a5a6;
+    --close-btn-hover: #ecf0f1;
+    --scrollbar-track: #1c2833;
+    --scrollbar-thumb: #34495e;
+    --scrollbar-thumb-hover: #3d566e;
+    --secondary-btn-bg: #34495e;
+    --secondary-btn-hover: #3d566e;
+}
+
+body.light {
+    /* Light mode colors */
+    --tool-title-color: #1a1a1a;
+    --select-btn-color: #1a1a1a;
+    --select-btn-bg: #F0EFEA;
+    --select-btn-border: #D97757;
+    --select-btn-hover-bg: #E6E5E0;
+    --selected-file-bg: #F0EFEA;
+    --selected-file-border: #D1CEC5;
+    --selected-file-color: #1a1a1a;
+    --pdf-name-color: #1a1a1a;
+    --pdf-size-color: #666666;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --info-section-bg: #F0EFEA;
+    --info-section-border: #D1CEC5;
+    --info-section-color: #D97757;
+    --info-card-h3-color: #1a1a1a;
+    --compress-options-bg: #F0EFEA;
+    --compress-options-border: #D1CEC5;
+    --compress-options-title-color: #1a1a1a;
+    --compress-options-title-border: #E6E5E0;
+    --quality-section-h3-color: #1a1a1a;
+    --radio-label-bg: #FAF9F5;
+    --radio-label-border: #D1CEC5;
+    --radio-label-hover-bg: #E6E5E0;
+    --radio-label-hover-border: #D97757;
+    --radio-label-checked-bg: #FFE8E0;
+    --radio-label-checked-border: #D97757;
+    --radio-accent-color: #D97757;
+    --option-title-color: #1a1a1a;
+    --option-desc-color: #888888;
+    --custom-quality-bg: #FAF9F5;
+    --custom-quality-border: #D1CEC5;
+    --custom-quality-label-color: #1a1a1a;
+    --quality-value-color: #D97757;
+    --slider-bg: #E6E5E0;
+    --slider-accent: #D97757;
+    --slider-labels-color: #888888;
+    --disabled-btn-bg: #E2B09F;
+    
+    /* Image to PDF specific light colors */
+    --image-item-bg: #FFFFFF;
+    --image-item-border: #D1CEC5;
+    --image-item-hover-shadow: rgba(0, 0, 0, 0.1);
+    --image-preview-bg: #FAF9F5;
+    --image-preview-fallback-bg: #F0EFEA;
+    --image-preview-fallback-color: #888888;
+    --drag-over-border: #2ecc71;
+    --drag-over-bg: #E8F5E9;
+    --image-order-bg: #D97757;
+    --modal-bg: #FFFFFF;
+    --modal-border: #D1CEC5;
+    --modal-overlay: rgba(0, 0, 0, 0.5);
+    --close-btn-color: #888888;
+    --close-btn-hover: #1a1a1a;
+    --scrollbar-track: #E6E5E0;
+    --scrollbar-thumb: #D1CEC5;
+    --scrollbar-thumb-hover: #C0BDB5;
+    --secondary-btn-bg: #E6E5E0;
+    --secondary-btn-hover: #D1CEC5;
+}
 
 .tool-title {
     font-size: 1.2rem;
     margin: 0;
-    color: #ecf0f1;
+    /* color: #ecf0f1; */
+    color: var(--tool-title-color);
 }
 
 /* --- Main Container --- */
@@ -43,22 +169,27 @@
 }
 
 .select-images-btn {
-    color: #ecf0f1;
+    /* color: #ecf0f1; */
+      color: var(--select-btn-color);
     width: 100%;
-    border: 2px dashed #3498db;
+    /* border: 2px dashed #3498db; */
+    border: 2px dashed var(--select-btn-border);
     border-radius: 8px;
     padding: 2rem;
     text-align: center;
     cursor: pointer;
-    background: #2c3e50;
+    /* background: #2c3e50; */
+     background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
     transition: background 0.2s, border-color 0.2s;
 }
 
 .select-images-btn:hover {
-    background: #34495e;
-    border-color: #2980b9;
+    /* background: #34495e; */
+    /* border-color: #2980b9; */
+    background: var(--select-btn-hover-bg);
+    border-color: var(--radio-accent-color);
 }
 
 .selected-files-info {
@@ -66,27 +197,33 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
-    background: #2c3e50;
+    /* background: #2c3e50; */
+     background: var(--selected-file-bg);
     border-radius: 6px;
     gap: 1rem;
-    color: #ecf0f1;
-    border: 1px solid #18222e;
+    /* color: #ecf0f1;
+    border: 1px solid #18222e; */
+    color: var(--selected-file-color);
+    border: 1px solid var(--selected-file-border);
 }
 
 .files-count {
     margin: 0;
     font-weight: 500;
-    color: #ecf0f1;
+    /* color: #ecf0f1; */
+     color: var(--pdf-name-color);
 }
 
 .files-size {
     margin: 0.3rem 0 0 0;
     font-size: 0.85rem;
-    color: #bdc3c7;
+    /* color: #bdc3c7; */
+     color: var(--pdf-size-color);
 }
 
 .remove-btn {
-    background: #e74c3c;
+    /* background: #e74c3c; */
+     background: var(--remove-btn-bg);
     color: #fff;
     border: none;
     border-radius: 50%;
@@ -103,7 +240,8 @@
 }
 
 .remove-btn:hover {
-    background: #c0392b;
+    /* background: #c0392b; */
+     background: var(--remove-btn-hover);
 }
 
 /* --- Image to PDF Layout --- */
@@ -120,10 +258,12 @@
     flex: 2;
     display: flex;
     flex-direction: column;
-    background: #2c3e50;
+    /* background: #2c3e50; */
+     background: var(--compress-options-bg);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid #18222e;
+    /* border: 1px solid #18222e; */
+    border: 1px solid var(--compress-options-border);
     min-height: 0;
     overflow: hidden;
 }
@@ -131,10 +271,12 @@
 /* Right Panel: Conversion Options */
 .options-container {
     flex: 1;
-    background: #2c3e50;
+    /* background: #2c3e50; */
+     background: var(--compress-options-bg);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid #18222e;
+    /* border: 1px solid #18222e; */
+    border: 1px solid var(--compress-options-border);
     min-height: 0;
     overflow-y: auto;
     display: flex;
@@ -148,7 +290,8 @@
     align-items: center;
     margin-bottom: 1rem;
     padding-bottom: 0.8rem;
-    border-bottom: 1px solid #34495e;
+    /* border-bottom: 1px solid #34495e; */
+     border-bottom: 1px solid var(--compress-options-title-border);
     flex-wrap: wrap;
     gap: 1rem;
     flex-shrink: 0;
@@ -157,7 +300,8 @@
 .preview-header h3 {
     margin: 0;
     font-size: 1.1rem;
-    color: #ecf0f1;
+    /* color: #ecf0f1; */
+     color: var(--compress-options-title-color);
     flex: 0 0 auto;
 }
 
@@ -180,10 +324,12 @@
 
 .image-item {
     position: relative;
-    background: #1c2833;
+    /* background: #1c2833; */
+     background: var(--image-item-bg);
     border-radius: 6px;
     padding: 0.8rem;
-    border: 2px solid #34495e;
+    /* border: 2px solid #34495e; */
+     border: 2px solid var(--image-item-border);
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -192,7 +338,8 @@
 
 .image-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); */
+     box-shadow: 0 4px 12px var(--image-item-hover-shadow);
     cursor: grab;
 }
 
@@ -202,8 +349,10 @@
 }
 
 .image-item.drag-over {
-    border-color: #2ecc71;
-    background: #1e3a2e;
+    /* border-color: #2ecc71;
+    background: #1e3a2e; */
+     border-color: var(--drag-over-border);
+    background: var(--drag-over-bg);
     transform: translateY(-2px);
 }
 
@@ -212,7 +361,8 @@
     height: 200px;
     object-fit: contain;
     border-radius: 4px;
-    background: #0f1419;
+    /* background: #0f1419; */
+    background: var(--image-preview-bg);
 }
 
 .image-preview-fallback {
@@ -221,9 +371,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #0f1419;
+    /* background: #0f1419; */
+     background: var(--image-preview-fallback-bg);
     border-radius: 4px;
-    color: #bdc3c7;
+    /* color: #bdc3c7; */
+    color: var(--image-preview-fallback-color);
     font-size: 0.85rem;
     text-align: center;
     padding: 1rem;
@@ -237,7 +389,8 @@
 
 .image-name {
     font-size: 0.85rem;
-    color: #ecf0f1;
+    /* color: #ecf0f1; */
+    color: var(--pdf-name-color);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -246,7 +399,8 @@
 
 .image-size {
     font-size: 0.75rem;
-    color: #bdc3c7;
+    /* color: #bdc3c7; */
+    color: var(--pdf-size-color);
 }
 
 .image-actions {
@@ -258,18 +412,21 @@
 
 .drag-handle {
     cursor: grab;
-    color: #bdc3c7;
+    /* color: #bdc3c7; */
+     color: var(--pdf-size-color);
     font-size: 1.2rem;
     padding: 0.2rem;
     user-select: none;
 }
 
 .drag-handle:hover {
-    color: #3498db;
+    /* color: #3498db; */
+     color: var(--radio-accent-color);
 }
 
 .remove-image-btn {
-    background: #e74c3c;
+    /* background: #e74c3c; */
+     background: var(--remove-btn-bg);
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -280,11 +437,13 @@
 }
 
 .remove-image-btn:hover {
-    background: #c0392b;
+    /* background: #c0392b; */
+    background: var(--remove-btn-hover);
 }
 
 .image-order {
-    background: #3498db;
+    /* background: #3498db; */
+     background: var(--image-order-bg);
     color: #fff;
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
@@ -296,8 +455,10 @@
 .options-container h2 {
     margin: 0 0 1.5rem 0;
     font-size: 1.1rem;
-    color: #ecf0f1;
-    border-bottom: 1px solid #34495e;
+    /* color: #ecf0f1;
+    border-bottom: 1px solid #34495e; */
+     color: var(--compress-options-title-color);
+    border-bottom: 1px solid var(--compress-options-title-border);
     padding-bottom: 0.8rem;
     flex-shrink: 0;
 }
@@ -308,7 +469,8 @@
 
 .option-group label {
     display: block;
-    color: #bdc3c7;
+    /* color: #bdc3c7; */
+     color: var(--option-title-color);
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
     font-weight: 500;
@@ -326,17 +488,23 @@
     gap: 0.5rem;
     cursor: pointer;
     margin: 0;
+    color: var(--option-title-color);
 }
 
 .radio-group input[type="radio"] {
     cursor: pointer;
+     accent-color: var(--radio-accent-color);
 }
 
 .options-select {
-    background: #1c2833;
+    /* background: #1c2833;
     border: 1px solid #34495e;
     border-radius: 4px;
-    color: #ecf0f1;
+    color: #ecf0f1; */
+     background: var(--custom-quality-bg);
+    border: 1px solid var(--custom-quality-border);
+    border-radius: 4px;
+    color: var(--custom-quality-label-color);
     font-size: 0.9rem;
     padding: 0.6rem;
     width: 100%;
@@ -345,7 +513,8 @@
 
 .options-select:focus {
     outline: none;
-    border-color: #3498db;
+    /* border-color: #3498db; */
+    border-color: var(--radio-accent-color);
 }
 
 .checkbox-label {
@@ -360,16 +529,19 @@
     cursor: pointer;
     width: 18px;
     height: 18px;
+     accent-color: var(--radio-accent-color);
 }
 
 .checkbox-label span {
-    color: #ecf0f1;
+    /* color: #ecf0f1; */
+    color: var(--option-title-color);
     font-weight: normal;
 }
 
 .help-text {
     display: block;
-    color: #95a5a6;
+    /* color: #95a5a6; */
+     color: var(--option-desc-color);
     font-size: 0.8rem;
     margin-top: 0.3rem;
 }
@@ -385,7 +557,8 @@
     flex: 1;
     height: 6px;
     border-radius: 3px;
-    background: #34495e;
+    /* background: #34495e; */
+     background: var(--slider-bg);
     outline: none;
 }
 
@@ -395,41 +568,50 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #3498db;
+    /* background: #3498db; */
+      background: var(--slider-accent);
     cursor: pointer;
     transition: background 0.2s;
 }
 
 .quality-slider::-webkit-slider-thumb:hover {
-    background: #2980b9;
+    /* background: #2980b9; */
+     background: var(--radio-accent-color);
+    transform: scale(1.1);
 }
 
 .quality-slider::-moz-range-thumb {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #3498db;
+    /* background: #3498db; */
+     background: var(--slider-accent);
     cursor: pointer;
     border: none;
     transition: background 0.2s;
 }
 
 .quality-slider::-moz-range-thumb:hover {
-    background: #2980b9;
+    /* background: #2980b9; */
+     background: var(--radio-accent-color);
+    transform: scale(1.1);
 }
 
 .quality-value {
     min-width: 45px;
     text-align: right;
-    color: #ecf0f1;
+    /* color: #ecf0f1; */
+     color: var(--quality-value-color);
     font-weight: 500;
     font-size: 0.9rem;
 }
 
 /* --- Buttons --- */
 .secondary-btn {
-    background: #34495e;
-    color: #ecf0f1;
+    /* background: #34495e;
+    color: #ecf0f1; */
+     background: var(--secondary-btn-bg);
+    color: var(--option-title-color);
     border: none;
     border-radius: 6px;
     padding: 0.7rem 1.2rem;
@@ -439,7 +621,8 @@
 }
 
 .secondary-btn:hover {
-    background: #3d566e;
+    /* background: #3d566e; */
+     background: var(--secondary-btn-hover);
 }
 
 .secondary-btn:active {
@@ -467,6 +650,7 @@
 .action-buttons .top-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    background: var(--disabled-btn-bg);
 }
 
 /* --- Modal Styles --- */
@@ -478,27 +662,32 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.6);
+    /* background-color: rgba(0, 0, 0, 0.6); */
+    background-color: var(--modal-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .modal-content {
-    background-color: #2c3e50;
+    /* background-color: #2c3e50; */
+     background-color: var(--modal-bg);
     margin: auto;
     padding: 20px;
-    border: 1px solid #34495e;
+    /* border: 1px solid #34495e; */
+     border: 1px solid var(--modal-border);
     width: 80%;
     max-width: 400px;
     border-radius: 8px;
     text-align: center;
     position: relative;
-    color: #ecf0f1;
+    /* color: #ecf0f1; */
+     color: var(--option-title-color);
 }
 
 .close-btn {
-    color: #95a5a6;
+    /* color: #95a5a6; */
+     color: var(--close-btn-color);
     position: absolute;
     top: 10px;
     right: 15px;
@@ -510,7 +699,8 @@
 
 .close-btn:hover,
 .close-btn:focus {
-    color: #ecf0f1;
+    /* color: #ecf0f1; */
+    color: var(--close-btn-hover);
 }
 
 /* --- Scrollbar Styling --- */
@@ -520,16 +710,19 @@
 }
 
 ::-webkit-scrollbar-track {
-    background: #1c2833;
+    /* background: #1c2833; */
+     background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #34495e;
+    /* background: #34495e; */
+     background: var(--scrollbar-thumb);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #3d566e;
+    /* background: #3d566e; */
+     background: var(--scrollbar-thumb-hover);
 }
 
 /* --- Responsive Design --- */
