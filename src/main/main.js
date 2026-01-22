@@ -237,12 +237,6 @@ const createWindow = () => {
 
     mainWindow.maximize();
     mainWindow.loadFile(path.resolve(app.getAppPath(), 'src/renderer/index.html'));
-
-    // Flush queued files once the renderer is ready
-    mainWindow.webContents.on('did-finish-load', () => {
-        console.log('Window content loaded, flushing open file queue...');
-        flushOpenFileQueue();
-    });
 };
 
 function sendUpdateStatus(status, details = '') {
@@ -414,20 +408,15 @@ if (!gotTheLock) {
     });
 }
 
-// Flush any queued open-file requests once renderer is ready to receive them
-function flushOpenFileQueue() {
-    if (!mainWindow || !mainWindow.webContents) return;
-    if (openFileQueue.length === 0) return;
-    try {
-        for (const p of openFileQueue) {
-            mainWindow.webContents.send('open-file', p);
-        }
-    } catch (err) {
-        console.error('Failed to flush open file queue:', err);
-    } finally {
-        openFileQueue = [];
-    }
-}
+// Provide queued PDF files to renderer on demand (renderer-pull instead of main-push)
+ipcMain.handle('get-queued-pdf-files', async () => {
+    if (openFileQueue.length === 0) return [];
+    
+    console.log(`Providing ${openFileQueue.length} queued PDF file(s) to renderer`);
+    const filesToSend = [...openFileQueue];
+    openFileQueue = []; // Clear queue after sending
+    return filesToSend;
+});
 
 // Helper function to ensure LocalPDF_Studio_Task folder exists
 function ensureTaskFolderExists() {
@@ -483,9 +472,7 @@ function getTaskFolderPath() {
 
 // When mainWindow finishes loading its content, flush queued files
 app.on('browser-window-created', (event, window) => {
-    window.webContents.once('did-finish-load', () => {
-        flushOpenFileQueue();
-    });
+    // Queued files will be fetched by renderer when ready
 });
 
 app.on('window-all-closed', () => {

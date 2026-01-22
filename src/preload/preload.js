@@ -57,6 +57,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     checkForUpdates: () => ipcRenderer.send('check-for-updates'),
     getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
     onOpenFile: (callback) => ipcRenderer.on('open-file', (event, filePath) => callback(filePath)),
+    getQueuedPdfFiles: () => ipcRenderer.invoke('get-queued-pdf-files'),
     saveDroppedFile: (fileInfo) => ipcRenderer.invoke('save-dropped-file', fileInfo),
     deleteFile: (filePath) => ipcRenderer.invoke('delete-file', filePath),
     performTesseractOCR: (imagePath, language, options) => ipcRenderer.invoke('perform-tesseract-ocr', { imagePath, language, options }),  

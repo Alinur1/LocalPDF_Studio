@@ -150,6 +150,19 @@ window.addEventListener('DOMContentLoaded', async() => {
         });
     }
 
+    // Request any queued PDF files that were opened before app was ready
+    try {
+        if (window.electronAPI && window.electronAPI.getQueuedPdfFiles) {
+            const queuedFiles = await window.electronAPI.getQueuedPdfFiles();
+            if (queuedFiles && queuedFiles.length > 0) {
+                console.log(`Received ${queuedFiles.length} queued PDF file(s)`);
+                await openPdfFiles(queuedFiles);
+            }
+        }
+    } catch (err) {
+        console.error('Error retrieving queued PDF files:', err);
+    }
+
     setInterval(() => {
         donateBtn.classList.add('glowing');
         setTimeout(() => {
