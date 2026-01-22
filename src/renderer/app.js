@@ -397,22 +397,39 @@ window.addEventListener('DOMContentLoaded', async() => {
 
     // Theme Utility functions
     function applyTheme(theme) {
-    document.body.classList.remove('light');
+        document.body.classList.remove('light');
 
-    if (theme === 'system') {
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        // Only add 'light' class if system is light
-        if (!isDark) document.body.classList.add('light');
-    } else if (theme === 'light') {
-        document.body.classList.add('light');
+        if (theme === 'system') {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            // Only add 'light' class if system is light
+            if (!isDark) document.body.classList.add('light');
+        } else if (theme === 'light') {
+            document.body.classList.add('light');
+        }
+
+        // Broadcast theme change to all open PDF iframes
+        broadcastThemeToPdfIframes(theme === 'system' ? getSystemTheme() : theme);
     }
-}
 
-function getSystemTheme() {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-}
+    function getSystemTheme() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light';
+    }
+
+    // Broadcast theme changes to all open PDF viewers
+    function broadcastThemeToPdfIframes(theme) {
+        if (window.pdfIframes && window.pdfIframes.size > 0) {
+            window.pdfIframes.forEach((iframe) => {
+                if (iframe.contentWindow) {
+                    iframe.contentWindow.postMessage(
+                        { type: 'theme-change', theme: theme },
+                        '*'
+                    );
+                }
+            });
+        }
+    }
 
 // Initial Theme on startup
 
