@@ -328,7 +328,8 @@
     "croppingPdf": "正在裁剪 PDF...",
     "croppingBtn": "正在裁剪...",
     "successMessage": "PDF 成功裁剪！\n保存到: ",
-    "pageLabel": "第 "
+    "pageLabel": "第 ",
+    "renderFailed": "无法渲染 PDF"
   },
   "editMetadata": {
     "page-title": "查看和编辑元数据",

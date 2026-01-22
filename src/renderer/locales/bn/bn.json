@@ -328,7 +328,8 @@
     "croppingPdf": "PDF ক্রপ করা হচ্ছে...",
     "croppingBtn": "ক্রপ করা হচ্ছে...",
     "successMessage": "PDF সফলভাবে ক্রপ করা হয়েছে!\nসংরক্ষিত: ",
-    "pageLabel": "পৃষ্ঠা "
+    "pageLabel": "পৃষ্ঠা ",
+    "renderFailed": "PDF রেন্ডার করতে অক্ষম"
   },
   "editMetadata": {
     "page-title": "মেটাডাটা দেখুন এবং সম্পাদনা করুন",

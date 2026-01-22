@@ -328,7 +328,8 @@
     "croppingPdf": "Cropping PDF...",
     "croppingBtn": "Cropping...",
     "successMessage": "PDF cropped successfully!\nSaved to: ",
-    "pageLabel": "Page "
+    "pageLabel": "Page ",
+    "renderFailed": "Unable to render the PDF"
   },
   "editMetadata": {
     "page-title": "View and Edit Metadata",

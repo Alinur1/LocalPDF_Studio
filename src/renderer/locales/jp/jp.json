@@ -328,7 +328,8 @@
     "croppingPdf": "PDF をトリミングしています...",
     "croppingBtn": "トリミング中...",
     "successMessage": "PDF が正常にトリミングされました！\n保存先: ",
-    "pageLabel": "ページ "
+    "pageLabel": "ページ ",
+    "renderFailed": "PDF をレンダリングできません"
   },
   "editMetadata": {
     "page-title": "メタデータの表示と編集",

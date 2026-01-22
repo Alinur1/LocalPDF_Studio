@@ -225,35 +225,45 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function renderPdfPreview(path) {
-    loadingUI.show(i18n.t('cropPdfJS.renderingPdf'));
-    previewContainer.style.display = "flex";
-    previewContainer.style.flexDirection = "column";
-    previewGrid.innerHTML = "";
-    renderedPages = [];
-    pageDimensions = [];
-    currentPage = 1;
-    zoomLevel = 1;
-    viewMode = 'single';
+    try {
+      loadingUI.show(i18n.t('cropPdfJS.renderingPdf'));
+      previewContainer.style.display = "flex";
+      previewContainer.style.flexDirection = "column";
+      previewGrid.innerHTML = "";
+      renderedPages = [];
+      pageDimensions = [];
+      currentPage = 1;
+      zoomLevel = 1;
+      viewMode = 'single';
 
-    // Initialize zoom display
-    const zoomDisplay = document.getElementById('zoom-level');
-    if (zoomDisplay) {
-      zoomDisplay.textContent = '100%';
+      // Initialize zoom display
+      const zoomDisplay = document.getElementById('zoom-level');
+      if (zoomDisplay) {
+        zoomDisplay.textContent = '100%';
+      }
+
+      pdfDoc = await pdfjsLib.getDocument(`file://${path}`).promise;
+      pageCountEl.textContent = `Total Pages: ${pdfDoc.numPages}`;
+      pageInputEl.max = pdfDoc.numPages;
+
+      for (let i = 1; i <= pdfDoc.numPages; i++) {
+        await renderPage(i);
+      }
+
+      updateViewMode();
+      updateCurrentPageDisplay();
+      updateCropOverlay();
+      applyZoom();
+      loadingUI.hide();
     }
-
-    pdfDoc = await pdfjsLib.getDocument(`file://${path}`).promise;
-    pageCountEl.textContent = `Total Pages: ${pdfDoc.numPages}`;
-    pageInputEl.max = pdfDoc.numPages;
-
-    for (let i = 1; i <= pdfDoc.numPages; i++) {
-      await renderPage(i);
+    catch (err) {
+      await customAlert.alert(i18n.t('alerts.error'), i18n.t('cropPdfJS.renderFailed'), [i18n.t('common.ok')]);
+      console.log(err);
+      loadingUI.hide();
     }
-
-    updateViewMode();
-    updateCurrentPageDisplay();
-    updateCropOverlay();
-    applyZoom();
-    loadingUI.hide();
+    finally {
+      loadingUI.hide();
+    }
   }
 
   // ==================== VIEW MODE FUNCTIONS ====================
@@ -612,28 +622,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       const wrapper = canvas.parentElement;
       const pageNum = index + 1;
       const dimensions = pageDimensions[index];
-      
+
       if (!dimensions) return;
 
       // Apply transform for zoom
       wrapper.style.transform = `scale(${zoomLevel})`;
       wrapper.style.transformOrigin = 'center top';
-      
+
       // Calculate the extra space needed due to zoom
       // When zoomed, the element takes more visual space
       const scaledHeight = dimensions.height * zoomLevel;
       const originalHeight = dimensions.height;
       const extraHeight = scaledHeight - originalHeight;
-      
+
       // Add margin to prevent overlap - only bottom margin to push next page down
       wrapper.style.marginBottom = `${extraHeight}px`;
-      
+
       // For double view mode, also adjust horizontal spacing
       if (viewMode === 'double') {
         const scaledWidth = dimensions.width * zoomLevel;
         const originalWidth = dimensions.width;
         const extraWidth = scaledWidth - originalWidth;
-        
+
         // Add horizontal margin for double page view
         wrapper.style.marginRight = `${extraWidth / 2}px`;
         wrapper.style.marginLeft = `${extraWidth / 2}px`;
@@ -720,7 +730,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Reset view mode buttons
     updateViewModeButtons();
-    
+
     // Ensure zoom buttons are enabled
     if (zoomOutBtn) {
       zoomOutBtn.disabled = false;
