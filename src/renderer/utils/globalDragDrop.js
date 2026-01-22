@@ -49,7 +49,7 @@ export function initializeGlobalDragDrop(options = {}) {
         border: 3px dashed white;
         box-shadow: 0 0 20px rgba(52, 152, 219, 0.8);
     `;
-    message.textContent = '📄 Drop PDF files here';
+    message.textContent = '📄 Drop your files here';
 
     overlay.appendChild(message);
     document.body.appendChild(overlay);
@@ -186,7 +186,7 @@ export function initializeGlobalDragDropForOCR(options = {}) {
         border: 3px dashed white;
         box-shadow: 0 0 20px rgba(52, 152, 219, 0.8);
     `;
-    message.textContent = '📄 Drop PDF or Image files here';
+    message.textContent = '📄 Drop your files here';
 
     overlay.appendChild(message);
     document.body.appendChild(overlay);
