@@ -777,8 +777,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Cancel button handler
         batchCancelBtn.onclick = () => {
             batchProcessingCancelled = true;
-            batchCurrentAction.textContent = 'Cancelling...';
-            batchCancelBtn.disabled = true;
+            batchProgressModal.style.display = 'none';
+            batchCancelBtn.disabled = false;
+            clearInterval(timeInterval);
+            loadingUI.forceHide();
         };
 
         // Update time periodically
