@@ -217,7 +217,7 @@ window.addEventListener('DOMContentLoaded', async() => {
             tabOrder: manager.getTabOrder(),
             tabs: Array.from(manager.tabs.entries()).map(([id, tab]) => ({
                 id,
-                filePath: decodeURIComponent(tab.content.src.replace(/^.*file:\/\//, '')),
+                filePath: decodeURIComponent((tab.content.querySelector('iframe')?.src || tab.content.src || '').replace(/^.*file:\/\//, '')),
                 title: tab.tabButton.querySelector('.tab-title')?.textContent || 'PDF'
             }))
         };

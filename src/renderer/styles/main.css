@@ -595,3 +595,78 @@ body.dark .search-result-item:hover .search-result-path,
 body.dark .search-result-item:hover .search-result-meta {
   color: white !important;
 }
+
+/* PDF Control Buttons */
+.pdf-control-btn {
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background var(--transition-speed), transform 0.2s;
+  outline: none;
+  position: relative;
+}
+
+.pdf-control-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.pdf-control-btn:active {
+  transform: translateY(0);
+}
+
+.pdf-control-btn.active {
+  background: var(--accent-color);
+  color: white;
+}
+
+/* Tooltip styling */
+.pdf-control-btn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  margin-bottom: 8px;
+  border: 1px solid var(--border-color);
+  z-index: 1001;
+}
+
+.pdf-control-btn[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
+/* Tooltip arrow */
+.pdf-control-btn[data-tooltip]::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 8px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--bg-tertiary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  margin-bottom: 0;
+  z-index: 1001;
+}
+
+.pdf-control-btn[data-tooltip]:hover::before {
+  opacity: 1;
+}

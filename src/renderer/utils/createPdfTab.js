@@ -40,6 +40,96 @@ export default function createPdfTab(filePath, tabManager, existingId = null) {
     iframe.style.display = 'block';
     iframe.dataset.appTheme = getAppTheme();
 
+    // Create a wrapper for iframe and buttons
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    wrapper.style.width = '100%';
+    wrapper.style.height = '100%';
+    wrapper.style.display = 'flex';
+    wrapper.style.justifyContent = 'center';
+    wrapper.style.alignItems = 'center';
+    wrapper.appendChild(iframe);
+
+    // Create floating control buttons
+    const controlsContainer = document.createElement('div');
+    controlsContainer.style.position = 'absolute';
+    controlsContainer.style.right = '-8px';
+    controlsContainer.style.top = '70px';
+    controlsContainer.style.display = 'flex';
+    controlsContainer.style.flexDirection = 'column';
+    controlsContainer.style.gap = '8px';
+    controlsContainer.style.zIndex = '1000';
+
+    // Define color filters
+    const filters = [
+        { emoji: '🌅', name: 'The Golden Sunset', filter: 'invert(80%) sepia(50%) hue-rotate(300deg) contrast(80%) brightness(100%)' },
+        { emoji: '🌙', name: 'Midnight Charcoal', filter: 'invert(92%) hue-rotate(180deg) brightness(95%) contrast(85%) sepia(10%)' },
+        { emoji: '✏️', name: 'Soft Graphite', filter: 'invert(85%) hue-rotate(180deg) brightness(100%) contrast(90%)' },
+        { emoji: '📖', name: 'Vintage Book', filter: 'sepia(40%) brightness(90%) contrast(90%)' },
+        { emoji: '❄️', name: 'Nordic Frost', filter: 'invert(90%) hue-rotate(160deg) brightness(90%) contrast(90%) saturate(70%)' }
+    ];
+
+    let activeFilterBtn = null;
+
+    // Create filter buttons
+    filters.forEach((filterConfig) => {
+        const btn = document.createElement('button');
+        btn.textContent = filterConfig.emoji;
+        btn.setAttribute('data-tooltip', filterConfig.name);
+        btn.className = 'pdf-control-btn';
+        btn.style.position = 'relative';
+        btn.dataset.filter = filterConfig.filter;
+
+        btn.addEventListener('click', () => {
+            const iframeWin = iframe.contentWindow;
+            const viewer = iframeWin.document.getElementById('viewer');
+            
+            if (viewer) {
+                // If clicking the same button, toggle off
+                if (activeFilterBtn === btn) {
+                    viewer.style.filter = '';
+                    btn.classList.remove('active');
+                    activeFilterBtn = null;
+                } else {
+                    // Remove active state from previous button
+                    if (activeFilterBtn) {
+                        activeFilterBtn.classList.remove('active');
+                    }
+                    // Apply new filter
+                    viewer.style.filter = filterConfig.filter;
+                    btn.classList.add('active');
+                    activeFilterBtn = btn;
+                }
+            }
+        });
+
+        controlsContainer.appendChild(btn);
+    });
+
+    // Reset button
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = '↻';
+    resetBtn.setAttribute('data-tooltip', 'Reset color inversion');
+    resetBtn.className = 'pdf-control-btn';
+    resetBtn.style.position = 'relative';
+
+    resetBtn.addEventListener('click', () => {
+        const iframeWin = iframe.contentWindow;
+        const viewer = iframeWin.document.getElementById('viewer');
+        
+        if (viewer) {
+            viewer.style.filter = '';
+            // Remove active state from all filter buttons
+            if (activeFilterBtn) {
+                activeFilterBtn.classList.remove('active');
+                activeFilterBtn = null;
+            }
+        }
+    });
+
+    controlsContainer.appendChild(resetBtn);
+    wrapper.appendChild(controlsContainer);
+
     iframe.addEventListener('load', () => {
         const iframeWin = iframe.contentWindow;
         const iframeDoc = iframeWin.document;
@@ -125,7 +215,7 @@ export default function createPdfTab(filePath, tabManager, existingId = null) {
         id: tabId,
         type: 'pdf',
         title,
-        content: iframe,
+        content: wrapper,
         closable: true,
         onClose: () => {
             iframe.src = 'about:blank';
