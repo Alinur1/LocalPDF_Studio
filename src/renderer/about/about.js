@@ -51,6 +51,7 @@ async function fixImagePaths() {
 
 function setupButtons() {
     const viewSourceBtn = document.getElementById('view-source');
+    const facebookBtn = document.getElementById('facebook-btn');
     const currentlyWorkingOnBtn = document.getElementById('currently-working-on');
     const starRepoBtn = document.getElementById('star-repo');
     const reportIssueBtn = document.getElementById('report-issue');
@@ -70,6 +71,9 @@ function setupButtons() {
     }
     if (releaseNoteBtn) {
         releaseNoteBtn.addEventListener('click', () => openExternalLink('https://alinur1.github.io/LocalPDF_Studio_Website/html/release_notes.html'));
+    }
+    if (facebookBtn) {
+        facebookBtn.addEventListener('click', () => openExternalLink('https://www.facebook.com/share/1BvWDuLGU2/'));
     }
 }
 
