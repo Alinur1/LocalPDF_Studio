@@ -67,6 +67,9 @@ function setupCreditLinks() {
 
     document.getElementById('pdfjs-link')?.addEventListener('click', () => 
         openExternalLink('https://mozilla.github.io/pdf.js/'));
+
+    document.getElementById('pymupdf-link')?.addEventListener('click', () => 
+        openExternalLink('https://github.com/pymupdf/PyMuPDF'));
 }
 
 async function fixImagePaths() {
@@ -120,6 +123,7 @@ function addButtonTooltips() {
         'bouncycastle-link': 'https://www.nuget.org/packages/Portable.BouncyCastle',
         'tesseract-link': 'https://tesseract.projectnaptha.com/',
         'pdfjs-link': 'https://mozilla.github.io/pdf.js/',
+        'pymupdf-link': 'https://github.com/pymupdf/PyMuPDF',
     };
 
     Object.entries(buttonUrls).forEach(([id, url]) => {
