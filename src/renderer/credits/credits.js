@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function setupCreditLinks() {
+    document.getElementById('icon-link')?.addEventListener('click', () => 
+        openExternalLink('https://www.flaticon.com/free-icon/pdf_8243027?term=pdf&page=1&position=86&origin=tag&related_id=8243027'));
     // Core Technologies
     document.getElementById('nodejs-link')?.addEventListener('click', () => 
         openExternalLink('https://nodejs.org/en'));
@@ -110,6 +112,7 @@ function showSimpleAlert(message) {
 
 function addButtonTooltips() {
     const buttonUrls = {
+        'icon-link': 'https://www.flaticon.com/free-icon/pdf_8243027?term=pdf&page=1&position=86&origin=tag&related_id=8243027',
         'nodejs-link': 'https://nodejs.org/en',
         'electron-link': 'https://www.electronjs.org/',
         'electron-builder-link': 'https://www.npmjs.com/package/electron-builder',
