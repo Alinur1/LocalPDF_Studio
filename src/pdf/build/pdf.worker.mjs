@@ -21,8 +21,8 @@
  */
 
 /**
- * pdfjsVersion = 5.4.530
- * pdfjsBuild = 50cc4adac
+ * pdfjsVersion = 5.4.624
+ * pdfjsBuild = 384c6208b
  */
 /******/ // The require scope
 /******/ var __webpack_require__ = {};
@@ -897,31 +897,6 @@ function _isValidExplicitDest(validRef, validName, dest) {
 function MathClamp(v, min, max) {
   return Math.min(Math.max(v, min), max);
 }
-function toHexUtil(arr) {
-  if (Uint8Array.prototype.toHex) {
-    return arr.toHex();
-  }
-  return Array.from(arr, num => hexNumbers[num]).join("");
-}
-function toBase64Util(arr) {
-  if (Uint8Array.prototype.toBase64) {
-    return arr.toBase64();
-  }
-  return btoa(bytesToString(arr));
-}
-function fromBase64Util(str) {
-  if (Uint8Array.fromBase64) {
-    return Uint8Array.fromBase64(str);
-  }
-  return stringToBytes(atob(str));
-}
-if (typeof Promise.try !== "function") {
-  Promise.try = function (fn, ...args) {
-    return new Promise(resolve => {
-      resolve(fn(...args));
-    });
-  };
-}
 if (typeof Math.sumPrecise !== "function") {
   Math.sumPrecise = function (numbers) {
     return numbers.reduce((a, b) => a + b, 0);
@@ -1262,6 +1237,9 @@ class BaseStream {
     return false;
   }
   get isAsyncDecoder() {
+    return false;
+  }
+  get isImageStream() {
     return false;
   }
   get canAsyncDecodeImageFromBuffer() {
@@ -2884,6 +2862,7 @@ class Stream extends BaseStream {
     const pos = this.pos;
     const strEnd = this.end;
     if (!length) {
+      this.pos = strEnd;
       return bytes.subarray(pos, strEnd);
     }
     let end = pos + length;
@@ -2931,14 +2910,14 @@ class NullStream extends Stream {
 
 
 class ChunkedStream extends Stream {
+  progressiveDataLength = 0;
+  _lastSuccessfulEnsureByteChunk = -1;
+  _loadedChunks = new Set();
   constructor(length, chunkSize, manager) {
     super(new Uint8Array(length), 0, length, null);
     this.chunkSize = chunkSize;
-    this._loadedChunks = new Set();
     this.numChunks = Math.ceil(length / chunkSize);
     this.manager = manager;
-    this.progressiveDataLength = 0;
-    this.lastSuccessfulEnsureByteChunk = -1;
   }
   getMissingChunks() {
     const chunks = [];
@@ -2990,13 +2969,13 @@ class ChunkedStream extends Stream {
     if (chunk > this.numChunks) {
       return;
     }
-    if (chunk === this.lastSuccessfulEnsureByteChunk) {
+    if (chunk === this._lastSuccessfulEnsureByteChunk) {
       return;
     }
     if (!this._loadedChunks.has(chunk)) {
       throw new MissingDataException(pos, pos + 1);
     }
-    this.lastSuccessfulEnsureByteChunk = chunk;
+    this._lastSuccessfulEnsureByteChunk = chunk;
   }
   ensureRange(begin, end) {
     if (begin >= end) {
@@ -3113,28 +3092,23 @@ class ChunkedStream extends Stream {
   }
 }
 class ChunkedStreamManager {
-  constructor(pdfNetworkStream, args) {
+  aborted = false;
+  currRequestId = 0;
+  _chunksNeededByRequest = new Map();
+  _loadedStreamCapability = Promise.withResolvers();
+  _promisesByRequest = new Map();
+  _requestsByChunk = new Map();
+  constructor(pdfStream, args) {
     this.length = args.length;
     this.chunkSize = args.rangeChunkSize;
     this.stream = new ChunkedStream(this.length, this.chunkSize, this);
-    this.pdfNetworkStream = pdfNetworkStream;
+    this.pdfStream = pdfStream;
     this.disableAutoFetch = args.disableAutoFetch;
     this.msgHandler = args.msgHandler;
-    this.currRequestId = 0;
-    this._chunksNeededByRequest = new Map();
-    this._requestsByChunk = new Map();
-    this._promisesByRequest = new Map();
-    this.progressiveDataLength = 0;
-    this.aborted = false;
-    this._loadedStreamCapability = Promise.withResolvers();
   }
   sendRequest(begin, end) {
-    const rangeReader = this.pdfNetworkStream.getRangeReader(begin, end);
-    if (!rangeReader.isStreamingSupported) {
-      rangeReader.onProgress = this.onProgress.bind(this);
-    }
-    let chunks = [],
-      loaded = 0;
+    const rangeReader = this.pdfStream.getRangeReader(begin, end);
+    let chunks = [];
     return new Promise((resolve, reject) => {
       const readChunk = ({
         value,
@@ -3142,16 +3116,9 @@ class ChunkedStreamManager {
       }) => {
         try {
           if (done) {
-            const chunkData = arrayBuffersToBytes(chunks);
+            resolve(arrayBuffersToBytes(chunks));
             chunks = null;
-            resolve(chunkData);
             return;
-          }
-          loaded += value.byteLength;
-          if (rangeReader.isStreamingSupported) {
-            this.onProgress({
-              loaded
-            });
           }
           chunks.push(value);
           rangeReader.read().then(readChunk, reject);
@@ -3269,27 +3236,25 @@ class ChunkedStreamManager {
     }
     return groupedChunks;
   }
-  onProgress(args) {
-    this.msgHandler.send("DocProgress", {
-      loaded: this.stream.numChunksLoaded * this.chunkSize + args.loaded,
-      total: this.length
-    });
-  }
   onReceiveData(args) {
+    const {
+      chunkSize,
+      length,
+      stream
+    } = this;
     const chunk = args.chunk;
     const isProgressive = args.begin === undefined;
-    const begin = isProgressive ? this.progressiveDataLength : args.begin;
+    const begin = isProgressive ? stream.progressiveDataLength : args.begin;
     const end = begin + chunk.byteLength;
-    const beginChunk = Math.floor(begin / this.chunkSize);
-    const endChunk = end < this.length ? Math.floor(end / this.chunkSize) : Math.ceil(end / this.chunkSize);
+    const beginChunk = Math.floor(begin / chunkSize);
+    const endChunk = end < length ? Math.floor(end / chunkSize) : Math.ceil(end / chunkSize);
     if (isProgressive) {
-      this.stream.onReceiveProgressiveData(chunk);
-      this.progressiveDataLength = end;
+      stream.onReceiveProgressiveData(chunk);
     } else {
-      this.stream.onReceiveData(begin, chunk);
+      stream.onReceiveData(begin, chunk);
     }
-    if (this.stream.isDataLoaded) {
-      this._loadedStreamCapability.resolve(this.stream);
+    if (stream.isDataLoaded) {
+      this._loadedStreamCapability.resolve(stream);
     }
     const loadedRequests = [];
     for (let curChunk = beginChunk; curChunk < endChunk; ++curChunk) {
@@ -3311,13 +3276,13 @@ class ChunkedStreamManager {
     }
     if (!this.disableAutoFetch && this._requestsByChunk.size === 0) {
       let nextEmptyChunk;
-      if (this.stream.numChunksLoaded === 1) {
-        const lastChunk = this.stream.numChunks - 1;
-        if (!this.stream.hasChunk(lastChunk)) {
+      if (stream.numChunksLoaded === 1) {
+        const lastChunk = stream.numChunks - 1;
+        if (!stream.hasChunk(lastChunk)) {
           nextEmptyChunk = lastChunk;
         }
       } else {
-        nextEmptyChunk = this.stream.nextEmptyChunk(endChunk);
+        nextEmptyChunk = stream.nextEmptyChunk(endChunk);
       }
       if (Number.isInteger(nextEmptyChunk)) {
         this._requestChunks([nextEmptyChunk]);
@@ -3329,8 +3294,8 @@ class ChunkedStreamManager {
       capability.resolve();
     }
     this.msgHandler.send("DocProgress", {
-      loaded: this.stream.numChunksLoaded * this.chunkSize,
-      total: this.length
+      loaded: stream.numChunksLoaded * chunkSize,
+      total: length
     });
   }
   onError(err) {
@@ -3344,7 +3309,7 @@ class ChunkedStreamManager {
   }
   abort(reason) {
     this.aborted = true;
-    this.pdfNetworkStream?.cancelAllRequests(reason);
+    this.pdfStream?.cancelAllRequests(reason);
     for (const capability of this._promisesByRequest.values()) {
       capability.reject(reason);
     }
@@ -3832,6 +3797,402 @@ class ImageResizer {
   }
 }
 
+;// ./external/jbig2/jbig2.js
+async function JBig2(moduleArg = {}) {
+  var moduleRtn;
+  var Module = moduleArg;
+  var ENVIRONMENT_IS_WEB = true;
+  var ENVIRONMENT_IS_WORKER = false;
+  var arguments_ = [];
+  var thisProgram = "./this.program";
+  var quit_ = (status, toThrow) => {
+    throw toThrow;
+  };
+  var _scriptName = import.meta.url;
+  var scriptDirectory = "";
+  var readAsync, readBinary;
+  if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
+    try {
+      scriptDirectory = new URL(".", _scriptName).href;
+    } catch {}
+    readAsync = async url => {
+      var response = await fetch(url, {
+        credentials: "same-origin"
+      });
+      if (response.ok) {
+        return response.arrayBuffer();
+      }
+      throw new Error(response.status + " : " + response.url);
+    };
+  } else {}
+  var out = console.log.bind(console);
+  var err = console.error.bind(console);
+  var wasmBinary;
+  var ABORT = false;
+  var EXITSTATUS;
+  var readyPromiseResolve, readyPromiseReject;
+  var HEAP8, HEAPU8, HEAP16, HEAPU16, HEAP32, HEAPU32, HEAPF32, HEAPF64;
+  var HEAP64, HEAPU64;
+  var runtimeInitialized = false;
+  function updateMemoryViews() {
+    var b = wasmMemory.buffer;
+    HEAP8 = new Int8Array(b);
+    HEAP16 = new Int16Array(b);
+    HEAPU8 = new Uint8Array(b);
+    HEAPU16 = new Uint16Array(b);
+    HEAP32 = new Int32Array(b);
+    HEAPU32 = new Uint32Array(b);
+    HEAPF32 = new Float32Array(b);
+    HEAPF64 = new Float64Array(b);
+    HEAP64 = new BigInt64Array(b);
+    HEAPU64 = new BigUint64Array(b);
+  }
+  function preRun() {
+    if (Module["preRun"]) {
+      if (typeof Module["preRun"] == "function") Module["preRun"] = [Module["preRun"]];
+      while (Module["preRun"].length) {
+        addOnPreRun(Module["preRun"].shift());
+      }
+    }
+    callRuntimeCallbacks(onPreRuns);
+  }
+  function initRuntime() {
+    runtimeInitialized = true;
+    wasmExports["h"]();
+  }
+  function postRun() {
+    if (Module["postRun"]) {
+      if (typeof Module["postRun"] == "function") Module["postRun"] = [Module["postRun"]];
+      while (Module["postRun"].length) {
+        addOnPostRun(Module["postRun"].shift());
+      }
+    }
+    callRuntimeCallbacks(onPostRuns);
+  }
+  function abort(what) {
+    Module["onAbort"]?.(what);
+    what = "Aborted(" + what + ")";
+    err(what);
+    ABORT = true;
+    what += ". Build with -sASSERTIONS for more info.";
+    var e = new WebAssembly.RuntimeError(what);
+    readyPromiseReject?.(e);
+    throw e;
+  }
+  var wasmBinaryFile;
+  function getWasmImports() {
+    var imports = {
+      a: wasmImports
+    };
+    return imports;
+  }
+  async function createWasm() {
+    function receiveInstance(instance, module) {
+      wasmExports = instance.exports;
+      assignWasmExports(wasmExports);
+      updateMemoryViews();
+      return wasmExports;
+    }
+    var info = getWasmImports();
+    return new Promise((resolve, reject) => {
+      Module["instantiateWasm"](info, (inst, mod) => {
+        resolve(receiveInstance(inst, mod));
+      });
+    });
+  }
+  class ExitStatus {
+    name = "ExitStatus";
+    constructor(status) {
+      this.message = `Program terminated with exit(${status})`;
+      this.status = status;
+    }
+  }
+  var callRuntimeCallbacks = callbacks => {
+    while (callbacks.length > 0) {
+      callbacks.shift()(Module);
+    }
+  };
+  var onPostRuns = [];
+  var addOnPostRun = cb => onPostRuns.push(cb);
+  var onPreRuns = [];
+  var addOnPreRun = cb => onPreRuns.push(cb);
+  var noExitRuntime = true;
+  var __abort_js = () => abort("");
+  var runtimeKeepaliveCounter = 0;
+  var __emscripten_runtime_keepalive_clear = () => {
+    noExitRuntime = false;
+    runtimeKeepaliveCounter = 0;
+  };
+  var timers = {};
+  var handleException = e => {
+    if (e instanceof ExitStatus || e == "unwind") {
+      return EXITSTATUS;
+    }
+    quit_(1, e);
+  };
+  var keepRuntimeAlive = () => noExitRuntime || runtimeKeepaliveCounter > 0;
+  var _proc_exit = code => {
+    EXITSTATUS = code;
+    if (!keepRuntimeAlive()) {
+      Module["onExit"]?.(code);
+      ABORT = true;
+    }
+    quit_(code, new ExitStatus(code));
+  };
+  var exitJS = (status, implicit) => {
+    EXITSTATUS = status;
+    _proc_exit(status);
+  };
+  var _exit = exitJS;
+  var maybeExit = () => {
+    if (!keepRuntimeAlive()) {
+      try {
+        _exit(EXITSTATUS);
+      } catch (e) {
+        handleException(e);
+      }
+    }
+  };
+  var callUserCallback = func => {
+    if (ABORT) {
+      return;
+    }
+    try {
+      func();
+      maybeExit();
+    } catch (e) {
+      handleException(e);
+    }
+  };
+  var _emscripten_get_now = () => performance.now();
+  var __setitimer_js = (which, timeout_ms) => {
+    if (timers[which]) {
+      clearTimeout(timers[which].id);
+      delete timers[which];
+    }
+    if (!timeout_ms) return 0;
+    var id = setTimeout(() => {
+      delete timers[which];
+      callUserCallback(() => __emscripten_timeout(which, _emscripten_get_now()));
+    }, timeout_ms);
+    timers[which] = {
+      id,
+      timeout_ms
+    };
+    return 0;
+  };
+  var getHeapMax = () => 2147483648;
+  var alignMemory = (size, alignment) => Math.ceil(size / alignment) * alignment;
+  var growMemory = size => {
+    var oldHeapSize = wasmMemory.buffer.byteLength;
+    var pages = (size - oldHeapSize + 65535) / 65536 | 0;
+    try {
+      wasmMemory.grow(pages);
+      updateMemoryViews();
+      return 1;
+    } catch (e) {}
+  };
+  var _emscripten_resize_heap = requestedSize => {
+    var oldSize = HEAPU8.length;
+    requestedSize >>>= 0;
+    var maxHeapSize = getHeapMax();
+    if (requestedSize > maxHeapSize) {
+      return false;
+    }
+    for (var cutDown = 1; cutDown <= 4; cutDown *= 2) {
+      var overGrownHeapSize = oldSize * (1 + .2 / cutDown);
+      overGrownHeapSize = Math.min(overGrownHeapSize, requestedSize + 100663296);
+      var newSize = Math.min(maxHeapSize, alignMemory(Math.max(requestedSize, overGrownHeapSize), 65536));
+      var replacement = growMemory(newSize);
+      if (replacement) {
+        return true;
+      }
+    }
+    return false;
+  };
+  function _setImageData(array_ptr, pitch8, pitch32, height) {
+    if (pitch32 === pitch8) {
+      Module.imageData = new Uint8ClampedArray(HEAPU8.subarray(array_ptr, array_ptr + pitch32 * height));
+      return;
+    }
+    const destSize = pitch8 * height;
+    const imageData = Module.imageData = new Uint8ClampedArray(destSize);
+    for (let srcStart = array_ptr, destStart = 0; destStart < destSize; srcStart += pitch32, destStart += pitch8) {
+      imageData.set(HEAPU8.subarray(srcStart, srcStart + pitch8), destStart);
+    }
+  }
+  var writeArrayToMemory = (array, buffer) => {
+    HEAP8.set(array, buffer);
+  };
+  if (Module["noExitRuntime"]) noExitRuntime = Module["noExitRuntime"];
+  if (Module["print"]) out = Module["print"];
+  if (Module["printErr"]) err = Module["printErr"];
+  if (Module["wasmBinary"]) wasmBinary = Module["wasmBinary"];
+  if (Module["arguments"]) arguments_ = Module["arguments"];
+  if (Module["thisProgram"]) thisProgram = Module["thisProgram"];
+  if (Module["preInit"]) {
+    if (typeof Module["preInit"] == "function") Module["preInit"] = [Module["preInit"]];
+    while (Module["preInit"].length > 0) {
+      Module["preInit"].shift()();
+    }
+  }
+  Module["writeArrayToMemory"] = writeArrayToMemory;
+  var _malloc, _free, _jbig2_decode, __emscripten_timeout, memory, __indirect_function_table, wasmMemory;
+  function assignWasmExports(wasmExports) {
+    _malloc = Module["_malloc"] = wasmExports["i"];
+    _free = Module["_free"] = wasmExports["j"];
+    _jbig2_decode = Module["_jbig2_decode"] = wasmExports["k"];
+    __emscripten_timeout = wasmExports["l"];
+    memory = wasmMemory = wasmExports["g"];
+    __indirect_function_table = wasmExports["__indirect_function_table"];
+  }
+  var wasmImports = {
+    e: __abort_js,
+    b: __emscripten_runtime_keepalive_clear,
+    c: __setitimer_js,
+    d: _emscripten_resize_heap,
+    a: _proc_exit,
+    f: _setImageData
+  };
+  function run() {
+    preRun();
+    function doRun() {
+      Module["calledRun"] = true;
+      if (ABORT) return;
+      initRuntime();
+      readyPromiseResolve?.(Module);
+      Module["onRuntimeInitialized"]?.();
+      postRun();
+    }
+    if (Module["setStatus"]) {
+      Module["setStatus"]("Running...");
+      setTimeout(() => {
+        setTimeout(() => Module["setStatus"](""), 1);
+        doRun();
+      }, 1);
+    } else {
+      doRun();
+    }
+  }
+  var wasmExports;
+  wasmExports = await createWasm();
+  run();
+  if (runtimeInitialized) {
+    moduleRtn = Module;
+  } else {
+    moduleRtn = new Promise((resolve, reject) => {
+      readyPromiseResolve = resolve;
+      readyPromiseReject = reject;
+    });
+  }
+  return moduleRtn;
+}
+/* harmony default export */ const jbig2 = (JBig2);
+;// ./src/core/jbig2_wasm.js
+
+
+
+class JBig2Error extends BaseException {
+  constructor(msg) {
+    super(msg, "Jbig2Error");
+  }
+}
+class JBig2WasmImage {
+  static #buffer = null;
+  static #handler = null;
+  static #modulePromise = null;
+  static #useWasm = true;
+  static #useWorkerFetch = true;
+  static #wasmUrl = null;
+  static setOptions({
+    handler,
+    useWasm,
+    useWorkerFetch,
+    wasmUrl
+  }) {
+    this.#useWasm = useWasm;
+    this.#useWorkerFetch = useWorkerFetch;
+    this.#wasmUrl = wasmUrl;
+    if (!useWorkerFetch) {
+      this.#handler = handler;
+    }
+  }
+  static async #instantiateWasm(fallbackCallback, imports, successCallback) {
+    const filename = "jbig2.wasm";
+    try {
+      if (!this.#buffer) {
+        if (this.#useWorkerFetch) {
+          this.#buffer = await fetchBinaryData(`${this.#wasmUrl}${filename}`);
+        } else {
+          this.#buffer = await this.#handler.sendWithPromise("FetchBinaryData", {
+            type: "wasmFactory",
+            filename
+          });
+        }
+      }
+      const results = await WebAssembly.instantiate(this.#buffer, imports);
+      return successCallback(results.instance);
+    } catch (reason) {
+      warn(`JBig2Image#instantiateWasm: ${reason}`);
+      return fallbackCallback(null);
+    } finally {
+      this.#handler = null;
+    }
+  }
+  static async decode(bytes, width, height, globals) {
+    if (!this.#modulePromise) {
+      const {
+        promise,
+        resolve
+      } = Promise.withResolvers();
+      const promises = [promise];
+      if (this.#useWasm) {
+        promises.push(jbig2({
+          warn: warn,
+          instantiateWasm: this.#instantiateWasm.bind(this, resolve)
+        }));
+      } else {
+        resolve(null);
+      }
+      this.#modulePromise = Promise.race(promises);
+    }
+    const module = await this.#modulePromise;
+    if (!module) {
+      throw new JBig2Error("JBig2 failed to initialize");
+    }
+    let ptr, globalsPtr;
+    try {
+      const size = bytes.length;
+      ptr = module._malloc(size);
+      module.writeArrayToMemory(bytes, ptr);
+      const globalsSize = globals ? globals.length : 0;
+      if (globalsSize > 0) {
+        globalsPtr = module._malloc(globalsSize);
+        module.writeArrayToMemory(globals, globalsPtr);
+      }
+      module._jbig2_decode(ptr, size, width, height, globalsPtr, globalsSize);
+      if (!module.imageData) {
+        throw new JBig2Error("Unknown error");
+      }
+      const {
+        imageData
+      } = module;
+      module.imageData = null;
+      return imageData;
+    } finally {
+      if (ptr) {
+        module._free(ptr);
+      }
+      if (globalsPtr) {
+        module._free(globalsPtr);
+      }
+    }
+  }
+  static cleanup() {
+    this.#modulePromise = null;
+  }
+}
+
 ;// ./src/core/decode_stream.js
 
 
@@ -3940,7 +4301,7 @@ class DecodeStream extends BaseStream {
 }
 class StreamsSequenceStream extends DecodeStream {
   constructor(streams, onError = null) {
-    streams = streams.filter(s => s instanceof BaseStream);
+    streams = streams.filter(s => s instanceof BaseStream && !s.isImageStream);
     let maybeLength = 0;
     for (const stream of streams) {
       maybeLength += stream instanceof DecodeStream ? stream._rawMinBufferLength : stream.length;
@@ -5461,6 +5822,9 @@ class JpegStream extends DecodeStream {
     } finally {
       decoder?.close();
     }
+  }
+  get isImageStream() {
+    return true;
   }
 }
 
@@ -7673,6 +8037,9 @@ class CCITTFaxStream extends DecodeStream {
       this.buffer[this.bufferLength++] = c;
     }
   }
+  get isImageStream() {
+    return true;
+  }
 }
 
 ;// ./src/core/flate_stream.js
@@ -7685,6 +8052,7 @@ const distDecode = new Int32Array([0x00001, 0x00002, 0x00003, 0x00004, 0x10005, 
 const fixedLitCodeTab = [new Int32Array([0x70100, 0x80050, 0x80010, 0x80118, 0x70110, 0x80070, 0x80030, 0x900c0, 0x70108, 0x80060, 0x80020, 0x900a0, 0x80000, 0x80080, 0x80040, 0x900e0, 0x70104, 0x80058, 0x80018, 0x90090, 0x70114, 0x80078, 0x80038, 0x900d0, 0x7010c, 0x80068, 0x80028, 0x900b0, 0x80008, 0x80088, 0x80048, 0x900f0, 0x70102, 0x80054, 0x80014, 0x8011c, 0x70112, 0x80074, 0x80034, 0x900c8, 0x7010a, 0x80064, 0x80024, 0x900a8, 0x80004, 0x80084, 0x80044, 0x900e8, 0x70106, 0x8005c, 0x8001c, 0x90098, 0x70116, 0x8007c, 0x8003c, 0x900d8, 0x7010e, 0x8006c, 0x8002c, 0x900b8, 0x8000c, 0x8008c, 0x8004c, 0x900f8, 0x70101, 0x80052, 0x80012, 0x8011a, 0x70111, 0x80072, 0x80032, 0x900c4, 0x70109, 0x80062, 0x80022, 0x900a4, 0x80002, 0x80082, 0x80042, 0x900e4, 0x70105, 0x8005a, 0x8001a, 0x90094, 0x70115, 0x8007a, 0x8003a, 0x900d4, 0x7010d, 0x8006a, 0x8002a, 0x900b4, 0x8000a, 0x8008a, 0x8004a, 0x900f4, 0x70103, 0x80056, 0x80016, 0x8011e, 0x70113, 0x80076, 0x80036, 0x900cc, 0x7010b, 0x80066, 0x80026, 0x900ac, 0x80006, 0x80086, 0x80046, 0x900ec, 0x70107, 0x8005e, 0x8001e, 0x9009c, 0x70117, 0x8007e, 0x8003e, 0x900dc, 0x7010f, 0x8006e, 0x8002e, 0x900bc, 0x8000e, 0x8008e, 0x8004e, 0x900fc, 0x70100, 0x80051, 0x80011, 0x80119, 0x70110, 0x80071, 0x80031, 0x900c2, 0x70108, 0x80061, 0x80021, 0x900a2, 0x80001, 0x80081, 0x80041, 0x900e2, 0x70104, 0x80059, 0x80019, 0x90092, 0x70114, 0x80079, 0x80039, 0x900d2, 0x7010c, 0x80069, 0x80029, 0x900b2, 0x80009, 0x80089, 0x80049, 0x900f2, 0x70102, 0x80055, 0x80015, 0x8011d, 0x70112, 0x80075, 0x80035, 0x900ca, 0x7010a, 0x80065, 0x80025, 0x900aa, 0x80005, 0x80085, 0x80045, 0x900ea, 0x70106, 0x8005d, 0x8001d, 0x9009a, 0x70116, 0x8007d, 0x8003d, 0x900da, 0x7010e, 0x8006d, 0x8002d, 0x900ba, 0x8000d, 0x8008d, 0x8004d, 0x900fa, 0x70101, 0x80053, 0x80013, 0x8011b, 0x70111, 0x80073, 0x80033, 0x900c6, 0x70109, 0x80063, 0x80023, 0x900a6, 0x80003, 0x80083, 0x80043, 0x900e6, 0x70105, 0x8005b, 0x8001b, 0x90096, 0x70115, 0x8007b, 0x8003b, 0x900d6, 0x7010d, 0x8006b, 0x8002b, 0x900b6, 0x8000b, 0x8008b, 0x8004b, 0x900f6, 0x70103, 0x80057, 0x80017, 0x8011f, 0x70113, 0x80077, 0x80037, 0x900ce, 0x7010b, 0x80067, 0x80027, 0x900ae, 0x80007, 0x80087, 0x80047, 0x900ee, 0x70107, 0x8005f, 0x8001f, 0x9009e, 0x70117, 0x8007f, 0x8003f, 0x900de, 0x7010f, 0x8006f, 0x8002f, 0x900be, 0x8000f, 0x8008f, 0x8004f, 0x900fe, 0x70100, 0x80050, 0x80010, 0x80118, 0x70110, 0x80070, 0x80030, 0x900c1, 0x70108, 0x80060, 0x80020, 0x900a1, 0x80000, 0x80080, 0x80040, 0x900e1, 0x70104, 0x80058, 0x80018, 0x90091, 0x70114, 0x80078, 0x80038, 0x900d1, 0x7010c, 0x80068, 0x80028, 0x900b1, 0x80008, 0x80088, 0x80048, 0x900f1, 0x70102, 0x80054, 0x80014, 0x8011c, 0x70112, 0x80074, 0x80034, 0x900c9, 0x7010a, 0x80064, 0x80024, 0x900a9, 0x80004, 0x80084, 0x80044, 0x900e9, 0x70106, 0x8005c, 0x8001c, 0x90099, 0x70116, 0x8007c, 0x8003c, 0x900d9, 0x7010e, 0x8006c, 0x8002c, 0x900b9, 0x8000c, 0x8008c, 0x8004c, 0x900f9, 0x70101, 0x80052, 0x80012, 0x8011a, 0x70111, 0x80072, 0x80032, 0x900c5, 0x70109, 0x80062, 0x80022, 0x900a5, 0x80002, 0x80082, 0x80042, 0x900e5, 0x70105, 0x8005a, 0x8001a, 0x90095, 0x70115, 0x8007a, 0x8003a, 0x900d5, 0x7010d, 0x8006a, 0x8002a, 0x900b5, 0x8000a, 0x8008a, 0x8004a, 0x900f5, 0x70103, 0x80056, 0x80016, 0x8011e, 0x70113, 0x80076, 0x80036, 0x900cd, 0x7010b, 0x80066, 0x80026, 0x900ad, 0x80006, 0x80086, 0x80046, 0x900ed, 0x70107, 0x8005e, 0x8001e, 0x9009d, 0x70117, 0x8007e, 0x8003e, 0x900dd, 0x7010f, 0x8006e, 0x8002e, 0x900bd, 0x8000e, 0x8008e, 0x8004e, 0x900fd, 0x70100, 0x80051, 0x80011, 0x80119, 0x70110, 0x80071, 0x80031, 0x900c3, 0x70108, 0x80061, 0x80021, 0x900a3, 0x80001, 0x80081, 0x80041, 0x900e3, 0x70104, 0x80059, 0x80019, 0x90093, 0x70114, 0x80079, 0x80039, 0x900d3, 0x7010c, 0x80069, 0x80029, 0x900b3, 0x80009, 0x80089, 0x80049, 0x900f3, 0x70102, 0x80055, 0x80015, 0x8011d, 0x70112, 0x80075, 0x80035, 0x900cb, 0x7010a, 0x80065, 0x80025, 0x900ab, 0x80005, 0x80085, 0x80045, 0x900eb, 0x70106, 0x8005d, 0x8001d, 0x9009b, 0x70116, 0x8007d, 0x8003d, 0x900db, 0x7010e, 0x8006d, 0x8002d, 0x900bb, 0x8000d, 0x8008d, 0x8004d, 0x900fb, 0x70101, 0x80053, 0x80013, 0x8011b, 0x70111, 0x80073, 0x80033, 0x900c7, 0x70109, 0x80063, 0x80023, 0x900a7, 0x80003, 0x80083, 0x80043, 0x900e7, 0x70105, 0x8005b, 0x8001b, 0x90097, 0x70115, 0x8007b, 0x8003b, 0x900d7, 0x7010d, 0x8006b, 0x8002b, 0x900b7, 0x8000b, 0x8008b, 0x8004b, 0x900f7, 0x70103, 0x80057, 0x80017, 0x8011f, 0x70113, 0x80077, 0x80037, 0x900cf, 0x7010b, 0x80067, 0x80027, 0x900af, 0x80007, 0x80087, 0x80047, 0x900ef, 0x70107, 0x8005f, 0x8001f, 0x9009f, 0x70117, 0x8007f, 0x8003f, 0x900df, 0x7010f, 0x8006f, 0x8002f, 0x900bf, 0x8000f, 0x8008f, 0x8004f, 0x900ff]), 9];
 const fixedDistCodeTab = [new Int32Array([0x50000, 0x50010, 0x50008, 0x50018, 0x50004, 0x50014, 0x5000c, 0x5001c, 0x50002, 0x50012, 0x5000a, 0x5001a, 0x50006, 0x50016, 0x5000e, 0x00000, 0x50001, 0x50011, 0x50009, 0x50019, 0x50005, 0x50015, 0x5000d, 0x5001d, 0x50003, 0x50013, 0x5000b, 0x5001b, 0x50007, 0x50017, 0x5000f, 0x00000]), 5];
 class FlateStream extends DecodeStream {
+  #isAsync = true;
   constructor(str, maybeLength) {
     super(maybeLength);
     this.stream = str;
@@ -7718,7 +8086,7 @@ class FlateStream extends DecodeStream {
   }
   async asyncGetBytes() {
     this.stream.reset();
-    const bytes = this.stream.getBytes();
+    const bytes = this.stream.isAsync ? await this.stream.asyncGetBytes() : this.stream.getBytes();
     try {
       const {
         readable,
@@ -7744,13 +8112,14 @@ class FlateStream extends DecodeStream {
       }
       return data;
     } catch {
+      this.#isAsync = false;
       this.stream = new Stream(bytes, 2, bytes.length, this.stream.dict);
       this.reset();
       return null;
     }
   }
   get isAsync() {
-    return true;
+    return this.#isAsync;
   }
   getBits(bits) {
     const str = this.stream;
@@ -10045,6 +10414,7 @@ class Jbig2Image {
 
 
 
+
 class Jbig2Stream extends DecodeStream {
   constructor(stream, maybeLength, params) {
     super(maybeLength);
@@ -10060,7 +10430,35 @@ class Jbig2Stream extends DecodeStream {
   readBlock() {
     this.decodeImage();
   }
-  decodeImage(bytes) {
+  get isAsyncDecoder() {
+    return true;
+  }
+  get isImageStream() {
+    return true;
+  }
+  async decodeImage(bytes, _decoderOptions) {
+    if (this.eof) {
+      return this.buffer;
+    }
+    bytes ||= this.bytes;
+    try {
+      let globals = null;
+      if (this.params instanceof Dict) {
+        const globalsStream = this.params.get("JBIG2Globals");
+        if (globalsStream instanceof BaseStream) {
+          globals = globalsStream.getBytes();
+        }
+      }
+      this.buffer = await JBig2WasmImage.decode(bytes, this.dict.get("Width"), this.dict.get("Height"), globals);
+    } catch {
+      warn("Jbig2Stream: Falling back to JS JBIG2 decoder.");
+      return this.decodeImageFallback(bytes);
+    }
+    this.bufferLength = this.buffer.length;
+    this.eof = true;
+    return this.buffer;
+  }
+  async decodeImageFallback(bytes) {
     if (this.eof) {
       return this.buffer;
     }
@@ -10132,6 +10530,9 @@ class JpxStream extends DecodeStream {
   }
   get canAsyncDecodeImageFromBuffer() {
     return this.stream.isAsync;
+  }
+  get isImageStream() {
+    return true;
   }
 }
 
@@ -11977,6 +12378,12 @@ class CMapFactory {
     if (encoding instanceof Name) {
       return createBuiltInCMap(encoding.name, fetchBuiltInCMap);
     } else if (encoding instanceof BaseStream) {
+      if (encoding.isAsync) {
+        const bytes = await encoding.asyncGetBytes();
+        if (bytes) {
+          encoding = new Stream(bytes, 0, bytes.length, encoding.dict);
+        }
+      }
       const parsedCMap = await parseCMap(new CMap(), new Lexer(encoding), fetchBuiltInCMap, useCMap);
       if (parsedCMap.isIdentityCMap) {
         return createBuiltInCMap(parsedCMap.name, fetchBuiltInCMap);
@@ -31328,7 +31735,7 @@ class PDFImage {
     const decode = dict.getArray("D", "Decode");
     const inverseDecode = decode?.[0] > 0;
     const computedLength = (width + 7 >> 3) * height;
-    const imgArray = image.getBytes(computedLength);
+    const imgArray = await image.getImageData(computedLength);
     const isSingleOpaquePixel = width === 1 && height === 1 && inverseDecode === (imgArray.length === 0 || !!(imgArray[0] & 128));
     if (isSingleOpaquePixel) {
       return {
@@ -32551,7 +32958,7 @@ class PartialEvaluator {
     const glyphs = font.charsToGlyphs(chars);
     if (font.data) {
       const isAddToPathSet = !!(state.textRenderingMode & TextRenderingMode.ADD_TO_PATH_FLAG);
-      if (isAddToPathSet || state.fillColorSpace.name === "Pattern" || font.disableFontFace) {
+      if (isAddToPathSet || state.fillColorSpace.name === "Pattern" || state.strokeColorSpace.name === "Pattern" || font.disableFontFace) {
         PartialEvaluator.buildFontPaths(font, glyphs, this.handler, this.options);
       }
     }
@@ -33037,7 +33444,7 @@ class PartialEvaluator {
     }
     return null;
   }
-  getOperatorList({
+  async getOperatorList({
     stream,
     task,
     resources,
@@ -33046,6 +33453,12 @@ class PartialEvaluator {
     fallbackFontDict = null,
     prevRefs = null
   }) {
+    if (stream.isAsync) {
+      const bytes = await stream.asyncGetBytes();
+      if (bytes) {
+        stream = new Stream(bytes, 0, bytes.length, stream.dict);
+      }
+    }
     const objId = stream.dict?.objId;
     const seenRefs = new RefSet(prevRefs);
     if (objId) {
@@ -33551,7 +33964,7 @@ class PartialEvaluator {
       throw reason;
     });
   }
-  getTextContent({
+  async getTextContent({
     stream,
     task,
     resources,
@@ -33567,6 +33980,12 @@ class PartialEvaluator {
     prevRefs = null,
     intersector = null
   }) {
+    if (stream.isAsync) {
+      const bytes = await stream.asyncGetBytes();
+      if (bytes) {
+        stream = new Stream(bytes, 0, bytes.length, stream.dict);
+      }
+    }
     const objId = stream.dict?.objId;
     const seenRefs = new RefSet(prevRefs);
     if (objId) {
@@ -35091,8 +35510,16 @@ class PartialEvaluator {
       if (fontFile) {
         if (!(fontFile instanceof BaseStream)) {
           throw new FormatError("FontFile should be a stream");
-        } else if (fontFile.isEmpty) {
-          throw new FormatError("FontFile is empty");
+        } else {
+          if (fontFile.isAsync) {
+            const bytes = await fontFile.asyncGetBytes();
+            if (bytes) {
+              fontFile = new Stream(bytes, 0, bytes.length, fontFile.dict);
+            }
+          }
+          if (fontFile.isEmpty) {
+            throw new FormatError("FontFile is empty");
+          }
         }
       }
     } catch (ex) {
@@ -36590,19 +37017,12 @@ function clearGlobalCaches() {
 
 
 function pickPlatformItem(dict) {
-  if (!(dict instanceof Dict)) {
-    return null;
-  }
-  if (dict.has("UF")) {
-    return dict.get("UF");
-  } else if (dict.has("F")) {
-    return dict.get("F");
-  } else if (dict.has("Unix")) {
-    return dict.get("Unix");
-  } else if (dict.has("Mac")) {
-    return dict.get("Mac");
-  } else if (dict.has("DOS")) {
-    return dict.get("DOS");
+  if (dict instanceof Dict) {
+    for (const key of ["UF", "F", "Unix", "Mac", "DOS"]) {
+      if (dict.has(key)) {
+        return dict.get(key);
+      }
+    }
   }
   return null;
 }
@@ -36611,11 +37031,10 @@ function stripPath(str) {
 }
 class FileSpec {
   #contentAvailable = false;
-  constructor(root, xref, skipContent = false) {
+  constructor(root, skipContent = false) {
     if (!(root instanceof Dict)) {
       return;
     }
-    this.xref = xref;
     this.root = root;
     if (root.has("FS")) {
       this.fs = root.get("FS");
@@ -36632,45 +37051,41 @@ class FileSpec {
     }
   }
   get filename() {
-    let filename = "";
     const item = pickPlatformItem(this.root);
     if (item && typeof item === "string") {
-      filename = stringToPDFString(item, true).replaceAll("\\\\", "\\").replaceAll("\\/", "/").replaceAll("\\", "/");
+      return stringToPDFString(item, true).replaceAll("\\\\", "\\").replaceAll("\\/", "/").replaceAll("\\", "/");
     }
-    return shadow(this, "filename", filename || "unnamed");
+    return "";
   }
   get content() {
     if (!this.#contentAvailable) {
       return null;
     }
-    this._contentRef ||= pickPlatformItem(this.root?.get("EF"));
-    let content = null;
-    if (this._contentRef) {
-      const fileObj = this.xref.fetchIfRef(this._contentRef);
-      if (fileObj instanceof BaseStream) {
-        content = fileObj.getBytes();
-      } else {
-        warn("Embedded file specification points to non-existing/invalid content");
-      }
-    } else {
-      warn("Embedded file specification does not have any content");
+    const ef = pickPlatformItem(this.root?.get("EF"));
+    if (ef instanceof BaseStream) {
+      return ef.getBytes();
     }
-    return content;
+    warn("Embedded file specification points to non-existing/invalid content");
+    return null;
   }
   get description() {
-    let description = "";
     const desc = this.root?.get("Desc");
     if (desc && typeof desc === "string") {
-      description = stringToPDFString(desc);
+      return stringToPDFString(desc);
     }
-    return shadow(this, "description", description);
+    return "";
   }
   get serializable() {
+    const {
+      filename,
+      content,
+      description
+    } = this;
     return {
-      rawFilename: this.filename,
-      filename: stripPath(this.filename),
-      content: this.content,
-      description: this.description
+      rawFilename: filename,
+      filename: stripPath(filename) || "unnamed",
+      content,
+      description
     };
   }
 }
@@ -38895,7 +39310,7 @@ class Catalog {
     if (obj instanceof Dict && obj.has("EmbeddedFiles")) {
       const nameTree = new NameTree(obj.getRaw("EmbeddedFiles"), this.xref);
       for (const [key, value] of nameTree.getAll()) {
-        const fs = new FileSpec(value, this.xref);
+        const fs = new FileSpec(value);
         attachments ??= Object.create(null);
         attachments[stringToPDFString(key, true)] = fs.serializable;
       }
@@ -39327,16 +39742,17 @@ class Catalog {
         case "GoToR":
           const urlDict = action.get("F");
           if (urlDict instanceof Dict) {
-            const fs = new FileSpec(urlDict, null, true);
-            const {
-              rawFilename
-            } = fs.serializable;
-            url = rawFilename;
+            const fs = new FileSpec(urlDict, true);
+            ({
+              rawFilename: url
+            } = fs.serializable);
           } else if (typeof urlDict === "string") {
             url = urlDict;
+          } else {
+            break;
           }
           const remoteDest = fetchRemoteDest(action);
-          if (remoteDest && typeof url === "string") {
+          if (remoteDest) {
             url = url.split("#", 1)[0] + "#" + remoteDest;
           }
           const newWindow = action.get("NewWindow");
@@ -44490,7 +44906,7 @@ class Image extends StringObject {
       return HTMLResult.EMPTY;
     }
     if (!buffer && this.transferEncoding === "base64") {
-      buffer = fromBase64Util(this[$content]);
+      buffer = Uint8Array.fromBase64(this[$content]);
     }
     if (!buffer) {
       return HTMLResult.EMPTY;
@@ -53806,10 +54222,9 @@ class FileAttachmentAnnotation extends MarkupAnnotation {
   constructor(params) {
     super(params);
     const {
-      dict,
-      xref
+      dict
     } = params;
-    const file = new FileSpec(dict.get("FS"), xref);
+    const file = new FileSpec(dict.get("FS"));
     this.data.annotationType = AnnotationType.FILEATTACHMENT;
     this.data.hasOwnCanvas = this.data.noRotate;
     this.data.noHTML = false;
@@ -56210,10 +56625,30 @@ class Page {
   }
   async getContentStream() {
     const content = await this.pdfManager.ensure(this, "content");
-    if (content instanceof BaseStream) {
+    if (content instanceof BaseStream && !content.isImageStream) {
+      if (content.isAsync) {
+        const bytes = await content.asyncGetBytes();
+        if (bytes) {
+          return new Stream(bytes, 0, bytes.length, content.dict);
+        }
+      }
       return content;
     }
     if (Array.isArray(content)) {
+      const promises = [];
+      for (let i = 0, ii = content.length; i < ii; i++) {
+        const item = content[i];
+        if (item instanceof BaseStream && item.isAsync) {
+          promises.push(item.asyncGetBytes().then(bytes => {
+            if (bytes) {
+              content[i] = new Stream(bytes, 0, bytes.length, item.dict);
+            }
+          }));
+        }
+      }
+      if (promises.length > 0) {
+        await Promise.all(promises);
+      }
       return new StreamsSequenceStream(content, this.#onSubStreamError.bind(this));
     }
     return new NullStream();
@@ -56325,6 +56760,8 @@ class Page {
     task,
     intent,
     cacheKey,
+    pageId = this.pageIndex,
+    pageIndex = this.pageIndex,
     annotationStorage = null,
     modifiedIds = null
   }) {
@@ -56377,7 +56814,7 @@ class Page {
       const opList = new OperatorList(intent, sink);
       handler.send("StartRenderPage", {
         transparency: partialEvaluator.hasBlendModes(resources, this.nonBlendModesSet),
-        pageIndex: this.pageIndex,
+        pageIndex,
         cacheKey
       });
       await partialEvaluator.getOperatorList({
@@ -57163,7 +57600,7 @@ class PDFDocument {
     } else {
       hashOriginal = calculateMD5(this.stream.getByteRange(0, FINGERPRINT_FIRST_BYTES), 0, FINGERPRINT_FIRST_BYTES);
     }
-    return shadow(this, "fingerprints", [toHexUtil(hashOriginal), hashModified ? toHexUtil(hashModified) : null]);
+    return shadow(this, "fingerprints", [hashOriginal.toHex(), hashModified?.toHex() ?? null]);
   }
   async #getLinearizationPage(pageIndex) {
     const {
@@ -57468,6 +57905,7 @@ class PDFDocument {
 
 
 
+
 function parseDocBaseUrl(url) {
   if (url) {
     const absoluteUrl = createValidAbsoluteUrl(url);
@@ -57504,6 +57942,7 @@ class BasePdfManager {
     JpxImage.setOptions(options);
     IccColorSpace.setOptions(options);
     CmykICCBasedCS.setOptions(options);
+    JBig2WasmImage.setOptions(options);
   }
   get docId() {
     return this._docId;
@@ -58788,10 +59227,14 @@ class PDFEditor {
     for (const {
       document,
       includePages,
-      excludePages
+      excludePages,
+      pageIndices
     } of pageInfos) {
       if (!document) {
         continue;
+      }
+      if (pageIndices) {
+        newIndex = -1;
       }
       const documentData = new DocumentData(document);
       allDocumentData.push(documentData);
@@ -58811,6 +59254,7 @@ class PDFEditor {
           (deletedIndices ||= new Set()).add(page);
         }
       }
+      let pageIndex = 0;
       for (let i = 0, ii = document.numPages; i < ii; i++) {
         if (deletedIndices?.has(i)) {
           continue;
@@ -58845,7 +59289,17 @@ class PDFEditor {
         if (!takePage) {
           continue;
         }
-        const newPageIndex = newIndex++;
+        let newPageIndex;
+        if (pageIndices) {
+          newPageIndex = pageIndices[pageIndex++];
+        }
+        if (newPageIndex === undefined) {
+          if (newIndex !== -1) {
+            newPageIndex = newIndex++;
+          } else {
+            for (newPageIndex = 0; this.oldPages[newPageIndex] === undefined; newPageIndex++) {}
+          }
+        }
         promises.push(document.getPage(i).then(page => {
           this.oldPages[newPageIndex] = new PageData(page, documentData);
         }));
@@ -59733,58 +60187,110 @@ class PDFEditor {
   }
 }
 
-;// ./src/core/worker_stream.js
+;// ./src/shared/base_pdf_stream.js
 
-class PDFWorkerStream {
-  constructor(msgHandler) {
-    this._msgHandler = msgHandler;
-    this._contentLength = null;
-    this._fullRequestReader = null;
-    this._rangeRequestReaders = [];
+class BasePDFStream {
+  #PDFStreamReader = null;
+  #PDFStreamRangeReader = null;
+  _fullReader = null;
+  _rangeReaders = new Set();
+  _source = null;
+  constructor(source, PDFStreamReader, PDFStreamRangeReader) {
+    this._source = source;
+    this.#PDFStreamReader = PDFStreamReader;
+    this.#PDFStreamRangeReader = PDFStreamRangeReader;
+  }
+  get _progressiveDataLength() {
+    return this._fullReader?._loaded ?? 0;
   }
   getFullReader() {
-    assert(!this._fullRequestReader, "PDFWorkerStream.getFullReader can only be called once.");
-    this._fullRequestReader = new PDFWorkerStreamReader(this._msgHandler);
-    return this._fullRequestReader;
+    assert(!this._fullReader, "BasePDFStream.getFullReader can only be called once.");
+    return this._fullReader = new this.#PDFStreamReader(this);
   }
   getRangeReader(begin, end) {
-    const reader = new PDFWorkerStreamRangeReader(begin, end, this._msgHandler);
-    this._rangeRequestReaders.push(reader);
+    if (end <= this._progressiveDataLength) {
+      return null;
+    }
+    const reader = new this.#PDFStreamRangeReader(this, begin, end);
+    this._rangeReaders.add(reader);
     return reader;
   }
   cancelAllRequests(reason) {
-    this._fullRequestReader?.cancel(reason);
-    for (const reader of this._rangeRequestReaders.slice(0)) {
+    this._fullReader?.cancel(reason);
+    for (const reader of new Set(this._rangeReaders)) {
       reader.cancel(reason);
     }
   }
 }
-class PDFWorkerStreamReader {
-  constructor(msgHandler) {
-    this._msgHandler = msgHandler;
-    this.onProgress = null;
-    this._contentLength = null;
-    this._isRangeSupported = false;
-    this._isStreamingSupported = false;
-    const readableStream = this._msgHandler.sendWithStream("GetReader");
-    this._reader = readableStream.getReader();
-    this._headersReady = this._msgHandler.sendWithPromise("ReaderHeadersReady").then(data => {
-      this._isStreamingSupported = data.isStreamingSupported;
-      this._isRangeSupported = data.isRangeSupported;
-      this._contentLength = data.contentLength;
-    });
+class BasePDFStreamReader {
+  onProgress = null;
+  _contentLength = 0;
+  _filename = null;
+  _headersCapability = Promise.withResolvers();
+  _isRangeSupported = false;
+  _isStreamingSupported = false;
+  _loaded = 0;
+  _stream = null;
+  constructor(stream) {
+    this._stream = stream;
   }
   get headersReady() {
-    return this._headersReady;
+    return this._headersCapability.promise;
+  }
+  get filename() {
+    return this._filename;
   }
   get contentLength() {
     return this._contentLength;
   }
+  get isRangeSupported() {
+    return this._isRangeSupported;
+  }
   get isStreamingSupported() {
     return this._isStreamingSupported;
   }
-  get isRangeSupported() {
-    return this._isRangeSupported;
+  async read() {
+    unreachable("Abstract method `read` called");
+  }
+  cancel(reason) {
+    unreachable("Abstract method `cancel` called");
+  }
+}
+class BasePDFStreamRangeReader {
+  _stream = null;
+  constructor(stream, begin, end) {
+    this._stream = stream;
+  }
+  async read() {
+    unreachable("Abstract method `read` called");
+  }
+  cancel(reason) {
+    unreachable("Abstract method `cancel` called");
+  }
+}
+
+;// ./src/core/worker_stream.js
+
+class PDFWorkerStream extends BasePDFStream {
+  constructor(source) {
+    super(source, PDFWorkerStreamReader, PDFWorkerStreamRangeReader);
+  }
+}
+class PDFWorkerStreamReader extends BasePDFStreamReader {
+  _reader = null;
+  constructor(stream) {
+    super(stream);
+    const {
+      msgHandler
+    } = stream._source;
+    const readableStream = msgHandler.sendWithStream("GetReader");
+    this._reader = readableStream.getReader();
+    msgHandler.sendWithPromise("ReaderHeadersReady").then(data => {
+      this._contentLength = data.contentLength;
+      this._isStreamingSupported = data.isStreamingSupported;
+      this._isRangeSupported = data.isRangeSupported;
+      this._headersCapability.resolve();
+    }, this._headersCapability.reject);
   }
   async read() {
     const {
@@ -59806,18 +60312,18 @@ class PDFWorkerStreamReader {
     this._reader.cancel(reason);
   }
 }
-class PDFWorkerStreamRangeReader {
-  constructor(begin, end, msgHandler) {
-    this._msgHandler = msgHandler;
-    this.onProgress = null;
-    const readableStream = this._msgHandler.sendWithStream("GetRangeReader", {
+class PDFWorkerStreamRangeReader extends BasePDFStreamRangeReader {
+  _reader = null;
+  constructor(stream, begin, end) {
+    super(stream, begin, end);
+    const {
+      msgHandler
+    } = stream._source;
+    const readableStream = msgHandler.sendWithStream("GetRangeReader", {
       begin,
       end
     });
     this._reader = readableStream.getReader();
-  }
-  get isStreamingSupported() {
-    return false;
   }
   async read() {
     const {
@@ -59903,7 +60409,7 @@ class WorkerMessageHandler {
       docId,
       apiVersion
     } = docParams;
-    const workerVersion = "5.4.530";
+    const workerVersion = "5.4.624";
     if (apiVersion !== workerVersion) {
       throw new Error(`The API version "${apiVersion}" does not match ` + `the Worker version "${workerVersion}".`);
     }
@@ -59975,19 +60481,21 @@ class WorkerMessageHandler {
         pdfManagerArgs.source = data;
         return new LocalPdfManager(pdfManagerArgs);
       }
-      const pdfStream = new PDFWorkerStream(handler),
-        fullRequest = pdfStream.getFullReader();
+      const pdfStream = new PDFWorkerStream({
+          msgHandler: handler
+        }),
+        fullReader = pdfStream.getFullReader();
       const pdfManagerCapability = Promise.withResolvers();
       let newPdfManager,
         cachedChunks = [],
         loaded = 0;
-      fullRequest.headersReady.then(function () {
-        if (!fullRequest.isRangeSupported) {
+      fullReader.headersReady.then(function () {
+        if (!fullReader.isRangeSupported) {
           return;
         }
         pdfManagerArgs.source = pdfStream;
-        pdfManagerArgs.length = fullRequest.contentLength;
-        pdfManagerArgs.disableAutoFetch ||= fullRequest.isStreamingSupported;
+        pdfManagerArgs.length = fullReader.contentLength;
+        pdfManagerArgs.disableAutoFetch ||= fullReader.isStreamingSupported;
         newPdfManager = new NetworkPdfManager(pdfManagerArgs);
         for (const chunk of cachedChunks) {
           newPdfManager.sendProgressiveData(chunk);
@@ -60021,10 +60529,10 @@ class WorkerMessageHandler {
               return;
             }
             loaded += value.byteLength;
-            if (!fullRequest.isStreamingSupported) {
+            if (!fullReader.isStreamingSupported) {
               handler.send("DocProgress", {
                 loaded,
-                total: Math.max(loaded, fullRequest.contentLength || 0)
+                total: Math.max(loaded, fullReader.contentLength || 0)
               });
             }
             if (newPdfManager) {
@@ -60032,12 +60540,12 @@ class WorkerMessageHandler {
             } else {
               cachedChunks.push(value);
             }
-            fullRequest.read().then(readChunk, reject);
+            fullReader.read().then(readChunk, reject);
           } catch (e) {
             reject(e);
           }
         };
-        fullRequest.read().then(readChunk, reject);
+        fullReader.read().then(readChunk, reject);
       }).catch(function (e) {
         pdfManagerCapability.reject(e);
         cancelXHRs = null;
@@ -60454,8 +60962,11 @@ class WorkerMessageHandler {
       });
     });
     handler.on("GetOperatorList", function (data, sink) {
-      const pageIndex = data.pageIndex;
-      pdfManager.getPage(pageIndex).then(function (page) {
+      const {
+        pageId,
+        pageIndex
+      } = data;
+      pdfManager.getPage(pageId).then(function (page) {
         const task = new WorkerTask(`GetOperatorList: page ${pageIndex}`);
         startWorkerTask(task);
         const start = verbosity >= VerbosityLevel.INFOS ? Date.now() : 0;
@@ -60466,7 +60977,8 @@ class WorkerMessageHandler {
           intent: data.intent,
           cacheKey: data.cacheKey,
           annotationStorage: data.annotationStorage,
-          modifiedIds: data.modifiedIds
+          modifiedIds: data.modifiedIds,
+          pageIndex
         }).then(function (operatorListInfo) {
           finishWorkerTask(task);
           if (start) {
@@ -60484,11 +60996,12 @@ class WorkerMessageHandler {
     });
     handler.on("GetTextContent", function (data, sink) {
       const {
+        pageId,
         pageIndex,
         includeMarkedContent,
         disableNormalization
       } = data;
-      pdfManager.getPage(pageIndex).then(function (page) {
+      pdfManager.getPage(pageId).then(function (page) {
         const task = new WorkerTask("GetTextContent: page " + pageIndex);
         startWorkerTask(task);
         const start = verbosity >= VerbosityLevel.INFOS ? Date.now() : 0;
