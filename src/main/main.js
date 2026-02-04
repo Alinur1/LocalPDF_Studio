@@ -247,10 +247,20 @@ function sendUpdateStatus(status, details = '') {
 }
 
 function setupAutoUpdater() {
-    if (process.platform === 'linux' && process.env.SNAP) {
-        console.log('Snap detected — skipping manual auto-updater.');
-        sendUpdateStatus('Snap package detected — updates are handled automatically by the Snap Store.');
-        return;
+    if(process.platform === 'linux')
+    {
+        if (process.env.SNAP)
+        {
+            console.log('Snap detected — skipping manual auto-updater.');
+            sendUpdateStatus('Snap package detected — updates are handled automatically by the Snap Store.');
+            return;
+        }
+        if (process.env.FLATPAK_ID || fs.existsSync('/.flatpak-info'))
+        {
+            console.log('Flatpak detected — skipping manual auto-updater.');
+            sendUpdateStatus('Flatpak detected — updates are handled automatically by the Flathub.');
+            return;
+        }
     }
 
     autoUpdater.autoDownload = process.platform === 'win32';

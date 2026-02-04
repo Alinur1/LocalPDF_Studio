@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.localpdfstudio.app</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0</project_license>
+  <name>LocalPDF Studio</name>
+  <summary>Offline, open-source, privacy-first PDF toolkit</summary>
+
+  <description>
+    <p>
+      LocalPDF Studio is a free, open-source, privacy-first PDF toolkit built to work 100% offline — no document uploads, no cloud required. 
+      Whether you’re merging PDFs, splitting large files, extracting images, adding watermarks, or locking/unlocking documents, this tool gives you full control — without compromising your privacy. 
+      Stop uploading your PDF files to random websites that may use or sell your sensitive documents, install LocalPDF Studio right now.
+    </p>
+    <p>Key features:</p>
+    <ul>
+      <li>Add comment, hand signature, highlight, text, drawing or image (Powered by Mozilla PDF.js)</li>
+      <li>View PDF in presentation mode</li>
+      <li>Combine multiple PDFs into one</li>
+      <li>Split large PDFs into smaller parts</li>
+      <li>Delete, reorder, or crop pages with ease</li>
+      <li>Convert PDF pages to high-quality images</li>
+      <li>Add page numbers or watermarks</li>
+      <li>Lock or unlock PDFs with passwords</li>
+      <li>Edit metadata and extract images from documents</li>
+      <li>Remove all PDF metadata</li>
+      <li>Convert images to PDF file</li>
+      <li>Perform OCR on image or PDF files</li>
+      <li>Redact PDF content as you wish</li>
+      <li>Works fully offline, with full support for Windows, macOS (Intel), and Linux</li>
+      <li>Built using modern, efficient technologies for speed and minimal footprint</li>
+    </ul>
+    <p>Why LocalPDF Studio?</p>
+    <ul>
+      <li>100% Offline &amp; Private: Your documents stay local. Nothing is uploaded.</li>
+      <li>Free &amp; Open Source (AGPL-3.0): No cost, no lock-in.</li>
+      <li>Cross-Platform: One tool for all your devices: Windows, Linux, macOS.</li>
+      <li>Lightweight: Fast startup, modern backend, minimal system stress.</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">com.localpdfstudio.app.desktop</launchable>
+  <provides>
+    <mediatype>application/pdf</mediatype>
+  </provides>
+  
+  <screenshots>
+    <screenshot type="default">
+      <caption>The main PDF reader interface in light mode</caption>
+      <image>https://raw.githubusercontent.com/Alinur1/LocalPDF_Studio/main/assets/Screenshots/LPS1.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>The main PDF reader interface in dark mode</caption>
+      <image>https://raw.githubusercontent.com/Alinur1/LocalPDF_Studio/main/assets/Screenshots/LPS2.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Accessing the built-in PDF manipulation tools</caption>
+      <image>https://raw.githubusercontent.com/Alinur1/LocalPDF_Studio/main/assets/Screenshots/LPS3.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Customizing application and privacy settings</caption>
+      <image>https://raw.githubusercontent.com/Alinur1/LocalPDF_Studio/main/assets/Screenshots/LPS4.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Information about LocalPDF Studio and its version</caption>
+      <image>https://raw.githubusercontent.com/Alinur1/LocalPDF_Studio/main/assets/Screenshots/LPS5.png</image>
+    </screenshot>
+  </screenshots>
+
+  <developer id="io.github.alinur1">
+    <name>Alinur</name>
+  </developer>
+
+  <url type="homepage">https://alinur1.github.io/LocalPDF_Studio_Website/</url>
+  <url type="bugtracker">https://github.com/Alinur1/LocalPDF_Studio/issues</url>
+  <url type="donation">https://alinur3.gumroad.com/l/csbhxr</url>
+  <url type="vcs-browser">https://github.com/Alinur1/LocalPDF_Studio</url>
+  
+  <content_rating type="oars-1.1" />
+  
+  <releases>
+    <release version="1.0.0" date="2026-02-03" />
+  </releases>
+</component>
