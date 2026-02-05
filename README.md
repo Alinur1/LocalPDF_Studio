@@ -54,7 +54,3 @@ LocalPDF Studio is built with modern web technologies and follows open-source pr
 - Test your code. (Must)
 - Commit with clear messages.
 - Push and create a Pull Request
-
-
-#
-## ⚠️We are currently shifting our focus to enterprise projects because of less or no donation at all since the initial release (October 31, 2025). So updates for LocalPDF Studio will be less frequent. The app will remain free, offline, privacy focused and open-source, but new feature supports are on hold for now. Thanks for using LocalPDF Studio.
