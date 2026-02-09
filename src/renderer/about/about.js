@@ -52,6 +52,8 @@ async function fixImagePaths() {
 function setupButtons() {
     const viewSourceBtn = document.getElementById('view-source');
     const facebookBtn = document.getElementById('facebook-btn');
+    const instagramBtn = document.getElementById('instagram-btn');
+    const redditBtn = document.getElementById('reddit-btn');
     const currentlyWorkingOnBtn = document.getElementById('currently-working-on');
     const starRepoBtn = document.getElementById('star-repo');
     const reportIssueBtn = document.getElementById('report-issue');
@@ -74,6 +76,12 @@ function setupButtons() {
     }
     if (facebookBtn) {
         facebookBtn.addEventListener('click', () => openExternalLink('https://www.facebook.com/share/1BvWDuLGU2/'));
+    }
+    if (instagramBtn) {
+        instagramBtn.addEventListener('click', () => openExternalLink('https://www.instagram.com/localpdf_studio/'));
+    }
+    if (redditBtn) {
+        redditBtn.addEventListener('click', () => openExternalLink('https://www.reddit.com/r/localpdf_studio/'));
     }
 }
 
