@@ -670,3 +670,26 @@ body.dark .search-result-item:hover .search-result-meta {
 .pdf-control-btn[data-tooltip]:hover::before {
   opacity: 1;
 }
+
+.donate-btn {
+  position: relative;
+}
+
+@keyframes glow-pulse {
+  0% {
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5),
+      0 0 10px rgba(52, 152, 219, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.8),
+      0 0 25px rgba(52, 152, 219, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5),
+      0 0 10px rgba(52, 152, 219, 0.3);
+  }
+}
+
+.donate-btn.glowing {
+  animation: glow-pulse 0.6s ease-in-out;
+}
