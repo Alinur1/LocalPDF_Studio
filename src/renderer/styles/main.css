@@ -28,6 +28,7 @@
   --text-secondary: #bdc3c7;
   --text-tertiary: #95a5a6;
   --border-color: #111820;
+  --border-color-tab: #94A3B8;
   --accent-color: #3498db;
   --accent-hover: #2980b9;
   --accent-disabled: #34495e;
@@ -53,6 +54,7 @@ body.light {
   --text-secondary: #666666;
   --text-tertiary: #888888;
   --border-color: #D1CEC5;
+  --border-color-tab: #D97757;
   --accent-color: #D97757;
   --accent-hover: #C06647;
   --accent-disabled: #E2B09F;
@@ -204,15 +206,16 @@ html {
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  cursor: pointer;
   position: relative;
   user-select: none;
-  border-left: 4px solid transparent;
+  border: 0.1px solid var(--border-color-tab);
+  border-radius: 8px;
   color: var(--text-secondary);
   transition: all 0.2s ease;
   overflow: hidden;
   cursor: grab;
   user-select: none;
+  margin: 3px;
 }
 
 .tab.dragging {
@@ -254,7 +257,7 @@ html {
   background: var(--bg-tertiary);
   color: var(--text-primary);
   font-weight: 600;
-  border-left: 4px solid var(--accent-color);
+  border: 4px solid var(--accent-color);
 }
 
 .tab-close {
