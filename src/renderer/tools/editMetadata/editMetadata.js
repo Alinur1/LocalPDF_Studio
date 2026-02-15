@@ -133,6 +133,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             loadingUI.show(i18n.t('editMetadataJS.loadingPdf'));
             clearAll(true);
+
+            const span = editToggleBtn.querySelector('span') || editToggleBtn;
+            span.textContent = i18n.t('editMetadata.edit-metadata-btn');
             
             selectedFile = fileInfo;
             currentFilePath = fileInfo.path;
