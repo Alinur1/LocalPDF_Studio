@@ -187,8 +187,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 author: info.Author || '',
                 subject: info.Subject || '',
                 keywords: info.Keywords || '',
-                creator: info.Creator || 'LocalPDF-Studio',
-                producer: info.Producer || 'LocalPDF-Studio',
+                creator: info.Creator || '',
+                producer: info.Producer || '',
                 creationDate: info.CreationDate || null,
                 modificationDate: info.ModDate || null,
                 pageCount: numPages
