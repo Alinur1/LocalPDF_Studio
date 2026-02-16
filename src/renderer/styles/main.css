@@ -696,3 +696,40 @@ body.dark .search-result-item:hover .search-result-meta {
 .donate-btn.glowing {
   animation: glow-pulse 0.6s ease-in-out;
 }
+
+/* Tab Context Menu */
+.tab-context-menu {
+  position: fixed;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px var(--shadow-color);
+  z-index: 10000;
+  min-width: 200px;
+  padding: 4px 0;
+}
+
+.tab-context-menu.hidden {
+  display: none;
+}
+
+.context-menu-item {
+  padding: 10px 16px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.context-menu-item:hover {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.context-menu-separator {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 4px 0;
+}

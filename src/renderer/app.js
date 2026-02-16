@@ -19,6 +19,7 @@
 // src/renderer/app.js
 
 import TabManager from './tabs/tabManager.js';
+import TabContextMenu from './tabs/tabContext.js';
 import { ClockManager } from './utils/clockManager.js';
 import createPdfTab from './utils/createPdfTab.js';
 import customAlert from './utils/customAlert.js';
@@ -32,6 +33,7 @@ window.addEventListener('DOMContentLoaded', async() => {
 
     const themeRadios = document.querySelectorAll('input[name="theme-mode"]');
     const tabManager = new TabManager('#tab-bar', '#tab-content');
+    const tabContextMenu = new TabContextMenu(tabManager);
     const clockManager = new ClockManager();
     const searchIndexManager = new SearchIndexManager();
     const searchBar = new SearchBar(searchIndexManager, tabManager);
