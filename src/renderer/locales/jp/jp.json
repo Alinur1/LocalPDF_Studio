@@ -793,5 +793,12 @@
     "nextBtn": "次へ →",
     "cancel": "キャンセル",
     "clearAll": "すべてクリア"
+  },
+  "tabContext": {
+    "closeThisTab": "このタブを閉じる",
+    "closeAllButThis": "他のタブをすべて閉じる",
+    "closeTheTabsAbove": "上のタブを閉じる",
+    "closeTheTabsBelow": "下のタブを閉じる",
+    "closeAll": "すべて閉じる"
   }
 }

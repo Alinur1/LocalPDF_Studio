@@ -18,32 +18,54 @@
 
 // src/renderer/tabs/tabContext.js
 
+import i18n from "../utils/i18n.js";
+
 export default class TabContextMenu {
     constructor(tabManager) {
         this.tabManager = tabManager;
         this.contextMenu = null;
         this.currentTabId = null;
-        
+
         this.createContextMenu();
         this.attachContextMenuListeners();
+
+        document.addEventListener('languageChanged', () => {
+            this.updateTranslations();
+        });
     }
 
     createContextMenu() {
-        // Create context menu container
         this.contextMenu = document.createElement('div');
         this.contextMenu.className = 'tab-context-menu hidden';
-        this.contextMenu.innerHTML = `
-            <div class="context-menu-item" data-action="close-this">Close this tab</div>
-            <div class="context-menu-separator"></div>
-            <div class="context-menu-item" data-action="close-all-but-this">Close all but this</div>
-            <div class="context-menu-separator"></div>
-            <div class="context-menu-item" data-action="close-above">Close the tabs above</div>
-            <div class="context-menu-item" data-action="close-below">Close the tabs below</div>
-            <div class="context-menu-separator"></div>
-            <div class="context-menu-item" data-action="close-all">Close all</div>
-        `;
-        
+        this.contextMenu.innerHTML = this.getMenuHTML();
         document.body.appendChild(this.contextMenu);
+
+        this.contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const action = item.dataset.action;
+                this.handleMenuAction(action, this.currentTabId);
+                this.hideContextMenu();
+            });
+        });
+    }
+
+    getMenuHTML() {
+        return `
+            <div class="context-menu-item" data-action="close-this">${i18n.t('tabContext.closeThisTab')}</div>
+            <div class="context-menu-separator"></div>
+            <div class="context-menu-item" data-action="close-all-but-this">${i18n.t('tabContext.closeAllButThis')}</div>
+            <div class="context-menu-separator"></div>
+            <div class="context-menu-item" data-action="close-above">${i18n.t('tabContext.closeTheTabsAbove')}</div>
+            <div class="context-menu-item" data-action="close-below">${i18n.t('tabContext.closeTheTabsBelow')}</div>
+            <div class="context-menu-separator"></div>
+            <div class="context-menu-item" data-action="close-all">${i18n.t('tabContext.closeAll')}</div>
+        `;
+    }
+
+    updateTranslations() {
+        // Recreate the menu with new translations
+        this.contextMenu.innerHTML = this.getMenuHTML();
 
         // Attach click handlers to menu items
         this.contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
@@ -63,6 +85,7 @@ export default class TabContextMenu {
             if (tab) {
                 e.preventDefault();
                 this.currentTabId = tab.dataset.tabId;
+                this.updateTranslations();
                 this.showContextMenu(e.clientX, e.clientY);
             }
         });

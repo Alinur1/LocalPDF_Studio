@@ -793,5 +793,12 @@
     "nextBtn": "下一页 →",
     "cancel": "取消",
     "clearAll": "清除全部"
+  },
+  "tabContext": {
+    "closeThisTab": "关闭此标签页",
+    "closeAllButThis": "关闭其他标签页",
+    "closeTheTabsAbove": "关闭上方标签页",
+    "closeTheTabsBelow": "关闭下方标签页",
+    "closeAll": "关闭全部"
   }
 }

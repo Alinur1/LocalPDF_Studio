@@ -793,5 +793,12 @@
     "nextBtn": "Next →",
     "cancel": "Cancel",
     "clearAll": "Clear All"
+  },
+  "tabContext": {
+    "closeThisTab": "Close this tab",
+    "closeAllButThis": "Close all but this",
+    "closeTheTabsAbove": "Close the tabs above",
+    "closeTheTabsBelow": "Close the tabs below",
+    "closeAll": "Close all"
   }
 }

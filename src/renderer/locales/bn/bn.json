@@ -793,5 +793,12 @@
     "nextBtn": "পরবর্তী →",
     "cancel": "বাতিল করুন",
     "clearAll": "সব পরিষ্কার করুন"
+  },
+  "tabContext": {
+    "closeThisTab": "এই ট্যাবটি বন্ধ করুন",
+    "closeAllButThis": "এটি ছাড়া সব বন্ধ করুন",
+    "closeTheTabsAbove": "উপরের ট্যাবগুলি বন্ধ করুন",
+    "closeTheTabsBelow": "নিচের ট্যাবগুলি বন্ধ করুন",
+    "closeAll": "সব বন্ধ করুন"
   }
 }
