@@ -76,7 +76,7 @@ def apply_redactions(input_path, output_path, redactions):
             # Apply all redactions on this page
             # This is the critical step - it PERMANENTLY removes the content
             # After this, the text/images in redacted areas cannot be recovered
-            page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_REMOVE, graphics=fitz.PDF_REDACT_IMAGE_REMOVE)
+            page.apply_redactions(images=2, graphics=fitz.PDF_REDACT_IMAGE_REMOVE)
             pages_redacted.add(page_num)
 
         # Save the redacted PDF
