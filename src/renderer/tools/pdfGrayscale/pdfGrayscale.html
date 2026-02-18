@@ -1,0 +1,120 @@
+<!--
+ * LocalPDF Studio - Offline PDF Toolkit
+ * ======================================
+ * 
+ * @author      Md. Alinur Hossain <alinur1160@gmail.com>
+ * @license     AGPL 3.0 (GNU Affero General Public License version 3)
+ * @website     https://alinur1.github.io/LocalPDF_Studio_Website/
+ * @repository  https://github.com/Alinur1/LocalPDF_Studio
+ * 
+ * Copyright (c) 2025 Md. Alinur Hossain. All rights reserved.
+ * 
+ * Architecture:
+ * - Frontend: Electron + HTML/CSS/JS
+ * - Backend: ASP.NET Core Web API, Python
+ * - PDF Engine: PdfSharp + Mozilla PDF.js
+-->
+
+
+<!-- src/renderer/tools/pdfGrayscale/pdfGrayscale.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - Convert to Grayscale</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./pdfGrayscale.css">
+    <script type="module" src="../../utils/themeManager.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="pdfGrayscale.page-title">Convert to Grayscale</h1>
+        </div>
+        <main class="tool-container">
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn" data-i18n="common.btn-select">Click to Select a PDF
+                    File or drop PDF here</button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                </div>
+            </div>
+
+            <div id="preview-container" class="preview-container" style="display: none;">
+                <div class="preview-header">
+                    <h3 data-i18n="common.pdf-preview">PDF Preview</h3>
+                    <span id="page-count" class="page-count"></span>
+                </div>
+                <div id="preview-grid" class="preview-grid"></div>
+            </div>
+
+            <div class="grayscale-options-container">
+                <h2 data-i18n="pdfGrayscale.grayscale-options">Grayscale Options</h2>
+
+                <div class="option-group">
+                    <h3 data-i18n="pdfGrayscale.page-range-title">Page Range</h3>
+                    <div class="page-range-options">
+                        <label class="radio-label">
+                            <input type="radio" name="pageRange" value="all" checked>
+                            <span data-i18n="pdfGrayscale.all-pages">All Pages</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="pageRange" value="range">
+                            <span data-i18n="pdfGrayscale.page-range">Page Range</span>
+                        </label>
+                    </div>
+                    <div id="page-range-inputs" style="display: none; margin-top: 1rem;">
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <div style="flex: 1;">
+                                <label for="startPage" data-i18n="pdfGrayscale.start-page">Start:</label>
+                                <input type="number" id="startPage" class="options-input" min="1" value="1">
+                            </div>
+                            <div style="flex: 1;">
+                                <label for="endPage" data-i18n="pdfGrayscale.end-page">End:</label>
+                                <input type="number" id="endPage" class="options-input" min="1" value="1">
+                            </div>
+                        </div>
+                        <small class="help-text" data-i18n="pdfGrayscale.page-range-help">Specify the range of pages to
+                            convert</small>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <h3 data-i18n="pdfGrayscale.conversion-settings">Conversion Settings</h3>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="preserveImages" checked>
+                            <span data-i18n="pdfGrayscale.preserve-images">Convert images to grayscale</span>
+                        </label>
+                        <small class="help-text" data-i18n="pdfGrayscale.preserve-images-help">When unchecked, images
+                            will remain in original color</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="convert-btn" class="top-btn" data-i18n="pdfGrayscale.convert-btn" disabled>Convert to
+                    Grayscale</button>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="./pdfGrayscale.js"></script>
+</body>
+
+</html>

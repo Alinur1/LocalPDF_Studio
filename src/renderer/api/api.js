@@ -118,6 +118,7 @@ async function getEndpoints() {
         ghostscriptCheck: `${base}/Ghostscript/check`,
         imageToPdf: `${base}/ImageToPdf/convert`,
         redact: `${base}/PdfRedact/redact`,
+        grayscale: `${base}/PdfGrayscale/convert`,
         // Add more as necessary
     };
 }

@@ -40,6 +40,7 @@ builder.Services.AddScoped<IPdfExtractImagesInterface, PdfExtractImagesService>(
 builder.Services.AddScoped<IGhostscriptInterface, GhostscriptService>();
 builder.Services.AddScoped<IImageToPdfInterface, ImageToPdfService>();
 builder.Services.AddScoped<IRedactInterface, RedactService>();
+builder.Services.AddScoped<IPdfGrayscaleInterface, PdfGrayscaleService>();
 
 builder.Services.AddCors(options =>
 {
