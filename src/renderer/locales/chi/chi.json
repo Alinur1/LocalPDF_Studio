@@ -23,7 +23,8 @@
     "tool-extract-images": "提取图片",
     "tool-OCR": "OCR辨識PDF或影像",
     "tool-image-to-pdf": "图片转 PDF",
-    "tool-redact-pdf": "PDF 内容擦除"
+    "tool-redact-pdf": "PDF 内容擦除",
+    "pdf-grayscale": "PDF 灰度转换器"
   },
   "error": {
     "empty-message": "未打开PDF。点击\"打开PDF阅读器\"开始使用！"
@@ -797,34 +798,33 @@
   "pdfGrayscale": {
     "page-title": "转换为灰度",
     "grayscale-options": "灰度选项",
-    "page-range-title": "页面范围",
+    "page-range-title": "页面选择",
     "all-pages": "所有页面",
-    "page-range": "页面范围",
-    "start-page": "开始：",
-    "end-page": "结束：",
-    "page-range-help": "指定要转换为灰度的页面范围",
+    "custom-pages": "自定义页面",
+    "custom-pages-label": "页面：",
+    "custom-pages-help": "输入单个页面或范围，用逗号分隔（例如：1、2、3-6、8）",
     "conversion-settings": "转换设置",
     "preserve-images": "将图像转换为灰度",
-    "preserve-images-help": "如果未选中，图像将保持原始颜色",
+    "preserve-images-help": "未选中时，图像将保持原始颜色",
     "convert-btn": "转换为灰度"
   },
   "pdfGrayscaleJS": {
-    "selectingPdfs": "正在选择PDF文件...",
-    "loadingPreview": "正在加载PDF预览...",
+    "selectingPdfs": "正在选择PDF...",
+    "loadingPreview": "正在加载预览...",
     "totalPages": "总页数：",
-    "morePages": " 更多",
+    "morePages": " 更多页面",
     "pageLabel": "第 ",
     "failedToLoad": "加载PDF预览失败",
-    "selectFileFirst": "请先选择一个PDF文件。",
-    "invalidPageRange": "无效的页面范围",
-    "pageRangeExceedsTotal": "结束页面不能超过总页数",
+    "selectFileFirst": "请先选择一个PDF文件",
+    "enterCustomPages": "请输入自定义页面",
     "convertingPdf": "正在将PDF转换为灰度...",
     "conversionSuccess": "PDF已成功转换为灰度！",
     "conversionFailed": "PDF转换失败",
-    "unexpectedResponse": "来自服务器的意外响应",
+    "cancelOrFailed": "操作已取消或失败。",
+    "unexpectedResponse": "后端返回意外响应",
     "conversionError": "转换过程中发生错误",
     "dropOneFile": "一次只能拖放一个PDF文件。",
-    "failedToSave": "保存拖放文件失败: ",
+    "failedToSave": "保存拖放文件失败：",
     "dropPdfFile": "请拖放有效的PDF文件。"
   },
   "tabContext": {

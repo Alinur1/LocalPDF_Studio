@@ -45,8 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pageCountEl = document.getElementById('page-count');
     const pageRangeRadios = document.querySelectorAll('input[name="pageRange"]');
     const pageRangeInputs = document.getElementById('page-range-inputs');
-    const startPageInput = document.getElementById('startPage');
-    const endPageInput = document.getElementById('endPage');
+    const customPagesInput = document.getElementById('customPages');
 
     let selectedFile = null;
     let droppedFilePath = null; // Track dropped file path for cleanup
@@ -118,28 +117,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     pageRangeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
-            pageRangeInputs.style.display = e.target.value === 'range' ? 'block' : 'none';
+            pageRangeInputs.style.display = e.target.value === 'custom' ? 'block' : 'none';
         });
     });
 
-    startPageInput.addEventListener('change', () => {
-        let value = parseInt(startPageInput.value);
-        if (value < 1) startPageInput.value = 1;
-        if (value > pdfDoc?.numPages) startPageInput.value = pdfDoc.numPages;
-
-        // Ensure endPage is not less than startPage
-        if (parseInt(endPageInput.value) < parseInt(startPageInput.value)) {
-            endPageInput.value = startPageInput.value;
-        }
-    });
-
-    endPageInput.addEventListener('change', () => {
-        let value = parseInt(endPageInput.value);
-        if (value < 1) endPageInput.value = 1;
-        if (value > pdfDoc?.numPages) endPageInput.value = pdfDoc.numPages;
-        if (value < parseInt(startPageInput.value)) {
-            endPageInput.value = startPageInput.value;
-        }
+    customPagesInput.addEventListener('input', () => {
+        // Real-time validation feedback could be added here if needed
     });
 
     async function handleFileSelected(file) {
@@ -161,11 +144,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
             pdfDoc = await loadingTask.promise;
             pageCountEl.textContent = (i18n.t('pdfGrayscaleJS.totalPages') || 'Total Pages: ') + pdfDoc.numPages;
-
-            // Update range inputs with max values
-            startPageInput.max = pdfDoc.numPages;
-            endPageInput.max = pdfDoc.numPages;
-            endPageInput.value = pdfDoc.numPages;
 
             previewGrid.innerHTML = '';
             const pagesToShow = Math.min(pdfDoc.numPages, 6);
@@ -252,35 +230,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Get page range from radio buttons
+        // Get page selection from radio buttons
         const pageRange = document.querySelector('input[name="pageRange"]:checked').value;
-        let startPage = 1;
-        let endPage = pdfDoc.numPages;
+        let customPages = '';
 
-        if (pageRange === 'range') {
-            startPage = parseInt(document.getElementById('startPage').value);
-            endPage = parseInt(document.getElementById('endPage').value);
+        if (pageRange === 'custom') {
+            customPages = customPagesInput.value.trim();
 
-            // Validation
-            if (startPage < 1 || endPage < startPage) {
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('pdfGrayscaleJS.invalidPageRange') || 'Invalid page range', [i18n.t('common.ok')]);
+            // Validate custom pages format
+            if (!customPages) {
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('pdfGrayscaleJS.enterCustomPages') || 'Please enter custom pages', [i18n.t('common.ok')]);
                 return;
             }
 
-            if (endPage > pdfDoc.numPages) {
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('pdfGrayscaleJS.pageRangeExceedsTotal') || `End page cannot exceed total pages (${pdfDoc.numPages})`, [i18n.t('common.ok')]);
+            // Validate and parse custom pages
+            const validationResult = validateCustomPages(customPages, pdfDoc.numPages);
+            if (!validationResult.valid) {
+                await customAlert.alert(i18n.t('alerts.error'), validationResult.error, [i18n.t('common.ok')]);
                 return;
             }
         }
 
-        // Simple request body matching the backend model
         const requestBody = {
             filePath: selectedFile.path,
-            // PyMuPDF handles the conversion automatically, so we just need basic options
             preserveImages: document.getElementById('preserveImages').checked,
-            pagesRange: pageRange === 'all' ? 'all' : 'range',
-            startPage: startPage,
-            endPage: endPage
+            pagesRange: pageRange,
+            customPages: customPages
         };
 
         try {
@@ -288,39 +263,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             convertBtn.disabled = true;
             convertBtn.textContent = i18n.t('pdfGrayscaleJS.convertingPdf') || 'Converting...';
 
-            // Get the endpoint
             const endpoint = await API.pdf.grayscale;
-
-            // Make the request
             const result = await API.request.post(endpoint, requestBody);
-
             if (result instanceof Blob) {
-                // Download the result
-                const url = window.URL.createObjectURL(result);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = selectedFile.name.replace('.pdf', '_grayscale.pdf');
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-
-                await customAlert.alert(
-                    i18n.t('alerts.success'),
-                    i18n.t('pdfGrayscaleJS.conversionSuccess') || 'PDF converted to grayscale successfully!',
-                    [i18n.t('common.ok')]
-                );
-
-                // Clean up and reset
-                await cleanupDroppedFile();
-                clearAll();
+                const arrayBuffer = await result.arrayBuffer();
+                const defaultName = selectedFile.name.replace('.pdf', '_grayscale.pdf');
+                const savedPath = await window.electronAPI.savePdfFile(defaultName, arrayBuffer);
+                if (savedPath) await customAlert.alert(i18n.t('alerts.success'), i18n.t('pdfGrayscaleJS.conversionSuccess') || 'PDF converted to grayscale successfully!', [i18n.t('common.ok')]);
+                else await customAlert.alert(i18n.t('alerts.warning'), i18n.t('pdfGrayscaleJS.cancelOrFailed'), [i18n.t('common.ok')]);
             } else if (result && result.success === false) {
                 const errorMsg = result.message || result.error || i18n.t('pdfGrayscaleJS.conversionFailed') || 'Failed to convert PDF';
                 await customAlert.alert(i18n.t('alerts.error'), errorMsg, [i18n.t('common.ok')]);
             } else {
                 await customAlert.alert(
                     i18n.t('alerts.error'),
-                    i18n.t('pdfGrayscaleJS.unexpectedResponse') || 'Unexpected response from server',
+                    i18n.t('pdfGrayscaleJS.unexpectedResponse'),
                     [i18n.t('common.ok')]
                 );
             }
@@ -334,4 +291,61 @@ document.addEventListener('DOMContentLoaded', async () => {
             convertBtn.textContent = i18n.t('pdfGrayscale.convert-btn') || 'Convert to Grayscale';
         }
     });
+
+    function validateCustomPages(customPagesStr, totalPages) {
+        try {
+            const parts = customPagesStr.split(',').map(p => p.trim());
+            const pages = new Set();
+
+            for (const part of parts) {
+                if (!part) continue;
+
+                if (part.includes('-')) {
+                    // Handle range like "3-6"
+                    const [start, end] = part.split('-').map(p => parseInt(p.trim()));
+                    
+                    if (isNaN(start) || isNaN(end)) {
+                        return { valid: false, error: `Invalid range format: "${part}"` };
+                    }
+                    
+                    if (start < 1 || end < 1) {
+                        return { valid: false, error: `Page numbers must be greater than 0: "${part}"` };
+                    }
+                    
+                    if (start > totalPages || end > totalPages) {
+                        return { valid: false, error: `Page numbers exceed total pages (${totalPages}): "${part}"` };
+                    }
+                    
+                    if (start > end) {
+                        return { valid: false, error: `Invalid range (start > end): "${part}"` };
+                    }
+                    
+                    for (let i = start; i <= end; i++) {
+                        pages.add(i);
+                    }
+                } else {
+                    // Handle individual page number
+                    const pageNum = parseInt(part);
+                    
+                    if (isNaN(pageNum)) {
+                        return { valid: false, error: `Invalid page number: "${part}"` };
+                    }
+                    
+                    if (pageNum < 1 || pageNum > totalPages) {
+                        return { valid: false, error: `Page number out of range: "${part}" (1-${totalPages})` };
+                    }
+                    
+                    pages.add(pageNum);
+                }
+            }
+
+            if (pages.size === 0) {
+                return { valid: false, error: 'No valid pages specified' };
+            }
+
+            return { valid: true };
+        } catch (error) {
+            return { valid: false, error: `Invalid page format: ${error.message}` };
+        }
+    }
 });

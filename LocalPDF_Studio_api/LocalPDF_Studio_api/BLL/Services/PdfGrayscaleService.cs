@@ -75,25 +75,16 @@ namespace LocalPDF_Studio_api.BLL.Services
                 $"\"{outputPath}\""
             };
 
-            // Add optional arguments (for future extensibility)
-            if (!string.IsNullOrEmpty(request.PagesRange) && request.PagesRange != "all")
-            {
-                arguments.Add($"--pages-range {request.PagesRange}");
-            }
-
-            if (!string.IsNullOrEmpty(request.CustomPages))
+            // Add custom pages argument
+            if (!string.IsNullOrEmpty(request.CustomPages) && request.PagesRange == "custom")
             {
                 arguments.Add($"--custom-pages \"{request.CustomPages}\"");
             }
 
+            // Add image preservation flag
             if (!request.PreserveImages)
             {
-                arguments.Add("--no-images");
-            }
-
-            if (!request.PreserveVectorGraphics)
-            {
-                arguments.Add("--rasterize-text");
+                arguments.Add("--skip-images");
             }
 
             var startInfo = new ProcessStartInfo

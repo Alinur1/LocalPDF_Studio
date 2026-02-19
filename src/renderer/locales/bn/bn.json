@@ -23,7 +23,8 @@
     "tool-extract-images": "ছবি বের করুন",
     "tool-OCR": "ওসিআর পিডিএফ বা ছবি",
     "tool-image-to-pdf": "ইমেজ থেকে পিডিএফ",
-    "tool-redact-pdf": "পিডিএফ কন্টেন্ট রিড্যাক্ট করুন"
+    "tool-redact-pdf": "পিডিএফ কন্টেন্ট রিড্যাক্ট করুন",
+    "pdf-grayscale": "পিডিএফ গ্রেস্কেল কনভার্টার"
   },
   "error": {
     "empty-message": "কোন পিডিএফ খোলা নেই। শুরু করতে \"পিডিএফ রিডার খুলুন\" ক্লিক করুন!"
@@ -795,35 +796,34 @@
     "clearAll": "সব পরিষ্কার করুন"
   },
   "pdfGrayscale": {
-    "page-title": "গ্রেস্কেল এ রূপান্তরিত করুন",
+    "page-title": "গ্রেস্কেল-এ রূপান্তরিত করুন",
     "grayscale-options": "গ্রেস্কেল অপশনসমূহ",
-    "page-range-title": "পৃষ্ঠা রেঞ্জ",
+    "page-range-title": "পৃষ্ঠা নির্বাচন",
     "all-pages": "সব পৃষ্ঠা",
-    "page-range": "পৃষ্ঠা রেঞ্জ",
-    "start-page": "শুরু:",
-    "end-page": "শেষ:",
-    "page-range-help": "গ্রেস্কেল এ রূপান্তরিত করতে পৃষ্ঠার পরিসীমা নির্দিষ্ট করুন",
+    "custom-pages": "কাস্টম পৃষ্ঠা",
+    "custom-pages-label": "পৃষ্ঠা:",
+    "custom-pages-help": "বৈয়ক্তিক পৃষ্ঠা বা পরিসীমা কমা দ্বারা পৃথক করে প্রবেশ করুন (যেমন, 1, 2, 3-6, 8)",
     "conversion-settings": "রূপান্তর সেটিংস",
-    "preserve-images": "ছবিগুলি কে গ্রেস্কেল এ রূপান্তরিত করুন",
+    "preserve-images": "ছবিগুলিকে গ্রেস্কেল-এ রূপান্তরিত করুন",
     "preserve-images-help": "অনির্বাচিত হলে, ছবিগুলি আসল রঙে থাকবে",
-    "convert-btn": "গ্রেস্কেল এ রূপান্তরিত করুন"
+    "convert-btn": "গ্রেস্কেল-এ রূপান্তরিত করুন"
   },
   "pdfGrayscaleJS": {
-    "selectingPdfs": "PDF ফাইল নির্বাচন করা হচ্ছে...",
-    "loadingPreview": "PDF প্রিভিউ লোড করা হচ্ছে...",
+    "selectingPdfs": "PDF নির্বাচন করা হচ্ছে...",
+    "loadingPreview": "প্রি-ভিউ লোড করা হচ্ছে...",
     "totalPages": "মোট পৃষ্ঠা: ",
-    "morePages": " টি অতিরিক্ত",
+    "morePages": " আরও পৃষ্ঠা",
     "pageLabel": "পৃষ্ঠা ",
-    "failedToLoad": "PDF প্রিভিউ লোড করতে ব্যর্থ হয়েছে",
-    "selectFileFirst": "প্রথমে একটি PDF ফাইল নির্বাচন করুন।",
-    "invalidPageRange": "অবৈধ পৃষ্ঠা রেঞ্জ",
-    "pageRangeExceedsTotal": "শেষ পৃষ্ঠা মোট পৃষ্ঠা অতিক্রম করতে পারে না",
-    "convertingPdf": "PDF কে গ্রেস্কেল এ রূপান্তরিত করা হচ্ছে...",
-    "conversionSuccess": "PDF সফলভাবে গ্রেস্কেল এ রূপান্তরিত হয়েছে!",
+    "failedToLoad": "PDF প্রি-ভিউ লোড করতে ব্যর্থ",
+    "selectFileFirst": "প্রথমে একটি PDF ফাইল নির্বাচন করুন",
+    "enterCustomPages": "কাস্টম পৃষ্ঠা প্রবেশ করুন",
+    "convertingPdf": "PDF কে গ্রেস্কেল-এ রূপান্তরিত করা হচ্ছে...",
+    "conversionSuccess": "PDF সফলভাবে গ্রেস্কেল-এ রূপান্তরিত হয়েছে!",
     "conversionFailed": "PDF রূপান্তর ব্যর্থ হয়েছে",
-    "unexpectedResponse": "সার্ভার থেকে অপ্রত্যাশিত প্রতিক্রিয়া",
+    "cancelOrFailed": "অপারেশন বাতিল করা হয়েছে বা ব্যর্থ হয়েছে।",
+    "unexpectedResponse": "ব্যাকএন্ড থেকে অপ্রত্যাশিত প্রতিক্রিয়া",
     "conversionError": "রূপান্তরের সময় একটি ত্রুটি ঘটেছে",
-    "dropOneFile": "একবারে শুধুমাত্র একটি PDF ফাইল ড্রপ করুন।",
+    "dropOneFile": "শুধুমাত্র একটি PDF ফাইল ড্রপ করুন।",
     "failedToSave": "ড্রপ করা ফাইল সংরক্ষণ করতে ব্যর্থ: ",
     "dropPdfFile": "একটি বৈধ PDF ফাইল ড্রপ করুন।"
   },
