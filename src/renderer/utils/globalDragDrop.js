@@ -18,6 +18,145 @@
 
 // src/renderer/utils/globalDragDrop.js
 
+
+export function initializeGlobalDragDropForImages(options = {}) {
+    const { onFilesDropped, onInvalidFiles } = options;
+
+    const SUPPORTED_EXTENSIONS = /\.(jpg|jpeg|png|bmp|tiff)$/i;
+
+    // ── Overlay ───────────────────────────────────────────────────────────────
+    const overlay = document.createElement('div');
+    overlay.id = 'global-drag-overlay-images';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        pointer-events: none;
+    `;
+
+    const message = document.createElement('div');
+    message.style.cssText = `
+        background: #3498db;
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        border: 3px dashed white;
+        box-shadow: 0 0 20px rgba(52, 152, 219, 0.8);
+    `;
+    message.textContent = '🖼️ Drop your images here';
+
+    overlay.appendChild(message);
+    document.body.appendChild(overlay);
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /** Returns true if the drag event carries external files (not an internal page drag). */
+    function isExternalFileDrag(e) {
+        const types = e.dataTransfer?.types ?? [];
+        const isInternal =
+            types.includes('application/x-page-item') ||
+            types.includes('application/x-image-item');
+        if (isInternal) return false;
+        return types.includes('Files') || types.includes('application/x-moz-file');
+    }
+
+    /** Returns true if the event target is a native form/editable element. */
+    function isFormElement(target) {
+        return target.matches('input, textarea, [contenteditable]');
+    }
+
+    /** Show or hide the drop overlay. */
+    function showOverlay(visible) {
+        overlay.style.display = visible ? 'flex' : 'none';
+        overlay.style.pointerEvents = visible ? 'auto' : 'none';
+    }
+
+    // ── Drag counter (tracks nested dragenter/dragleave pairs) ────────────────
+    let dragCounter = 0;
+
+    // ── Prevent form elements from hijacking drags ────────────────────────────
+    document.addEventListener('dragover', (e) => {
+        if (isFormElement(e.target)) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+
+    document.addEventListener('drop', (e) => {
+        if (isFormElement(e.target)) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+
+    // ── dragenter — show overlay when files enter the window ──────────────────
+    document.addEventListener('dragenter', (e) => {
+        if (isFormElement(e.target)) return;
+        if (!isExternalFileDrag(e)) return;
+
+        dragCounter++;
+        showOverlay(true);
+    });
+
+    // ── dragleave — hide overlay when files fully leave the window ────────────
+    document.addEventListener('dragleave', (e) => {
+        if (isFormElement(e.target)) return;
+        if (!isExternalFileDrag(e)) return;
+
+        dragCounter--;
+        if (dragCounter <= 0) {
+            dragCounter = 0;
+            showOverlay(false);
+        }
+    });
+
+    // ── dragover — allow drop + set cursor ────────────────────────────────────
+    document.addEventListener('dragover', (e) => {
+        if (isFormElement(e.target)) return;
+        if (!isExternalFileDrag(e)) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'copy';
+    });
+
+    // ── drop — validate and forward image files ───────────────────────────────
+    document.addEventListener('drop', (e) => {
+        if (isFormElement(e.target)) return;
+        if (!isExternalFileDrag(e)) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        dragCounter = 0;
+        showOverlay(false);
+
+        const files = Array.from(e.dataTransfer?.files ?? []);
+        if (files.length === 0) return;
+
+        const imageFiles = files.filter(file =>
+            SUPPORTED_EXTENSIONS.test(file.name ?? '')
+        );
+
+        if (imageFiles.length === 0) {
+            onInvalidFiles?.();
+            return;
+        }
+
+        onFilesDropped?.(imageFiles);
+    });
+}
+
 export function initializeGlobalDragDrop(options = {}) {
     const { onFilesDropped, onInvalidFiles } = options;
 
