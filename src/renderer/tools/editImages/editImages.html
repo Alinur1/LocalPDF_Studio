@@ -45,14 +45,9 @@
                 <!-- FIX: Hidden file input element was missing — JS called input.click() on a
                      dynamically created element, but having it in the DOM allows better
                      control and avoids popup blockers in some Electron versions. -->
-                <input
-                    type="file"
-                    id="file-input"
-                    accept="image/jpeg,image/png,image/bmp,image/tiff,image/gif,image/webp"
-                    multiple
-                    style="display: none;"
-                    aria-hidden="true"
-                >
+                <input type="file" id="file-input"
+                    accept="image/jpeg,image/png,image/bmp,image/tiff,image/gif,image/webp" multiple
+                    style="display: none;" aria-hidden="true">
                 <div id="selected-files-info" class="selected-files-info" style="display: none;">
                     <div style="flex-grow: 1;">
                         <p id="files-count" class="files-count"></p>
@@ -69,9 +64,12 @@
                     <div class="preview-header">
                         <h3 data-i18n="resizeImages.preview-title">Preview</h3>
                         <div class="preview-tabs" role="tablist">
-                            <button class="preview-tab active" data-tab="before" role="tab" aria-selected="true" data-i18n="resizeImages.before">Before</button>
-                            <button class="preview-tab" data-tab="after" role="tab" aria-selected="false" data-i18n="resizeImages.after">After</button>
-                            <button class="preview-tab" data-tab="comparison" role="tab" aria-selected="false" data-i18n="resizeImages.comparison">Comparison</button>
+                            <button class="preview-tab active" data-tab="before" role="tab" aria-selected="true"
+                                data-i18n="resizeImages.before">Before</button>
+                            <button class="preview-tab" data-tab="after" role="tab" aria-selected="false"
+                                data-i18n="resizeImages.after">After</button>
+                            <button class="preview-tab" data-tab="comparison" role="tab" aria-selected="false"
+                                data-i18n="resizeImages.comparison">Comparison</button>
                         </div>
                     </div>
 
@@ -96,14 +94,8 @@
                                     <canvas id="canvas-compare-after" class="preview-canvas"></canvas>
                                 </div>
                                 <!-- FIX: Added aria-label for accessibility -->
-                                <input
-                                    type="range"
-                                    class="comparison-range"
-                                    min="0"
-                                    max="100"
-                                    value="50"
-                                    aria-label="Comparison slider"
-                                >
+                                <input type="range" class="comparison-range" min="0" max="100" value="50"
+                                    aria-label="Comparison slider">
                             </div>
                         </div>
                     </div>
@@ -207,7 +199,8 @@
 
                         <!-- SECTION 2: Aspect Ratio Handling -->
                         <div class="accordion-item">
-                            <button class="accordion-header" aria-expanded="false" data-i18n="resizeImages.aspect-handling">
+                            <button class="accordion-header" aria-expanded="false"
+                                data-i18n="resizeImages.aspect-handling">
                                 ⚙️ Aspect Ratio Handling
                             </button>
                             <div class="accordion-content">
@@ -230,10 +223,12 @@
 
                                 <!-- Padding Color -->
                                 <div class="option-group">
-                                    <label for="padding-color" data-i18n="resizeImages.padding-color">Padding Color</label>
+                                    <label for="padding-color" data-i18n="resizeImages.padding-color">Padding
+                                        Color</label>
                                     <div class="color-input-group">
                                         <input type="color" id="padding-color" value="#ffffff">
-                                        <input type="text" id="padding-color-hex" value="#ffffff" maxlength="7" aria-label="Hex color value">
+                                        <input type="text" id="padding-color-hex" value="#ffffff" maxlength="7"
+                                            aria-label="Hex color value">
                                     </div>
                                 </div>
                             </div>
@@ -241,7 +236,8 @@
 
                         <!-- SECTION 3: Transformations -->
                         <div class="accordion-item">
-                            <button class="accordion-header" aria-expanded="false" data-i18n="resizeImages.transformations">
+                            <button class="accordion-header" aria-expanded="false"
+                                data-i18n="resizeImages.transformations">
                                 🔄 Transformations
                             </button>
                             <div class="accordion-content">
@@ -252,7 +248,8 @@
                                          current rotation, so buttons should be +90 increments.
                                          A "Reset" button is added for setting rotation back to 0. -->
                                     <div class="button-group">
-                                        <button class="transform-btn" data-rotation="0" data-i18n="resizeImages.rotation-reset">Reset 0°</button>
+                                        <button class="transform-btn" data-rotation="0"
+                                            data-i18n="resizeImages.rotation-reset">Reset 0°</button>
                                         <button class="transform-btn" data-rotation="90">+90°</button>
                                         <button class="transform-btn" data-rotation="180">+180°</button>
                                         <button class="transform-btn" data-rotation="270">+270°</button>
@@ -262,8 +259,10 @@
                                 <div class="option-group">
                                     <label data-i18n="resizeImages.flip">Flip</label>
                                     <div class="button-group">
-                                        <button class="flip-btn" data-flip="horizontal" data-i18n="resizeImages.flip-horizontal">↔️ Horizontal</button>
-                                        <button class="flip-btn" data-flip="vertical" data-i18n="resizeImages.flip-vertical">↕️ Vertical</button>
+                                        <button class="flip-btn" data-flip="horizontal"
+                                            data-i18n="resizeImages.flip-horizontal">↔️ Horizontal</button>
+                                        <button class="flip-btn" data-flip="vertical"
+                                            data-i18n="resizeImages.flip-vertical">↕️ Vertical</button>
                                     </div>
                                 </div>
 
@@ -328,7 +327,8 @@
 
                                 <!-- Auto Enhance -->
                                 <div class="option-group">
-                                    <button id="auto-enhance-btn" class="secondary-btn" data-i18n="resizeImages.auto-enhance">
+                                    <button id="auto-enhance-btn" class="secondary-btn"
+                                        data-i18n="resizeImages.auto-enhance">
                                         🎯 Auto Enhance
                                     </button>
                                 </div>
@@ -337,10 +337,14 @@
                                 <div class="option-group">
                                     <label data-i18n="resizeImages.filters">Filters</label>
                                     <div class="button-group">
-                                        <button class="filter-btn" data-filter="grayscale" data-i18n="resizeImages.filter-grayscale">Grayscale</button>
-                                        <button class="filter-btn" data-filter="sepia" data-i18n="resizeImages.filter-sepia">Sepia</button>
-                                        <button class="filter-btn" data-filter="blur" data-i18n="resizeImages.filter-blur">Blur</button>
-                                        <button class="filter-btn" data-filter="sharpen" data-i18n="resizeImages.filter-sharpen">Sharpen</button>
+                                        <button class="filter-btn" data-filter="grayscale"
+                                            data-i18n="resizeImages.filter-grayscale">Grayscale</button>
+                                        <button class="filter-btn" data-filter="sepia"
+                                            data-i18n="resizeImages.filter-sepia">Sepia</button>
+                                        <button class="filter-btn" data-filter="blur"
+                                            data-i18n="resizeImages.filter-blur">Blur</button>
+                                        <button class="filter-btn" data-filter="sharpen"
+                                            data-i18n="resizeImages.filter-sharpen">Sharpen</button>
                                     </div>
                                 </div>
 
@@ -357,13 +361,15 @@
 
                         <!-- SECTION 5: Format & Quality -->
                         <div class="accordion-item">
-                            <button class="accordion-header" aria-expanded="false" data-i18n="resizeImages.format-quality">
+                            <button class="accordion-header" aria-expanded="false"
+                                data-i18n="resizeImages.format-quality">
                                 🎨 Format & Quality
                             </button>
                             <div class="accordion-content">
                                 <!-- Output Format -->
                                 <div class="option-group">
-                                    <label for="output-format" data-i18n="resizeImages.output-format">Output Format</label>
+                                    <label for="output-format" data-i18n="resizeImages.output-format">Output
+                                        Format</label>
                                     <select id="output-format">
                                         <option value="jpeg">JPEG (Lossy)</option>
                                         <option value="png">PNG (Lossless)</option>
@@ -396,7 +402,8 @@
                                 <div class="option-group">
                                     <label class="checkbox-label">
                                         <input type="checkbox" id="strip-metadata" checked>
-                                        <span data-i18n="resizeImages.strip-metadata">🔐 Strip EXIF & Metadata (Privacy)</span>
+                                        <span data-i18n="resizeImages.strip-metadata">🔐 Strip EXIF & Metadata
+                                            (Privacy)</span>
                                     </label>
                                 </div>
                             </div>
@@ -433,12 +440,14 @@
                                     <!-- Text Watermark -->
                                     <div id="text-watermark-options">
                                         <div class="option-group">
-                                            <label for="watermark-text" data-i18n="resizeImages.watermark-text-input">Text</label>
+                                            <label for="watermark-text"
+                                                data-i18n="resizeImages.watermark-text-input">Text</label>
                                             <input type="text" id="watermark-text" placeholder="© 2025 Your Name">
                                         </div>
 
                                         <div class="option-group">
-                                            <label for="watermark-font-size" data-i18n="resizeImages.watermark-size">Font Size</label>
+                                            <label for="watermark-font-size"
+                                                data-i18n="resizeImages.watermark-size">Font Size</label>
                                             <input type="number" id="watermark-font-size" value="24" min="8" max="100">
                                         </div>
 
@@ -455,15 +464,24 @@
                                     <div class="option-group">
                                         <label data-i18n="resizeImages.watermark-position">Position</label>
                                         <div class="watermark-positions" role="group" aria-label="Watermark position">
-                                            <button class="position-btn" data-position="top-left" aria-label="Top left">↖️</button>
-                                            <button class="position-btn" data-position="top-center" aria-label="Top center">⬆️</button>
-                                            <button class="position-btn" data-position="top-right" aria-label="Top right">↗️</button>
-                                            <button class="position-btn" data-position="left" aria-label="Middle left">⬅️</button>
-                                            <button class="position-btn active" data-position="center" aria-label="Center">⭕</button>
-                                            <button class="position-btn" data-position="right" aria-label="Middle right">➡️</button>
-                                            <button class="position-btn" data-position="bottom-left" aria-label="Bottom left">↙️</button>
-                                            <button class="position-btn" data-position="bottom-center" aria-label="Bottom center">⬇️</button>
-                                            <button class="position-btn" data-position="bottom-right" aria-label="Bottom right">↘️</button>
+                                            <button class="position-btn" data-position="top-left"
+                                                aria-label="Top left">↖️</button>
+                                            <button class="position-btn" data-position="top-center"
+                                                aria-label="Top center">⬆️</button>
+                                            <button class="position-btn" data-position="top-right"
+                                                aria-label="Top right">↗️</button>
+                                            <button class="position-btn" data-position="left"
+                                                aria-label="Middle left">⬅️</button>
+                                            <button class="position-btn active" data-position="center"
+                                                aria-label="Center">⭕</button>
+                                            <button class="position-btn" data-position="right"
+                                                aria-label="Middle right">➡️</button>
+                                            <button class="position-btn" data-position="bottom-left"
+                                                aria-label="Bottom left">↙️</button>
+                                            <button class="position-btn" data-position="bottom-center"
+                                                aria-label="Bottom center">⬇️</button>
+                                            <button class="position-btn" data-position="bottom-right"
+                                                aria-label="Bottom right">↘️</button>
                                         </div>
                                     </div>
                                 </div>
@@ -478,7 +496,8 @@
                             <div class="accordion-content">
                                 <!-- File Naming -->
                                 <div class="option-group">
-                                    <label for="naming-pattern" data-i18n="resizeImages.naming-pattern">Filename Pattern</label>
+                                    <label for="naming-pattern" data-i18n="resizeImages.naming-pattern">Filename
+                                        Pattern</label>
                                     <select id="naming-pattern">
                                         <option value="original">Keep Original Name</option>
                                         <option value="original_resized">filename_resized</option>
@@ -502,7 +521,8 @@
                                 <div class="option-group">
                                     <label class="checkbox-label">
                                         <input type="checkbox" id="organize-by-size">
-                                        <span data-i18n="resizeImages.organize-by-size">📁 Organize into folders by size</span>
+                                        <span data-i18n="resizeImages.organize-by-size">📁 Organize into folders by
+                                            size</span>
                                     </label>
                                 </div>
                             </div>
@@ -517,28 +537,38 @@
                                 <div class="option-group">
                                     <label data-i18n="resizeImages.quick-presets">Quick Presets</label>
                                     <div class="button-group">
-                                        <button class="quick-preset-btn" data-preset="thumbnail">Thumbnail<br><small>150×150</small></button>
-                                        <button class="quick-preset-btn" data-preset="web">Web<br><small>1920×1080</small></button>
-                                        <button class="quick-preset-btn" data-preset="print">Print<br><small>4000×3000</small></button>
-                                        <button class="quick-preset-btn" data-preset="mobile">Mobile<br><small>640×480</small></button>
+                                        <button class="quick-preset-btn"
+                                            data-preset="thumbnail">Thumbnail<br><small>150×150</small></button>
+                                        <button class="quick-preset-btn"
+                                            data-preset="web">Web<br><small>1920×1080</small></button>
+                                        <button class="quick-preset-btn"
+                                            data-preset="print">Print<br><small>4000×3000</small></button>
+                                        <button class="quick-preset-btn"
+                                            data-preset="mobile">Mobile<br><small>640×480</small></button>
                                     </div>
                                 </div>
 
                                 <div class="option-group">
                                     <label data-i18n="resizeImages.social-presets">Social Media</label>
                                     <div class="button-group">
-                                        <button class="social-preset-btn" data-preset="instagram-square">IG Square<br><small>1080×1080</small></button>
-                                        <button class="social-preset-btn" data-preset="instagram-story">IG Story<br><small>1080×1920</small></button>
-                                        <button class="social-preset-btn" data-preset="twitter">Twitter<br><small>1024×512</small></button>
-                                        <button class="social-preset-btn" data-preset="facebook">Facebook<br><small>1200×628</small></button>
+                                        <button class="social-preset-btn" data-preset="instagram-square">IG
+                                            Square<br><small>1080×1080</small></button>
+                                        <button class="social-preset-btn" data-preset="instagram-story">IG
+                                            Story<br><small>1080×1920</small></button>
+                                        <button class="social-preset-btn"
+                                            data-preset="twitter">Twitter<br><small>1024×512</small></button>
+                                        <button class="social-preset-btn"
+                                            data-preset="facebook">Facebook<br><small>1200×628</small></button>
                                     </div>
                                 </div>
 
                                 <div class="option-group">
-                                    <label for="preset-name" data-i18n="resizeImages.save-preset">Save Current as Preset</label>
+                                    <label for="preset-name" data-i18n="resizeImages.save-preset">Save Current as
+                                        Preset</label>
                                     <div class="input-with-btn">
                                         <input type="text" id="preset-name" placeholder="My Custom Preset">
-                                        <button id="save-preset-btn" class="secondary-btn" data-i18n="resizeImages.save-btn">Save</button>
+                                        <button id="save-preset-btn" class="secondary-btn"
+                                            data-i18n="resizeImages.save-btn">Save</button>
                                     </div>
                                 </div>
 
@@ -559,13 +589,15 @@
                                 <div class="option-group">
                                     <label class="checkbox-label">
                                         <input type="checkbox" id="smart-compression">
-                                        <span data-i18n="resizeImages.smart-compression">🧠 Smart Compression (Auto Quality)</span>
+                                        <span data-i18n="resizeImages.smart-compression">🧠 Smart Compression (Auto
+                                            Quality)</span>
                                     </label>
                                 </div>
 
                                 <!-- Target File Size -->
                                 <div class="option-group" id="target-size-group" style="display: none;">
-                                    <label for="target-file-size" data-i18n="resizeImages.target-size">Target File Size (KB)</label>
+                                    <label for="target-file-size" data-i18n="resizeImages.target-size">Target File Size
+                                        (KB)</label>
                                     <input type="number" id="target-file-size" value="500" min="10" max="10000">
                                 </div>
 
@@ -573,7 +605,8 @@
                                 <div class="option-group">
                                     <label class="checkbox-label">
                                         <input type="checkbox" id="generate-thumbnails">
-                                        <span data-i18n="resizeImages.generate-thumbnails">📸 Generate Thumbnails (150×150)</span>
+                                        <span data-i18n="resizeImages.generate-thumbnails">📸 Generate Thumbnails
+                                            (150×150)</span>
                                     </label>
                                 </div>
 
@@ -581,7 +614,8 @@
                                 <div class="option-group">
                                     <label class="checkbox-label">
                                         <input type="checkbox" id="generate-retina">
-                                        <span data-i18n="resizeImages.generate-retina">🔍 Generate @2x Retina Versions</span>
+                                        <span data-i18n="resizeImages.generate-retina">🔍 Generate @2x Retina
+                                            Versions</span>
                                     </label>
                                 </div>
 
@@ -589,7 +623,8 @@
                                 <div class="option-group">
                                     <label class="checkbox-label">
                                         <input type="checkbox" id="generate-responsive">
-                                        <span data-i18n="resizeImages.generate-responsive">📱 Generate Responsive Set (3 sizes)</span>
+                                        <span data-i18n="resizeImages.generate-responsive">📱 Generate Responsive Set (3
+                                            sizes)</span>
                                     </label>
                                 </div>
                             </div>
@@ -600,7 +635,8 @@
                     <!-- Action Buttons -->
                     <div class="action-buttons">
                         <button id="reset-btn" class="secondary-btn" data-i18n="resizeImages.reset-btn">↻ Reset</button>
-                        <button id="process-btn" class="primary-btn" data-i18n="resizeImages.process-btn">⚙️ Process All</button>
+                        <button id="process-btn" class="primary-btn" data-i18n="resizeImages.process-btn">⚙️ Process
+                            All</button>
                     </div>
                 </div><!-- /options-panel -->
             </div><!-- /resize-wrapper -->
@@ -609,7 +645,8 @@
             <div class="results-section" id="results-section" style="display: none;">
                 <div class="results-header">
                     <h3 data-i18n="resizeImages.results">Results</h3>
-                    <button id="download-all-btn" class="primary-btn" data-i18n="resizeImages.download-all">⬇️ Download All as ZIP</button>
+                    <button id="download-all-btn" class="primary-btn" data-i18n="resizeImages.download-all">⬇️ Download
+                        All as ZIP</button>
                 </div>
                 <div id="results-grid" class="results-grid"></div>
             </div>
@@ -617,7 +654,8 @@
     </div>
 
     <!-- Loading Modal -->
-    <div id="loading-modal" class="modal" role="dialog" aria-modal="true" aria-label="Processing" style="display: none;">
+    <div id="loading-modal" class="modal" role="dialog" aria-modal="true" aria-label="Processing"
+        style="display: none;">
         <div class="modal-content">
             <div class="spinner" aria-hidden="true"></div>
             <p id="loading-text" data-i18n="resizeImages.processing">Processing...</p>

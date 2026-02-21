@@ -17,12 +17,14 @@
 import { initializeGlobalDragDropForImages } from '../../utils/globalDragDrop.js';
 import i18n from '../../utils/i18n.js';
 import { ThemeManager } from "../../utils/themeManager.js";
+import customAlert from '../../utils/customAlert.js';
 
 class ImageResizer {
     constructor() {
         this.selectedImages = [];
         this.currentImageIndex = 0;
         this.processedImages = [];
+        this.droppedImagePaths = [];
         this.transformations = {
             rotation: 0,
             flipH: false,
@@ -55,26 +57,37 @@ class ImageResizer {
     }
 
     setupEventListeners() {
-        // FIX: Use the persistent hidden file input in the DOM instead of dynamically
-        //      creating one each click — avoids popup-blocker issues in Electron.
         const selectBtn = document.getElementById('select-images-btn');
         const fileInput = document.getElementById('file-input');
 
         selectBtn.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
 
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', async () => {
+            await this.cleanupDroppedFiles();
+        });
+
+        // Also cleanup when navigating back
+        const backBtn = document.querySelector('a[href="../../index.html"]');
+        if (backBtn) {
+            backBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await this.cleanupDroppedFiles();
+                window.location.href = '../../index.html';
+            });
+        }
+
         // Drag & Drop — use global drag-drop handler for consistent behavior
         initializeGlobalDragDropForImages({
-            onFilesDropped: (files) => this.addImages(files),
-            onInvalidFiles: () => this.showModal('Error', 'Please select valid image files (JPEG, PNG, BMP, TIFF, WebP).')
+            onFilesDropped: (files) => this.addImages(files, true),
+            onInvalidFiles: () => customAlert.alert('LocalPDF Studio - WARNING', 'Please select valid image files (JPEG, PNG, BMP, TIFF, WebP).')
         });
 
         // File Removal
-        document.getElementById('remove-files-btn').addEventListener('click', () => this.clearSelectedFiles());
+        document.getElementById('remove-files-btn').addEventListener('click', async () => await this.clearSelectedFiles());
 
         // Preview Tabs
-        // FIX: Pass the tab and the button element explicitly instead of relying on
-        //      the deprecated global `window.event` object used in switchPreviewTab().
         document.querySelectorAll('.preview-tab').forEach(tab => {
             tab.addEventListener('click', (e) => this.switchPreviewTab(e.currentTarget.dataset.tab, e.currentTarget));
         });
@@ -111,7 +124,6 @@ class ImageResizer {
         lockAspectCheckbox.addEventListener('change', () => this.updatePreview());
 
         // Aspect Ratio Presets
-        // FIX: Pass the clicked button element explicitly to avoid `event` global.
         document.querySelectorAll('.preset-btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.applyAspectRatio(e.currentTarget.dataset.ratio, 'aspect', e.currentTarget));
         });
@@ -136,8 +148,6 @@ class ImageResizer {
             }
         });
 
-        // Transformations — rotation buttons now set absolute rotation directly (reset/+90/+180/+270)
-        // FIX: applyRotation now receives the target button so it doesn't rely on global event.
         document.querySelectorAll('.transform-btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.applyRotation(e.currentTarget.dataset.rotation, e.currentTarget));
         });
@@ -157,9 +167,9 @@ class ImageResizer {
         // Image Enhancement sliders
         const sliderMap = [
             { id: 'brightness-slider', valId: 'brightness-value', key: 'brightness', suffix: '%' },
-            { id: 'contrast-slider',   valId: 'contrast-value',   key: 'contrast',   suffix: '%' },
+            { id: 'contrast-slider', valId: 'contrast-value', key: 'contrast', suffix: '%' },
             { id: 'saturation-slider', valId: 'saturation-value', key: 'saturation', suffix: '%' },
-            { id: 'hue-slider',        valId: 'hue-value',        key: 'hue',        suffix: '°' },
+            { id: 'hue-slider', valId: 'hue-value', key: 'hue', suffix: '°' },
         ];
 
         sliderMap.forEach(({ id, valId, key }) => {
@@ -281,26 +291,80 @@ class ImageResizer {
 
     handleFileSelect(event) {
         const files = Array.from(event.target.files);
-        // FIX: Reset input so the same file can be re-selected after removal
         event.target.value = '';
-        this.addImages(files);
+        this.addImages(files, false);
     }
 
+    async cleanupDroppedFiles() {
+        if (this.droppedImagePaths.length > 0) {
+            try {
+                for (const filePath of this.droppedImagePaths) {
+                    await window.electronAPI.deleteFile(filePath);
+                }
+                this.droppedImagePaths = [];
+            } catch (error) {
+                console.log('Error cleaning up dropped files:', error);
+            }
+        }
+    }
 
-
-    addImages(files) {
+    async addImages(files, isDropped = false) {
+        // Filter valid image files
         const validFiles = files.filter(f => f.type.startsWith('image/'));
         if (validFiles.length === 0) {
-            this.showModal('Error', 'Please select valid image files (JPEG, PNG, BMP, TIFF, WebP).');
+            customAlert.alert('ILocalPDF Studio - WARNING', 'Please select valid image files (JPEG, PNG, BMP, TIFF, WebP).');
             return;
         }
 
-        // FIX: Track how many readers have completed so UI only updates once all
-        //      files are loaded, preventing partial renders for large batches.
-        let completed = 0;
-        const total = validFiles.length;
+        // For dropped files, save them to LocalPDF_Studio_Task folder
+        if (isDropped) {
+            const savedPaths = [];
+            for (const file of validFiles) {
+                try {
+                    const buffer = await file.arrayBuffer();
+                    const result = await window.electronAPI.saveDroppedFile({
+                        name: file.name,
+                        buffer: buffer
+                    });
 
-        validFiles.forEach(file => {
+                    if (result.success) {
+                        // Track the file path but also store the blob URL for immediate display
+                        const blob = new Blob([buffer], { type: file.type });
+                        const blobUrl = URL.createObjectURL(blob);
+                        
+                        savedPaths.push({
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            blobUrl: blobUrl,
+                            filePath: result.filePath
+                        });
+                        this.droppedImagePaths.push(result.filePath);
+                    } else {
+                        console.log('Failed to save dropped file:', result.error);
+                        customAlert.alert('LocalPDF Studio - ERROR', 'Failed to save the image. Please try again.');
+                        return;
+                    }
+                } catch (error) {
+                    console.log('Error processing dropped file:', error);
+                    customAlert.alert('LocalPDF Studio - ERROR', 'An error occurred while adding the image. Please try again.');
+                    return;
+                }
+            }
+
+            // Load images directly from blob URLs
+            this.loadImagesFromBlobUrls(savedPaths);
+        } else {
+            // For selected files, load directly as data URLs
+            await this.loadImagesAsDataUrls(validFiles);
+        }
+    }
+
+    async loadImagesAsDataUrls(files) {
+        let completed = 0;
+        const total = files.length;
+
+        files.forEach(file => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 this.selectedImages.push({
@@ -316,7 +380,7 @@ class ImageResizer {
             };
             reader.onerror = () => {
                 completed++;
-                console.error(`Failed to read file: ${file.name}`);
+                console.log(`Failed to read file: ${file.name}`);
                 if (completed === total) {
                     this.updateUI();
                 }
@@ -325,7 +389,42 @@ class ImageResizer {
         });
     }
 
-    clearSelectedFiles() {
+    loadImagesFromBlobUrls(imageData) {
+        // Load images directly from blob URLs
+        // This avoids needing to read files back from disk
+        let completed = 0;
+        const total = imageData.length;
+
+        for (const data of imageData) {
+            const img = new Image();
+
+            img.onload = () => {
+                this.selectedImages.push({
+                    name: data.name,
+                    size: data.size,
+                    type: data.type,
+                    data: data.blobUrl,
+                });
+                completed++;
+                if (completed === total) {
+                    this.updateUI();
+                }
+            };
+            img.onerror = () => {
+                completed++;
+                console.log(`Failed to load image: ${data.name}`);
+                if (completed === total) {
+                    this.updateUI();
+                }
+            };
+            img.src = data.blobUrl;
+        }
+    }
+
+    async clearSelectedFiles() {
+        // Clean up dropped files from temporary folder
+        await this.cleanupDroppedFiles();
+
         this.selectedImages = [];
         this.processedImages = [];
         this.currentImageIndex = 0;
@@ -416,7 +515,7 @@ class ImageResizer {
             this.drawBeforePreview(img);
             this.updatePreview();
         } catch (err) {
-            console.error(err);
+            console.log(err);
         }
     }
 
@@ -456,7 +555,7 @@ class ImageResizer {
             this.drawAfterPreview(processedCanvas);
             this.drawComparisonAfter(processedCanvas);
         } catch (err) {
-            console.error('Preview update failed:', err);
+            console.log('Preview update failed:', err);
         }
     }
 
@@ -569,12 +668,12 @@ class ImageResizer {
     applyEnhancementsToContext(ctx, canvasWidth, canvasHeight) {
         const needsProcessing =
             this.enhancements.brightness !== 100 ||
-            this.enhancements.contrast   !== 100 ||
+            this.enhancements.contrast !== 100 ||
             this.enhancements.saturation !== 100 ||
-            this.enhancements.hue        !== 0   ||
+            this.enhancements.hue !== 0 ||
             this.filters.grayscale ||
-            this.filters.sepia     ||
-            this.filters.blur      ||
+            this.filters.sepia ||
+            this.filters.blur ||
             this.filters.sharpen;
 
         if (!needsProcessing) return;
@@ -583,9 +682,9 @@ class ImageResizer {
         const data = imageData.data;
 
         const brightness = this.enhancements.brightness / 100;
-        const contrast   = (this.enhancements.contrast - 100) / 100;
+        const contrast = (this.enhancements.contrast - 100) / 100;
         const saturation = this.enhancements.saturation / 100;
-        const hue        = this.enhancements.hue;
+        const hue = this.enhancements.hue;
 
         for (let i = 0; i < data.length; i += 4) {
             let r = data[i];
@@ -615,7 +714,7 @@ class ImageResizer {
                 [r, g, b] = this.applyHueRotation(r, g, b, hue);
             }
 
-            data[i]     = Math.min(255, Math.max(0, r));
+            data[i] = Math.min(255, Math.max(0, r));
             data[i + 1] = Math.min(255, Math.max(0, g));
             data[i + 2] = Math.min(255, Math.max(0, b));
         }
@@ -624,9 +723,9 @@ class ImageResizer {
 
         // Pixel-kernel filters operate on the already-enhanced image
         if (this.filters.grayscale) this.applyGrayscale(ctx, canvasWidth, canvasHeight);
-        if (this.filters.sepia)     this.applySepia(ctx, canvasWidth, canvasHeight);
-        if (this.filters.blur)      this.applyBlur(ctx, canvasWidth, canvasHeight);
-        if (this.filters.sharpen)   this.applySharpen(ctx, canvasWidth, canvasHeight);
+        if (this.filters.sepia) this.applySepia(ctx, canvasWidth, canvasHeight);
+        if (this.filters.blur) this.applyBlur(ctx, canvasWidth, canvasHeight);
+        if (this.filters.sharpen) this.applySharpen(ctx, canvasWidth, canvasHeight);
     }
 
     // ─── Hue helper (inline with main loop for performance) ──────────────────
@@ -695,7 +794,7 @@ class ImageResizer {
         const data = imageData.data;
         for (let i = 0; i < data.length; i += 4) {
             const r = data[i], g = data[i + 1], b = data[i + 2];
-            data[i]     = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189);
+            data[i] = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189);
             data[i + 1] = Math.min(255, r * 0.349 + g * 0.686 + b * 0.168);
             data[i + 2] = Math.min(255, r * 0.272 + g * 0.534 + b * 0.131);
         }
@@ -721,7 +820,7 @@ class ImageResizer {
                     }
                 }
                 const idx = (y * width + x) * 4;
-                newData[idx]     = r / count;
+                newData[idx] = r / count;
                 newData[idx + 1] = g / count;
                 newData[idx + 2] = b / count;
             }
@@ -742,13 +841,13 @@ class ImageResizer {
                     for (let kx = -1; kx <= 1; kx++) {
                         const idx = ((y + ky) * width + (x + kx)) * 4;
                         const kIdx = (ky + 1) * 3 + (kx + 1);
-                        r += data[idx]     * kernel[kIdx];
+                        r += data[idx] * kernel[kIdx];
                         g += data[idx + 1] * kernel[kIdx];
                         b += data[idx + 2] * kernel[kIdx];
                     }
                 }
                 const idx = (y * width + x) * 4;
-                newData[idx]     = Math.min(255, Math.max(0, r));
+                newData[idx] = Math.min(255, Math.max(0, r));
                 newData[idx + 1] = Math.min(255, Math.max(0, g));
                 newData[idx + 2] = Math.min(255, Math.max(0, b));
             }
@@ -810,10 +909,10 @@ class ImageResizer {
     updateComparisonSlider(e) {
         const percentage = e.target.value / 100;
         const beforeImg = document.querySelector('.comparison-img.before');
-        const afterImg  = document.querySelector('.comparison-img.after');
+        const afterImg = document.querySelector('.comparison-img.after');
         // FIX: Adjust widths so the two panels always sum to 100% with no gap
         beforeImg.style.width = ((1 - percentage) * 100) + '%';
-        afterImg.style.width  = (percentage * 100) + '%';
+        afterImg.style.width = (percentage * 100) + '%';
     }
 
     // ─── Dimension helpers ────────────────────────────────────────────────────
@@ -825,7 +924,7 @@ class ImageResizer {
             const w = parseInt(document.getElementById('resize-width').value) || 1;
             const h = Math.max(1, Math.round((w * img.height) / img.width));
             document.getElementById('resize-height').value = h;
-        } catch (err) { console.error(err); }
+        } catch (err) { console.log(err); }
     }
 
     async updateWidthFromHeight() {
@@ -835,7 +934,7 @@ class ImageResizer {
             const h = parseInt(document.getElementById('resize-height').value) || 1;
             const w = Math.max(1, Math.round((h * img.width) / img.height));
             document.getElementById('resize-width').value = w;
-        } catch (err) { console.error(err); }
+        } catch (err) { console.log(err); }
     }
 
     // FIX: Accept clicked button element to avoid relying on window.event
@@ -933,15 +1032,15 @@ class ImageResizer {
             let x, y;
 
             switch (position) {
-                case 'top-left':      x = pad;                          y = fontSize / 2 + pad; break;
-                case 'top-center':    x = canvasWidth / 2 - tw / 2;    y = fontSize / 2 + pad; break;
-                case 'top-right':     x = canvasWidth - tw - pad;       y = fontSize / 2 + pad; break;
-                case 'left':          x = pad;                          y = canvasHeight / 2;   break;
-                case 'right':         x = canvasWidth - tw - pad;       y = canvasHeight / 2;   break;
-                case 'bottom-left':   x = pad;                          y = canvasHeight - fontSize / 2 - pad; break;
-                case 'bottom-center': x = canvasWidth / 2 - tw / 2;    y = canvasHeight - fontSize / 2 - pad; break;
-                case 'bottom-right':  x = canvasWidth - tw - pad;       y = canvasHeight - fontSize / 2 - pad; break;
-                default:              x = canvasWidth / 2 - tw / 2;    y = canvasHeight / 2;   break;
+                case 'top-left': x = pad; y = fontSize / 2 + pad; break;
+                case 'top-center': x = canvasWidth / 2 - tw / 2; y = fontSize / 2 + pad; break;
+                case 'top-right': x = canvasWidth - tw - pad; y = fontSize / 2 + pad; break;
+                case 'left': x = pad; y = canvasHeight / 2; break;
+                case 'right': x = canvasWidth - tw - pad; y = canvasHeight / 2; break;
+                case 'bottom-left': x = pad; y = canvasHeight - fontSize / 2 - pad; break;
+                case 'bottom-center': x = canvasWidth / 2 - tw / 2; y = canvasHeight - fontSize / 2 - pad; break;
+                case 'bottom-right': x = canvasWidth - tw - pad; y = canvasHeight - fontSize / 2 - pad; break;
+                default: x = canvasWidth / 2 - tw / 2; y = canvasHeight / 2; break;
             }
 
             ctx.strokeText(text, x, y);
@@ -955,7 +1054,7 @@ class ImageResizer {
 
     async processAllImages() {
         if (this.selectedImages.length === 0) {
-            this.showModal('Error', 'Please select images first.');
+            customAlert.alert('LocalPDF Studio - NOTICE', 'Please select images first.');
             return;
         }
 
@@ -967,10 +1066,6 @@ class ImageResizer {
         const mime = this.getMimeType(outputFormat);
 
         try {
-            // FIX: Use Promise.all + async image loading to avoid the original
-            //      for-loop + onload callback race condition where the counter check
-            //      fires inside nested async callbacks causing unpredictable ordering
-            //      and potential double-triggers on the last image.
             const results = await Promise.all(
                 this.selectedImages.map(async (imgRecord, i) => {
                     const img = await this.loadImageElement(imgRecord.data);
@@ -990,7 +1085,8 @@ class ImageResizer {
             this.showResults();
         } catch (error) {
             this.hideLoadingModal();
-            this.showModal('Error', `Processing failed: ${error.message}`);
+            console.log('Image processing error:', error);
+            customAlert.alert('LocalPDF Studio - ERROR', 'An error occurred while processing images. Please try again.');
         }
     }
 
@@ -998,12 +1094,6 @@ class ImageResizer {
         return { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', bmp: 'image/bmp' }[format] || 'image/jpeg';
     }
 
-    // FIX: generateFilename had a double extension removal bug — it stripped the
-    //      extension once at the top (baseName) and then ran another .replace() to
-    //      remove extensions again mid-function, corrupting filenames like
-    //      "photo.final.jpg" → "photo" (losing ".final"). Now the extension is
-    //      stripped only once at the beginning, and the format is appended once at
-    //      the end. Also added width/height params so original_wxh pattern works correctly.
     generateFilename(originalName, index, processedW, processedH) {
         const namingPattern = document.getElementById('naming-pattern').value;
         const prefix = document.getElementById('filename-prefix').value;
@@ -1016,9 +1106,9 @@ class ImageResizer {
         let newName;
         switch (namingPattern) {
             case 'original_resized': newName = `${baseName}_resized`; break;
-            case 'original_wxh':     newName = `${baseName}_${processedW}x${processedH}`; break;
-            case 'custom':           newName = `${prefix}${baseName}${suffix}`; break;
-            default:                 newName = baseName; break;
+            case 'original_wxh': newName = `${baseName}_${processedW}x${processedH}`; break;
+            case 'custom': newName = `${prefix}${baseName}${suffix}`; break;
+            default: newName = baseName; break;
         }
 
         // For non-custom patterns, prepend prefix/suffix around the computed name
@@ -1030,8 +1120,6 @@ class ImageResizer {
     }
 
     showResults() {
-        // FIX: Correctly reference #options-panel (the id added to the HTML) and
-        //      hide the file selection area so the results panel has full width.
         document.getElementById('file-selection-area').style.display = 'none';
         document.getElementById('preview-section').style.display = 'none';
         const optionsPanel = document.getElementById('options-panel');
@@ -1082,14 +1170,9 @@ class ImageResizer {
 
     async downloadAllAsZip() {
         if (this.processedImages.length === 0) {
-            this.showModal('Error', 'Process images first.');
+            customAlert.alert('LocalPDF Studio - NOTICE', 'Process images first.');
             return;
         }
-
-        // FIX: The original code called this "Download as ZIP" but simply triggered
-        //      individual downloads. This is now honest about what it's doing, and
-        //      staggers downloads slightly to prevent browser download managers from
-        //      blocking simultaneous initiations.
         this.showLoadingModal('Preparing downloads...');
 
         try {
@@ -1098,10 +1181,11 @@ class ImageResizer {
                 this.downloadImage(this.processedImages[i].data, this.processedImages[i].name);
             }
             this.hideLoadingModal();
-            this.showModal('Done', `${this.processedImages.length} image${this.processedImages.length > 1 ? 's' : ''} downloaded.`);
+            customAlert.alert('Download Complete', `${this.processedImages.length} image${this.processedImages.length > 1 ? 's' : ''} downloaded.`);
         } catch (error) {
             this.hideLoadingModal();
-            this.showModal('Error', error.message);
+            console.log('Download error:', error);
+            customAlert.alert('Download Error', 'An error occurred while downloading. Please try again.');
         }
     }
 
@@ -1109,17 +1193,17 @@ class ImageResizer {
 
     resetAllSettings() {
         this.transformations = { rotation: 0, flipH: false, flipV: false };
-        this.enhancements    = { brightness: 100, contrast: 100, saturation: 100, hue: 0 };
-        this.filters         = { grayscale: false, sepia: false, blur: false, sharpen: false };
+        this.enhancements = { brightness: 100, contrast: 100, saturation: 100, hue: 0 };
+        this.filters = { grayscale: false, sepia: false, blur: false, sharpen: false };
 
         const reset = (id, val) => { document.getElementById(id).value = val; };
         reset('resize-width', '800');
         reset('resize-height', '600');
         reset('brightness-slider', '100'); document.getElementById('brightness-value').textContent = '100';
-        reset('contrast-slider', '100');   document.getElementById('contrast-value').textContent = '100';
+        reset('contrast-slider', '100'); document.getElementById('contrast-value').textContent = '100';
         reset('saturation-slider', '100'); document.getElementById('saturation-value').textContent = '100';
-        reset('hue-slider', '0');          document.getElementById('hue-value').textContent = '0';
-        reset('quality-slider', '85');     document.getElementById('quality-value').textContent = '85';
+        reset('hue-slider', '0'); document.getElementById('hue-value').textContent = '0';
+        reset('quality-slider', '85'); document.getElementById('quality-value').textContent = '85';
         reset('padding-color', '#ffffff'); document.getElementById('padding-color-hex').value = '#ffffff';
 
         document.getElementById('lock-aspect-ratio').checked = true;
@@ -1173,13 +1257,13 @@ class ImageResizer {
 
     savePreset() {
         const presetName = document.getElementById('preset-name').value.trim();
-        if (!presetName) { this.showModal('Error', 'Please enter a preset name.'); return; }
+        if (!presetName) { customAlert.alert('LocalPDF Studio - WARNING', 'Please enter a preset name.'); return; }
 
         this.presets[presetName] = {
-            width:      document.getElementById('resize-width').value,
-            height:     document.getElementById('resize-height').value,
-            format:     document.getElementById('output-format').value,
-            quality:    document.getElementById('quality-slider').value,
+            width: document.getElementById('resize-width').value,
+            height: document.getElementById('resize-height').value,
+            format: document.getElementById('output-format').value,
+            quality: document.getElementById('quality-slider').value,
             resizeMode: document.querySelector('input[name="resize-mode"]:checked').value,
             aspectMode: document.querySelector('input[name="aspect-mode"]:checked').value,
         };
@@ -1187,7 +1271,7 @@ class ImageResizer {
         localStorage.setItem('imageResizePresets', JSON.stringify(this.presets));
         document.getElementById('preset-name').value = '';
         this.loadPresets();
-        this.showModal('Saved', `Preset "${presetName}" saved.`);
+        customAlert.alert('LocalPDF Studio - SUCCESS', `Preset "${presetName}" saved.`);
     }
 
     deletePreset(name) {
@@ -1199,7 +1283,7 @@ class ImageResizer {
     }
 
     applyPreset(settings) {
-        document.getElementById('resize-width').value  = settings.width;
+        document.getElementById('resize-width').value = settings.width;
         document.getElementById('resize-height').value = settings.height;
         document.getElementById('output-format').value = settings.format;
         document.getElementById('quality-slider').value = settings.quality;
@@ -1212,14 +1296,14 @@ class ImageResizer {
 
     applyQuickPreset(preset) {
         const presets = {
-            thumbnail: { width: 150,  height: 150  },
-            web:       { width: 1920, height: 1080 },
-            print:     { width: 4000, height: 3000 },
-            mobile:    { width: 640,  height: 480  },
+            thumbnail: { width: 150, height: 150 },
+            web: { width: 1920, height: 1080 },
+            print: { width: 4000, height: 3000 },
+            mobile: { width: 640, height: 480 },
         };
         const s = presets[preset];
         if (s) {
-            document.getElementById('resize-width').value  = s.width;
+            document.getElementById('resize-width').value = s.width;
             document.getElementById('resize-height').value = s.height;
             this.updatePreview();
         }
@@ -1228,13 +1312,13 @@ class ImageResizer {
     applySocialPreset(preset) {
         const presets = {
             'instagram-square': { width: 1080, height: 1080 },
-            'instagram-story':  { width: 1080, height: 1920 },
-            'twitter':          { width: 1024, height: 512  },
-            'facebook':         { width: 1200, height: 628  },
+            'instagram-story': { width: 1080, height: 1920 },
+            'twitter': { width: 1024, height: 512 },
+            'facebook': { width: 1200, height: 628 },
         };
         const s = presets[preset];
         if (s) {
-            document.getElementById('resize-width').value  = s.width;
+            document.getElementById('resize-width').value = s.width;
             document.getElementById('resize-height').value = s.height;
             this.updatePreview();
         }
@@ -1261,17 +1345,7 @@ class ImageResizer {
         }
     }
 
-    // ─── Modals ───────────────────────────────────────────────────────────────
-
-    showModal(title, message) {
-        document.getElementById('modal-title').textContent = title;
-        document.getElementById('modal-message').textContent = message;
-        document.getElementById('message-modal').classList.add('show');
-    }
-
-    hideModal() {
-        document.getElementById('message-modal').classList.remove('show');
-    }
+    // ─── Loading Modals ───────────────────────────────────────────────────────
 
     showLoadingModal(text = 'Processing...') {
         document.getElementById('loading-text').textContent = text;

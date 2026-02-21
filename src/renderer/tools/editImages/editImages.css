@@ -30,7 +30,7 @@
     --remove-btn-bg: #e74c3c;
     --remove-btn-hover: #c0392b;
     --option-title-color: #ecf0f1;
-    --option-desc-color: #95a5a6;
+    --option-desc-color: #bdc3c7;
     --slider-bg: #34495e;
     --slider-accent: #3498db;
     --slider-labels-color: #7f8c8d;
@@ -40,12 +40,12 @@
     --drag-over-border: #2ecc71;
     --drag-over-bg: #1e3a2e;
     --modal-bg: #2c3e50;
-    --modal-border: #34495e;
+    --modal-border: #18222e;
     --modal-overlay: rgba(0, 0, 0, 0.6);
-    --close-btn-color: #95a5a6;
+    --close-btn-color: #bdc3c7;
     --close-btn-hover: #ecf0f1;
-    --secondary-btn-bg: #34495e;
-    --secondary-btn-hover: #3d566e;
+    --secondary-btn-bg: #7f8c8d;
+    --secondary-btn-hover: #95a5a6;
     --primary-btn-bg: #3498db;
     --primary-btn-hover: #2980b9;
     --input-bg: #1c2833;
@@ -56,91 +56,83 @@
     --scrollbar-track: #1c2833;
     --scrollbar-thumb: #34495e;
     --scrollbar-thumb-hover: #3d566e;
-
-    /* FIX: Added missing bg variables referenced throughout the component */
-    --bg-primary: #151f2b;
-    --bg-secondary: #1e2d3d;
 }
 
 body.light {
     --tool-title-color: #1a1a1a;
     --select-btn-color: #1a1a1a;
-    --select-btn-bg: #f5f5f5;
-    --select-btn-border: #d97757;
-    --select-btn-hover-bg: #efefef;
-    --selected-file-bg: #ffffff;
-    --selected-file-border: #d97757;
+    --select-btn-bg: #F0EFEA;
+    --select-btn-border: #D97757;
+    --select-btn-hover-bg: #E6E5E0;
+    --selected-file-bg: #F0EFEA;
+    --selected-file-border: #D1CEC5;
     --selected-file-color: #1a1a1a;
-    --info-card-bg: #ffffff;
-    --info-card-border: #d97757;
+    --info-card-bg: #F0EFEA;
+    --info-card-border: #D1CEC5;
     --info-card-color: #1a1a1a;
     --remove-btn-bg: #e74c3c;
     --remove-btn-hover: #c0392b;
     --option-title-color: #1a1a1a;
     --option-desc-color: #666666;
-    --slider-bg: #d97757;
-    --slider-accent: #d97757;
+    --slider-bg: #D97757;
+    --slider-accent: #D97757;
     --slider-labels-color: #888888;
-    --disabled-btn-bg: #e2b09f;
-    --image-item-bg: #f9f9f9;
-    --image-item-border: #e0e0e0;
+    --disabled-btn-bg: #E2B09F;
+    --image-item-bg: #FAF9F5;
+    --image-item-border: #D1CEC5;
     --drag-over-border: #27ae60;
     --drag-over-bg: #ecf8f0;
-    --modal-bg: #ffffff;
-    --modal-border: #d97757;
+    --modal-bg: #F0EFEA;
+    --modal-border: #D1CEC5;
     --modal-overlay: rgba(0, 0, 0, 0.3);
     --close-btn-color: #666666;
     --close-btn-hover: #1a1a1a;
-    --secondary-btn-bg: #f0f0f0;
-    --secondary-btn-hover: #e0e0e0;
-    --primary-btn-bg: #d97757;
+    --secondary-btn-bg: #E2B09F;
+    --secondary-btn-hover: #D97757;
+    --primary-btn-bg: #D97757;
     --primary-btn-hover: #c06647;
-    --input-bg: #ffffff;
-    --input-border: #d97757;
+    --input-bg: #FFFFFF;
+    --input-border: #D1CEC5;
     --input-color: #1a1a1a;
-    --select-bg: #ffffff;
-    --select-border: #d97757;
-    --scrollbar-track: #f5f5f5;
-    --scrollbar-thumb: #d0d0d0;
+    --select-bg: #FFFFFF;
+    --select-border: #D1CEC5;
+    --scrollbar-track: #E6E5E0;
+    --scrollbar-thumb: #D1CEC5;
     --scrollbar-thumb-hover: #c0c0c0;
-
-    /* FIX: Light mode bg variables */
-    --bg-primary: #f0f0f0;
-    --bg-secondary: #e8e8e8;
 }
 
-/* File Selection Area */
-.file-selection-area {
-    padding: 20px;
-    margin-bottom: 20px;
-    background: var(--bg-secondary);
+.tool-title {
+    font-size: 1.2rem;
+    margin-left: 1rem;
+    color: var(--tool-title-color);
+}
+
+.tool-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+    height: calc(100vh - 58px);
+    overflow-y: auto;
+}
+
+.file-selection-area .select-images-btn {
+    color: var(--select-btn-color);
+    width: 100%;
     border: 2px dashed var(--select-btn-border);
     border-radius: 8px;
+    padding: 2rem;
     text-align: center;
-    transition: all 0.3s ease;
-}
-
-.file-selection-area.drag-over {
-    background: var(--drag-over-bg);
-    border-color: var(--drag-over-border);
-}
-
-.select-images-btn {
-    width: 100%;
-    padding: 40px 20px;
-    background: var(--select-btn-bg);
-    color: var(--select-btn-color);
-    border: 2px solid var(--select-btn-border);
-    border-radius: 8px;
     cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    background: var(--select-btn-bg);
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: background 0.2s, border-color 0.2s;
 }
 
-.select-images-btn:hover {
+.file-selection-area .select-images-btn:hover {
     background: var(--select-btn-hover-bg);
-    transform: scale(1.02);
+    border-color: var(--select-btn-border);
 }
 
 .selected-files-info {
@@ -1030,8 +1022,13 @@ body.light {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-content {
@@ -1093,8 +1090,13 @@ body.light {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 #loading-text {
