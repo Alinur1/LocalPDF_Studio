@@ -14,6 +14,8 @@
  * - Image Processing: Canvas API + Filters
 **/
 
+// src/renderer/tools/editImages/editImages.js
+
 import { initializeGlobalDragDropForImages } from '../../utils/globalDragDrop.js';
 import i18n from '../../utils/i18n.js';
 import { ThemeManager } from "../../utils/themeManager.js";
