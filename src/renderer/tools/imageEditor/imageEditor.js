@@ -21,8 +21,10 @@ import customAlert from '../../utils/customAlert.js';
 import loadingUI from '../../utils/loading.js';
 import { initializeGlobalDragDropForImages } from '../../utils/globalDragDrop.js';
 import { ThemeManager } from '../../utils/themeManager.js';
+import i18n from '../../utils/i18n.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    await i18n.init();
     ThemeManager.init();
 
     const selectImageBtn = document.getElementById('select-image-btn');
@@ -92,15 +94,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     selectImageBtn.addEventListener('click', async () => {
-        loadingUI.show('Selecting image...');
+        loadingUI.show(i18n.t('imageEditorJS.selecting-image'));
         try {
             const files = await window.electronAPI.selectPdfsAndImages();
             if (files && files.length > 0) {
                 // Filter to image files
-                const imagePaths = files.filter(f => /\.(jpg|jpeg|png|bmp|webp)$/i.test(f));
+                const imagePaths = files.filter(f => /\.(jpg|jpeg|png|bmp|webp|tiff)$/i.test(f));
 
                 if (imagePaths.length === 0) {
-                    await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a valid image file (JPG, PNG, BMP, WebP).', ['OK']);
+                    await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.invalid-files'), [i18n.t('imageEditorJS.btn-ok')]);
                     return;
                 }
                 const filePath = imagePaths[0];
@@ -127,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadImageFromPath(filePath, fileName, fileSize) {
         return new Promise((resolve, reject) => {
-            loadingUI.show('Loading image...');
+            loadingUI.show(i18n.t('imageEditorJS.selecting-image'));
             const img = new Image();
             img.onload = () => {
                 originalImage = img;
@@ -158,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
             img.onerror = () => {
                 loadingUI.hide();
-                customAlert.alert('LocalPDF Studio - ERROR', 'Failed to load image. The file may be corrupted or an unsupported format.', ['OK']);
+                customAlert.alert(i18n.t('alerts.error'), i18n.t('imageEditorJS.failed-load-image'), [i18n.t('imageEditorJS.btn-ok')]);
                 reject(new Error('Image load failed'));
             };
             img.src = `file://${filePath}`;
@@ -499,7 +501,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const w = parseInt(rwInput.value);
         const h = parseInt(rhInput.value);
         if (!w || !h || w < 1 || h < 1 || w > 10000 || h > 10000) {
-            customAlert.alert('LocalPDF Studio - WARNING', 'Please enter valid dimensions (1–10000 px).', ['OK']);
+            customAlert.alert(i18n.t('alerts.warning'), i18n.t('imageEditorJS.invalid-dimensions'), [i18n.t('imageEditorJS.btn-ok')]);
             return;
         }
         resizeW = w;
@@ -534,7 +536,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('apply-text').addEventListener('click', () => {
         const text = document.getElementById('text-content').value.trim();
         if (!text) {
-            customAlert.alert('LocalPDF Studio - NOTICE', 'Please enter some text to overlay.', ['OK']);
+            customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.empty-text'), [i18n.t('imageEditorJS.btn-ok')]);
             return;
         }
         const activePos = document.querySelector('.pos-btn.active');
@@ -757,7 +759,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     resetBtn.addEventListener('click', async () => {
-        const result = await customAlert.alert('LocalPDF Studio - WARNING', 'This will undo all edits and restore the original image. Continue?', ['Cancel', 'Reset']);
+        const result = await customAlert.alert(i18n.t('alerts.warning'), i18n.t('imageEditorJS.reset-confirm-msg'), [i18n.t('imageEditorJS.btn-cancel'), i18n.t('imageEditorJS.btn-reset')]);
         if (result === 1) {
             rotation90 = 0;
             flipH = false;
@@ -807,7 +809,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const ext = format === 'image/jpeg' ? 'jpg' : format === 'image/webp' ? 'webp' : 'png';
         const quality = format === 'image/jpeg' ? 0.92 : undefined;
 
-        loadingUI.show('Saving image...');
+        loadingUI.show(i18n.t('imageEditorJS.saving-image'));
         try {
             const dataUrl = editorCanvas.toDataURL(format, quality);
             const base64 = dataUrl.split(',')[1];
@@ -821,13 +823,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const savedPath = await window.electronAPI.saveImageFile(defaultName, bytes.buffer);
 
             if (savedPath) {
-                await customAlert.alert('LocalPDF Studio - SUCCESS', `Image saved to:\n${savedPath}`, ['OK']);
+                await customAlert.alert(i18n.t('alerts.success'), i18n.t('imageEditorJS.save-success') + '\n' + savedPath, [i18n.t('imageEditorJS.btn-ok')]);
             } else {
-                await customAlert.alert('LocalPDF Studio - WARNING', 'Save was cancelled or failed.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('imageEditorJS.save-failed'), [i18n.t('imageEditorJS.btn-ok')]);
             }
         } catch (error) {
             console.error('Save error:', error);
-            await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to save image: ' + error.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('imageEditorJS.save-error') + error.message, [i18n.t('imageEditorJS.btn-ok')]);
         } finally {
             loadingUI.hide();
         }
@@ -865,7 +867,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDropForImages({
         onFilesDropped: async (imageFiles) => {
             if (imageFiles.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop one image at a time.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.drop-one-image'), [i18n.t('imageEditorJS.btn-ok')]);
                 return;
             }
 
@@ -882,11 +884,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 droppedFilePath = result.filePath;
                 await loadImageFromPath(result.filePath, file.name, file.size || 0);
             } else {
-                await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to process dropped file: ' + result.error, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('imageEditorJS.process-drop-failed') + result.error, [i18n.t('imageEditorJS.btn-ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a valid image file (JPG, PNG, BMP, WebP).', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.invalid-files'), [i18n.t('imageEditorJS.btn-ok')]);
         }
     });
 });

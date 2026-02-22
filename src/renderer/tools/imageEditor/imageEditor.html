@@ -34,8 +34,8 @@
 <body>
     <div id="app">
         <div class="top-bar">
-            <a href="../../index.html" class="top-btn" id="back-btn">← Back</a>
-            <h1 class="tool-title">Image Editor</h1>
+            <a href="../../index.html" class="top-btn" id="back-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="imageEditor.page-title">Image Editor</h1>
         </div>
 
         <main class="tool-container">
@@ -44,15 +44,15 @@
             <div class="file-selection-area" id="file-selection-area">
                 <button id="select-image-btn" class="select-pdf-btn">
                     <span class="select-icon">🖼️</span>
-                    <span>Click to Select an Image or Drop it Here</span>
-                    <p><small class="select-hint">Supports JPG, PNG, BMP, TIFF, WebP</small></p>
+                    <span data-i18n="imageEditor.select-hint">Click to Select an Image or Drop it Here</span>
+                    <p><small class="select-hint" data-i18n="imageEditor.supported-formats">Supports JPG, PNG, BMP, TIFF, WebP</small></p>
                 </button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
                     <div style="flex-grow: 1;">
                         <p id="image-name" class="pdf-name"></p>
                         <p id="image-size" class="pdf-size"></p>
                     </div>
-                    <button id="remove-image-btn" class="remove-btn" title="Remove image">×</button>
+                    <button id="remove-image-btn" class="remove-btn" title="Remove image" data-i18n-title="imageEditorJS.remove-image">×</button>
                 </div>
             </div>
 
@@ -62,10 +62,10 @@
                 <!-- Canvas Area -->
                 <div class="canvas-panel">
                     <div class="canvas-header">
-                        <span class="canvas-label">Preview</span>
+                        <span class="canvas-label" data-i18n="imageEditor.canvas-label">Preview</span>
                         <div class="canvas-info">
                             <span id="canvas-dimensions" class="canvas-dimensions"></span>
-                            <button id="reset-btn" class="icon-btn reset-btn" title="Reset all edits">↺ Reset</button>
+                            <button id="reset-btn" class="icon-btn reset-btn" title="Reset all edits" data-i18n="imageEditor.reset-btn">↺ Reset</button>
                         </div>
                     </div>
                     <div class="canvas-wrapper" id="canvas-wrapper">
@@ -80,59 +80,59 @@
 
                     <!-- Tab Nav -->
                     <div class="tool-tabs">
-                        <button class="tab-btn active" data-tab="adjustments">🎨 Adjust</button>
-                        <button class="tab-btn" data-tab="transform">🔄 Transform</button>
-                        <button class="tab-btn" data-tab="filters">✨ Filters</button>
-                        <button class="tab-btn" data-tab="text">📝 Text</button>
-                        <button class="tab-btn" data-tab="crop">✂️ Crop</button>
+                        <button class="tab-btn active" data-tab="adjustments" data-i18n="imageEditor.tab-adjust">🎨 Adjust</button>
+                        <button class="tab-btn" data-tab="transform" data-i18n="imageEditor.tab-transform">🔄 Transform</button>
+                        <button class="tab-btn" data-tab="filters" data-i18n="imageEditor.tab-filters">✨ Filters</button>
+                        <button class="tab-btn" data-tab="text" data-i18n="imageEditor.tab-text">📝 Text</button>
+                        <button class="tab-btn" data-tab="crop" data-i18n="imageEditor.tab-crop">✂️ Crop</button>
                     </div>
 
                     <!-- Adjustments Tab -->
                     <div class="tab-content active" id="tab-adjustments">
                         <div class="option-group">
-                            <label>Brightness</label>
+                            <label data-i18n="imageEditor.brightness">Brightness</label>
                             <div class="range-input-group">
                                 <input type="range" id="brightness" class="range-input" min="-100" max="100" value="0">
                                 <span class="range-value" id="brightness-value">0</span>
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Contrast</label>
+                            <label data-i18n="imageEditor.contrast">Contrast</label>
                             <div class="range-input-group">
                                 <input type="range" id="contrast" class="range-input" min="-100" max="100" value="0">
                                 <span class="range-value" id="contrast-value">0</span>
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Saturation</label>
+                            <label data-i18n="imageEditor.saturation">Saturation</label>
                             <div class="range-input-group">
                                 <input type="range" id="saturation" class="range-input" min="-100" max="100" value="0">
                                 <span class="range-value" id="saturation-value">0</span>
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Exposure</label>
+                            <label data-i18n="imageEditor.exposure">Exposure</label>
                             <div class="range-input-group">
                                 <input type="range" id="exposure" class="range-input" min="-100" max="100" value="0">
                                 <span class="range-value" id="exposure-value">0</span>
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Sharpness</label>
+                            <label data-i18n="imageEditor.sharpness">Sharpness</label>
                             <div class="range-input-group">
                                 <input type="range" id="sharpness" class="range-input" min="0" max="10" value="0">
                                 <span class="range-value" id="sharpness-value">0</span>
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Blur</label>
+                            <label data-i18n="imageEditor.blur">Blur</label>
                             <div class="range-input-group">
                                 <input type="range" id="blur" class="range-input" min="0" max="20" value="0">
                                 <span class="range-value" id="blur-value">0</span>
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Opacity</label>
+                            <label data-i18n="imageEditor.opacity">Opacity</label>
                             <div class="range-input-group">
                                 <input type="range" id="opacity-adj" class="range-input" min="0" max="100" value="100">
                                 <span class="range-value" id="opacity-value">100%</span>
@@ -143,75 +143,75 @@
                     <!-- Transform Tab -->
                     <div class="tab-content" id="tab-transform">
                         <div class="option-group">
-                            <label>Rotate</label>
+                            <label data-i18n="imageEditor.rotate">Rotate</label>
                             <div class="btn-row">
-                                <button class="action-pill" id="rotate-ccw">↺ 90° CCW</button>
-                                <button class="action-pill" id="rotate-cw">↻ 90° CW</button>
+                                <button class="action-pill" id="rotate-ccw" data-i18n="imageEditor.rotate-ccw">↺ 90° CCW</button>
+                                <button class="action-pill" id="rotate-cw" data-i18n="imageEditor.rotate-cw">↻ 90° CW</button>
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Flip</label>
+                            <label data-i18n="imageEditor.flip">Flip</label>
                             <div class="btn-row">
-                                <button class="action-pill" id="flip-h">↔ Horizontal</button>
-                                <button class="action-pill" id="flip-v">↕ Vertical</button>
+                                <button class="action-pill" id="flip-h" data-i18n="imageEditor.flip-horizontal">↔ Horizontal</button>
+                                <button class="action-pill" id="flip-v" data-i18n="imageEditor.flip-vertical">↕ Vertical</button>
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Fine Rotation (°)</label>
+                            <label data-i18n="imageEditor.fine-rotation">Fine Rotation (°)</label>
                             <div class="range-input-group">
                                 <input type="range" id="fine-rotation" class="range-input" min="-45" max="45" value="0">
                                 <span class="range-value" id="fine-rotation-value">0°</span>
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Resize</label>
+                            <label data-i18n="imageEditor.resize">Resize</label>
                             <div class="resize-grid">
                                 <div class="resize-field">
-                                    <label class="sub-label">Width (px)</label>
+                                    <label class="sub-label" data-i18n="imageEditor.width-px">Width (px)</label>
                                     <input type="number" id="resize-width" class="options-input" min="1" max="10000">
                                 </div>
                                 <div class="resize-field">
-                                    <label class="sub-label">Height (px)</label>
+                                    <label class="sub-label" data-i18n="imageEditor.height-px">Height (px)</label>
                                     <input type="number" id="resize-height" class="options-input" min="1" max="10000">
                                 </div>
                             </div>
                             <div class="checkbox-group" style="margin-top: 0.5rem;">
                                 <input type="checkbox" id="lock-aspect" checked>
-                                <label for="lock-aspect">Lock aspect ratio</label>
+                                <label for="lock-aspect" data-i18n="imageEditor.lock-aspect-ratio">Lock aspect ratio</label>
                             </div>
-                            <button class="action-pill full-width" id="apply-resize" style="margin-top: 0.7rem;">Apply
+                            <button class="action-pill full-width" id="apply-resize" data-i18n="imageEditor.apply-resize" style="margin-top: 0.7rem;">Apply
                                 Resize</button>
                         </div>
                     </div>
 
                     <!-- Filters Tab -->
                     <div class="tab-content" id="tab-filters">
-                        <p class="help-text" style="margin-bottom: 1rem;">Click a filter to apply it. Click again to
+                        <p class="help-text" data-i18n="imageEditor.filter-info" style="margin-bottom: 1rem;">Click a filter to apply it. Click again to
                             remove.</p>
                         <div class="filter-grid" id="filter-grid">
                             <button class="filter-btn active" data-filter="none">
-                                <span class="filter-preview-label">Original</span>
+                                <span class="filter-preview-label" data-i18n="imageEditor.filter-original">Original</span>
                             </button>
                             <button class="filter-btn" data-filter="grayscale">
-                                <span class="filter-preview-label">Grayscale</span>
+                                <span class="filter-preview-label" data-i18n="imageEditor.filter-grayscale">Grayscale</span>
                             </button>
                             <button class="filter-btn" data-filter="sepia">
-                                <span class="filter-preview-label">Sepia</span>
+                                <span class="filter-preview-label" data-i18n="imageEditor.filter-sepia">Sepia</span>
                             </button>
                             <button class="filter-btn" data-filter="invert">
-                                <span class="filter-preview-label">Invert</span>
+                                <span class="filter-preview-label" data-i18n="imageEditor.filter-invert">Invert</span>
                             </button>
                             <button class="filter-btn" data-filter="vintage">
-                                <span class="filter-preview-label">Vintage</span>
+                                <span class="filter-preview-label" data-i18n="imageEditor.filter-vintage">Vintage</span>
                             </button>
                             <button class="filter-btn" data-filter="cool">
-                                <span class="filter-preview-label">Cool</span>
+                                <span class="filter-preview-label" data-i18n="imageEditor.filter-cool">Cool</span>
                             </button>
                             <button class="filter-btn" data-filter="warm">
-                                <span class="filter-preview-label">Warm</span>
+                                <span class="filter-preview-label" data-i18n="imageEditor.filter-warm">Warm</span>
                             </button>
                             <button class="filter-btn" data-filter="dramatic">
-                                <span class="filter-preview-label">Dramatic</span>
+                                <span class="filter-preview-label" data-i18n="imageEditor.filter-dramatic">Dramatic</span>
                             </button>
                         </div>
                     </div>
@@ -219,19 +219,19 @@
                     <!-- Text Overlay Tab -->
                     <div class="tab-content" id="tab-text">
                         <div class="option-group">
-                            <label>Text Content</label>
+                            <label data-i18n="imageEditor.text-content">Text Content</label>
                             <textarea id="text-content" class="options-textarea"
-                                placeholder="Enter text to overlay..."></textarea>
+                                data-i18n-placeholder="imageEditor.text-placeholder" placeholder="Enter text to overlay..."></textarea>
                         </div>
                         <div class="option-group">
-                            <label>Font Size</label>
+                            <label data-i18n="imageEditor.text-size">Font Size</label>
                             <div class="range-input-group">
                                 <input type="range" id="text-size" class="range-input" min="8" max="120" value="32">
                                 <span class="range-value" id="text-size-value">32px</span>
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Text Color</label>
+                            <label data-i18n="imageEditor.text-color">Text Color</label>
                             <div class="color-input-group">
                                 <input type="color" id="text-color" class="color-input" value="#ffffff">
                                 <div id="text-color-preview" class="color-preview" style="background-color: #ffffff;">
@@ -239,14 +239,14 @@
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Font Weight</label>
+                            <label data-i18n="imageEditor.font-weight">Font Weight</label>
                             <select id="text-weight" class="options-select">
-                                <option value="normal">Normal</option>
-                                <option value="bold" selected>Bold</option>
+                                <option value="normal" data-i18n="imageEditor.font-weight-normal">Normal</option>
+                                <option value="bold" selected data-i18n="imageEditor.font-weight-bold">Bold</option>
                             </select>
                         </div>
                         <div class="option-group">
-                            <label>Position</label>
+                            <label data-i18n="imageEditor.text-position">Position</label>
                             <div class="position-grid">
                                 <button class="pos-btn" data-pos="top-left">↖</button>
                                 <button class="pos-btn" data-pos="top-center">↑</button>
@@ -260,36 +260,36 @@
                             </div>
                         </div>
                         <div class="option-group">
-                            <label>Background</label>
+                            <label data-i18n="imageEditor.text-background">Background</label>
                             <div class="checkbox-group">
                                 <input type="checkbox" id="text-bg">
-                                <label for="text-bg">Add dark background behind text</label>
+                                <label for="text-bg" data-i18n="imageEditor.text-bg-label">Add dark background behind text</label>
                             </div>
                         </div>
-                        <button class="action-pill full-width" id="apply-text">Apply Text Overlay</button>
-                        <button class="action-pill full-width danger" id="clear-text" style="margin-top:0.5rem;">Clear
+                        <button class="action-pill full-width" id="apply-text" data-i18n="imageEditor.apply-text">Apply Text Overlay</button>
+                        <button class="action-pill full-width danger" id="clear-text" data-i18n="imageEditor.clear-text" style="margin-top:0.5rem;">Clear
                             Text Overlay</button>
                     </div>
 
                     <!-- Crop Tab -->
                     <div class="tab-content" id="tab-crop">
-                        <p class="help-text" style="margin-bottom: 0.8rem;">Draw a selection on the image to crop it.
+                        <p class="help-text" data-i18n="imageEditor.crop-info" style="margin-bottom: 0.8rem;">Draw a selection on the image to crop it.
                         </p>
                         <div class="option-group">
-                            <label>Aspect Ratio</label>
+                            <label data-i18n="imageEditor.crop-aspect-ratio">Aspect Ratio</label>
                             <select id="crop-ratio" class="options-select">
-                                <option value="free">Free</option>
-                                <option value="1:1">1:1 (Square)</option>
-                                <option value="4:3">4:3</option>
-                                <option value="16:9">16:9 (Widescreen)</option>
-                                <option value="3:2">3:2</option>
-                                <option value="2:3">2:3 (Portrait)</option>
+                                <option value="free" data-i18n="imageEditor.crop-ratio-free">Free</option>
+                                <option value="1:1" data-i18n="imageEditor.crop-ratio-1-1">1:1 (Square)</option>
+                                <option value="4:3" data-i18n="imageEditor.crop-ratio-4-3">4:3</option>
+                                <option value="16:9" data-i18n="imageEditor.crop-ratio-16-9">16:9 (Widescreen)</option>
+                                <option value="3:2" data-i18n="imageEditor.crop-ratio-3-2">3:2</option>
+                                <option value="2:3" data-i18n="imageEditor.crop-ratio-2-3">2:3 (Portrait)</option>
                             </select>
                         </div>
-                        <button class="action-pill full-width" id="start-crop">Start Crop Selection</button>
-                        <button class="action-pill full-width" id="apply-crop" style="margin-top: 0.5rem;"
+                        <button class="action-pill full-width" id="start-crop" data-i18n="imageEditor.start-crop">Start Crop Selection</button>
+                        <button class="action-pill full-width" id="apply-crop" data-i18n="imageEditor.apply-crop" style="margin-top: 0.5rem;"
                             disabled>Apply Crop</button>
-                        <button class="action-pill full-width danger" id="cancel-crop" style="margin-top: 0.5rem;"
+                        <button class="action-pill full-width danger" id="cancel-crop" data-i18n="imageEditor.cancel-crop" style="margin-top: 0.5rem;"
                             disabled>Cancel</button>
                         <div id="crop-coords" class="crop-coords" style="display:none;">
                             <span id="crop-info"></span>
@@ -302,11 +302,11 @@
             <!-- Action Buttons -->
             <div class="action-buttons" id="action-buttons" style="display: none;">
                 <select id="save-format" class="options-select format-select">
-                    <option value="image/png">PNG</option>
-                    <option value="image/jpeg">JPEG</option>
-                    <option value="image/webp">WebP</option>
+                    <option value="image/png" data-i18n="imageEditor.save-png">PNG</option>
+                    <option value="image/jpeg" data-i18n="imageEditor.save-jpeg">JPEG</option>
+                    <option value="image/webp" data-i18n="imageEditor.save-webp">WebP</option>
                 </select>
-                <button id="save-btn" class="top-btn">💾 Save Image</button>
+                <button id="save-btn" class="top-btn" data-i18n="imageEditor.save-btn">💾 Save Image</button>
             </div>
 
         </main>
