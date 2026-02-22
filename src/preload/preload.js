@@ -63,5 +63,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     performTesseractOCR: (imagePath, language, options) => ipcRenderer.invoke('perform-tesseract-ocr', { imagePath, language, options }),  
     performTesseractPDFOCR: (pages, language, options) => ipcRenderer.invoke('perform-tesseract-pdf-ocr', { pages, language, options }),    
     getTesseractLanguages: () => ipcRenderer.invoke('get-tesseract-languages'),    
-    onTesseractProgress: (callback) => ipcRenderer.on('tesseract-progress', (event, progress) => callback(progress))
+    onTesseractProgress: (callback) => ipcRenderer.on('tesseract-progress', (event, progress) => callback(progress)),
+    saveImageFile: (filename, buffer) => ipcRenderer.invoke('save-image-file', { filename, buffer }),
 });

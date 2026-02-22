@@ -996,3 +996,28 @@ ipcMain.handle('get-tesseract-languages', async () => {
         return { success: false, error: error.message };
     }
 });
+
+ipcMain.handle('save-image-file', async (event, { filename, buffer }) => {
+    const ext = path.extname(filename).toLowerCase().replace('.', '');
+    const filterMap = {
+        jpg: [{ name: 'JPEG Image', extensions: ['jpg', 'jpeg'] }],
+        jpeg: [{ name: 'JPEG Image', extensions: ['jpg', 'jpeg'] }],
+        png: [{ name: 'PNG Image', extensions: ['png'] }],
+        webp: [{ name: 'WebP Image', extensions: ['webp'] }],
+        bmp: [{ name: 'BMP Image', extensions: ['bmp'] }],
+    };
+    const filters = filterMap[ext] || [{ name: 'Image File', extensions: ['png', 'jpg', 'jpeg', 'webp', 'bmp'] }];
+    filters.push({ name: 'All Files', extensions: ['*'] });
+
+    const { dialog } = require('electron');
+    const result = await dialog.showSaveDialog({
+        defaultPath: filename,
+        filters: filters
+    });
+
+    if (result.canceled || !result.filePath) return null;
+
+    const uint8 = Buffer.from(buffer);
+    fs.writeFileSync(result.filePath, uint8);
+    return result.filePath;
+});
