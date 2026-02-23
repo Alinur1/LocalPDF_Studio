@@ -700,6 +700,14 @@ ipcMain.handle('save-pdf-with-metadata', async (event, { filePath, metadata }) =
             pdfDoc.setKeywords([]);
         }
 
+        if (!metadata.title && !metadata.author && !metadata.creator && !metadata.producer) {
+            pdfDoc.setCreationDate(new Date(0));
+            pdfDoc.setModificationDate(new Date(0));
+            const infoDict = pdfDoc.getInfoDict();
+            infoDict.delete(PDFName.of('CreationDate'));
+            infoDict.delete(PDFName.of('ModDate'));
+        }
+
         const modifiedPdfBytes = await pdfDoc.save();
         fs.writeFileSync(savedPath, modifiedPdfBytes);
 

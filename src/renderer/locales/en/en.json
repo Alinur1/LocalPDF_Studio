@@ -378,7 +378,7 @@
     "pdfLibraryError": "PDF.js library not loaded. Please refresh the page.",
     "passwordProtected": "This PDF is password-protected. Please decrypt it first.",
     "invalidPdf": "Invalid or corrupted PDF file.",
-    "confirmSanitize": "This will remove ALL metadata from the PDF including:\n• Title\n• Author\n• Subject\n• Keywords\n• Creator\n• Producer\n\nContinue?",
+    "confirmSanitize": "This will remove ALL metadata from the PDF including:\n• Title\n• Author\n• Subject\n• Keywords\n• Creator\n• Producer\n• Creation Date\n• Modification Date\n\nContinue?",
     "removingMetadata": "Removing all metadata from PDF...",
     "cleaning": "Cleaning...",
     "sanitizeSuccessMsg": "✅ All metadata removed successfully!\n\nSaved to: ",

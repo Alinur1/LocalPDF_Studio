@@ -264,7 +264,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     keywords: '',
                     creator: '',
                     producer: '',
-                    description: ''
+                    description: '',
+                    creationDate: '',
+                    modificationDate: ''
                 };
 
                 // Update the display

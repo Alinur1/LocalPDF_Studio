@@ -378,7 +378,7 @@
     "pdfLibraryError": "PDF.js 库未加载。请刷新页面。",
     "passwordProtected": "此 PDF 受密码保护。请先解密。",
     "invalidPdf": "无效或损坏的 PDF 文件。",
-    "confirmSanitize": "这将从 PDF 中删除所有元数据，包括：\n• 标题\n• 作者\n• 主题\n• 关键词\n• 创建者\n• 生成器\n\n继续？",
+    "confirmSanitize": "这将从 PDF 中删除所有元数据，包括：\n• 标题\n• 作者\n• 主题\n• 关键词\n• 创建者\n• 生成器\n• 创建日期\n• 修改日期\n\n是否继续？",
     "removingMetadata": "正在从 PDF 中删除所有元数据...",
     "cleaning": "正在清理...",
     "sanitizeSuccessMsg": "✅ 所有元数据已成功删除！\n\n保存到：",
