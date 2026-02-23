@@ -1,0 +1,327 @@
+<!-- src/renderer/tools/fillablePdfBuilder/fillablePdfBuilder.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - Fillable PDF Builder</title>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' http://localhost:*;">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./fillablePdfBuilder.css">
+    <script type="module" src="../../utils/themeManager.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn" id="back-btn">← Back</a>
+            <h1 class="tool-title">Fillable PDF Builder</h1>
+        </div>
+
+        <main class="tool-container">
+
+            <!-- Mode Selection Screen -->
+            <div id="mode-selection" class="mode-selection">
+                <div class="mode-selection-inner">
+                    <p class="mode-subtitle">Choose how you want to start building your form</p>
+                    <div class="mode-cards">
+                        <button class="mode-card" id="mode-blank">
+                            <div class="mode-card-icon">📄</div>
+                            <div class="mode-card-title">Blank Template</div>
+                            <div class="mode-card-desc">Start with a blank page and design your form from scratch</div>
+                        </button>
+                        <button class="mode-card" id="mode-existing">
+                            <div class="mode-card-icon">📑</div>
+                            <div class="mode-card-title">Existing PDF</div>
+                            <div class="mode-card-desc">Load a PDF and add interactive form fields on top of it</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blank Mode Setup -->
+            <div id="blank-setup" class="blank-setup" style="display: none;">
+                <div class="setup-card">
+                    <h2 class="setup-title">Configure Blank Template</h2>
+                    <div class="setup-grid">
+                        <div class="option-group">
+                            <label>Page Size</label>
+                            <select id="page-size" class="options-select">
+                                <option value="A4">A4 (210 × 297 mm)</option>
+                                <option value="Letter">Letter (8.5 × 11 in)</option>
+                                <option value="Legal">Legal (8.5 × 14 in)</option>
+                                <option value="A3">A3 (297 × 420 mm)</option>
+                                <option value="A5">A5 (148 × 210 mm)</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label>Orientation</label>
+                            <select id="page-orientation" class="options-select">
+                                <option value="portrait">Portrait</option>
+                                <option value="landscape">Landscape</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label>Number of Pages</label>
+                            <input type="number" id="page-count" class="options-input" value="1" min="1" max="50">
+                        </div>
+                        <div class="option-group">
+                            <label>Background Color</label>
+                            <div class="color-input-group">
+                                <input type="color" id="page-bg-color" class="color-input" value="#ffffff">
+                                <div id="page-bg-preview" class="color-preview" style="background-color: #ffffff;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setup-actions">
+                        <button class="top-btn secondary-btn" id="back-to-mode">← Back</button>
+                        <button class="top-btn" id="create-blank">Create Template →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Existing PDF Setup -->
+            <div id="existing-setup" class="existing-setup" style="display: none;">
+                <div class="setup-card">
+                    <h2 class="setup-title">Load Existing PDF</h2>
+                    <div class="file-selection-area">
+                        <button id="select-pdf-btn" class="select-pdf-btn">
+                            <span class="select-icon">📑</span>
+                            <span>Click to Select a PDF File or Drop it Here</span>
+                        </button>
+                        <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                            <div style="flex-grow: 1;">
+                                <p id="pdf-name" class="pdf-name"></p>
+                                <p id="pdf-size" class="pdf-size"></p>
+                            </div>
+                            <button id="remove-pdf-btn" class="remove-btn" title="Remove">×</button>
+                        </div>
+                    </div>
+                    <div class="setup-actions">
+                        <button class="top-btn secondary-btn" id="back-to-mode-2">← Back</button>
+                        <button class="top-btn" id="load-existing-pdf" disabled>Open in Builder →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Builder Workspace -->
+            <div id="builder-workspace" class="builder-workspace" style="display: none;">
+
+                <!-- Left: Field Palette -->
+                <div class="field-palette">
+                    <div class="palette-header">Form Fields</div>
+                    <div class="palette-fields">
+                        <button class="palette-field-btn" data-type="text">
+                            <span class="field-icon">T</span>
+                            <span class="field-label">Text Field</span>
+                        </button>
+                        <button class="palette-field-btn" data-type="textarea">
+                            <span class="field-icon">¶</span>
+                            <span class="field-label">Text Area</span>
+                        </button>
+                        <button class="palette-field-btn" data-type="checkbox">
+                            <span class="field-icon">✓</span>
+                            <span class="field-label">Checkbox</span>
+                        </button>
+                        <button class="palette-field-btn" data-type="radio">
+                            <span class="field-icon">◉</span>
+                            <span class="field-label">Radio Button</span>
+                        </button>
+                        <button class="palette-field-btn" data-type="dropdown">
+                            <span class="field-icon">▼</span>
+                            <span class="field-label">Dropdown</span>
+                        </button>
+                        <button class="palette-field-btn" data-type="date">
+                            <span class="field-icon">📅</span>
+                            <span class="field-label">Date (text)</span>
+                        </button>
+                        <button class="palette-field-btn" data-type="signature">
+                            <span class="field-icon">✍</span>
+                            <span class="field-label">Signature</span>
+                        </button>
+                        <button class="palette-field-btn label-field-btn" data-type="label">
+                            <span class="field-icon">𝐀</span>
+                            <span class="field-label">Label (static)</span>
+                        </button>
+                    </div>
+
+                    <div class="palette-divider"></div>
+
+                    <div class="palette-header">Pages</div>
+                    <div id="page-thumbnails" class="page-thumbnails"></div>
+                    <button class="add-page-btn" id="add-page-btn">+ Add Page</button>
+
+                    <div class="palette-divider"></div>
+
+                    <div class="palette-header">Template</div>
+                    <button class="palette-action-btn" id="save-template-btn">💾 Save Template</button>
+                    <button class="palette-action-btn" id="load-template-btn">📂 Load Template</button>
+                    <input type="file" id="load-template-input" accept=".json" style="display: none;">
+                </div>
+
+                <!-- Center: Canvas Area -->
+                <div class="canvas-area">
+                    <div class="canvas-toolbar">
+                        <div class="toolbar-left">
+                            <span class="canvas-page-info" id="canvas-page-info">Page 1 of 1</span>
+                            <button class="toolbar-btn" id="prev-page-btn" disabled>◀</button>
+                            <button class="toolbar-btn" id="next-page-btn" disabled>▶</button>
+                        </div>
+                        <div class="toolbar-center">
+                            <button class="toolbar-btn" id="zoom-out-btn">−</button>
+                            <span class="zoom-level" id="zoom-level">100%</span>
+                            <button class="toolbar-btn" id="zoom-in-btn">+</button>
+                            <button class="toolbar-btn" id="zoom-fit-btn">Fit</button>
+                        </div>
+                        <div class="toolbar-right">
+                            <button class="toolbar-btn danger-btn" id="delete-field-btn" disabled>🗑 Delete Field</button>
+                            <button class="toolbar-btn danger-btn" id="delete-page-btn">🗑 Delete Page</button>
+                        </div>
+                    </div>
+
+                    <div class="canvas-scroll-wrapper" id="canvas-scroll-wrapper">
+                        <div class="canvas-centering" id="canvas-centering">
+                            <div class="page-canvas-wrapper" id="page-canvas-wrapper">
+                                <!-- PDF.js background canvas -->
+                                <canvas id="pdf-render-canvas"></canvas>
+                                <!-- Fields overlay -->
+                                <div id="fields-overlay" class="fields-overlay"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Properties Panel -->
+                <div class="properties-panel" id="properties-panel">
+                    <div class="props-header">Properties</div>
+
+                    <!-- No selection state -->
+                    <div id="props-empty" class="props-empty">
+                        <div class="props-empty-icon">↖</div>
+                        <p>Click a field on the canvas to edit its properties</p>
+                    </div>
+
+                    <!-- Field properties -->
+                    <div id="props-form" class="props-form" style="display: none;">
+                        <div class="props-field-type" id="props-field-type-label"></div>
+
+                        <!-- Label content (only for label type) -->
+                        <div class="option-group" id="prop-label-content-group" style="display: none;">
+                            <label>Text Content</label>
+                            <textarea id="prop-label-content" class="options-textarea" placeholder="e.g. First Name:"></textarea>
+                            <small class="help-text">This text will be baked into the PDF as static text.</small>
+                        </div>
+
+                        <!-- Label font weight -->
+                        <div class="option-group" id="prop-label-weight-group" style="display: none;">
+                            <label>Font Weight</label>
+                            <select id="prop-label-weight" class="options-select">
+                                <option value="normal">Normal</option>
+                                <option value="bold">Bold</option>
+                            </select>
+                        </div>
+
+                        <!-- Date field note -->
+                        <div class="option-group" id="prop-date-note" style="display: none;">
+                            <div class="date-field-note">
+                                📅 Date fields export as plain text fields. Users type the date manually (e.g. DD/MM/YYYY).
+                            </div>
+                        </div>
+
+                        <div class="option-group" id="prop-name-group">
+                            <label>Field Name <span class="required-star">*</span></label>
+                            <input type="text" id="prop-name" class="options-input" placeholder="e.g. first_name">
+                            <small class="help-text">Unique identifier for this field</small>
+                        </div>
+
+                        <div class="option-group">
+                            <label>Label / Placeholder</label>
+                            <input type="text" id="prop-placeholder" class="options-input" placeholder="e.g. Enter your name">
+                        </div>
+
+                        <div class="option-group" id="prop-default-group">
+                            <label>Default Value</label>
+                            <input type="text" id="prop-default" class="options-input" placeholder="Optional">
+                        </div>
+
+                        <!-- Dropdown options -->
+                        <div class="option-group" id="prop-options-group" style="display: none;">
+                            <label>Options <span class="help-text">(one per line)</span></label>
+                            <textarea id="prop-options" class="options-textarea" placeholder="Option 1&#10;Option 2&#10;Option 3"></textarea>
+                        </div>
+
+                        <!-- Radio group name -->
+                        <div class="option-group" id="prop-radio-group" style="display: none;">
+                            <label>Radio Group Name</label>
+                            <input type="text" id="prop-radio-name" class="options-input" placeholder="e.g. gender">
+                            <small class="help-text">Radio buttons with the same group name are mutually exclusive</small>
+                        </div>
+
+                        <div class="option-group">
+                            <label>Font Size</label>
+                            <input type="number" id="prop-fontsize" class="options-input" value="12" min="6" max="72">
+                        </div>
+
+                        <div class="option-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="prop-required">
+                                <label for="prop-required">Required field</label>
+                            </div>
+                        </div>
+
+                        <div class="option-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="prop-readonly">
+                                <label for="prop-readonly">Read only</label>
+                            </div>
+                        </div>
+
+                        <div class="option-group">
+                            <label>Position & Size</label>
+                            <div class="xywh-grid">
+                                <div class="xywh-field">
+                                    <label class="sub-label">X</label>
+                                    <input type="number" id="prop-x" class="options-input">
+                                </div>
+                                <div class="xywh-field">
+                                    <label class="sub-label">Y</label>
+                                    <input type="number" id="prop-y" class="options-input">
+                                </div>
+                                <div class="xywh-field">
+                                    <label class="sub-label">W</label>
+                                    <input type="number" id="prop-w" class="options-input" min="20">
+                                </div>
+                                <div class="xywh-field">
+                                    <label class="sub-label">H</label>
+                                    <input type="number" id="prop-h" class="options-input" min="10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="action-pill full-width" id="duplicate-field-btn">⧉ Duplicate Field</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Export Actions (shown only in builder) -->
+            <div id="export-actions" class="export-actions" style="display: none;">
+                <div class="export-left">
+                    <span class="field-count-label" id="field-count-label">0 fields on this document</span>
+                </div>
+                <div class="export-right">
+                    <button class="top-btn secondary-btn" id="export-flattened-btn">📄 Save as Flattened PDF</button>
+                    <button class="top-btn" id="export-fillable-btn">📋 Save as Fillable PDF</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script type="module" src="./fillablePdfBuilder.js"></script>
+</body>
+
+</html>

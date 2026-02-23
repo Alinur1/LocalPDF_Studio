@@ -65,4 +65,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getTesseractLanguages: () => ipcRenderer.invoke('get-tesseract-languages'),    
     onTesseractProgress: (callback) => ipcRenderer.on('tesseract-progress', (event, progress) => callback(progress)),
     saveImageFile: (filename, buffer) => ipcRenderer.invoke('save-image-file', { filename, buffer }),
+    buildFillablePdf: (options) => ipcRenderer.invoke('build-fillable-pdf', options),
 });

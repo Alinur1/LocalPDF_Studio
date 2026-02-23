@@ -1021,3 +1021,209 @@ ipcMain.handle('save-image-file', async (event, { filename, buffer }) => {
     fs.writeFileSync(result.filePath, uint8);
     return result.filePath;
 });
+
+ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPath, fillable, pageBackgroundColor }) => {
+    try {
+        const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+
+        let pdfDoc;
+        if (mode === 'existing' && existingPdfPath) {
+            const pdfBytes = fs.readFileSync(existingPdfPath);
+            pdfDoc = await PDFDocument.load(pdfBytes);
+        } else {
+            pdfDoc = await PDFDocument.create();
+            for (const page of pages) {
+                pdfDoc.addPage([page.width, page.height]);
+            }
+        }
+
+        const pdfPages = pdfDoc.getPages();
+
+        // Embed font - try bundled Noto font first, fall back to Helvetica
+        let font;
+        try {
+            const isPackaged = app.isPackaged;
+            const basePath = isPackaged ? process.resourcesPath : path.resolve(app.getAppPath());
+            const fontPath = path.join(basePath, 'assets', 'fonts', 'GoNotoKurrent-Regular.ttf');
+            const fontBytes = fs.readFileSync(fontPath);
+            font = await pdfDoc.embedFont(fontBytes);
+        } catch (fontErr) {
+            console.warn('Bundled font not found, falling back to Helvetica:', fontErr.message);
+            font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        }
+
+        // Draw background color for blank mode
+        if (mode === 'blank' && pageBackgroundColor) {
+            const hex = pageBackgroundColor.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16) / 255;
+            const g = parseInt(hex.substring(2, 4), 16) / 255;
+            const b = parseInt(hex.substring(4, 6), 16) / 255;
+            pdfPages.forEach(p => {
+                const { width, height } = p.getSize();
+                p.drawRectangle({ x: 0, y: 0, width, height, color: rgb(r, g, b) });
+            });
+        }
+
+        if (fillable) {
+            const form = pdfDoc.getForm();
+
+            for (let pi = 0; pi < pages.length; pi++) {
+                const page = pages[pi];
+                const pdfPage = pdfPages[pi];
+                if (!pdfPage) continue;
+                const { height: pageH } = pdfPage.getSize();
+
+                for (const field of page.fields) {
+                    const pdfX = field.x;
+                    const pdfY = pageH - field.y - field.height;
+                    const w = field.width;
+                    const h = field.height;
+
+                    // Labels are always static text — never AcroForm fields
+                    if (field.type === 'label') {
+                        const content = (field.labelContent || '').trim();
+                        if (content) {
+                            pdfPage.drawText(content, {
+                                x: pdfX + 2,
+                                y: pdfY + (h / 2) - ((field.fontSize || 12) / 2),
+                                size: field.fontSize || 12,
+                                font,
+                                color: rgb(0, 0, 0),
+                                maxWidth: w - 4,
+                            });
+                        }
+                        continue;
+                    }
+
+                    const safeName = sanitizeName(field.name || `field_${field.id}`);
+
+                    try {
+                        switch (field.type) {
+                            case 'text':
+                            case 'date': {
+                                const tf = form.createTextField(safeName);
+                                tf.setText(field.defaultValue || '');
+                                tf.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font, fontSize: field.fontSize || 12 });
+                                if (field.required) tf.enableRequired();
+                                if (field.readonly) tf.enableReadOnly();
+                                break;
+                            }
+                            case 'textarea': {
+                                const tf = form.createTextField(safeName);
+                                tf.setText(field.defaultValue || '');
+                                tf.enableMultiline();
+                                tf.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font, fontSize: field.fontSize || 12 });
+                                if (field.required) tf.enableRequired();
+                                if (field.readonly) tf.enableReadOnly();
+                                break;
+                            }
+                            case 'checkbox': {
+                                const cb = form.createCheckBox(safeName);
+                                cb.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h });
+                                if (field.required) cb.enableRequired();
+                                if (field.readonly) cb.enableReadOnly();
+                                break;
+                            }
+                            case 'radio': {
+                                const groupName = sanitizeName(field.radioGroupName || safeName);
+                                let rg;
+                                try { rg = form.getRadioGroup(groupName); }
+                                catch { rg = form.createRadioGroup(groupName); }
+                                rg.addOptionToPage(safeName, pdfPage, { x: pdfX, y: pdfY, width: w, height: h });
+                                break;
+                            }
+                            case 'dropdown': {
+                                const dd = form.createDropdown(safeName);
+                                const opts = (field.options || ['Option 1']).filter(Boolean);
+                                dd.setOptions(opts);
+                                if (opts.length > 0) dd.select(opts[0]);
+                                dd.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font, fontSize: field.fontSize || 12 });
+                                if (field.required) dd.enableRequired();
+                                if (field.readonly) dd.enableReadOnly();
+                                break;
+                            }
+                            case 'signature': {
+                                const sf = form.createTextField(safeName);
+                                sf.setText('');
+                                sf.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font, fontSize: field.fontSize || 12 });
+                                pdfPage.drawText('Sign here', {
+                                    x: pdfX + 4, y: pdfY + 4,
+                                    size: 8, font, color: rgb(0.5, 0.5, 0.5)
+                                });
+                                break;
+                            }
+                        }
+                    } catch (fieldErr) {
+                        console.warn(`Skipping field "${safeName}":`, fieldErr.message);
+                    }
+                }
+            }
+        } else {
+            // Flattened: draw visual field outlines
+            for (let pi = 0; pi < pages.length; pi++) {
+                const page = pages[pi];
+                const pdfPage = pdfPages[pi];
+                if (!pdfPage) continue;
+                const { height: pageH } = pdfPage.getSize();
+
+                for (const field of page.fields) {
+                    const pdfX = field.x;
+                    const pdfY = pageH - field.y - field.height;
+                    const w = field.width;
+                    const h = field.height;
+
+                    // Labels are always static text — never rectangles
+                    if (field.type === 'label') {
+                        const content = (field.labelContent || '').trim();
+                        if (content) {
+                            pdfPage.drawText(content, {
+                                x: pdfX + 2,
+                                y: pdfY + (h / 2) - ((field.fontSize || 12) / 2),
+                                size: field.fontSize || 12,
+                                font,
+                                color: rgb(0, 0, 0),
+                                maxWidth: w - 4,
+                            });
+                        }
+                        continue;
+                    }
+
+                    switch (field.type) {
+                        case 'checkbox':
+                        case 'radio': {
+                            pdfPage.drawRectangle({ x: pdfX, y: pdfY, width: w, height: h, borderColor: rgb(0.2, 0.2, 0.2), borderWidth: 1, color: rgb(1, 1, 1) });
+                            break;
+                        }
+                        case 'signature': {
+                            pdfPage.drawRectangle({ x: pdfX, y: pdfY, width: w, height: h, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1, color: rgb(0.97, 0.97, 0.97) });
+                            pdfPage.drawText('Signature', { x: pdfX + 4, y: pdfY + h / 2 - 4, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
+                            break;
+                        }
+                        default: {
+                            pdfPage.drawRectangle({ x: pdfX, y: pdfY, width: w, height: h, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1, color: rgb(1, 1, 1) });
+                            if (field.placeholder) {
+                                pdfPage.drawText(field.placeholder, {
+                                    x: pdfX + 4, y: pdfY + (h / 2) - ((field.fontSize || 10) / 2),
+                                    size: Math.min(field.fontSize || 10, h - 4),
+                                    font, color: rgb(0.6, 0.6, 0.6), maxWidth: w - 8,
+                                });
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        const pdfBytes = await pdfDoc.save();
+        return { success: true, data: Array.from(pdfBytes) };
+
+    } catch (err) {
+        console.error('build-fillable-pdf error:', err);
+        return { success: false, error: err.message };
+    }
+});
+
+function sanitizeName(name) {
+    return (name || 'field').replace(/[^a-zA-Z0-9_\-.]/g, '_').substring(0, 64);
+}
