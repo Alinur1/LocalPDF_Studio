@@ -83,7 +83,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const propsFieldTypeLabel = document.getElementById('props-field-type-label');
 
     const propName        = document.getElementById('prop-name');
-    const propPlaceholder = document.getElementById('prop-placeholder');
     const propDefault     = document.getElementById('prop-default');
     const propFontSize    = document.getElementById('prop-fontsize');
     const propRequired    = document.getElementById('prop-required');
@@ -459,7 +458,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 id: `field_${++fieldCounter}`,
                 type,
                 name: `${type}_${fieldCounter}`,
-                placeholder: type === 'date' ? 'DD/MM/YYYY' : '',
                 defaultValue: '',
                 labelContent: type === 'label' ? 'Label:' : '',
                 labelWeight: 'normal',
@@ -574,7 +572,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         propsFieldTypeLabel.textContent = FIELD_LABELS[field.type] || field.type;
 
         propName.value        = field.name || '';
-        propPlaceholder.value = field.placeholder || '';
         propDefault.value     = field.defaultValue || '';
         propFontSize.value    = field.fontSize || 12;
         propRequired.checked  = !!field.required;
@@ -596,7 +593,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Date note
         document.getElementById('prop-date-note').style.display = isDate ? 'block' : 'none';
 
-        // Hide name/placeholder/required for labels — they're static text
+        // Hide name/required for labels — they're static text
         document.getElementById('prop-name-group').style.display    = isLabel ? 'none' : 'block';
         document.getElementById('prop-default-group').style.display =
             (isLabel || ['checkbox', 'radio', 'signature'].includes(field.type)) ? 'none' : 'block';
@@ -608,7 +605,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Hide required/readonly for labels
         document.querySelector('#prop-required').closest('.option-group').style.display = isLabel ? 'none' : 'block';
         document.querySelector('#prop-readonly').closest('.option-group').style.display = isLabel ? 'none' : 'block';
-        document.querySelector('#prop-placeholder').closest('.option-group').style.display = isLabel ? 'none' : 'block';
 
         if (field.type === 'dropdown') propOptions.value = (field.options || []).join('\n');
         if (field.type === 'radio')    propRadioName.value = field.radioGroupName || '';
@@ -636,7 +632,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     bindPropInput(propName, 'name');
-    bindPropInput(propPlaceholder, 'placeholder');
     bindPropInput(propDefault, 'defaultValue');
     bindPropInput(propFontSize, 'fontSize', v => Math.max(6, Math.min(72, parseInt(v) || 12)));
     bindPropInput(propRadioName, 'radioGroupName');

@@ -1025,6 +1025,7 @@ ipcMain.handle('save-image-file', async (event, { filename, buffer }) => {
 ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPath, fillable, pageBackgroundColor }) => {
     try {
         const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+        const fontkit = require('@pdf-lib/fontkit');
 
         let pdfDoc;
         if (mode === 'existing' && existingPdfPath) {
@@ -1037,19 +1038,44 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
             }
         }
 
+        pdfDoc.registerFontkit(fontkit);
         const pdfPages = pdfDoc.getPages();
 
-        // Embed font - try bundled Noto font first, fall back to Helvetica
-        let font;
+        // Embed fonts
+        let fontRegular, fontBold, fontCJK;
+
         try {
-            const isPackaged = app.isPackaged;
-            const basePath = isPackaged ? process.resourcesPath : path.resolve(app.getAppPath());
-            const fontPath = path.join(basePath, 'assets', 'fonts', 'GoNotoKurrent-Regular.ttf');
-            const fontBytes = fs.readFileSync(fontPath);
-            font = await pdfDoc.embedFont(fontBytes);
-        } catch (fontErr) {
-            console.warn('Bundled font not found, falling back to Helvetica:', fontErr.message);
-            font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            const basePath = app.isPackaged ? process.resourcesPath : path.resolve(app.getAppPath());
+            const regularBytes = fs.readFileSync(path.join(basePath, 'assets', 'fonts', 'GoNotoKurrent-Regular.ttf'));
+            fontRegular = await pdfDoc.embedFont(regularBytes, { subset: false });
+        } catch (err) {
+            console.warn('GoNotoKurrent-Regular not found, falling back to Helvetica:', err.message);
+            fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        }
+
+        try {
+            const basePath = app.isPackaged ? process.resourcesPath : path.resolve(app.getAppPath());
+            const boldBytes = fs.readFileSync(path.join(basePath, 'assets', 'fonts', 'GoNotoKurrent-Bold.ttf'));
+            fontBold = await pdfDoc.embedFont(boldBytes, { subset: false });
+        } catch (err) {
+            console.warn('GoNotoKurrent-Bold not found, falling back to Helvetica-Bold:', err.message);
+            fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        }
+
+        try {
+            const basePath = app.isPackaged ? process.resourcesPath : path.resolve(app.getAppPath());
+            const cjkBytes = fs.readFileSync(path.join(basePath, 'assets', 'fonts', 'GoNotoCJKCore.ttf'));
+            fontCJK = await pdfDoc.embedFont(cjkBytes, { subset: false });
+        } catch (err) {
+            console.warn('GoNotoCJKCore not found, CJK text may not render:', err.message);
+            fontCJK = fontRegular;
+        }
+
+        // Pick the right font for given text and weight
+        function pickFont(text, bold) {
+            const hasCJK = /[\u3000-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]/.test(text || '');
+            if (hasCJK) return fontCJK;
+            return bold ? fontBold : fontRegular;
         }
 
         // Draw background color for blank mode
@@ -1083,11 +1109,12 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
                     if (field.type === 'label') {
                         const content = (field.labelContent || '').trim();
                         if (content) {
+                            const isBold = field.labelWeight === 'bold';
                             pdfPage.drawText(content, {
                                 x: pdfX + 2,
                                 y: pdfY + (h / 2) - ((field.fontSize || 12) / 2),
                                 size: field.fontSize || 12,
-                                font,
+                                font: pickFont(content, isBold),
                                 color: rgb(0, 0, 0),
                                 maxWidth: w - 4,
                             });
@@ -1103,7 +1130,8 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
                             case 'date': {
                                 const tf = form.createTextField(safeName);
                                 tf.setText(field.defaultValue || '');
-                                tf.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font, fontSize: field.fontSize || 12 });
+                                tf.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font: fontRegular, fontSize: field.fontSize || 12 });
+                                tf.setFontSize(field.fontSize || 12);
                                 if (field.required) tf.enableRequired();
                                 if (field.readonly) tf.enableReadOnly();
                                 break;
@@ -1112,7 +1140,8 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
                                 const tf = form.createTextField(safeName);
                                 tf.setText(field.defaultValue || '');
                                 tf.enableMultiline();
-                                tf.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font, fontSize: field.fontSize || 12 });
+                                tf.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font: fontRegular, fontSize: field.fontSize || 12 });
+                                tf.setFontSize(field.fontSize || 12);
                                 if (field.required) tf.enableRequired();
                                 if (field.readonly) tf.enableReadOnly();
                                 break;
@@ -1137,7 +1166,7 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
                                 const opts = (field.options || ['Option 1']).filter(Boolean);
                                 dd.setOptions(opts);
                                 if (opts.length > 0) dd.select(opts[0]);
-                                dd.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font, fontSize: field.fontSize || 12 });
+                                dd.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font: fontRegular, fontSize: field.fontSize || 12 });
                                 if (field.required) dd.enableRequired();
                                 if (field.readonly) dd.enableReadOnly();
                                 break;
@@ -1145,16 +1174,17 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
                             case 'signature': {
                                 const sf = form.createTextField(safeName);
                                 sf.setText('');
-                                sf.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font, fontSize: field.fontSize || 12 });
+                                sf.addToPage(pdfPage, { x: pdfX, y: pdfY, width: w, height: h, font: fontRegular, fontSize: field.fontSize || 12 });
+                                sf.setFontSize(field.fontSize || 12);
                                 pdfPage.drawText('Sign here', {
                                     x: pdfX + 4, y: pdfY + 4,
-                                    size: 8, font, color: rgb(0.5, 0.5, 0.5)
+                                    size: 8, font: fontRegular, color: rgb(0.5, 0.5, 0.5)
                                 });
                                 break;
                             }
                         }
                     } catch (fieldErr) {
-                        console.warn(`Skipping field "${safeName}":`, fieldErr.message);
+                        console.log(`Skipping field "${safeName}":`, fieldErr.message);
                     }
                 }
             }
@@ -1176,11 +1206,12 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
                     if (field.type === 'label') {
                         const content = (field.labelContent || '').trim();
                         if (content) {
+                            const isBold = field.labelWeight === 'bold';
                             pdfPage.drawText(content, {
                                 x: pdfX + 2,
                                 y: pdfY + (h / 2) - ((field.fontSize || 12) / 2),
                                 size: field.fontSize || 12,
-                                font,
+                                font: pickFont(content, isBold),
                                 color: rgb(0, 0, 0),
                                 maxWidth: w - 4,
                             });
@@ -1196,18 +1227,11 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
                         }
                         case 'signature': {
                             pdfPage.drawRectangle({ x: pdfX, y: pdfY, width: w, height: h, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1, color: rgb(0.97, 0.97, 0.97) });
-                            pdfPage.drawText('Signature', { x: pdfX + 4, y: pdfY + h / 2 - 4, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
+                            pdfPage.drawText('Signature', { x: pdfX + 4, y: pdfY + h / 2 - 4, size: 9, font: fontRegular, color: rgb(0.5, 0.5, 0.5) });
                             break;
                         }
                         default: {
                             pdfPage.drawRectangle({ x: pdfX, y: pdfY, width: w, height: h, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1, color: rgb(1, 1, 1) });
-                            if (field.placeholder) {
-                                pdfPage.drawText(field.placeholder, {
-                                    x: pdfX + 4, y: pdfY + (h / 2) - ((field.fontSize || 10) / 2),
-                                    size: Math.min(field.fontSize || 10, h - 4),
-                                    font, color: rgb(0.6, 0.6, 0.6), maxWidth: w - 8,
-                                });
-                            }
                             break;
                         }
                     }
@@ -1219,7 +1243,7 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
         return { success: true, data: Array.from(pdfBytes) };
 
     } catch (err) {
-        console.error('build-fillable-pdf error:', err);
+        console.log('build-fillable-pdf error:', err);
         return { success: false, error: err.message };
     }
 });
