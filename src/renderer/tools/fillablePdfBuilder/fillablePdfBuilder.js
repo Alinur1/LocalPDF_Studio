@@ -1,3 +1,20 @@
+/**
+ * LocalPDF Studio - Offline PDF Toolkit
+ * ======================================
+ * 
+ * @author      Md. Alinur Hossain <alinur1160@gmail.com>
+ * @license     AGPL 3.0 (GNU Affero General Public License version 3)
+ * @website     https://alinur1.github.io/LocalPDF_Studio_Website/
+ * @repository  https://github.com/Alinur1/LocalPDF_Studio
+ * 
+ * Copyright (c) 2025 Md. Alinur Hossain. All rights reserved.
+ * 
+ * Architecture:
+ * - Frontend: Electron + HTML/CSS/JS
+ * - Backend: ASP.NET Core Web API, Python
+ * - PDF Engine: PdfSharp + Mozilla PDF.js
+**/
+
 // src/renderer/tools/fillablePdfBuilder/fillablePdfBuilder.js
 
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
@@ -182,7 +199,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadExistingBtn.disabled = false;
             selectedPdfPath = filePath;
         } catch (err) {
-            await customAlert.alert('Error', 'Failed to read PDF: ' + err.message, ['OK']);
+            console.log("Failed to read PDF.", err);
+            await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to read PDF.', ['OK']);
         }
     }
 
@@ -206,7 +224,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentPageIndex = 0;
             enterBuilder();
         } catch (err) {
-            await customAlert.alert('Error', 'Failed to load PDF: ' + err.message, ['OK']);
+            console.log("Failed to load PDF.", err);
+            await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to load PDF.' + err.message, ['OK']);
         } finally {
             loadingUI.hide();
         }
@@ -245,7 +264,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('add-page-btn').addEventListener('click', () => {
         if (mode === 'existing') {
-            customAlert.alert('Notice', 'Cannot add pages when editing an existing PDF.', ['OK']);
+            customAlert.alert('LocalPDF Studio - NOTICE', 'Cannot add pages when editing an existing PDF.', ['OK']);
             return;
         }
         const ref = pages[0] || { width: PAGE_SIZES.A4.width, height: PAGE_SIZES.A4.height };
@@ -258,10 +277,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('delete-page-btn').addEventListener('click', async () => {
         if (pages.length <= 1) {
-            await customAlert.alert('Notice', 'You must have at least one page.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'You must have at least one page.', ['OK']);
             return;
         }
-        const result = await customAlert.alert('Delete Page', `Delete page ${currentPageIndex + 1}? All fields on this page will be removed.`, ['Cancel', 'Delete']);
+        const result = await customAlert.alert('LocalPDF Studio - WARNING', `Delete page ${currentPageIndex + 1}? All fields on this page will be removed.`, ['Cancel', 'Delete']);
         if (result !== 1) return;
 
         pages.splice(currentPageIndex, 1);
@@ -351,6 +370,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (err) {
                 ctx.fillStyle = '#fff';
                 ctx.fillRect(0, 0, scaledW, scaledH);
+                console.log("Unable to render PDF file.", err);
             }
         }
 
@@ -484,7 +504,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ─── Delete Field ─────────────────────────────────────────────────────
     document.getElementById('delete-field-btn').addEventListener('click', async () => {
         if (!selectedFieldId) return;
-        const result = await customAlert.alert('Delete Field', 'Delete this field?', ['Cancel', 'Delete']);
+        const result = await customAlert.alert('LocalPDF Studio - WARNING', 'Delete this field?', ['Cancel', 'Delete']);
         if (result !== 1) return;
         removeField(selectedFieldId);
     });
@@ -727,7 +747,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const bytes = encoder.encode(json);
         const savedPath = await window.electronAPI.saveTextFile('form_template.json', json);
         if (savedPath) {
-            await customAlert.alert('Success', 'Template saved to:\n' + savedPath, ['OK']);
+            await customAlert.alert('LocalPDF Studio - SUCCESS', 'Template saved to:\n' + savedPath, ['OK']);
         }
     });
 
@@ -761,9 +781,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderCurrentPage();
             updateFieldCount();
             updatePageNav();
-            await customAlert.alert('Success', 'Template loaded successfully.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - SUCCESS', 'Template loaded successfully.', ['OK']);
         } catch (err) {
-            await customAlert.alert('Error', 'Failed to load template: ' + err.message, ['OK']);
+            console.log("Failed to load template.", err);
+            await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to load template: ' + err.message, ['OK']);
         }
         e.target.value = '';
     });
@@ -799,7 +820,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function exportPdf(fillable) {
         const total = pages.reduce((s, p) => s + p.fields.length, 0);
         if (total === 0) {
-            await customAlert.alert('No Fields', 'Please add at least one form field before exporting.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please add at least one form field before exporting.', ['OK']);
             return;
         }
 
@@ -815,16 +836,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const savedPath = await window.electronAPI.savePdfFile(fileName, pdfBytes.buffer);
             if (savedPath) {
                 await customAlert.alert(
-                    'Success',
+                    'LocalPDF Studio - SUCCESS',
                     `${fillable ? 'Fillable' : 'Flattened'} PDF saved to:\n${savedPath}`,
                     ['OK']
                 );
             } else {
-                await customAlert.alert('Warning', 'Save was cancelled or failed.', ['OK']);
+                await customAlert.alert('LocalPDF Studio - WARNING', 'Save was cancelled or failed.', ['OK']);
             }
         } catch (err) {
-            console.error('Export error:', err);
-            await customAlert.alert('Error', 'Export failed: ' + err.message, ['OK']);
+            console.log('Export error:', err);
+            await customAlert.alert('LocalPDF Studio - ERROR', 'Export failed: ' + err.message, ['OK']);
         } finally {
             loadingUI.hide();
         }
@@ -837,7 +858,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (existingSetup.style.display === 'none') return;
 
             if (pdfFiles.length > 1) {
-                await customAlert.alert('Notice', 'Please drop one PDF file at a time.', ['OK']);
+                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop one PDF file at a time.', ['OK']);
                 return;
             }
 
@@ -850,11 +871,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 droppedFilePath = result.filePath;
                 await handlePdfSelected(result.filePath);
             } else {
-                await customAlert.alert('Error', 'Failed to process dropped file: ' + result.error, ['OK']);
+                await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to process dropped file: ' + result.error, ['OK']);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('Notice', 'Please drop a valid PDF file.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a valid PDF file.', ['OK']);
         }
     });
 
@@ -864,7 +885,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await window.electronAPI.deleteFile(droppedFilePath);
                 droppedFilePath = null;
             } catch (err) {
-                console.error('Cleanup error:', err);
+                console.log('Cleanup error:', err);
             }
         }
     }
