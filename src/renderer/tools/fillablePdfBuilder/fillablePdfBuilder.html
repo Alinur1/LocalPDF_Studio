@@ -34,8 +34,8 @@
 <body>
     <div id="app">
         <div class="top-bar">
-            <a href="../../index.html" class="top-btn" id="back-btn">← Back</a>
-            <h1 class="tool-title">Fillable PDF Builder</h1>
+            <a href="../../index.html" class="top-btn" id="back-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="fillablePdfBuilder.page-title">Fillable PDF Builder</h1>
         </div>
 
         <main class="tool-container">
@@ -43,17 +43,17 @@
             <!-- Mode Selection Screen -->
             <div id="mode-selection" class="mode-selection">
                 <div class="mode-selection-inner">
-                    <p class="mode-subtitle">Choose how you want to start building your form</p>
+                    <p class="mode-subtitle" data-i18n="fillablePdfBuilder.subtitle">Choose how you want to start building your form</p>
                     <div class="mode-cards">
                         <button class="mode-card" id="mode-blank">
                             <div class="mode-card-icon">📄</div>
-                            <div class="mode-card-title">Blank Template</div>
-                            <div class="mode-card-desc">Start with a blank page and design your form from scratch</div>
+                            <div class="mode-card-title" data-i18n="fillablePdfBuilder.mode-blank-title">Blank Template</div>
+                            <div class="mode-card-desc" data-i18n="fillablePdfBuilder.mode-blank-desc">Start with a blank page and design your form from scratch</div>
                         </button>
                         <button class="mode-card" id="mode-existing">
                             <div class="mode-card-icon">📑</div>
-                            <div class="mode-card-title">Existing PDF</div>
-                            <div class="mode-card-desc">Load a PDF and add interactive form fields on top of it</div>
+                            <div class="mode-card-title" data-i18n="fillablePdfBuilder.mode-existing-title">Existing PDF</div>
+                            <div class="mode-card-desc" data-i18n="fillablePdfBuilder.mode-existing-desc">Load a PDF and add interactive form fields on top of it</div>
                         </button>
                     </div>
                 </div>
@@ -62,31 +62,31 @@
             <!-- Blank Mode Setup -->
             <div id="blank-setup" class="blank-setup" style="display: none;">
                 <div class="setup-card">
-                    <h2 class="setup-title">Configure Blank Template</h2>
+                    <h2 class="setup-title" data-i18n="fillablePdfBuilder.blank-setup-title">Configure Blank Template</h2>
                     <div class="setup-grid">
                         <div class="option-group">
-                            <label>Page Size</label>
+                            <label data-i18n="fillablePdfBuilder.page-size-label">Page Size</label>
                             <select id="page-size" class="options-select">
-                                <option value="A4">A4 (210 × 297 mm)</option>
-                                <option value="Letter">Letter (8.5 × 11 in)</option>
-                                <option value="Legal">Legal (8.5 × 14 in)</option>
-                                <option value="A3">A3 (297 × 420 mm)</option>
-                                <option value="A5">A5 (148 × 210 mm)</option>
+                                <option value="A4" data-i18n="fillablePdfBuilder.page-size-a4">A4 (210 × 297 mm)</option>
+                                <option value="Letter" data-i18n="fillablePdfBuilder.page-size-letter">Letter (8.5 × 11 in)</option>
+                                <option value="Legal" data-i18n="fillablePdfBuilder.page-size-legal">Legal (8.5 × 14 in)</option>
+                                <option value="A3" data-i18n="fillablePdfBuilder.page-size-a3">A3 (297 × 420 mm)</option>
+                                <option value="A5" data-i18n="fillablePdfBuilder.page-size-a5">A5 (148 × 210 mm)</option>
                             </select>
                         </div>
                         <div class="option-group">
-                            <label>Orientation</label>
+                            <label data-i18n="fillablePdfBuilder.orientation-label">Orientation</label>
                             <select id="page-orientation" class="options-select">
-                                <option value="portrait">Portrait</option>
-                                <option value="landscape">Landscape</option>
+                                <option value="portrait" data-i18n="fillablePdfBuilder.orientation-portrait">Portrait</option>
+                                <option value="landscape" data-i18n="fillablePdfBuilder.orientation-landscape">Landscape</option>
                             </select>
                         </div>
                         <div class="option-group">
-                            <label>Number of Pages</label>
+                            <label data-i18n="fillablePdfBuilder.page-count-label">Number of Pages</label>
                             <input type="number" id="page-count" class="options-input" value="1" min="1" max="50">
                         </div>
                         <div class="option-group">
-                            <label>Background Color</label>
+                            <label data-i18n="fillablePdfBuilder.bg-color-label">Background Color</label>
                             <div class="color-input-group">
                                 <input type="color" id="page-bg-color" class="color-input" value="#ffffff">
                                 <div id="page-bg-preview" class="color-preview" style="background-color: #ffffff;"></div>
@@ -94,8 +94,8 @@
                         </div>
                     </div>
                     <div class="setup-actions">
-                        <button class="top-btn secondary-btn" id="back-to-mode">← Back</button>
-                        <button class="top-btn" id="create-blank">Create Template →</button>
+                        <button class="top-btn secondary-btn" id="back-to-mode" data-i18n="common.back-btn">← Back</button>
+                        <button class="top-btn" id="create-blank" data-i18n="fillablePdfBuilder.create-blank-btn">Create Template →</button>
                     </div>
                 </div>
             </div>
@@ -103,9 +103,9 @@
             <!-- Existing PDF Setup -->
             <div id="existing-setup" class="existing-setup" style="display: none;">
                 <div class="setup-card">
-                    <h2 class="setup-title">Load Existing PDF</h2>
+                    <h2 class="setup-title" data-i18n="fillablePdfBuilder.load-pdf-title">Load Existing PDF</h2>
                     <div class="file-selection-area">
-                        <button id="select-pdf-btn" class="select-pdf-btn">
+                        <button id="select-pdf-btn" class="select-pdf-btn" data-i18n="fillablePdfBuilder.select-pdf-hint">
                             <span class="select-icon">📑</span>
                             <span>Click to Select a PDF File or Drop it Here</span>
                         </button>
@@ -118,8 +118,8 @@
                         </div>
                     </div>
                     <div class="setup-actions">
-                        <button class="top-btn secondary-btn" id="back-to-mode-2">← Back</button>
-                        <button class="top-btn" id="load-existing-pdf" disabled>Open in Builder →</button>
+                        <button class="top-btn secondary-btn" id="back-to-mode-2" data-i18n="common.back-btn">← Back</button>
+                        <button class="top-btn" id="load-existing-pdf" data-i18n="fillablePdfBuilder.load-existing-btn" disabled>Open in Builder →</button>
                     </div>
                 </div>
             </div>
@@ -129,53 +129,53 @@
 
                 <!-- Left: Field Palette -->
                 <div class="field-palette">
-                    <div class="palette-header">Form Fields</div>
+                    <div class="palette-header" data-i18n="fillablePdfBuilder.palette-header-fields">Form Fields</div>
                     <div class="palette-fields">
-                        <button class="palette-field-btn" data-type="text">
+                        <button class="palette-field-btn" data-type="text" title="Text Field">
                             <span class="field-icon">T</span>
-                            <span class="field-label">Text Field</span>
+                            <span class="field-label" data-i18n="fillablePdfBuilder.field-text">Text Field</span>
                         </button>
-                        <button class="palette-field-btn" data-type="textarea">
+                        <button class="palette-field-btn" data-type="textarea" title="Text Area">
                             <span class="field-icon">¶</span>
-                            <span class="field-label">Text Area</span>
+                            <span class="field-label" data-i18n="fillablePdfBuilder.field-textarea">Text Area</span>
                         </button>
-                        <button class="palette-field-btn" data-type="checkbox">
+                        <button class="palette-field-btn" data-type="checkbox" title="Checkbox">
                             <span class="field-icon">✓</span>
-                            <span class="field-label">Checkbox</span>
+                            <span class="field-label" data-i18n="fillablePdfBuilder.field-checkbox">Checkbox</span>
                         </button>
-                        <button class="palette-field-btn" data-type="radio">
+                        <button class="palette-field-btn" data-type="radio" title="Radio Button">
                             <span class="field-icon">◉</span>
-                            <span class="field-label">Radio Button</span>
+                            <span class="field-label" data-i18n="fillablePdfBuilder.field-radio">Radio Button</span>
                         </button>
-                        <button class="palette-field-btn" data-type="dropdown">
+                        <button class="palette-field-btn" data-type="dropdown" title="Dropdown">
                             <span class="field-icon">▼</span>
-                            <span class="field-label">Dropdown</span>
+                            <span class="field-label" data-i18n="fillablePdfBuilder.field-dropdown">Dropdown</span>
                         </button>
-                        <button class="palette-field-btn" data-type="date">
+                        <button class="palette-field-btn" data-type="date" title="Date (text)">
                             <span class="field-icon">📅</span>
-                            <span class="field-label">Date (text)</span>
+                            <span class="field-label" data-i18n="fillablePdfBuilder.field-date">Date (text)</span>
                         </button>
-                        <button class="palette-field-btn" data-type="signature">
+                        <button class="palette-field-btn" data-type="signature" title="Signature">
                             <span class="field-icon">✍</span>
-                            <span class="field-label">Signature</span>
+                            <span class="field-label" data-i18n="fillablePdfBuilder.field-signature">Signature</span>
                         </button>
-                        <button class="palette-field-btn label-field-btn" data-type="label">
+                        <button class="palette-field-btn label-field-btn" data-type="label" title="Label (static)">
                             <span class="field-icon">𝐀</span>
-                            <span class="field-label">Label (static)</span>
+                            <span class="field-label" data-i18n="fillablePdfBuilder.field-label">Label (static)</span>
                         </button>
                     </div>
 
                     <div class="palette-divider"></div>
 
-                    <div class="palette-header">Pages</div>
+                    <div class="palette-header" data-i18n="fillablePdfBuilder.palette-header-pages">Pages</div>
                     <div id="page-thumbnails" class="page-thumbnails"></div>
-                    <button class="add-page-btn" id="add-page-btn">+ Add Page</button>
+                    <button class="add-page-btn" id="add-page-btn" data-i18n="fillablePdfBuilder.add-page-btn">+ Add Page</button>
 
                     <div class="palette-divider"></div>
 
-                    <div class="palette-header">Template</div>
-                    <button class="palette-action-btn" id="save-template-btn">💾 Save Template</button>
-                    <button class="palette-action-btn" id="load-template-btn">📂 Load Template</button>
+                    <div class="palette-header" data-i18n="fillablePdfBuilder.palette-header-template">Template</div>
+                    <button class="palette-action-btn" id="save-template-btn" data-i18n="fillablePdfBuilder.save-template-btn">💾 Save Template</button>
+                    <button class="palette-action-btn" id="load-template-btn" data-i18n="fillablePdfBuilder.load-template-btn">📂 Load Template</button>
                     <input type="file" id="load-template-input" accept=".json" style="display: none;">
                 </div>
 
@@ -191,11 +191,11 @@
                             <button class="toolbar-btn" id="zoom-out-btn">−</button>
                             <span class="zoom-level" id="zoom-level">100%</span>
                             <button class="toolbar-btn" id="zoom-in-btn">+</button>
-                            <button class="toolbar-btn" id="zoom-fit-btn">Fit</button>
+                            <button class="toolbar-btn" id="zoom-fit-btn" data-i18n="fillablePdfBuilder.zoom-fit-btn">Fit</button>
                         </div>
                         <div class="toolbar-right">
-                            <button class="toolbar-btn danger-btn" id="delete-field-btn" disabled>🗑 Delete Field</button>
-                            <button class="toolbar-btn danger-btn" id="delete-page-btn">🗑 Delete Page</button>
+                            <button class="toolbar-btn danger-btn" id="delete-field-btn" data-i18n="fillablePdfBuilder.delete-field-btn" disabled>🗑 Delete Field</button>
+                            <button class="toolbar-btn danger-btn" id="delete-page-btn" data-i18n="fillablePdfBuilder.delete-page-btn">🗑 Delete Page</button>
                         </div>
                     </div>
 
@@ -213,12 +213,12 @@
 
                 <!-- Right: Properties Panel -->
                 <div class="properties-panel" id="properties-panel">
-                    <div class="props-header">Properties</div>
+                    <div class="props-header" data-i18n="fillablePdfBuilder.props-header">Properties</div>
 
                     <!-- No selection state -->
                     <div id="props-empty" class="props-empty">
                         <div class="props-empty-icon">↖</div>
-                        <p>Click a field on the canvas to edit its properties</p>
+                        <p data-i18n="fillablePdfBuilder.props-empty-text">Click a field on the canvas to edit its properties</p>
                     </div>
 
                     <!-- Field properties -->
@@ -227,93 +227,93 @@
 
                         <!-- Label content (only for label type) -->
                         <div class="option-group" id="prop-label-content-group" style="display: none;">
-                            <label>Text Content</label>
-                            <textarea id="prop-label-content" class="options-textarea" placeholder="e.g. First Name:"></textarea>
-                            <small class="help-text">This text will be baked into the PDF as static text.</small>
+                            <label data-i18n="fillablePdfBuilder.prop-label-content-label">Text Content</label>
+                            <textarea id="prop-label-content" class="options-textarea" placeholder="e.g. First Name:" data-i18n-placeholder="fillablePdfBuilder.prop-label-content-label"></textarea>
+                            <small class="help-text" data-i18n="fillablePdfBuilder.prop-label-content-help">This text will be baked into the PDF as static text.</small>
                         </div>
 
                         <!-- Label font weight -->
                         <div class="option-group" id="prop-label-weight-group" style="display: none;">
-                            <label>Font Weight</label>
+                            <label data-i18n="fillablePdfBuilder.prop-label-weight-label">Font Weight</label>
                             <select id="prop-label-weight" class="options-select">
-                                <option value="normal">Normal</option>
-                                <option value="bold">Bold</option>
+                                <option value="normal" data-i18n="fillablePdfBuilder.weight-normal">Normal</option>
+                                <option value="bold" data-i18n="fillablePdfBuilder.weight-bold">Bold</option>
                             </select>
                         </div>
 
                         <!-- Date field note -->
                         <div class="option-group" id="prop-date-note" style="display: none;">
-                            <div class="date-field-note">
+                            <div class="date-field-note" data-i18n="fillablePdfBuilder.prop-date-note">
                                 📅 Date fields export as plain text fields. Users type the date manually (e.g. DD/MM/YYYY).
                             </div>
                         </div>
 
                         <div class="option-group" id="prop-name-group">
-                            <label>Field Name <span class="required-star">*</span></label>
+                            <label data-i18n="fillablePdfBuilder.prop-name-label">Field Name <span class="required-star" data-i18n="fillablePdfBuilder.required-star">*</span></label>
                             <input type="text" id="prop-name" class="options-input" placeholder="e.g. first_name">
-                            <small class="help-text">Unique identifier for this field</small>
+                            <small class="help-text" data-i18n="fillablePdfBuilder.prop-name-help">Unique identifier for this field</small>
                         </div>
 
                         <div class="option-group" id="prop-default-group">
-                            <label>Default Value</label>
-                            <input type="text" id="prop-default" class="options-input" placeholder="Optional">
+                            <label data-i18n="fillablePdfBuilder.prop-default-label">Default Value</label>
+                            <input type="text" id="prop-default" class="options-input" data-i18n-placeholder="fillablePdfBuilder.prop-default-placeholder" placeholder="Optional">
                         </div>
 
                         <!-- Dropdown options -->
                         <div class="option-group" id="prop-options-group" style="display: none;">
-                            <label>Options <span class="help-text">(one per line)</span></label>
+                            <label data-i18n="fillablePdfBuilder.prop-options-label">Options <span class="help-text">(one per line)</span></label>
                             <textarea id="prop-options" class="options-textarea" placeholder="Option 1&#10;Option 2&#10;Option 3"></textarea>
                         </div>
 
                         <!-- Radio group name -->
                         <div class="option-group" id="prop-radio-group" style="display: none;">
-                            <label>Radio Group Name</label>
+                            <label data-i18n="fillablePdfBuilder.prop-radio-group-label">Radio Group Name</label>
                             <input type="text" id="prop-radio-name" class="options-input" placeholder="e.g. gender">
-                            <small class="help-text">Radio buttons with the same group name are mutually exclusive</small>
+                            <small class="help-text" data-i18n="fillablePdfBuilder.prop-radio-group-help">Radio buttons with the same group name are mutually exclusive</small>
                         </div>
 
                         <div class="option-group">
-                            <label>Font Size</label>
+                            <label data-i18n="fillablePdfBuilder.prop-fontsize-label">Font Size</label>
                             <input type="number" id="prop-fontsize" class="options-input" value="12" min="6" max="72">
                         </div>
 
                         <div class="option-group">
                             <div class="checkbox-group">
                                 <input type="checkbox" id="prop-required">
-                                <label for="prop-required">Required field</label>
+                                <label for="prop-required" data-i18n="fillablePdfBuilder.prop-required-label">Required field</label>
                             </div>
                         </div>
 
                         <div class="option-group">
                             <div class="checkbox-group">
                                 <input type="checkbox" id="prop-readonly">
-                                <label for="prop-readonly">Read only</label>
+                                <label for="prop-readonly" data-i18n="fillablePdfBuilder.prop-readonly-label">Read only</label>
                             </div>
                         </div>
 
                         <div class="option-group">
-                            <label>Position & Size</label>
+                            <label data-i18n="fillablePdfBuilder.prop-position-label">Position & Size</label>
                             <div class="xywh-grid">
                                 <div class="xywh-field">
-                                    <label class="sub-label">X</label>
+                                    <label class="sub-label" data-i18n="fillablePdfBuilder.prop-x-label">X</label>
                                     <input type="number" id="prop-x" class="options-input">
                                 </div>
                                 <div class="xywh-field">
-                                    <label class="sub-label">Y</label>
+                                    <label class="sub-label" data-i18n="fillablePdfBuilder.prop-y-label">Y</label>
                                     <input type="number" id="prop-y" class="options-input">
                                 </div>
                                 <div class="xywh-field">
-                                    <label class="sub-label">W</label>
+                                    <label class="sub-label" data-i18n="fillablePdfBuilder.prop-w-label">W</label>
                                     <input type="number" id="prop-w" class="options-input" min="20">
                                 </div>
                                 <div class="xywh-field">
-                                    <label class="sub-label">H</label>
+                                    <label class="sub-label" data-i18n="fillablePdfBuilder.prop-h-label">H</label>
                                     <input type="number" id="prop-h" class="options-input" min="10">
                                 </div>
                             </div>
                         </div>
 
-                        <button class="action-pill full-width" id="duplicate-field-btn">⧉ Duplicate Field</button>
+                        <button class="action-pill full-width" id="duplicate-field-btn" data-i18n="fillablePdfBuilder.duplicate-field-btn">⧉ Duplicate Field</button>
                     </div>
                 </div>
 
@@ -325,8 +325,8 @@
                     <span class="field-count-label" id="field-count-label">0 fields on this document</span>
                 </div>
                 <div class="export-right">
-                    <button class="top-btn secondary-btn" id="export-flattened-btn">📄 Save as Flattened PDF</button>
-                    <button class="top-btn" id="export-fillable-btn">📋 Save as Fillable PDF</button>
+                    <button class="top-btn secondary-btn" id="export-flattened-btn" data-i18n="fillablePdfBuilder.save-flattened-btn">📄 Save as Flattened PDF</button>
+                    <button class="top-btn" id="export-fillable-btn" data-i18n="fillablePdfBuilder.save-fillable-btn">📋 Save as Fillable PDF</button>
                 </div>
             </div>
 

@@ -22,10 +22,12 @@ import customAlert from '../../utils/customAlert.js';
 import loadingUI from '../../utils/loading.js';
 import { initializeGlobalDragDrop } from '../../utils/globalDragDrop.js';
 import { ThemeManager } from '../../utils/themeManager.js';
+import i18n from '../../utils/i18n.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    await i18n.init();
     ThemeManager.init();
 
     // ─── Constants ────────────────────────────────────────────────────────
@@ -49,9 +51,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const FIELD_LABELS = {
-        text: 'Text Field', textarea: 'Text Area', checkbox: 'Checkbox',
-        radio: 'Radio', dropdown: 'Dropdown', date: 'Date (text)',
-        signature: 'Signature', label: 'Label'
+        text: () => i18n.t('fillablePdfBuilderJS.fieldText'),
+        textarea: () => i18n.t('fillablePdfBuilderJS.fieldTextarea'),
+        checkbox: () => i18n.t('fillablePdfBuilderJS.fieldCheckbox'),
+        radio: () => i18n.t('fillablePdfBuilderJS.fieldRadio'),
+        dropdown: () => i18n.t('fillablePdfBuilderJS.fieldDropdown'),
+        date: () => i18n.t('fillablePdfBuilderJS.fieldDate'),
+        signature: () => i18n.t('fillablePdfBuilderJS.fieldSignature'),
+        label: () => i18n.t('fillablePdfBuilderJS.fieldLabel')
     };
 
     // ─── State ────────────────────────────────────────────────────────────
@@ -168,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ─── Existing PDF Setup ───────────────────────────────────────────────
     selectPdfBtn.addEventListener('click', async () => {
-        loadingUI.show('Selecting PDF...');
+        loadingUI.show(i18n.t('fillablePdfBuilderJS.selectingPdf'));
         try {
             const files = await window.electronAPI.selectPdfs();
             if (files && files.length > 0) {
@@ -200,13 +207,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             selectedPdfPath = filePath;
         } catch (err) {
             console.log("Failed to read PDF.", err);
-            await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to read PDF.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('fillablePdfBuilderJS.failedToReadPdf'), [i18n.t('common.ok')]);
         }
     }
 
     loadExistingBtn.addEventListener('click', async () => {
         if (!selectedPdfPath) return;
-        loadingUI.show('Loading PDF...');
+        loadingUI.show(i18n.t('fillablePdfBuilderJS.loadingPdf'));
         try {
             const loadingTask = pdfjsLib.getDocument(`file://${selectedPdfPath}`);
             existingPdfDoc = await loadingTask.promise;
@@ -225,7 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             enterBuilder();
         } catch (err) {
             console.log("Failed to load PDF.", err);
-            await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to load PDF.' + err.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('fillablePdfBuilderJS.failedToLoadPdf') + err.message, [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
         }
@@ -264,7 +271,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('add-page-btn').addEventListener('click', () => {
         if (mode === 'existing') {
-            customAlert.alert('LocalPDF Studio - NOTICE', 'Cannot add pages when editing an existing PDF.', ['OK']);
+            customAlert.alert(i18n.t('alerts.notice'), i18n.t('fillablePdfBuilderJS.cannotAddPages'), [i18n.t('common.ok')]);
             return;
         }
         const ref = pages[0] || { width: PAGE_SIZES.A4.width, height: PAGE_SIZES.A4.height };
@@ -277,10 +284,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('delete-page-btn').addEventListener('click', async () => {
         if (pages.length <= 1) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'You must have at least one page.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('fillablePdfBuilderJS.mustHaveOnePage'), [i18n.t('common.ok')]);
             return;
         }
-        const result = await customAlert.alert('LocalPDF Studio - WARNING', `Delete page ${currentPageIndex + 1}? All fields on this page will be removed.`, ['Cancel', 'Delete']);
+        const result = await customAlert.alert(i18n.t('alerts.warning'), i18n.t('fillablePdfBuilderJS.deletePageConfirm').replace('{n}', currentPageIndex + 1), [i18n.t('fillablePdfBuilderJS.cancelBtn'), i18n.t('fillablePdfBuilderJS.deleteBtn')]);
         if (result !== 1) return;
 
         pages.splice(currentPageIndex, 1);
@@ -402,7 +409,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Type tag
         const typeTag = document.createElement('div');
         typeTag.className = 'field-type-tag';
-        typeTag.textContent = FIELD_LABELS[field.type] || field.type;
+        typeTag.textContent = (FIELD_LABELS[field.type] ? FIELD_LABELS[field.type]() : field.type);
         el.appendChild(typeTag);
 
         // Name tag (not shown for labels — content is shown instead)
@@ -504,7 +511,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ─── Delete Field ─────────────────────────────────────────────────────
     document.getElementById('delete-field-btn').addEventListener('click', async () => {
         if (!selectedFieldId) return;
-        const result = await customAlert.alert('LocalPDF Studio - WARNING', 'Delete this field?', ['Cancel', 'Delete']);
+        const result = await customAlert.alert(i18n.t('alerts.warning'), i18n.t('fillablePdfBuilderJS.deleteFieldConfirm'), [i18n.t('fillablePdfBuilderJS.cancelBtn'), i18n.t('fillablePdfBuilderJS.deleteBtn')]);
         if (result !== 1) return;
         removeField(selectedFieldId);
     });
@@ -589,7 +596,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showFieldProps(field) {
         propsEmpty.style.display = 'none';
         propsForm.style.display = 'flex';
-        propsFieldTypeLabel.textContent = FIELD_LABELS[field.type] || field.type;
+        propsFieldTypeLabel.textContent = (FIELD_LABELS[field.type] ? FIELD_LABELS[field.type]() : field.type);
 
         propName.value        = field.name || '';
         propDefault.value     = field.defaultValue || '';
@@ -718,7 +725,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ─── Field Count ──────────────────────────────────────────────────────
     function updateFieldCount() {
         const total = pages.reduce((sum, p) => sum + p.fields.length, 0);
-        fieldCountLabel.textContent = `${total} field${total !== 1 ? 's' : ''} in this document`;
+        fieldCountLabel.textContent = i18n.t('fillablePdfBuilder.field-count-label').replace('{n}', total);
     }
 
     // ─── Utility ──────────────────────────────────────────────────────────
@@ -747,7 +754,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const bytes = encoder.encode(json);
         const savedPath = await window.electronAPI.saveTextFile('form_template.json', json);
         if (savedPath) {
-            await customAlert.alert('LocalPDF Studio - SUCCESS', 'Template saved to:\n' + savedPath, ['OK']);
+            await customAlert.alert(i18n.t('alerts.success'), i18n.t('fillablePdfBuilderJS.templateSavePath').replace('{path}', savedPath), [i18n.t('common.ok')]);
         }
     });
 
@@ -781,10 +788,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderCurrentPage();
             updateFieldCount();
             updatePageNav();
-            await customAlert.alert('LocalPDF Studio - SUCCESS', 'Template loaded successfully.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.success'), i18n.t('fillablePdfBuilderJS.templateLoadSuccess'), [i18n.t('common.ok')]);
         } catch (err) {
             console.log("Failed to load template.", err);
-            await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to load template: ' + err.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('fillablePdfBuilderJS.templateLoadError').replace('{error}', err.message), [i18n.t('common.ok')]);
         }
         e.target.value = '';
     });
@@ -820,11 +827,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function exportPdf(fillable) {
         const total = pages.reduce((s, p) => s + p.fields.length, 0);
         if (total === 0) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please add at least one form field before exporting.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('fillablePdfBuilderJS.noFieldsBeforeExport'), [i18n.t('common.ok')]);
             return;
         }
 
-        loadingUI.show(fillable ? 'Building fillable PDF...' : 'Building flattened PDF...');
+        loadingUI.show(fillable ? i18n.t('fillablePdfBuilderJS.buildingFillablePdf') : i18n.t('fillablePdfBuilderJS.buildingFlattenPdf'));
         try {
             const pdfBytes = await buildPdf(fillable);
             const suffix   = fillable ? '_fillable' : '_flattened';
@@ -836,16 +843,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const savedPath = await window.electronAPI.savePdfFile(fileName, pdfBytes.buffer);
             if (savedPath) {
                 await customAlert.alert(
-                    'LocalPDF Studio - SUCCESS',
+                    i18n.t('alerts.success'),
                     `${fillable ? 'Fillable' : 'Flattened'} PDF saved to:\n${savedPath}`,
-                    ['OK']
+                    [i18n.t('common.ok')]
                 );
             } else {
-                await customAlert.alert('LocalPDF Studio - WARNING', 'Save was cancelled or failed.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('fillablePdfBuilderJS.exportSaveCancel'), [i18n.t('common.ok')]);
             }
         } catch (err) {
             console.log('Export error:', err);
-            await customAlert.alert('LocalPDF Studio - ERROR', 'Export failed: ' + err.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('fillablePdfBuilderJS.exportError').replace('{error}', err.message), [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
         }
@@ -858,7 +865,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (existingSetup.style.display === 'none') return;
 
             if (pdfFiles.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop one PDF file at a time.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('fillablePdfBuilderJS.dropOnlyOnePdf'), [i18n.t('common.ok')]);
                 return;
             }
 
@@ -871,11 +878,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 droppedFilePath = result.filePath;
                 await handlePdfSelected(result.filePath);
             } else {
-                await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to process dropped file: ' + result.error, ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('fillablePdfBuilderJS.failedToProcessFile').replace('{error}', result.error), [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a valid PDF file.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('fillablePdfBuilderJS.invalidPdfFile'), [i18n.t('common.ok')]);
         }
     });
 
