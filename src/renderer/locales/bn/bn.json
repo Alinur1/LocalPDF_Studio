@@ -927,7 +927,6 @@
     "closeAll": "সব বন্ধ করুন"
   },
   "fillablePdfBuilder": {
-    "back-btn": "← ফিরে যান",
     "page-title": "পূরণযোগ্য PDF নির্মাতা",
     "subtitle": "আপনার ফর্ম তৈরি করার পদ্ধতি নির্বাচন করুন",
     "mode-blank-title": "খালি টেম্পলেট",
@@ -997,21 +996,21 @@
     "save-fillable-btn": "📋 পূরণযোগ্য PDF হিসাবে সংরক্ষণ করুন"
   },
   "fillablePdfBuilderJS": {
-    "failedToReadPdf": "PDF পড়তে ব্যর্থ।",
-    "failedToLoadPdf": "PDF লোড করতে ব্যর্থ।",
-    "cannotAddPages": "বিদ্যমান PDF সম্পাদনে পৃষ্ঠা যোগ করতে পারবেন না।",
+    "failedToReadPdf": "PDF পড়তে ব্যর্থ হয়েছে।",
+    "failedToLoadPdf": "PDF লোড করতে ব্যর্থ হয়েছে।",
+    "cannotAddPages": "বিদ্যমান PDF সম্পাদনা করার সময় পৃষ্ঠা যোগ করা যায় না।",
     "mustHaveOnePage": "অন্তত একটি পৃষ্ঠা থাকতে হবে।",
-    "deletePageConfirm": "পৃষ্ঠা {n} মুছুন? এই পৃষ্ঠার সমস্ত ফিল্ড অপসারণ করা হবে।",
-    "deleteFieldConfirm": "এই ফিল্ড মুছুন?",
-    "templateSavePath": "টেম্পলেট এতে সংরক্ষণ করা হয়েছে:\\n{path}",
-    "templateLoadSuccess": "টেম্পলেট সফলভাবে লোড করা হয়েছে।",
-    "templateLoadError": "টেম্পলেট লোড করতে ব্যর্থ: {error}",
-    "noFieldsBeforeExport": "এক্সপোর্ট করার আগে, কমপক্ষে একটি ফর্ম ফিল্ড যোগ করুন।",
-    "exportSaveCancel": "সংরক্ষণ বাতিল করা হয়েছে বা ব্যর্থ হয়েছে।",
-    "exportError": "এক্সপোর্ট ব্যর্থ: {error}",
-    "dropOnlyOnePdf": "একবারে শুধুমাত্র একটি PDF ফাইল ড্রপ করুন।",
-    "failedToProcessFile": "ড্রপ করা ফাইল প্রক্রিয়া করতে ব্যর্থ: {error}",
-    "invalidPdfFile": "অনুগ্রহ করে একটি বৈধ PDF ফাইল ড্রপ করুন।",
+    "deletePageConfirm": "পৃষ্ঠা {n} মুছবেন? এই পৃষ্ঠার সব ফিল্ড মুছে যাবে।",
+    "deleteFieldConfirm": "এই ফিল্ডটি মুছবেন?",
+    "templateSavePath": "টেমপ্লেট সফলভাবে সংরক্ষিত হয়েছে।",
+    "templateLoadSuccess": "টেমপ্লেট সফলভাবে লোড হয়েছে।",
+    "templateLoadError": "টেমপ্লেট লোড করতে ব্যর্থ হয়েছে।",
+    "noFieldsBeforeExport": "এক্সপোর্ট করার আগে অন্তত একটি ফর্ম ফিল্ড যোগ করুন।",
+    "exportSaveCancel": "সংরক্ষণ বাতিল বা ব্যর্থ হয়েছে।",
+    "exportError": "এক্সপোর্ট ব্যর্থ হয়েছে।",
+    "dropOnlyOnePdf": "একবারে একটি PDF ফাইল ড্রপ করুন।",
+    "failedToProcessFile": "ড্রপ করা ফাইল প্রসেস করতে ব্যর্থ হয়েছে।",
+    "invalidPdfFile": "একটি বৈধ PDF ফাইল ড্রপ করুন।",
     "fieldText": "টেক্সট ফিল্ড",
     "fieldTextarea": "টেক্সট এরিয়া",
     "fieldCheckbox": "চেকবক্স",
@@ -1025,6 +1024,10 @@
     "selectingPdf": "PDF নির্বাচন করা হচ্ছে...",
     "loadingPdf": "PDF লোড করা হচ্ছে...",
     "cancelBtn": "বাতিল করুন",
-    "deleteBtn": "মুছুন"
+    "deleteBtn": "মুছুন",
+    "savingTemplate": "টেমপ্লেট সংরক্ষণ করা হচ্ছে...",
+    "templateSaveCancelled": "টেমপ্লেট সংরক্ষণ বাতিল করা হয়েছে",
+    "errorSavingTemplate": "টেমপ্লেট সংরক্ষণ করার সময় একটি ত্রুটি ঘটেছে",
+    "loadingTemplate": "টেমপ্লেট লোড করা হচ্ছে..."
   }
 }

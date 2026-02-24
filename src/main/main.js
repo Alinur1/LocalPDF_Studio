@@ -660,6 +660,42 @@ ipcMain.handle('save-text-file', async (event, { filename, text }) => {
     }
 });
 
+ipcMain.handle('save-json-file', async (event, { filename, json }) => {
+    const { filePath, canceled } = await dialog.showSaveDialog({
+        defaultPath: filename,
+        filters: [{ name: 'JSON Files', extensions: ['json'] }]
+    });
+
+    if (canceled || !filePath) return null;
+
+    try {
+        fs.writeFileSync(filePath, json, 'utf-8');
+        return filePath;
+    } catch (err) {
+        console.error('Failed to save JSON file:', err);
+        return null;
+    }
+});
+
+ipcMain.handle('select-json-file', async () => {
+    const { filePaths, canceled } = await dialog.showOpenDialog({
+        filters: [{ name: 'JSON Files', extensions: ['json'] }],
+        properties: ['openFile']
+    });
+
+    if (canceled || filePaths.length === 0) return null;
+    return filePaths[0];
+});
+
+ipcMain.handle('read-json-file', async (event, filePath) => {
+    try {
+        return fs.readFileSync(filePath, 'utf-8');
+    } catch (err) {
+        console.error('Failed to read JSON file:', err);
+        return null;
+    }
+});
+
 ipcMain.handle('save-pdf-with-metadata', async (event, { filePath, metadata }) => {
     try {
         const ext = path.extname(filePath);

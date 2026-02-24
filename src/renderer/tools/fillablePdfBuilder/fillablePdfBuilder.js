@@ -739,35 +739,52 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ─── Template Save/Load ───────────────────────────────────────────────
     document.getElementById('save-template-btn').addEventListener('click', async () => {
-        const template = {
-            version: 1,
-            mode,
-            pages: pages.map(p => ({
-                width: p.width,
-                height: p.height,
-                pdfPageIndex: p.pdfPageIndex,
-                fields: p.fields
-            }))
-        };
-        const json = JSON.stringify(template, null, 2);
-        const encoder = new TextEncoder();
-        const bytes = encoder.encode(json);
-        const savedPath = await window.electronAPI.saveTextFile('form_template.json', json);
-        if (savedPath) {
-            await customAlert.alert(i18n.t('alerts.success'), i18n.t('fillablePdfBuilderJS.templateSavePath').replace('{path}', savedPath), [i18n.t('common.ok')]);
+        loadingUI.show(i18n.t('fillablePdfBuilderJS.savingTemplate'));
+        try
+        {
+            const template = {
+                version: 1,
+                mode,
+                pages: pages.map(p => ({
+                    width: p.width,
+                    height: p.height,
+                    pdfPageIndex: p.pdfPageIndex,
+                    fields: p.fields
+                }))
+            };
+            const json = JSON.stringify(template, null, 2);
+            const encoder = new TextEncoder();
+            const bytes = encoder.encode(json);
+            const savedPath = await window.electronAPI.saveJsonFile('form_template.json', json);
+            if (savedPath) {
+                await customAlert.alert(i18n.t('alerts.success'), i18n.t('fillablePdfBuilderJS.templateSavePath'), [i18n.t('common.ok')]);
+            }
+            else{
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('fillablePdfBuilderJS.templateSaveCancelled'), [i18n.t('common.ok')]);
+            }
+        }
+        catch (err)
+        {
+            console.log("Unable to save fillable PDF's template.", err);
+            customAlert.alert(i18n.t('alerts.error'), i18n.t('fillablePdfBuilderJS.errorSavingTemplate'), [i18n.t('common.ok')]);
+        }
+        finally
+        {
+            loadingUI.hide();
         }
     });
 
-    document.getElementById('load-template-btn').addEventListener('click', () => {
-        document.getElementById('load-template-input').click();
-    });
-
-    document.getElementById('load-template-input').addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+    document.getElementById('load-template-btn').addEventListener('click', async () => {
+        loadingUI.show(i18n.t('fillablePdfBuilderJS.loadingTemplate'));
         try {
-            const text = await file.text();
-            const template = JSON.parse(text);
+            const filePath = await window.electronAPI.selectJsonFile();
+            if (!filePath) {
+                loadingUI.hide();
+                return;
+            }
+            const result = await window.electronAPI.readJsonFile(filePath);
+            if (!result) throw new Error('Failed to read template file');
+            const template = JSON.parse(result);
             if (!template.pages) throw new Error('Invalid template file');
             pages = template.pages.map(p => ({
                 width: p.width,
@@ -790,10 +807,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             updatePageNav();
             await customAlert.alert(i18n.t('alerts.success'), i18n.t('fillablePdfBuilderJS.templateLoadSuccess'), [i18n.t('common.ok')]);
         } catch (err) {
-            console.log("Failed to load template.", err);
-            await customAlert.alert(i18n.t('alerts.error'), i18n.t('fillablePdfBuilderJS.templateLoadError').replace('{error}', err.message), [i18n.t('common.ok')]);
+            console.log('Failed to load template.', err);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('fillablePdfBuilderJS.templateLoadError'), [i18n.t('common.ok')]);
         }
-        e.target.value = '';
+        finally
+        {
+            loadingUI.hide();
+        }
     });
 
     // ─── Export: Build PDF via IPC ────────────────────────────────────────

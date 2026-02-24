@@ -1002,14 +1002,14 @@
     "mustHaveOnePage": "You must have at least one page.",
     "deletePageConfirm": "Delete page {n}? All fields on this page will be removed.",
     "deleteFieldConfirm": "Delete this field?",
-    "templateSavePath": "Template saved to:\n{path}",
+    "templateSavePath": "Template saved successfully.",
     "templateLoadSuccess": "Template loaded successfully.",
-    "templateLoadError": "Failed to load template: {error}",
+    "templateLoadError": "Failed to load template.",
     "noFieldsBeforeExport": "Please add at least one form field before exporting.",
     "exportSaveCancel": "Save was cancelled or failed.",
-    "exportError": "Export failed: {error}",
+    "exportError": "Export failed.",
     "dropOnlyOnePdf": "Please drop one PDF file at a time.",
-    "failedToProcessFile": "Failed to process dropped file: {error}",
+    "failedToProcessFile": "Failed to process dropped file.",
     "invalidPdfFile": "Please drop a valid PDF file.",
     "fieldText": "Text Field",
     "fieldTextarea": "Text Area",
@@ -1024,6 +1024,10 @@
     "selectingPdf": "Selecting PDF...",
     "loadingPdf": "Loading PDF...",
     "cancelBtn": "Cancel",
-    "deleteBtn": "Delete"
+    "deleteBtn": "Delete",
+    "savingTemplate": "Saving template...",
+    "templateSaveCancelled": "Template save cancelled",
+    "errorSavingTemplate": "An error occurred while saving template",
+    "loadingTemplate": "Loading template..."
   }
 }
