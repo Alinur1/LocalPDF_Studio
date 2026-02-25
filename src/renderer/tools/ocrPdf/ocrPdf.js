@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 path: filePath,
                 name: fileName,
                 size: fileSize,
-                isImage: /\.(jpg|jpeg|png|bmp|tiff)$/i.test(filePath)
+                isImage: /\.(jpg|jpeg|png|bmp)$/i.test(filePath)
             });
         }
         loadingUI.hide();
@@ -444,7 +444,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function handleFileSelected(file) {
         clearAll(true);
         selectedFile = file;
-        isImageFile = /\.(jpg|jpeg|png|bmp|tiff)$/i.test(file.path);
+        isImageFile = /\.(jpg|jpeg|png|bmp)$/i.test(file.path);
         pdfNameEl.textContent = file.name;
         pdfSizeEl.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
         selectPdfBtn.style.display = 'none';
@@ -463,7 +463,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             manualPagesInput.value = '';
             pageRangesInput.value = '';
 
-            const isImage = /\.(jpg|jpeg|png|bmp|tiff)$/i.test(filePath);
+            const isImage = /\.(jpg|jpeg|png|bmp)$/i.test(filePath);
 
             if (isImage) {
                 previewTitle.textContent = i18n.t('ocrPdfJS.imagePreview');
@@ -726,7 +726,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     path: result.filePath,
                     name: file.name,
                     size: fileSize,
-                    isImage: /\.(jpg|jpeg|png|bmp|tiff)$/i.test(file.name)
+                    isImage: /\.(jpg|jpeg|png|bmp)$/i.test(file.name)
                 });
             } else {
                 await customAlert.alert(i18n.t('alerts.error'), i18n.t('ocrPdfJS.dropPdfOrImage'), [i18n.t('common.ok')]);

@@ -485,10 +485,10 @@
   },
   "imageToPdfJS": {
     "selectingImages": "ছবি নির্বাচন করা হচ্ছে...",
-    "dropImageFiles": "অনুগ্রহ করে ছবি ফাইল ড্রপ করুন (JPG, PNG, BMP, TIFF)।",
+    "dropImageFiles": "অনুগ্রহ করে ছবি ফাইল ড্রপ করুন (JPG, PNG, BMP)।",
     "dropValidImages": "অনুগ্রহ করে বৈধ ছবি ফাইল ড্রপ করুন।",
     "loadingPreviews": "পূর্বরূপ লোড হচ্ছে...",
-    "selectImages": "অনুগ্রহ করে ছবি ফাইল নির্বাচন করুন (JPG, PNG, BMP, TIFF)।",
+    "selectImages": "অনুগ্রহ করে ছবি ফাইল নির্বাচন করুন (JPG, PNG, BMP)।",
     "imageSelected": "ছবি নির্বাচিত",
     "imagesSelected": "ছবি নির্বাচিত",
     "convertingPdf": "PDF তে রূপান্তর করা হচ্ছে...",
@@ -832,7 +832,7 @@
   "imageEditor": {
     "page-title": "ইমেজ এডিটর",
     "select-hint": "একটি ইমেজ নির্বাচন করতে ক্লিক করুন বা এখানে ড্রাগ & ড্রপ করুন",
-    "supported-formats": "JPG, PNG, BMP, TIFF, WebP সমর্থন করে",
+    "supported-formats": "JPG, PNG, BMP, WebP সমর্থন করে",
     "canvas-label": "প্রিভিউ",
     "reset-tooltip": "সমস্ত সম্পাদনা রিসেট করুন",
     "reset-btn": "↺ রিসেট",

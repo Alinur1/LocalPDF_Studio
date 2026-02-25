@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const imageFiles = files.filter(file => {
                 const fileName = file.name || '';
-                return /\.(jpg|jpeg|png|bmp|tiff)$/i.test(fileName);
+                return /\.(jpg|jpeg|png|bmp)$/i.test(fileName);
             });
 
             if (imageFiles.length === 0) {
@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             // Filter only image files
             const imageFiles = files.filter(path => {
-                return /\.(jpg|jpeg|png|bmp|tiff)$/i.test(path);
+                return /\.(jpg|jpeg|png|bmp)$/i.test(path);
             });
 
             if (imageFiles.length === 0) {

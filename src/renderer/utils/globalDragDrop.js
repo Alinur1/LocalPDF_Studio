@@ -22,7 +22,7 @@
 export function initializeGlobalDragDropForImages(options = {}) {
     const { onFilesDropped, onInvalidFiles } = options;
 
-    const SUPPORTED_EXTENSIONS = /\.(jpg|jpeg|png|bmp|tiff)$/i;
+    const SUPPORTED_EXTENSIONS = /\.(jpg|jpeg|png|bmp)$/i;
 
     const overlay = document.createElement('div');
     overlay.id = 'global-drag-overlay-images';
@@ -394,7 +394,7 @@ export function initializeGlobalDragDropForOCR(options = {}) {
             const supportedFiles = fileArray.filter(file => {
                 const fileName = file.name || '';
                 const isPdf = fileName.toLowerCase().endsWith('.pdf');
-                const isImage = /\.(jpg|jpeg|png|bmp|tiff)$/i.test(fileName);
+                const isImage = /\.(jpg|jpeg|png|bmp)$/i.test(fileName);
                 return isPdf || isImage;
             });
 

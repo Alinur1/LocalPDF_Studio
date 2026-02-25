@@ -485,10 +485,10 @@
   },
   "imageToPdfJS": {
     "selectingImages": "画像を選択中...",
-    "dropImageFiles": "画像ファイルをドラッグ&ドロップしてください (JPG, PNG, BMP, TIFF)。",
+    "dropImageFiles": "画像ファイルをドラッグ&ドロップしてください (JPG, PNG, BMP)。",
     "dropValidImages": "有効な画像ファイルをドラッグ&ドロップしてください。",
     "loadingPreviews": "プレビューを読み込み中...",
-    "selectImages": "画像ファイルを選択してください (JPG, PNG, BMP, TIFF)。",
+    "selectImages": "画像ファイルを選択してください (JPG, PNG, BMP)。",
     "imageSelected": "個の画像を選択",
     "imagesSelected": "個の画像を選択",
     "convertingPdf": "PDF に変換中...",
@@ -832,7 +832,7 @@
   "imageEditor": {
     "page-title": "画像エディター",
     "select-hint": "画像を選択するか、ここにドラッグしてドロップしてください",
-    "supported-formats": "JPG、PNG、BMP、TIFF、WebP をサポート",
+    "supported-formats": "JPG、PNG、BMP、WebP をサポート",
     "canvas-label": "プレビュー",
     "reset-tooltip": "すべての編集をリセット",
     "reset-btn": "↺ リセット",

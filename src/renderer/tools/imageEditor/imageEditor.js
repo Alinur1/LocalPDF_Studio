@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const files = await window.electronAPI.selectPdfsAndImages();
             if (files && files.length > 0) {
-                const imagePaths = files.filter(f => /\.(jpg|jpeg|png|bmp|webp|tiff)$/i.test(f));
+                const imagePaths = files.filter(f => /\.(jpg|jpeg|png|bmp|webp)$/i.test(f));
                 if (imagePaths.length === 0) {
                     await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.invalid-files'), [i18n.t('imageEditorJS.btn-ok')]);
                     return;

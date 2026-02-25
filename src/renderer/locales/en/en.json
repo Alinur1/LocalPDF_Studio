@@ -485,10 +485,10 @@
   },
   "imageToPdfJS": {
     "selectingImages": "Selecting images...",
-    "dropImageFiles": "Please drop image files (JPG, PNG, BMP, TIFF).",
+    "dropImageFiles": "Please drop image files (JPG, PNG, BMP).",
     "dropValidImages": "Please drop valid image files.",
     "loadingPreviews": "Loading previews...",
-    "selectImages": "Please select image files (JPG, PNG, BMP, TIFF).",
+    "selectImages": "Please select image files (JPG, PNG, BMP).",
     "imageSelected": "image selected",
     "imagesSelected": "images selected",
     "convertingPdf": "Converting to PDF...",
@@ -832,7 +832,7 @@
   "imageEditor": {
     "page-title": "Image Editor",
     "select-hint": "Click to Select an Image or Drop it Here",
-    "supported-formats": "Supports JPG, PNG, BMP, TIFF, WebP",
+    "supported-formats": "Supports JPG, PNG, BMP, WebP",
     "canvas-label": "Preview",
     "reset-tooltip": "Reset all edits",
     "reset-btn": "↺ Reset",

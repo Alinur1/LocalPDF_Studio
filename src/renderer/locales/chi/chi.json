@@ -485,10 +485,10 @@
   },
   "imageToPdfJS": {
     "selectingImages": "正在选择图片...",
-    "dropImageFiles": "请拖放图片文件 (JPG, PNG, BMP, TIFF)。",
+    "dropImageFiles": "请拖放图片文件 (JPG, PNG, BMP)。",
     "dropValidImages": "请拖放有效的图片文件。",
     "loadingPreviews": "正在加载预览...",
-    "selectImages": "请选择图片文件 (JPG, PNG, BMP, TIFF)。",
+    "selectImages": "请选择图片文件 (JPG, PNG, BMP)。",
     "imageSelected": "张图片已选择",
     "imagesSelected": "张图片已选择",
     "convertingPdf": "正在转换为 PDF...",
@@ -832,7 +832,7 @@
   "imageEditor": {
     "page-title": "图像编辑器",
     "select-hint": "点击以选择图像或将其拖放到此处",
-    "supported-formats": "支持 JPG、PNG、BMP、TIFF、WebP",
+    "supported-formats": "支持 JPG、PNG、BMP、WebP",
     "canvas-label": "预览",
     "reset-tooltip": "重置所有编辑",
     "reset-btn": "↺ 重置",
