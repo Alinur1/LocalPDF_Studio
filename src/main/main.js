@@ -535,9 +535,9 @@ ipcMain.handle('select-pdf-and-image-files', async () => {
     const result = await dialog.showOpenDialog({
         properties: ['openFile', 'multiSelections'],
         filters: [
-            { name: 'PDF and Image Files', extensions: ['pdf', 'jpg', 'jpeg', 'png', 'bmp', 'tiff'] },
+            { name: 'PDF and Image Files', extensions: ['pdf', 'jpg', 'jpeg', 'png', 'bmp'] },
             { name: 'PDF Files', extensions: ['pdf'] },
-            { name: 'Image Files', extensions: ['jpg', 'jpeg', 'png', 'bmp', 'tiff'] }
+            { name: 'Image Files', extensions: ['jpg', 'jpeg', 'png', 'bmp'] }
         ]
     });
     return result.canceled ? [] : result.filePaths;
