@@ -180,6 +180,11 @@ window.addEventListener('DOMContentLoaded', async() => {
                 window.open(event.data.url, '_blank');
             }
         }
+        if (event.data?.type === 'close-active-tab') {
+            if (tabManager.activeTabId) {
+                tabManager.closeTab(tabManager.activeTabId);
+            }
+        }
     });
 
     const tabBar = document.getElementById('tab-bar');
@@ -318,6 +323,24 @@ window.addEventListener('DOMContentLoaded', async() => {
             modal.classList.add('hidden');
         }
     });
+
+    document.addEventListener('keydown', (e) => {
+        const isMac = navigator.platform.toUpperCase().includes('MAC');
+        const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+        if (ctrlOrCmd && (e.key.toLowerCase() === 's' || e.key.toLowerCase() === 'p')) {
+            e.preventDefault();
+
+            if (tabManager.activeTabId && window.pdfIframes) {
+                const iframe = window.pdfIframes.get(tabManager.activeTabId);
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({
+                        type: e.key.toLowerCase() === 's' ? 'pdf-save' : 'pdf-print'
+                    }, '*');
+                }
+            }
+        }
+    }, true);
 
     cancelBtn.addEventListener('click', () => {
         restoreOriginalSettings();

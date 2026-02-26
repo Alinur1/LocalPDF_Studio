@@ -19375,6 +19375,31 @@ if (document.readyState === "interactive" || document.readyState === "complete")
   document.addEventListener("DOMContentLoaded", webViewerLoad, true);
 }
 
+// LocalPDF Studio — forward Ctrl+W to parent tab manager
+window.addEventListener('keydown', function (e) {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'close-active-tab' }, '*');
+    }
+  }
+}, true);
+
+// LocalPDF Studio — handle save and print commands from parent
+window.addEventListener('message', function (event) {
+  if (event.data?.type === 'pdf-save') {
+    if (typeof PDFViewerApplication !== 'undefined') {
+      PDFViewerApplication.save();
+    }
+  }
+  if (event.data?.type === 'pdf-print') {
+    if (typeof PDFViewerApplication !== 'undefined') {
+      PDFViewerApplication.triggerPrinting();
+    }
+  }
+});
+
 export { PDFViewerApplication, AppConstants as PDFViewerApplicationConstants, AppOptions as PDFViewerApplicationOptions };
 
 //# sourceMappingURL=viewer.mjs.map
