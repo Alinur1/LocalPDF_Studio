@@ -91,7 +91,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
         private bool IsValidImageExtension(string extension)
         {
-            var validExtensions = new[] { ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif" };
+            var validExtensions = new[] { ".jpg", ".jpeg", ".png", ".bmp" };
             return validExtensions.Contains(extension);
         }
 
