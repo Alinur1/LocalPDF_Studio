@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (files && files.length > 0) {
                 const imagePaths = files.filter(f => /\.(jpg|jpeg|png|bmp|webp)$/i.test(f));
                 if (imagePaths.length === 0) {
-                    await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.invalid-files'), [i18n.t('imageEditorJS.btn-ok')]);
+                    await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.invalid-files'), [i18n.t('common.ok')]);
                     return;
                 }
                 const filePath = imagePaths[0];
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
             img.onerror = () => {
                 loadingUI.hide();
-                customAlert.alert(i18n.t('alerts.error'), i18n.t('imageEditorJS.failed-load-image'), [i18n.t('imageEditorJS.btn-ok')]);
+                customAlert.alert(i18n.t('alerts.error'), i18n.t('imageEditorJS.failed-load-image'), [i18n.t('common.ok')]);
                 reject(new Error('Image load failed'));
             };
             img.src = `file://${filePath}`;
@@ -551,7 +551,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const w = parseInt(rwInput.value);
         const h = parseInt(rhInput.value);
         if (!w || !h || w < 1 || h < 1 || w > 10000 || h > 10000) {
-            customAlert.alert(i18n.t('alerts.warning'), i18n.t('imageEditorJS.invalid-dimensions'), [i18n.t('imageEditorJS.btn-ok')]);
+            customAlert.alert(i18n.t('alerts.warning'), i18n.t('imageEditorJS.invalid-dimensions'), [i18n.t('common.ok')]);
             return;
         }
         resizeW = w;
@@ -592,7 +592,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('apply-text').addEventListener('click', () => {
         const text = document.getElementById('text-content').value.trim();
         if (!text) {
-            customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.empty-text'), [i18n.t('imageEditorJS.btn-ok')]);
+            customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.empty-text'), [i18n.t('common.ok')]);
             return;
         }
         const activePos = document.querySelector('.pos-btn.active');
@@ -829,13 +829,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const savedPath = await window.electronAPI.saveImageFile(defaultName, bytes.buffer);
 
             if (savedPath) {
-                await customAlert.alert(i18n.t('alerts.success'), i18n.t('imageEditorJS.save-success') + '\n' + savedPath, [i18n.t('imageEditorJS.btn-ok')]);
+                await customAlert.alert(i18n.t('alerts.success'), i18n.t('imageEditorJS.save-success') + '\n' + savedPath, [i18n.t('common.ok')]);
             } else {
-                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('imageEditorJS.save-failed'), [i18n.t('imageEditorJS.btn-ok')]);
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('imageEditorJS.save-failed'), [i18n.t('common.ok')]);
             }
         } catch (error) {
             console.error('Save error:', error);
-            await customAlert.alert(i18n.t('alerts.error'), i18n.t('imageEditorJS.save-error') + error.message, [i18n.t('imageEditorJS.btn-ok')]);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('imageEditorJS.save-error') + error.message, [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
         }
@@ -878,7 +878,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDropForImages({
         onFilesDropped: async (imageFiles) => {
             if (imageFiles.length > 1) {
-                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.drop-one-image'), [i18n.t('imageEditorJS.btn-ok')]);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.drop-one-image'), [i18n.t('common.ok')]);
                 return;
             }
             await cleanupDroppedFile();
@@ -889,11 +889,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 droppedFilePath = result.filePath;
                 await loadImageFromPath(result.filePath, file.name, file.size || 0);
             } else {
-                await customAlert.alert(i18n.t('alerts.error'), i18n.t('imageEditorJS.process-drop-failed') + result.error, [i18n.t('imageEditorJS.btn-ok')]);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('imageEditorJS.process-drop-failed') + result.error, [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.invalid-files'), [i18n.t('imageEditorJS.btn-ok')]);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('imageEditorJS.invalid-files'), [i18n.t('common.ok')]);
         }
     });
 });

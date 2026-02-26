@@ -912,7 +912,6 @@
     "reset-confirm-msg": "This will undo all edits and restore the original image. Continue?",
     "drop-one-image": "Please drop one image at a time.",
     "process-drop-failed": "Failed to process dropped file: ",
-    "btn-ok": "OK",
     "btn-cancel": "Cancel",
     "btn-reset": "Reset",
     "save-success": "Image saved to:",

@@ -912,7 +912,6 @@
     "reset-confirm-msg": "这将撤销所有编辑并恢复原始图像。继续?",
     "drop-one-image": "一次只能拖放一个图像。",
     "process-drop-failed": "无法处理拖放的文件: ",
-    "btn-ok": "确定",
     "btn-cancel": "取消",
     "btn-reset": "重置",
     "save-success": "图像已保存到:",

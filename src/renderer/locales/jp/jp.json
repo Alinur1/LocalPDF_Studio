@@ -912,7 +912,6 @@
     "reset-confirm-msg": "これにより、すべての編集が取り消され、元の画像が復元されます。続けますか?",
     "drop-one-image": "一度に1つの画像だけをドラッグしてドロップしてください。",
     "process-drop-failed": "ドラッグしたファイルの処理に失敗しました: ",
-    "btn-ok": "OK",
     "btn-cancel": "キャンセル",
     "btn-reset": "リセット",
     "save-success": "画像を保存しました:",
