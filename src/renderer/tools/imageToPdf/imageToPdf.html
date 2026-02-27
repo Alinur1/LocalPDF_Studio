@@ -43,7 +43,10 @@
         <main class="tool-container">
             <!-- File Selection Area -->
             <div class="file-selection-area" id="file-selection-area">
-                <button id="select-images-btn" class="select-images-btn" data-i18n="common.btn-image-select">Click to Select Images or drop images here</button>
+                <button id="select-images-btn" class="select-images-btn">
+                    <span data-i18n="common.btn-image-select">Click to Select Images or drop images here</span>
+                    <p><small class="select-hint" data-i18n="common.supported-formats-img">Supports JPG, JPEG, PNG, BMP</small></p>
+                </button>
                 <div id="selected-files-info" class="selected-files-info" style="display: none;">
                     <div style="flex-grow: 1;">
                         <p id="files-count" class="files-count"></p>

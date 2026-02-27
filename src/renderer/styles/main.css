@@ -40,6 +40,7 @@
   --button-disabled-text: #7f8c8d;
   --modal-bg: #2c3e50;
   --modal-overlay: rgba(0, 0, 0, 0.7);
+  --help-text-color: #7f8c8d;
 
   /* Common variables */
   --border-radius: 6px;
@@ -732,4 +733,10 @@ body.dark .search-result-item:hover .search-result-meta {
   height: 1px;
   background-color: var(--border-color);
   margin: 4px 0;
+}
+
+.select-hint {
+    font-size: 0.75rem;
+    color: var(--help-text-color);
+    font-weight: 400;
 }

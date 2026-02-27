@@ -43,7 +43,10 @@
             <h1 class="tool-title" data-i18n="merge.page-title">Merge PDF</h1>
         </div>
         <main class="tool-container">
-            <button id="select-pdf-btn" class="select-pdf-btn" data-i18n="common.btn-select-merge">Click to Select PDF Files or drop PDFs here</button>
+            <button id="select-pdf-btn" class="select-pdf-btn">
+                <span data-i18n="common.btn-select-merge">Click to Select PDF Files or drop PDFs here</span>
+                <p><small class="select-hint" data-i18n="common.supported-formats">Supports PDF</small></p>
+            </button>
             <ul id="pdf-list" class="pdf-list"></ul>
             <div class="action-buttons">
                 <button id="clear-btn" class="top-btn secondary" data-i18n="merge.clear-btn">Clear All</button>

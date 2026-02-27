@@ -215,24 +215,11 @@ body.light {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.4rem;
 }
 
 .file-selection-area .select-pdf-btn:hover {
     background: var(--select-btn-hover-bg);
     border-color: var(--select-btn-border);
-}
-
-.select-icon {
-    font-size: 2rem;
-    line-height: 1;
-    margin-bottom: 0.25rem;
-}
-
-.select-hint {
-    font-size: 0.75rem;
-    color: var(--help-text-color);
-    font-weight: 400;
 }
 
 .selected-file-info {

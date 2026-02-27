@@ -39,7 +39,10 @@
         </div>
         <main class="tool-container">
             <div class="file-selection-area">
-                <button id="select-pdf-btn" class="select-pdf-btn" data-i18n="common.btn-select">Click to Select a PDF File or drop PDF here</button>
+                <button id="select-pdf-btn" class="select-pdf-btn">
+                    <span data-i18n="common.btn-select">Click to Select a PDF File or drop PDF here</span>
+                    <p><small class="select-hint" data-i18n="common.supported-formats">Supports PDF</small></p>
+                </button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
                     <div style="flex-grow: 1;">
                         <p id="pdf-name" class="pdf-name"></p>
