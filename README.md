@@ -3,7 +3,7 @@
 ##  Your Complete Offline PDF Toolkit.
 
 ### Stop uploading your PDF files in some random websites.
-This software is completely free, open-source, and privacy-focused. 
+This software is completely free, open-source, and privacy-focused.
 
 > All your popular PDF tools in one place.
 
@@ -13,9 +13,7 @@ This software is completely free, open-source, and privacy-focused.
 
 > Unlimited usage.
 
-### Donate one time: [Gumroad](https://alinur3.gumroad.com/coffee)
-
-### Donate monthly, quarterly: [Gumroad](https://alinur3.gumroad.com/l/csbhxr)
+### Donate: [Patreon](https://www.patreon.com/cw/MdAlinurHossain?vanity=MdAlinurHossain)
 
 ### ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Alinur1/LocalPDF_Studio/total?style=for-the-badge&logo=github&label=Total%20Downloads&cacheSeconds=43200)
 
