@@ -16,9 +16,9 @@
 **/
 
 
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Pdf.IO;
-using PdfSharpCore.Pdf.Security;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
+using PdfSharp.Pdf.Security;
 using LocalPDF_Studio_api.BLL.Interfaces;
 using LocalPDF_Studio_api.DAL.Models.LockUnlockPdfModel;
 
@@ -79,9 +79,25 @@ namespace LocalPDF_Studio_api.BLL.Services
             document.SecuritySettings.UserPassword = lockOptions.OpenPassword;
             document.SecuritySettings.OwnerPassword = lockOptions.OpenPassword;
 
-            document.SecuritySettings.DocumentSecurityLevel = lockOptions.EncryptionLevel == 40
-                ? PdfDocumentSecurityLevel.Encrypted40Bit
-                : PdfDocumentSecurityLevel.Encrypted128Bit;
+            switch (lockOptions.EncryptionLevel)
+            {
+                case 40:
+                    Console.WriteLine("Applying encryption level: 40-bit");
+                    document.SecurityHandler.SetEncryptionToV1();  // 40-bit RC4
+                    break;
+                case 128:
+                    Console.WriteLine("Applying encryption level: 128-bit");
+                    document.SecurityHandler.SetEncryptionToV4UsingAES();  // 128-bit AES
+                    break;
+                case 256:
+                    Console.WriteLine("Applying encryption level: 256-bit");
+                    document.SecurityHandler.SetEncryptionToV5();  // 256-bit AES
+                    break;
+                default:
+                    Console.WriteLine("Applying default encryption level: Default = 128-bit");
+                    document.SecurityHandler.SetEncryptionToV4UsingAES();  // fallback to 128-bit
+                    break;
+            }
 
             using var memoryStream = new MemoryStream();
             document.Save(memoryStream, false);
@@ -124,7 +140,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
                 return memoryStream.ToArray();
             }
-            catch (PdfSharpCore.Pdf.IO.PdfReaderException ex) when (ex.Message.Contains("password"))
+            catch (PdfSharp.Pdf.IO.PdfReaderException ex) when (ex.Message.Contains("password"))
             {
                 _logger.LogWarning("Wrong password provided for PDF: {FilePath}", request.FilePath);
                 throw new UnauthorizedAccessException("Incorrect password. Please check the password and try again.");

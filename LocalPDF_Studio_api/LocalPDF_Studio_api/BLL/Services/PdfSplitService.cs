@@ -16,8 +16,8 @@
 **/
 
 
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Pdf.IO;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 using System.IO.Compression;
 using LocalPDF_Studio_api.BLL.Interfaces;
 using LocalPDF_Studio_api.DAL.Enums;

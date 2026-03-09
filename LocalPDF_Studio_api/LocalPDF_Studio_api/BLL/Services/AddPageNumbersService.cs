@@ -16,9 +16,9 @@
 **/
 
 
-using PdfSharpCore.Drawing;
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Pdf.IO;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 using LocalPDF_Studio_api.BLL.Interfaces;
 using LocalPDF_Studio_api.DAL.Enums;
 using LocalPDF_Studio_api.DAL.Models.AddPageNumbers;
@@ -40,22 +40,18 @@ namespace LocalPDF_Studio_api.BLL.Services
             {
                 using var document = PdfReader.Open(request.FilePath, PdfDocumentOpenMode.Modify);
                 var totalPages = document.PageCount;
+                var font = new XFont("Times New Roman", request.FontSize);
 
                 for (int i = 0; i < totalPages; i++)
                 {
-                    var pageIndex = i;
                     var pageNumber = i + 1;
-
                     if (pageNumber < request.StartPage) continue;
 
-                    var page = document.Pages[pageIndex];
+                    var page = document.Pages[i];
                     using var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Append);
-                    var font = new XFont("Arial", request.FontSize);
-
                     var currentNumber = request.StartNumber + (pageNumber - request.StartPage);
                     var text = FormatPageNumber(currentNumber, totalPages, request.Format);
                     var size = gfx.MeasureString(text, font);
-
                     var point = GetPosition(page, size, request.Position);
                     gfx.DrawString(text, font, XBrushes.Black, point);
                 }

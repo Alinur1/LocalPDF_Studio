@@ -18,6 +18,8 @@
 
 using LocalPDF_Studio_api.BLL.Interfaces;
 using LocalPDF_Studio_api.BLL.Services;
+using LocalPDF_Studio_api.BLL.Utils;
+using PdfSharp.Fonts;
 using System.Net;
 using System.Net.Sockets;
 
@@ -61,6 +63,11 @@ builder.WebHost.ConfigureKestrel(options =>
 {
     options.Listen(IPAddress.Loopback, port);
 });
+
+// Font resolver for PdfSharp
+var fontsPath = Path.GetFullPath(
+    Path.Combine(AppContext.BaseDirectory, "..", "..", "assets", "fonts"));
+GlobalFontSettings.FontResolver = new LocalFontResolver(fontsPath);
 
 var app = builder.Build();
 

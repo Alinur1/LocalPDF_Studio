@@ -16,8 +16,8 @@
 **/
 
 
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Pdf.IO;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 using LocalPDF_Studio_api.BLL.Interfaces;
 
 namespace LocalPDF_Studio_api.BLL.Services

@@ -17,8 +17,8 @@
 
 using LocalPDF_Studio_api.BLL.Interfaces;
 using LocalPDF_Studio_api.DAL.Models.imageToPdf;
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Drawing;
+using PdfSharp.Pdf;
+using PdfSharp.Drawing;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -189,14 +189,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
                 // Draw the image on the page
                 using var gfx = XGraphics.FromPdfPage(page);
-                // FromStream takes ownership of the stream via the lambda, which will be disposed by PdfSharpCore.
-                // By setting processedImageStream to null, we prevent the finally block from disposing it again.
-                using var xImage = XImage.FromStream(() =>
-                {
-                    var streamToPass = processedImageStream;
-                    processedImageStream = null;
-                    return streamToPass;
-                });
+                using var xImage = XImage.FromStream(processedImageStream);
 
                 // Calculate image position and size to fit within page while maintaining aspect ratio
                 var (drawWidth, drawHeight, x, y) = CalculateImageBounds(
