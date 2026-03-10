@@ -201,7 +201,7 @@ namespace LocalPDF_Studio_api.BLL.Services
                     "-dSAFER",
 
                     // Force PDFSharp compatibility
-                    "-dCompatibilityLevel=1.4",
+                    "-dCompatibilityLevel=1.7",
                     "-dCompressObjects=false",
                     "-dAvoidBinarySnippets=true",
                     "-dDetectDuplicateImages=false",
