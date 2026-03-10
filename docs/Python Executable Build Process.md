@@ -55,17 +55,17 @@ Place in: `assets/backend_macos/`
 
 ---
 
-## New folder structure
+## Folder structure
 
 ```
 assets/
-├── backend_windows/
+├── backend_win/
 │   └── scripts/
 │       └── localpdf_studio_python.exe
 ├── backend_linux/
 │   └── scripts/
 │       └── localpdf_studio_python
-├── backend_macos/
+├── backend_mac/
 │   └── scripts/
 │       └── localpdf_studio_python
 ```
@@ -91,18 +91,10 @@ The executable takes a command name as the first argument, followed by the origi
 In each service's `GetPythonExecutablePath()`, change the exe name:
 
 ```csharp
-// OLD (one per service):
-string exeName = "add_watermark.exe";       // WatermarkService
-string exeName = "extract_images.exe";      // ExtractImagesService
-string exeName = "convert_pdf_images.exe";  // PdfToImageService
-string exeName = "pdf_to_grayscale.exe";    // GrayscaleService
-string exeName = "redact_pdf.exe";          // RedactService
-
-// NEW (same for all services):
 string exeName = "localpdf_studio_python.exe";
 ```
 
-And prepend the command name as the first argument in each service's argument list:
+And add the command name as the first argument in each service's argument list:
 
 ```csharp
 // WatermarkService
