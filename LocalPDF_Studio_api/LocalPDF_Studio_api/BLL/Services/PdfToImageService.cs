@@ -82,6 +82,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             var arguments = new List<string>
             {
+                "convert_pdf_images",
                 $"\"{request.FilePath}\"",
                 $"\"{outputZipPath}\"",
                 $"--dpi {request.Dpi}",
@@ -154,17 +155,17 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                exeName = "convert_pdf_images.exe";
+                exeName = "localpdf_studio_python.exe";
                 platformFolder = "backend_win";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                exeName = "convert_pdf_images";
+                exeName = "localpdf_studio_python";
                 platformFolder = "backend_linux";
             }
             else
             {
-                exeName = "convert_pdf_images";
+                exeName = "localpdf_studio_python";
                 platformFolder = "backend_mac";
             }
 

@@ -142,7 +142,7 @@ namespace LocalPDF_Studio_api.BLL.Services
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = _pythonExecutablePath,
-                    Arguments = $"\"{tempJsonFile}\"", // Pass the temp file path instead of raw JSON
+                    Arguments = $"extract_images \"{tempJsonFile}\"", // Pass the temp file path instead of raw JSON
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -244,17 +244,17 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                exeName = "extract_images.exe";
+                exeName = "localpdf_studio_python.exe";
                 platformFolder = "backend_win";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                exeName = "extract_images";
+                exeName = "localpdf_studio_python";
                 platformFolder = "backend_linux";
             }
             else
             {
-                exeName = "extract_images";
+                exeName = "localpdf_studio_python";
                 platformFolder = "backend_mac";
             }
 

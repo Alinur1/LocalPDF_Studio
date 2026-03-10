@@ -164,6 +164,7 @@ namespace LocalPDF_Studio_api.BLL.Services
             // Build command arguments
             var arguments = new List<string>
             {
+                "redact",
                 $"\"{request.File}\"",
                 $"\"{outputPath}\"",
                 $"--redactions \"{redactionsJson.Replace("\"", "\\\"")}\"",
@@ -258,21 +259,20 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                exeName = "redact_pdf.exe";
+                exeName = "localpdf_studio_python.exe";
                 platformFolder = "backend_win";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                exeName = "redact_pdf";
+                exeName = "localpdf_studio_python";
                 platformFolder = "backend_linux";
             }
-            else // macOS
+            else
             {
-                exeName = "redact_pdf";
+                exeName = "localpdf_studio_python";
                 platformFolder = "backend_mac";
             }
 
-            // Try multiple possible paths
             var possiblePaths = new[]
             {
                 Path.Combine(baseDir, exeName),

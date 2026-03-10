@@ -86,6 +86,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             var arguments = new List<string>
             {
+                "watermark",
                 $"\"{request.FilePath}\"",
                 $"\"{outputPath}\"",
                 $"--watermark-type {request.WatermarkType}",
@@ -193,17 +194,17 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                exeName = "add_watermark.exe";
+                exeName = "localpdf_studio_python.exe";
                 platformFolder = "backend_win";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                exeName = "add_watermark";
+                exeName = "localpdf_studio_python";
                 platformFolder = "backend_linux";
             }
             else
             {
-                exeName = "add_watermark";
+                exeName = "localpdf_studio_python";
                 platformFolder = "backend_mac";
             }
 

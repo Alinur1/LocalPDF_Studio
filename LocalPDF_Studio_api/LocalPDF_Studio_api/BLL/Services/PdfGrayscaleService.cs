@@ -89,6 +89,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             var arguments = new List<string>
             {
+                "grayscale",
                 $"\"{request.FilePath}\"",
                 $"\"{outputPath}\""
             };
@@ -223,17 +224,17 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                exeName = "pdf_to_grayscale.exe";
+                exeName = "localpdf_studio_python.exe";
                 platformFolder = "backend_win";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                exeName = "pdf_to_grayscale";
+                exeName = "localpdf_studio_python";
                 platformFolder = "backend_linux";
             }
             else
             {
-                exeName = "pdf_to_grayscale";
+                exeName = "localpdf_studio_python";
                 platformFolder = "backend_mac";
             }
 
