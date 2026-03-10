@@ -15,7 +15,7 @@
  # - PDF Engine: PdfSharp + Mozilla PDF.js
 ##
 
-
+# extract_images.py
 import fitz  # PyMuPDF
 import json
 import sys
