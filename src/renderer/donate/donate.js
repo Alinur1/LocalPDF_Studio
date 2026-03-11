@@ -85,11 +85,8 @@ class DonationManager {
         const bkashBtn = document.getElementById('show-bkash-qr');
         if (bkashBtn) bkashBtn.addEventListener('click', () => this.showBkashQR());
 
-        const gumroadBtn = document.getElementById('gumroad-donate');
-        if (gumroadBtn) gumroadBtn.addEventListener('click', () => this.openGumroad());
-
-        const gumroadBtn2 = document.getElementById('gumroad-donate2');
-        if (gumroadBtn2) gumroadBtn2.addEventListener('click', () => this.openGumroad2());
+        const patreonBtn = document.getElementById('patreon-donate');
+        if (patreonBtn) patreonBtn.addEventListener('click', () => this.openPatreon());
     }
 
     setupSupportHandlers() {
@@ -138,12 +135,8 @@ class DonationManager {
         if (modal) modal.classList.add('hidden');
     }
 
-    openGumroad() {
-        this.openExternal('https://alinur3.gumroad.com/coffee');
-    }
-
-    openGumroad2() {
-        this.openExternal('https://alinur3.gumroad.com/l/csbhxr');
+    openPatreon() {
+        this.openExternal('https://www.patreon.com/cw/MdAlinurHossain?vanity=MdAlinurHossain');
     }
 
     async shareApp() {
