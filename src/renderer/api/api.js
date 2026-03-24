@@ -119,6 +119,7 @@ async function getEndpoints() {
         imageToPdf: `${base}/ImageToPdf/convert`,
         redact: `${base}/PdfRedact/redact`,
         grayscale: `${base}/PdfGrayscale/convert`,
+        pdfToPdfa: `${base}/PdfToPdfa/convert`,
         // Add more as necessary
     };
 }

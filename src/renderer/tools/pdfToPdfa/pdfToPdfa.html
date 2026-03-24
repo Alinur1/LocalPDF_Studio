@@ -1,0 +1,139 @@
+<!-- src/renderer/tools/pdfToPdfa/pdfToPdfa.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - PDF to PDF/A Converter</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./pdfToPdfa.css">
+    <script type="module" src="../../utils/themeManager.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn">← Back</a>
+            <h1 class="tool-title">PDF to PDF/A Converter</h1>
+        </div>
+        <main class="tool-container">
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">
+                    <span>Click to Select a PDF File or drop PDF here</span>
+                    <p><small class="select-hint">Supports PDF</small></p>
+                </button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                </div>
+            </div>
+
+            <div class="convert-options-container">
+                <h2>Conversion Settings</h2>
+
+                <div class="conformance-section">
+                    <h3>PDF/A Conformance Level</h3>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="conformance" value="pdfa1b">
+                            <div class="option-content">
+                                <span class="option-title">PDF/A-1b</span>
+                                <span class="option-desc">ISO 19005-1, Level B — Basic visual reproducibility. Most
+                                    compatible, widely supported.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="conformance" value="pdfa1a">
+                            <div class="option-content">
+                                <span class="option-title">PDF/A-1a</span>
+                                <span class="option-desc">ISO 19005-1, Level A — Full accessibility including structure
+                                    and tagging.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="conformance" value="pdfa2b" checked>
+                            <div class="option-content">
+                                <span class="option-title">PDF/A-2b (Recommended)</span>
+                                <span class="option-desc">ISO 19005-2, Level B — Supports JPEG 2000, transparency, and
+                                    layers.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="conformance" value="pdfa2a">
+                            <div class="option-content">
+                                <span class="option-title">PDF/A-2a</span>
+                                <span class="option-desc">ISO 19005-2, Level A — Full accessibility with PDF 1.7
+                                    features.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="conformance" value="pdfa3b">
+                            <div class="option-content">
+                                <span class="option-title">PDF/A-3b</span>
+                                <span class="option-desc">ISO 19005-3, Level B — Allows embedding any file type as
+                                    attachment.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="embed-section">
+                    <h3>Font Embedding</h3>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="fontEmbed" value="embed" checked>
+                            <div class="option-content">
+                                <span class="option-title">Embed All Fonts (Recommended)</span>
+                                <span class="option-desc">Ensures text renders correctly on any device. Required for
+                                    valid PDF/A.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="fontEmbed" value="subset">
+                            <div class="option-content">
+                                <span class="option-title">Subset Fonts</span>
+                                <span class="option-desc">Embeds only used characters to reduce file size.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="convert-btn" class="top-btn" disabled>Convert to PDF/A</button>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="./pdfToPdfa.js"></script>
+</body>
+
+</html>
