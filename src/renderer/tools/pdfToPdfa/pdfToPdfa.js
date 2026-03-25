@@ -20,6 +20,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedFile = null;
     let droppedFilePath = null;
 
+    // ─── Ghostscript check ───────────────────────────────────────────────────
+
+    async function checkGhostscriptAvailability() {
+        try {
+            const checkEndpoint = await API.ghostscript.check();
+            const response = await fetch(checkEndpoint, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (response.ok) {
+                const result = await response.json();
+                return result.available === true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error checking Ghostscript:', error);
+            return false;
+        }
+    }
+
     // ─── File handling ───────────────────────────────────────────────────────
 
     function handleFileSelected(file) {
@@ -56,7 +76,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ─── Select PDF button ───────────────────────────────────────────────────
 
     selectPdfBtn.addEventListener('click', async () => {
+        loadingUI.show('Checking Ghostscript...');
         try {
+            const isGhostscriptAvailable = await checkGhostscriptAvailability();
+            if (!isGhostscriptAvailable) {
+                loadingUI.hide();
+                const result = await customAlert.alert(
+                    'Requirement Missing',
+                    'Ghostscript is required for PDF/A conversion but was not found on your system.\n\nPlease install Ghostscript and try again.',
+                    ['OK', 'Watch Tutorial']
+                );
+                if (result === 1) {
+                    window.electronAPI.openExternal('https://youtu.be/fKrnSytg_z4');
+                }
+                return;
+            }
+
             loadingUI.updateMessage('Selecting PDF...');
             const files = await window.electronAPI.selectPdfs();
             if (files && files.length > 0) {
@@ -109,6 +144,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     convertBtn.addEventListener('click', async () => {
         if (!selectedFile) {
             await customAlert.alert('Notice', 'Please select a PDF file first.', ['OK']);
+            return;
+        }
+
+        // Re-verify Ghostscript before converting
+        loadingUI.show('Verifying Ghostscript...');
+        try {
+            const isGhostscriptAvailable = await checkGhostscriptAvailability();
+            if (!isGhostscriptAvailable) {
+                loadingUI.hide();
+                await customAlert.alert(
+                    'Requirement Missing',
+                    'Ghostscript is not available. Please install Ghostscript to use PDF/A conversion.',
+                    ['OK']
+                );
+                return;
+            }
+        } catch (error) {
+            loadingUI.hide();
+            await customAlert.alert(
+                'Error',
+                'Failed to verify Ghostscript: ' + error.message,
+                ['OK']
+            );
             return;
         }
 
@@ -176,7 +234,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await customAlert.alert('Notice', 'Please drop only one PDF file at a time.', ['OK']);
                 return;
             }
+
+            loadingUI.show('Checking Ghostscript...');
             try {
+                const isGhostscriptAvailable = await checkGhostscriptAvailability();
+                if (!isGhostscriptAvailable) {
+                    loadingUI.hide();
+                    const result = await customAlert.alert(
+                        'Requirement Missing',
+                        'Ghostscript is required for PDF/A conversion but was not found on your system.\n\nPlease install Ghostscript and try again.',
+                        ['OK', 'Watch Tutorial']
+                    );
+                    if (result === 1) {
+                        window.electronAPI.openExternal('https://youtu.be/fKrnSytg_z4');
+                    }
+                    return;
+                }
+
+                loadingUI.updateMessage('Processing dropped file...');
                 await cleanupDroppedFile();
                 const file = pdfFiles[0];
                 const buffer = await file.arrayBuffer();
