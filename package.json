@@ -65,6 +65,20 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "assets/common",
+        "to": "assets/common",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "assets/fonts",
+        "to": "assets/fonts",
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "asar": true,
