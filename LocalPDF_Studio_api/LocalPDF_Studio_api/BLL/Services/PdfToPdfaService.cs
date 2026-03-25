@@ -84,7 +84,14 @@ namespace LocalPDF_Studio_api.BLL.Services
             }
         }
 
-        private async Task<PdfaResult> RunGhostscriptConversionAsync(string inputPath, string outputPath, PdfaOptions options)
+        // ─────────────────────────────────────────────────────────────────────
+        // Core conversion
+        // ─────────────────────────────────────────────────────────────────────
+
+        private async Task<PdfaResult> RunGhostscriptConversionAsync(
+            string inputPath,
+            string outputPath,
+            PdfaOptions options)
         {
             string? tempDefFile = null;
 
@@ -98,16 +105,17 @@ namespace LocalPDF_Studio_api.BLL.Services
                     return new PdfaResult
                     {
                         Success = false,
-                        Error = "Could not locate the sRGB ICC color profile (srgb.icc) required for PDF/A conversion. " +
-                                "Please ensure Ghostscript is fully installed."
+                        Error = "Could not locate the sRGB ICC color profile (srgb.icc) required for PDF/A " +
+                                "conversion. Please ensure Ghostscript is fully installed."
                     };
                 }
 
                 tempDefFile = Path.Combine(Path.GetTempPath(), $"PDFA_def_{Guid.NewGuid()}.ps");
                 await WritePdfaDefinitionFile(tempDefFile, iccProfile, options);
 
-                // Build the argument list — using ArgumentList avoids ALL quoting issues
-                // with spaces in paths on Windows and Linux/macOS
+                // Use ArgumentList — each entry is passed as a discrete OS argument,
+                // which correctly handles spaces in paths on ALL platforms without
+                // any manual quote wrapping.
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = processName,
@@ -119,10 +127,11 @@ namespace LocalPDF_Studio_api.BLL.Services
 
                 startInfo.ArgumentList.Add("-dNOPAUSE");
                 startInfo.ArgumentList.Add("-dBATCH");
-                // NOTE: Do NOT add -dSAFER — in GS 9.50+ it is the default and
-                // it blocks file access to paths outside GS's allowed list,
-                // which breaks reading our temp PDFA_def.ps file.
-                // Use -dNOSAFER to explicitly allow file access.
+                // -dNOSAFER: In GS 9.50+ SAFER mode is the default and restricts
+                // file I/O to a permitted path list. Our temp PDFA_def.ps sits in
+                // the system temp dir which is outside that list, causing an
+                // "Unrecoverable error". -dNOSAFER disables this restriction.
+                // This is safe here because of full control all input files.
                 startInfo.ArgumentList.Add("-dNOSAFER");
                 startInfo.ArgumentList.Add("-sDEVICE=pdfwrite");
                 startInfo.ArgumentList.Add($"-dPDFA={GetPdfaVersion(options.ConformanceLevel!)}");
@@ -130,11 +139,11 @@ namespace LocalPDF_Studio_api.BLL.Services
                 startInfo.ArgumentList.Add("-sColorConversionStrategy=RGB");
                 startInfo.ArgumentList.Add("-dEmbedAllFonts=true");
                 startInfo.ArgumentList.Add($"-dSubsetFonts={(options.SubsetFonts ? "true" : "false")}");
-                startInfo.ArgumentList.Add($"-sOutputFile={outputPath}");  // No manual quotes needed
-                startInfo.ArgumentList.Add(tempDefFile);                   // No manual quotes needed
-                startInfo.ArgumentList.Add(inputPath);                     // No manual quotes needed
+                startInfo.ArgumentList.Add($"-sOutputFile={outputPath}");
+                // PDFA_def.ps MUST come before the input PDF in the argument list
+                startInfo.ArgumentList.Add(tempDefFile);
+                startInfo.ArgumentList.Add(inputPath);
 
-                // Log the full command for debugging
                 Console.WriteLine($"[PDFA_DEBUG] Process: {processName}");
                 Console.WriteLine($"[PDFA_DEBUG] Arguments:");
                 foreach (var arg in startInfo.ArgumentList)
@@ -180,109 +189,23 @@ namespace LocalPDF_Studio_api.BLL.Services
             }
         }
 
-        /// <summary>
-        /// Returns the PDF/A version number (1, 2, or 3) for the -dPDFA= flag.
-        /// </summary>
-        private static int GetPdfaVersion(string conformanceLevel)
-        {
-            return conformanceLevel.ToLower() switch
-            {
-                "pdfa1a" or "pdfa1b" => 1,
-                "pdfa2a" or "pdfa2b" => 2,
-                "pdfa3b" => 3,
-                _ => 1
-            };
-        }
+        // ─────────────────────────────────────────────────────────────────────
+        // PDFA_def.ps generation
+        // ─────────────────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Tries to locate the PDFA_def.ps file shipped with Ghostscript.
-        /// Returns null if not found; the conversion will still proceed without it
-        /// but may not be fully conformant.
-        /// </summary>
-        private static string? GetPdfaDefinitionFile(string conformanceLevel)
-        {
-            var candidates = new List<string>();
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // Common Ghostscript install locations on Windows
-                var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-                var programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-
-                foreach (var root in new[] { programFiles, programFilesX86 })
-                {
-                    if (Directory.Exists(root))
-                    {
-                        foreach (var dir in Directory.GetDirectories(root, "gs*", SearchOption.TopDirectoryOnly))
-                        {
-                            candidates.Add(Path.Combine(dir, "lib", "PDFA_def.ps"));
-                        }
-                    }
-                }
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                candidates.Add("/opt/homebrew/share/ghostscript/PDFA_def.ps");
-                candidates.Add("/usr/local/share/ghostscript/PDFA_def.ps");
-
-                // Try versioned paths
-                foreach (var dir in new[] { "/opt/homebrew/share/ghostscript", "/usr/local/share/ghostscript" })
-                {
-                    if (Directory.Exists(dir))
-                    {
-                        foreach (var sub in Directory.GetDirectories(dir))
-                        {
-                            candidates.Add(Path.Combine(sub, "PDFA_def.ps"));
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // Linux
-                candidates.Add("/usr/share/ghostscript/PDFA_def.ps");
-                candidates.Add("/usr/share/doc/ghostscript/examples/PDFA_def.ps");
-
-                // Try versioned paths
-                foreach (var dir in new[] { "/usr/share/ghostscript" })
-                {
-                    if (Directory.Exists(dir))
-                    {
-                        foreach (var sub in Directory.GetDirectories(dir))
-                        {
-                            candidates.Add(Path.Combine(sub, "PDFA_def.ps"));
-                        }
-                    }
-                }
-            }
-
-            // Also check bundled assets (snap / packaged builds)
-            var bundledDef = Path.Combine(AppContext.BaseDirectory, "compiled-ghostscript", "lib", "PDFA_def.ps");
-            candidates.Insert(0, bundledDef);
-
-            foreach (var candidate in candidates)
-            {
-                if (File.Exists(candidate))
-                {
-                    Console.WriteLine($"[PDFA_DEBUG] Using PDFA_def.ps: {candidate}");
-                    return candidate;
-                }
-            }
-
-            Console.WriteLine("[PDFA_DEBUG] PDFA_def.ps not found; proceeding without it.");
-            return null;
-        }
-
-        private async Task WritePdfaDefinitionFile(string defFilePath, string iccProfilePath, PdfaOptions options)
+        private async Task WritePdfaDefinitionFile(
+            string defFilePath,
+            string iccProfilePath,
+            PdfaOptions options)
         {
             // PostScript requires forward slashes even on Windows
             var escapedIcc = iccProfilePath.Replace("\\", "/");
 
-            // NOTE: Do NOT indent this — PostScript is whitespace-sensitive in some parsers
-            // and leading spaces before [ can cause issues. Keep it flush left.
+            // Keep every line flush-left — PostScript can be sensitive to
+            // unexpected whitespace before tokens.
             var content =
                 "%!PS-Adobe-3.0\n" +
-                "[ /Title (PDF/A Converted Document)\n" +
+                "[ /Title ()\n" +
                 "  /DOCINFO pdfmark\n" +
                 "\n" +
                 "[/_objdef {icc_PDFA} /type /stream /OBJ pdfmark\n" +
@@ -307,56 +230,79 @@ namespace LocalPDF_Studio_api.BLL.Services
             await File.WriteAllTextAsync(defFilePath, content);
         }
 
+        // ─────────────────────────────────────────────────────────────────────
+        // srgb.icc discovery — 4 strategies, platform-aware
+        // ─────────────────────────────────────────────────────────────────────
+
         private async Task<string?> FindSrgbIccProfile(string ghostscriptProcessName)
         {
-            // Strategy 1: Ask Ghostscript itself where its resource directory is
-            var gsResourceDir = await GetGhostscriptResourceDir(ghostscriptProcessName);
-            if (!string.IsNullOrEmpty(gsResourceDir))
+            // ── Strategy 1 ─────────────────────────────────────────────
+            // For bundled GS (snap / AppImage / packaged builds), the iccprofiles
+            // folder is always relative to the GS binary — check this immediately
+            // before anything else so this strategy never wastes time on GS subprocess calls
+            // against a bundled binary that may not support .genpath or findlibfile.
+            //
+            // Covers snap layout:
+            //   compiled-ghostscript/bin/gs
+            //   compiled-ghostscript/share/ghostscript/<version>/iccprofiles/srgb.icc
+            if (Path.IsPathRooted(ghostscriptProcessName) && File.Exists(ghostscriptProcessName))
             {
-                // srgb.icc lives in iccprofiles/ inside the resource dir
-                var iccPath = Path.Combine(gsResourceDir, "iccprofiles", "srgb.icc");
-                if (File.Exists(iccPath))
+                var icc = SearchIccRelativeToBinary(ghostscriptProcessName);
+                if (!string.IsNullOrEmpty(icc))
                 {
-                    Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc via GS resource dir: {iccPath}");
-                    return iccPath;
-                }
-
-                // Some Ghostscript builds put it one level up
-                var iccPathAlt = Path.Combine(gsResourceDir, "..", "iccprofiles", "srgb.icc");
-                var iccPathAltNorm = Path.GetFullPath(iccPathAlt);
-                if (File.Exists(iccPathAltNorm))
-                {
-                    Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc via GS resource dir (alt): {iccPathAltNorm}");
-                    return iccPathAltNorm;
+                    Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc relative to bundled binary: {icc}");
+                    return icc;
                 }
             }
 
-            // Strategy 2: Ask Ghostscript to locate the file directly using findlibfile
-            var directPath = await GetIccPathFromGhostscript(ghostscriptProcessName);
-            if (!string.IsNullOrEmpty(directPath) && File.Exists(directPath))
+            // ── Strategy 2 ───────────────────────────────────────────────────
+            // Ask GS to print its full lib search path via .genpath.
+            // Works on standard GS 9.x and 10.x installs on all platforms.
+            // NOTE: Compiled/bundled GS builds (snap) may not support .genpath —
+            // if it fails it will fall through cleanly.
+            var genPathResult = await FindIccViaGenPath(ghostscriptProcessName);
+            if (!string.IsNullOrEmpty(genPathResult))
             {
-                Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc via GS findlibfile: {directPath}");
-                return directPath;
+                Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc via .genpath: {genPathResult}");
+                return genPathResult;
             }
 
-            // Strategy 3: Search relative to the Ghostscript executable itself
+            // ── Strategy 3 ───────────────────────────────────────────────────
+            // Ask GS to locate srgb.icc on its own search path using findlibfile.
+            var findLibResult = await FindIccViaFindLibFile(ghostscriptProcessName);
+            if (!string.IsNullOrEmpty(findLibResult) && File.Exists(findLibResult))
+            {
+                Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc via findlibfile: {findLibResult}");
+                return findLibResult;
+            }
+
+            // ── Strategy 4 ───────────────────────────────────────────────────
+            // Resolve the real executable path (following symlinks — critical
+            // for Homebrew on macOS where /usr/local/bin/gs symlinks into the
+            // Cellar tree) then walk up the directory tree.
             var execPath = await GetGhostscriptExecutablePath(ghostscriptProcessName);
             if (!string.IsNullOrEmpty(execPath))
             {
-                var gsDir = Path.GetDirectoryName(execPath);
-                // Walk up from bin/ to find iccprofiles/
-                var current = gsDir;
-                for (int i = 0; i < 4; i++) // max 4 levels up
+                var resolvedExec = ResolveSymlink(execPath);
+                Console.WriteLine($"[PDFA_DEBUG] Resolved GS executable: {resolvedExec}");
+
+                // Also run the relative-to-binary search on the resolved path
+                // in case the original path was a symlink (macOS Homebrew)
+                var iccFromResolved = SearchIccRelativeToBinary(resolvedExec);
+                if (!string.IsNullOrEmpty(iccFromResolved))
                 {
-                    if (current == null) break;
-                    var candidate = Path.Combine(current, "iccprofiles", "srgb.icc");
-                    if (File.Exists(candidate))
-                    {
-                        Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc by walking up from executable: {candidate}");
-                        return candidate;
-                    }
-                    current = Path.GetDirectoryName(current);
+                    Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc relative to resolved binary: {iccFromResolved}");
+                    return iccFromResolved;
                 }
+            }
+
+            // ── Strategy 4 ───────────────────────────────────────────────────
+            // Last resort: well-known versioned install paths per platform.
+            var wellKnown = FindIccInWellKnownPaths();
+            if (!string.IsNullOrEmpty(wellKnown))
+            {
+                Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc via well-known paths: {wellKnown}");
+                return wellKnown;
             }
 
             Console.WriteLine("[PDFA_DEBUG] srgb.icc not found via any strategy.");
@@ -364,23 +310,92 @@ namespace LocalPDF_Studio_api.BLL.Services
         }
 
         /// <summary>
-        /// Runs: gs -dNODISPLAY -dNOSAFER -q -c "systemdict /resourcedir get ==" -c quit
-        /// Returns the Ghostscript resource directory path, e.g:
-        /// C:/Program Files/gs/gs10.06.0/Resource/
+        /// Given the full path to a GS binary, walks up the directory tree
+        /// looking for iccprofiles/srgb.icc in all known layouts:
+        ///
+        ///   bin/gs  →  ../iccprofiles/srgb.icc                  (simple bundled)
+        ///   bin/gs  →  ../share/ghostscript/iccprofiles/         (some builds)
+        ///   bin/gs  →  ../share/ghostscript/<version>/iccprofiles/ (snap / autotools install)
+        ///   bin/gs  →  ../../share/ghostscript/<version>/iccprofiles/ (Homebrew Cellar)
+        ///
+        /// Walks up to 6 levels — enough for any real-world layout.
         /// </summary>
-        private async Task<string?> GetGhostscriptResourceDir(string ghostscriptProcessName)
+        private static string? SearchIccRelativeToBinary(string binaryPath)
+        {
+            var current = Path.GetDirectoryName(binaryPath);
+
+            for (int level = 0; level < 6; level++)
+            {
+                if (current == null) break;
+
+                Console.WriteLine($"[PDFA_DEBUG] SearchIccRelativeToBinary level {level}: {current}");
+
+                // 1. Direct: <dir>/iccprofiles/srgb.icc
+                var direct = Path.Combine(current, "iccprofiles", "srgb.icc");
+                if (File.Exists(direct)) return direct;
+
+                // 2. <dir>/share/ghostscript/iccprofiles/srgb.icc (non-versioned)
+                var shareGsDir = Path.Combine(current, "share", "ghostscript");
+                if (Directory.Exists(shareGsDir))
+                {
+                    var nonVersioned = Path.Combine(shareGsDir, "iccprofiles", "srgb.icc");
+                    if (File.Exists(nonVersioned)) return nonVersioned;
+
+                    // 3. <dir>/share/ghostscript/<version>/iccprofiles/srgb.icc (versioned)
+                    try
+                    {
+                        foreach (var vDir in Directory.GetDirectories(shareGsDir))
+                        {
+                            var versioned = Path.Combine(vDir, "iccprofiles", "srgb.icc");
+                            if (File.Exists(versioned)) return versioned;
+                        }
+                    }
+                    catch { /* unreadable — skip */ }
+                }
+
+                // 4. Scan immediate subdirectories for iccprofiles/
+                //    (covers Homebrew Cellar sibling layout)
+                try
+                {
+                    foreach (var sub in Directory.GetDirectories(current, "*", SearchOption.TopDirectoryOnly))
+                    {
+                        var subIcc = Path.Combine(sub, "iccprofiles", "srgb.icc");
+                        if (File.Exists(subIcc)) return subIcc;
+                    }
+                }
+                catch { /* unreadable — skip */ }
+
+                current = Path.GetDirectoryName(current);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Runs GS with .genpath to get its full lib search path, then looks for
+        /// srgb.icc adjacent to each entry. Works on standard GS 9.x and 10.x.
+        /// Returns null cleanly if the operator is unsupported (bundled/compiled GS).
+        /// </summary>
+        private async Task<string?> FindIccViaGenPath(string ghostscriptProcessName)
         {
             try
             {
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = ghostscriptProcessName,
-                    Arguments = "-dNODISPLAY -dNOSAFER -q -c \"systemdict /resourcedir get ==\" -c quit",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 };
+
+                startInfo.ArgumentList.Add("-dNODISPLAY");
+                startInfo.ArgumentList.Add("-dNOSAFER");
+                startInfo.ArgumentList.Add("-q");
+                startInfo.ArgumentList.Add("-c");
+                startInfo.ArgumentList.Add(".genpath ==");
+                startInfo.ArgumentList.Add("-c");
+                startInfo.ArgumentList.Add("quit");
 
                 using var process = new Process { StartInfo = startInfo };
                 process.Start();
@@ -389,39 +404,87 @@ namespace LocalPDF_Studio_api.BLL.Services
                 var errorTask = process.StandardError.ReadToEndAsync();
                 await process.WaitForExitAsync();
 
-                var output = (await outputTask).Trim();
-                await errorTask; // drain stderr
+                var rawOutput = (await outputTask).Trim();
+                var rawError = (await errorTask).Trim();
 
-                Console.WriteLine($"[PDFA_DEBUG] GS resource dir raw output: {output}");
+                Console.WriteLine($"[PDFA_DEBUG] .genpath raw output: {rawOutput}");
 
-                if (string.IsNullOrWhiteSpace(output)) return null;
+                // If GS printed an error (e.g. /undefined in .genpath) — bail out cleanly
+                if (string.IsNullOrWhiteSpace(rawOutput) ||
+                    rawOutput.Contains("/undefined") ||
+                    rawOutput.Contains("Error:"))
+                {
+                    Console.WriteLine("[PDFA_DEBUG] .genpath not supported or failed — skipping.");
+                    return null;
+                }
 
-                // GS prints the path wrapped in parentheses: (C:/Program Files/gs/gs10.06.0/Resource/)
-                var cleaned = output.Trim('(', ')', '"', ' ', '\n', '\r');
-                Console.WriteLine($"[PDFA_DEBUG] GS resource dir cleaned: {cleaned}");
+                // Output looks like: (path1:path2:path3) on Unix
+                //                or (path1;path2;path3) on Windows
+                var cleaned = rawOutput.Trim('(', ')');
+                var separator = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ';' : ':';
+                var paths = cleaned.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 
-                return Directory.Exists(cleaned) ? cleaned : null;
+                foreach (var entry in paths)
+                {
+                    var trimmed = entry.Trim();
+                    if (string.IsNullOrEmpty(trimmed)) continue;
+
+                    Console.WriteLine($"[PDFA_DEBUG] .genpath entry: {trimmed}");
+
+                    // srgb.icc may be in iccprofiles/ relative to the lib entry
+                    // or 1–2 levels up from a Resource/ subdirectory.
+                    var candidates = new[]
+                    {
+                        Path.Combine(trimmed, "iccprofiles", "srgb.icc"),
+                        Path.Combine(trimmed, "..",   "iccprofiles", "srgb.icc"),
+                        Path.Combine(trimmed, "..", "..", "iccprofiles", "srgb.icc"),
+                    };
+
+                    foreach (var candidate in candidates)
+                    {
+                        try
+                        {
+                            var normalized = Path.GetFullPath(candidate);
+                            if (File.Exists(normalized))
+                                return normalized;
+                        }
+                        catch { /* invalid path — skip */ }
+                    }
+                }
+
+                return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[PDFA_DEBUG] GetGhostscriptResourceDir failed: {ex.Message}");
+                Console.WriteLine($"[PDFA_DEBUG] FindIccViaGenPath failed: {ex.Message}");
                 return null;
             }
         }
 
-        private async Task<string?> GetIccPathFromGhostscript(string ghostscriptProcessName)
+        /// <summary>
+        /// Asks GS to resolve srgb.icc via its own findlibfile operator.
+        /// Returns null cleanly if unsupported.
+        /// </summary>
+        private async Task<string?> FindIccViaFindLibFile(string ghostscriptProcessName)
         {
             try
             {
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = ghostscriptProcessName,
-                    Arguments = "-dNODISPLAY -dNOSAFER -q -c \"(srgb.icc) findlibfile { == pop } { pop } ifelse\" -c quit",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 };
+
+                startInfo.ArgumentList.Add("-dNODISPLAY");
+                startInfo.ArgumentList.Add("-dNOSAFER");
+                startInfo.ArgumentList.Add("-q");
+                startInfo.ArgumentList.Add("-c");
+                startInfo.ArgumentList.Add("(srgb.icc) findlibfile { == pop } { pop } ifelse");
+                startInfo.ArgumentList.Add("-c");
+                startInfo.ArgumentList.Add("quit");
 
                 using var process = new Process { StartInfo = startInfo };
                 process.Start();
@@ -433,34 +496,46 @@ namespace LocalPDF_Studio_api.BLL.Services
                 var output = (await outputTask).Trim();
                 await errorTask;
 
-                Console.WriteLine($"[PDFA_DEBUG] GS findlibfile raw output: {output}");
+                Console.WriteLine($"[PDFA_DEBUG] findlibfile raw output: {output}");
 
-                if (string.IsNullOrWhiteSpace(output)) return null;
+                if (string.IsNullOrWhiteSpace(output) ||
+                    output.Contains("/undefined") ||
+                    output.Contains("Error:"))
+                    return null;
 
                 var cleaned = output.Trim('(', ')', '"', ' ', '\n', '\r');
                 return string.IsNullOrWhiteSpace(cleaned) ? null : cleaned;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[PDFA_DEBUG] GetIccPathFromGhostscript failed: {ex.Message}");
+                Console.WriteLine($"[PDFA_DEBUG] FindIccViaFindLibFile failed: {ex.Message}");
                 return null;
             }
         }
 
+        /// <summary>
+        /// Resolves the full filesystem path of the GS executable using
+        /// 'where' (Windows) or 'which' (Linux/macOS).
+        /// If the process name is already an absolute rooted path, returns it directly.
+        /// </summary>
         private async Task<string?> GetGhostscriptExecutablePath(string ghostscriptProcessName)
         {
             try
             {
+                // Already an absolute path — return directly, no shell needed
+                if (Path.IsPathRooted(ghostscriptProcessName) && File.Exists(ghostscriptProcessName))
+                    return ghostscriptProcessName;
+
                 var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = isWindows ? "where" : "which",
-                    Arguments = ghostscriptProcessName,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 };
+                startInfo.ArgumentList.Add(ghostscriptProcessName);
 
                 using var process = new Process { StartInfo = startInfo };
                 process.Start();
@@ -469,10 +544,11 @@ namespace LocalPDF_Studio_api.BLL.Services
                 await process.StandardError.ReadToEndAsync();
                 await process.WaitForExitAsync();
 
-                // 'where' can return multiple lines — take the first valid one
-                var firstLine = output.Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                                      .Select(l => l.Trim())
-                                      .FirstOrDefault(l => File.Exists(l));
+                // 'where' may return multiple lines — take the first that exists on disk
+                var firstLine = output
+                    .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(l => l.Trim())
+                    .FirstOrDefault(l => File.Exists(l));
 
                 Console.WriteLine($"[PDFA_DEBUG] GS executable path: {firstLine}");
                 return firstLine;
@@ -484,13 +560,183 @@ namespace LocalPDF_Studio_api.BLL.Services
             }
         }
 
+        /// <summary>
+        /// Follows symlinks to their real target. Essential on macOS Homebrew
+        /// where /usr/local/bin/gs → /usr/local/Cellar/ghostscript/x.x.x/bin/gs.
+        /// Without this, walking up from /usr/local/bin/ never reaches the
+        /// Cellar tree where iccprofiles/ actually lives.
+        /// </summary>
+        private static string ResolveSymlink(string path)
+        {
+            try
+            {
+                var info = new FileInfo(path);
+                if (info.LinkTarget != null)
+                {
+                    var target = info.LinkTarget;
+                    // LinkTarget may be relative — resolve against the symlink's directory
+                    if (!Path.IsPathRooted(target))
+                        target = Path.GetFullPath(
+                            Path.Combine(Path.GetDirectoryName(path)!, target));
+
+                    Console.WriteLine($"[PDFA_DEBUG] Symlink {path} -> {target}");
+                    // Recurse to handle chained symlinks
+                    return ResolveSymlink(target);
+                }
+                return path;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[PDFA_DEBUG] ResolveSymlink failed for {path}: {ex.Message}");
+                return path;
+            }
+        }
+
+        /// <summary>
+        /// Last-resort search of well-known versioned install paths per platform.
+        /// Covers non-standard installs that all other strategies miss.
+        /// </summary>
+        private static string? FindIccInWellKnownPaths()
+        {
+            var candidates = new List<string>();
+
+            // ── Bundled GS (snap / AppImage / packaged builds) ────────────────
+            // AppContext.BaseDirectory = .../resources/assets/backend_linux/ (snap)
+            //                         = .../<app>.app/Contents/MacOS/          (macOS dmg)
+            //                         = .../resources/                          (Windows)
+            foreach (var baseOffset in new[] { ".", ".." })
+            {
+                var bundledBase = Path.GetFullPath(
+                    Path.Combine(AppContext.BaseDirectory, baseOffset, "compiled-ghostscript"));
+
+                // Direct iccprofiles/
+                candidates.Add(Path.Combine(bundledBase, "iccprofiles", "srgb.icc"));
+
+                // share/ghostscript/iccprofiles/ (non-versioned)
+                var shareGs = Path.Combine(bundledBase, "share", "ghostscript");
+                candidates.Add(Path.Combine(shareGs, "iccprofiles", "srgb.icc"));
+
+                // share/ghostscript/<version>/iccprofiles/ (versioned — snap autotools layout)
+                if (Directory.Exists(shareGs))
+                {
+                    try
+                    {
+                        foreach (var vDir in Directory.GetDirectories(shareGs))
+                            candidates.Add(Path.Combine(vDir, "iccprofiles", "srgb.icc"));
+                    }
+                    catch { /* skip */ }
+                }
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                foreach (var root in new[]
+                {
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
+                })
+                {
+                    if (!Directory.Exists(root)) continue;
+                    // e.g. C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+                    foreach (var gsRoot in Directory.GetDirectories(root, "gs*", SearchOption.TopDirectoryOnly))
+                    {
+                        candidates.Add(Path.Combine(gsRoot, "iccprofiles", "srgb.icc"));
+                        try
+                        {
+                            foreach (var vDir in Directory.GetDirectories(gsRoot))
+                                candidates.Add(Path.Combine(vDir, "iccprofiles", "srgb.icc"));
+                        }
+                        catch { /* skip */ }
+                    }
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // Homebrew ARM (/opt/homebrew) and Intel (/usr/local) Cellar paths
+                // e.g. /opt/homebrew/Cellar/ghostscript/10.06.0_1/share/ghostscript/iccprofiles/
+                //      /usr/local/Cellar/ghostscript/10.06.0_1/share/ghostscript/iccprofiles/
+                foreach (var brewRoot in new[] { "/opt/homebrew", "/usr/local" })
+                {
+                    var cellarGs = Path.Combine(brewRoot, "Cellar", "ghostscript");
+                    if (!Directory.Exists(cellarGs)) continue;
+                    try
+                    {
+                        foreach (var vDir in Directory.GetDirectories(cellarGs))
+                        {
+                            var shareGs = Path.Combine(vDir, "share", "ghostscript");
+                            candidates.Add(Path.Combine(shareGs, "iccprofiles", "srgb.icc"));
+                            if (Directory.Exists(shareGs))
+                            {
+                                try
+                                {
+                                    foreach (var sub in Directory.GetDirectories(shareGs))
+                                        candidates.Add(Path.Combine(sub, "iccprofiles", "srgb.icc"));
+                                }
+                                catch { /* skip */ }
+                            }
+                        }
+                    }
+                    catch { /* skip */ }
+                }
+            }
+            else
+            {
+                // Linux system GS
+                // e.g. /usr/share/ghostscript/10.06.0/iccprofiles/srgb.icc
+                var gsShareRoot = "/usr/share/ghostscript";
+                candidates.Add(Path.Combine(gsShareRoot, "iccprofiles", "srgb.icc"));
+                candidates.Add("/usr/share/color/icc/ghostscript/srgb.icc");
+                if (Directory.Exists(gsShareRoot))
+                {
+                    try
+                    {
+                        foreach (var vDir in Directory.GetDirectories(gsShareRoot))
+                            candidates.Add(Path.Combine(vDir, "iccprofiles", "srgb.icc"));
+                    }
+                    catch { /* skip */ }
+                }
+            }
+
+            foreach (var candidate in candidates)
+            {
+                try
+                {
+                    var normalized = Path.GetFullPath(candidate);
+                    if (File.Exists(normalized))
+                    {
+                        Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc via well-known paths: {normalized}");
+                        return normalized;
+                    }
+                }
+                catch { /* invalid path — skip */ }
+            }
+
+            return null;
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Helpers
+        // ─────────────────────────────────────────────────────────────────────
+
+        private static int GetPdfaVersion(string conformanceLevel)
+        {
+            return conformanceLevel.ToLower() switch
+            {
+                "pdfa1a" or "pdfa1b" => 1,
+                "pdfa2a" or "pdfa2b" => 2,
+                "pdfa3b" => 3,
+                _ => 1
+            };
+        }
+
         private string GetGhostscriptProcessName()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return "gswin64c.exe";
 
-            // Check for bundled Ghostscript (snap / packaged Linux builds)
-            var bundledGs = Path.Combine(AppContext.BaseDirectory, "compiled-ghostscript", "bin", "gs");
+            // Bundled GS (snap / packaged Linux builds)
+            var bundledGs = Path.Combine(
+                AppContext.BaseDirectory, "compiled-ghostscript", "bin", "gs");
             if (File.Exists(bundledGs))
             {
                 Console.WriteLine($"[PDFA_DEBUG] Using bundled Ghostscript: {bundledGs}");
@@ -499,6 +745,8 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
+                // Return the symlink path — ResolveSymlink() will follow it to
+                // the real Cellar path when needed for icc discovery.
                 if (File.Exists("/opt/homebrew/bin/gs")) return "/opt/homebrew/bin/gs";
                 if (File.Exists("/usr/local/bin/gs")) return "/usr/local/bin/gs";
             }
