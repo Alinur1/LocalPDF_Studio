@@ -82,6 +82,8 @@ parts:
       cp $SNAPCRAFT_STAGE/usr/local/bin/gs $GS_TARGET/bin/      
       mkdir -p $GS_TARGET/share
       cp -rv $SNAPCRAFT_STAGE/usr/local/share/* $GS_TARGET/share/
+      mkdir -p $SNAPCRAFT_PART_INSTALL/assets/common/iccprofiles
+      cp -rv assets/common/iccprofiles/* $SNAPCRAFT_PART_INSTALL/assets/common/iccprofiles/
 
 apps:
   localpdf-studio:

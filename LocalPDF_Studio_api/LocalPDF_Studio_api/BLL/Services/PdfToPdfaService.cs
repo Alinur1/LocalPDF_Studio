@@ -236,76 +236,25 @@ namespace LocalPDF_Studio_api.BLL.Services
 
         private async Task<string?> FindSrgbIccProfile(string ghostscriptProcessName)
         {
-            // ── Strategy 1 ─────────────────────────────────────────────
-            // For bundled GS (snap / AppImage / packaged builds), the iccprofiles
-            // folder is always relative to the GS binary — check this immediately
-            // before anything else so this strategy never wastes time on GS subprocess calls
-            // against a bundled binary that may not support .genpath or findlibfile.
-            //
-            // Covers snap layout:
-            //   compiled-ghostscript/bin/gs
-            //   compiled-ghostscript/share/ghostscript/<version>/iccprofiles/srgb.icc
-            if (Path.IsPathRooted(ghostscriptProcessName) && File.Exists(ghostscriptProcessName))
+            var baseDir = AppContext.BaseDirectory;            
+            string[] searchPaths = {
+                Path.Combine(baseDir, "assets", "common", "iccprofiles", "srgb.icc"),
+                Path.Combine(baseDir, "..", "assets", "common", "iccprofiles", "srgb.icc"),
+                Path.Combine(baseDir, "..", "..", "assets", "common", "iccprofiles", "srgb.icc"),
+                Path.Combine(baseDir, "..", "..", "..", "assets", "common", "iccprofiles", "srgb.icc")
+            };
+
+            foreach (var path in searchPaths)
             {
-                var icc = SearchIccRelativeToBinary(ghostscriptProcessName);
-                if (!string.IsNullOrEmpty(icc))
+                var normalizedPath = Path.GetFullPath(path);
+                if (File.Exists(normalizedPath))
                 {
-                    Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc relative to bundled binary: {icc}");
-                    return icc;
+                    Console.WriteLine($"[PDFA_DEBUG] Found bundled srgb.icc at: {normalizedPath}");
+                    return normalizedPath;
                 }
             }
 
-            // ── Strategy 2 ───────────────────────────────────────────────────
-            // Ask GS to print its full lib search path via .genpath.
-            // Works on standard GS 9.x and 10.x installs on all platforms.
-            // NOTE: Compiled/bundled GS builds (snap) may not support .genpath —
-            // if it fails it will fall through cleanly.
-            var genPathResult = await FindIccViaGenPath(ghostscriptProcessName);
-            if (!string.IsNullOrEmpty(genPathResult))
-            {
-                Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc via .genpath: {genPathResult}");
-                return genPathResult;
-            }
-
-            // ── Strategy 3 ───────────────────────────────────────────────────
-            // Ask GS to locate srgb.icc on its own search path using findlibfile.
-            var findLibResult = await FindIccViaFindLibFile(ghostscriptProcessName);
-            if (!string.IsNullOrEmpty(findLibResult) && File.Exists(findLibResult))
-            {
-                Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc via findlibfile: {findLibResult}");
-                return findLibResult;
-            }
-
-            // ── Strategy 4 ───────────────────────────────────────────────────
-            // Resolve the real executable path (following symlinks — critical
-            // for Homebrew on macOS where /usr/local/bin/gs symlinks into the
-            // Cellar tree) then walk up the directory tree.
-            var execPath = await GetGhostscriptExecutablePath(ghostscriptProcessName);
-            if (!string.IsNullOrEmpty(execPath))
-            {
-                var resolvedExec = ResolveSymlink(execPath);
-                Console.WriteLine($"[PDFA_DEBUG] Resolved GS executable: {resolvedExec}");
-
-                // Also run the relative-to-binary search on the resolved path
-                // in case the original path was a symlink (macOS Homebrew)
-                var iccFromResolved = SearchIccRelativeToBinary(resolvedExec);
-                if (!string.IsNullOrEmpty(iccFromResolved))
-                {
-                    Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc relative to resolved binary: {iccFromResolved}");
-                    return iccFromResolved;
-                }
-            }
-
-            // ── Strategy 4 ───────────────────────────────────────────────────
-            // Last resort: well-known versioned install paths per platform.
-            var wellKnown = FindIccInWellKnownPaths();
-            if (!string.IsNullOrEmpty(wellKnown))
-            {
-                Console.WriteLine($"[PDFA_DEBUG] Found srgb.icc via well-known paths: {wellKnown}");
-                return wellKnown;
-            }
-
-            Console.WriteLine("[PDFA_DEBUG] srgb.icc not found via any strategy.");
+            Console.WriteLine("[PDFA_DEBUG] srgb.icc not found in bundled common assets.");
             return null;
         }
 
