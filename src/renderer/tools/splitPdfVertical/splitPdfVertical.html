@@ -1,0 +1,129 @@
+<!--
+ * LocalPDF Studio - Offline PDF Toolkit
+ * ======================================
+ * 
+ * @author      Md. Alinur Hossain <alinur1160@gmail.com>
+ * @license     AGPL 3.0 (GNU Affero General Public License version 3)
+ * @website     https://alinur1.github.io/LocalPDF_Studio_Website/
+ * @repository  https://github.com/Alinur1/LocalPDF_Studio
+ * 
+ * Copyright (c) 2025 Md. Alinur Hossain. All rights reserved.
+ * 
+ * Architecture:
+ * - Frontend: Electron + HTML/CSS/JS
+ * - Backend: ASP.NET Core Web API, Python
+ * - PDF Engine: PdfSharp + Mozilla PDF.js
+-->
+
+
+<!-- src/renderer/tools/splitPdfVertical/splitPdfVertical.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - Split PDF (Vertical)</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./splitPdfVertical.css">
+    <link rel="stylesheet" href="../../styles/loading.css">
+    <script type="module" src="../../utils/themeManager.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn">← Back</a>
+            <h1 class="tool-title">Split PDF (Vertical)</h1>
+        </div>
+        <main class="tool-container">
+
+            <!-- File Selection -->
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">
+                    Click to Select a PDF File or drop PDF here
+                    <p><small class="select-hint">Supports PDF</small></p>
+                </button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                </div>
+            </div>
+
+            <!-- PDF Preview -->
+            <div id="preview-container" class="preview-container" style="display: none;">
+                <div class="preview-header">
+                    <h3>PDF Preview</h3>
+                    <span id="page-count" class="page-count"></span>
+                </div>
+                <div id="preview-grid" class="preview-grid"></div>
+            </div>
+
+            <!-- Split Options -->
+            <div class="split-options-container">
+                <h2>Split Options</h2>
+
+                <!-- 50/50 -->
+                <div class="split-method">
+                    <input type="radio" id="splitEvenHalf" name="splitMode" value="half" checked>
+                    <label for="splitEvenHalf">Split evenly (50 / 50)</label>
+                </div>
+                <div class="options-panel" id="optionsHalf" style="border: none; padding-left: 2rem;">
+                    <small class="help-text">Each page will be split exactly down the middle into a left and right
+                        PDF.</small>
+                </div>
+
+                <!-- Custom % -->
+                <div class="split-method">
+                    <input type="radio" id="splitCustom" name="splitMode" value="custom">
+                    <label for="splitCustom">Custom split position</label>
+                </div>
+                <div class="options-panel" id="optionsCustom" style="display: none;">
+                    <label
+                        style="color: var(--options-label-color); font-size: 0.9rem; display: block; margin-bottom: 0.6rem;">
+                        Split position (% from left edge)
+                    </label>
+                    <div class="slider-row">
+                        <input type="range" id="split-slider" class="split-slider" min="1" max="99" value="50">
+                        <input type="number" id="split-percentage" class="percentage-input" min="1" max="99" value="50">
+                        <span class="percentage-symbol">%</span>
+                    </div>
+
+                    <!-- Visual bar preview -->
+                    <div class="split-visual-preview">
+                        <div class="split-visual-left" id="visual-left" style="width: 50%;">
+                            <span class="split-visual-label" id="label-left">Left — 50%</span>
+                        </div>
+                        <div class="split-visual-line"></div>
+                        <div class="split-visual-right" id="visual-right">
+                            <span class="split-visual-label" id="label-right">Right — 50%</span>
+                        </div>
+                    </div>
+                    <small class="help-text" style="margin-top: 0.5rem;">
+                        Drag the slider or type a value between 1 and 99.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Action -->
+            <div class="action-buttons">
+                <button id="split-btn" class="top-btn" disabled>Split PDF (Vertical)</button>
+            </div>
+
+        </main>
+    </div>
+
+    <script type="module" src="./splitPdfVertical.js"></script>
+</body>
+
+</html>

@@ -120,6 +120,7 @@ async function getEndpoints() {
         redact: `${base}/PdfRedact/redact`,
         grayscale: `${base}/PdfGrayscale/convert`,
         pdfToPdfa: `${base}/PdfToPdfa/convert`,
+        verticalSplit: `${base}/PdfVerticalSplit/split`,
         // Add more as necessary
     };
 }
