@@ -1,3 +1,21 @@
+/**
+ * LocalPDF Studio - Offline PDF Toolkit
+ * ======================================
+ * 
+ * @author      Md. Alinur Hossain <alinur1160@gmail.com>
+ * @license     AGPL 3.0 (GNU Affero General Public License version 3)
+ * @website     https://alinur1.github.io/LocalPDF_Studio_Website/
+ * @repository  https://github.com/Alinur1/LocalPDF_Studio
+ * 
+ * Copyright (c) 2025 Md. Alinur Hossain. All rights reserved.
+ * 
+ * Architecture:
+ * - Frontend: Electron + HTML/CSS/JS
+ * - Backend: ASP.NET Core Web API, Python
+ * - PDF Engine: PdfSharp + Mozilla PDF.js
+**/
+
+
 // src/renderer/tools/pdfToPdfa/pdfToPdfa.js
 
 import { API } from '../../api/api.js';
@@ -82,9 +100,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!isGhostscriptAvailable) {
                 loadingUI.hide();
                 const result = await customAlert.alert(
-                    'Requirement Missing',
-                    'Ghostscript is required for PDF/A conversion but was not found on your system.\n\nPlease install Ghostscript and try again.',
-                    ['OK', 'Watch Tutorial']
+                    'LocalPDF Studio - REQUIREMENT',
+                    'Ghostscript is required to use the Compress PDF feature.\nPlease install Ghostscript on your system to continue:\n\n• Windows: Download from https://www.ghostscript.com/\n• macOS: Install using Homebrew: \"brew install ghostscript\"\n• Linux: Install using your package manager\n   - Ubuntu/Debian: \"sudo apt install ghostscript\"\n   - Fedora: \"sudo dnf install ghostscript\"\n   - Arch: \"sudo pacman -S ghostscript\"\nNote: Most modern linux distros have ghostscript pre-installed. Checking command=> gs -v',
+                    ['OK', 'Tutorial']
                 );
                 if (result === 1) {
                     window.electronAPI.openExternal('https://youtu.be/fKrnSytg_z4');
@@ -103,8 +121,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error during file selection:', error);
             await customAlert.alert(
-                'Error',
-                'An error occurred while selecting the file: ' + error.message,
+                'LocalPDF Studio - ERROR',
+                'An error occurred while selecting the file.',
                 ['OK']
             );
         } finally {
@@ -143,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     convertBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('Notice', 'Please select a PDF file first.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a PDF file first.', ['OK']);
             return;
         }
 
@@ -154,7 +172,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!isGhostscriptAvailable) {
                 loadingUI.hide();
                 await customAlert.alert(
-                    'Requirement Missing',
+                    'LocalPDF Studio - REQUIREMENT',
                     'Ghostscript is not available. Please install Ghostscript to use PDF/A conversion.',
                     ['OK']
                 );
@@ -163,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             loadingUI.hide();
             await customAlert.alert(
-                'Error',
+                'LocalPDF Studio - ERROR',
                 'Failed to verify Ghostscript: ' + error.message,
                 ['OK']
             );
@@ -205,17 +223,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (savedPath) {
                 await customAlert.alert(
-                    'Success',
-                    `PDF successfully converted to PDF/A (${conformance.toUpperCase()}).\n\nSaved to: ${savedPath}`,
+                    'LocalPDF Studio - SUCCESS',
+                    `PDF successfully converted to PDF/A (${conformance.toUpperCase()}).`,
                     ['OK']
                 );
             } else {
-                await customAlert.alert('Warning', 'Operation was cancelled or failed to save.', ['OK']);
+                await customAlert.alert('LocalPDF Studio - WARNING', 'Operation was cancelled or failed to save.', ['OK']);
             }
         } catch (error) {
             console.error('Error converting PDF:', error);
             await customAlert.alert(
-                'Error',
+                'LocalPDF Studio - ERROR',
                 'An error occurred during conversion: ' + error.message,
                 ['OK']
             );
@@ -231,7 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert('Notice', 'Please drop only one PDF file at a time.', ['OK']);
+                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop only one PDF file at a time.', ['OK']);
                 return;
             }
 
@@ -241,9 +259,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!isGhostscriptAvailable) {
                     loadingUI.hide();
                     const result = await customAlert.alert(
-                        'Requirement Missing',
-                        'Ghostscript is required for PDF/A conversion but was not found on your system.\n\nPlease install Ghostscript and try again.',
-                        ['OK', 'Watch Tutorial']
+                        'LocalPDF Studio - REQUIREMENT',
+                        'Ghostscript is required to use the Compress PDF feature.\nPlease install Ghostscript on your system to continue:\n\n• Windows: Download from https://www.ghostscript.com/\n• macOS: Install using Homebrew: \"brew install ghostscript\"\n• Linux: Install using your package manager\n   - Ubuntu/Debian: \"sudo apt install ghostscript\"\n   - Fedora: \"sudo dnf install ghostscript\"\n   - Arch: \"sudo pacman -S ghostscript\"\nNote: Most modern linux distros have ghostscript pre-installed. Checking command=> gs -v',
+                        ['OK', 'Tutorial']
                     );
                     if (result === 1) {
                         window.electronAPI.openExternal('https://youtu.be/fKrnSytg_z4');
@@ -268,12 +286,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         size: file.size || 0
                     });
                 } else {
-                    await customAlert.alert('Error', 'Failed to save dropped file: ' + saveResult.error, ['OK']);
+                    await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to save dropped file: ' + saveResult.error, ['OK']);
                 }
             } catch (error) {
                 console.error('Error processing dropped file:', error);
                 await customAlert.alert(
-                    'Error',
+                    'LocalPDF Studio - ERROR',
                     'An error occurred while processing the dropped file: ' + error.message,
                     ['OK']
                 );
@@ -282,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('Notice', 'Please drop a valid PDF file.', ['OK']);
+            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a valid PDF file.', ['OK']);
         }
     });
 
