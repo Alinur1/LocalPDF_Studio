@@ -23,9 +23,11 @@ import customAlert from '../../utils/customAlert.js';
 import loadingUI from '../../utils/loading.js';
 import { initializeGlobalDragDrop } from '../../utils/globalDragDrop.js';
 import { ThemeManager } from '../../utils/themeManager.js';
+import i18n from '../../utils/i18n.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await API.init();
+    await i18n.init();
     ThemeManager.init();
 
     const selectPdfBtn = document.getElementById('select-pdf-btn');
@@ -94,15 +96,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ─── Select PDF button ───────────────────────────────────────────────────
 
     selectPdfBtn.addEventListener('click', async () => {
-        loadingUI.show('Checking Ghostscript...');
+        loadingUI.show(i18n.t('pdfToPdfAJS.checking-gs'));
         try {
             const isGhostscriptAvailable = await checkGhostscriptAvailability();
             if (!isGhostscriptAvailable) {
                 loadingUI.hide();
                 const result = await customAlert.alert(
-                    'LocalPDF Studio - REQUIREMENT',
-                    'Ghostscript is required to use the Compress PDF feature.\nPlease install Ghostscript on your system to continue:\n\n• Windows: Download from https://www.ghostscript.com/\n• macOS: Install using Homebrew: \"brew install ghostscript\"\n• Linux: Install using your package manager\n   - Ubuntu/Debian: \"sudo apt install ghostscript\"\n   - Fedora: \"sudo dnf install ghostscript\"\n   - Arch: \"sudo pacman -S ghostscript\"\nNote: Most modern linux distros have ghostscript pre-installed. Checking command=> gs -v',
-                    ['OK', 'Tutorial']
+                    i18n.t('alerts.requirement'),
+                    i18n.t('pdfToPdfAJS.gs-required-msg'),
+                    [i18n.t('common.ok'), i18n.t('pdfToPdfAJS.tutorial')]
                 );
                 if (result === 1) {
                     window.electronAPI.openExternal('https://youtu.be/fKrnSytg_z4');
@@ -110,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            loadingUI.updateMessage('Selecting PDF...');
+            loadingUI.updateMessage(i18n.t('pdfToPdfAJS.selecting-pdf'));
             const files = await window.electronAPI.selectPdfs();
             if (files && files.length > 0) {
                 const filePath = files[0];
@@ -121,9 +123,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error during file selection:', error);
             await customAlert.alert(
-                'LocalPDF Studio - ERROR',
-                'An error occurred while selecting the file.',
-                ['OK']
+                i18n.t('alerts.error'),
+                i18n.t('pdfToPdfAJS.file-selection-error'),
+                [i18n.t('common.ok')]
             );
         } finally {
             loadingUI.hide();
@@ -161,29 +163,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     convertBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please select a PDF file first.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('pdfToPdfAJS.select-pdf'), [i18n.t('common.ok')]);
             return;
         }
 
         // Re-verify Ghostscript before converting
-        loadingUI.show('Verifying Ghostscript...');
+        loadingUI.show(i18n.t('pdfToPdfAJS.verifying-gs'));
         try {
             const isGhostscriptAvailable = await checkGhostscriptAvailability();
             if (!isGhostscriptAvailable) {
                 loadingUI.hide();
                 await customAlert.alert(
-                    'LocalPDF Studio - REQUIREMENT',
-                    'Ghostscript is not available. Please install Ghostscript to use PDF/A conversion.',
-                    ['OK']
+                    i18n.t('alerts.requirement'),
+                    i18n.t('pdfToPdfAJS.gs-na'),
+                    [i18n.t('common.ok')]
                 );
                 return;
             }
         } catch (error) {
             loadingUI.hide();
+            console.log("Failed to verify Ghostscript: ", error);
             await customAlert.alert(
-                'LocalPDF Studio - ERROR',
-                'Failed to verify Ghostscript: ' + error.message,
-                ['OK']
+                i18n.t('alerts.error'),
+                i18n.t('pdfToPdfAJS.gs-verify-failed'),
+                [i18n.t('common.ok')]
             );
             return;
         }
@@ -199,9 +202,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            loadingUI.show('Converting to PDF/A...');
+            loadingUI.show(i18n.t('pdfToPdfAJS.converting-pdfa'));
             convertBtn.disabled = true;
-            convertBtn.textContent = 'Converting...';
+            convertBtn.textContent = i18n.t('pdfToPdfAJS.converting');
 
             const convertEndpoint = await API.pdf.pdfToPdfa;
             const response = await fetch(convertEndpoint, {
@@ -223,24 +226,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (savedPath) {
                 await customAlert.alert(
-                    'LocalPDF Studio - SUCCESS',
-                    `PDF successfully converted to PDF/A (${conformance.toUpperCase()}).`,
-                    ['OK']
+                    i18n.t('alerts.success'),
+                    i18n.t('pdfToPdfAJS.conversion-success'),
+                    [i18n.t('common.ok')]
                 );
             } else {
-                await customAlert.alert('LocalPDF Studio - WARNING', 'Operation was cancelled or failed to save.', ['OK']);
+                await customAlert.alert(i18n.t('common.warning'), i18n.t('pdfToPdfAJS.conversion-cancalled'), [i18n.t('common.ok')]);
             }
         } catch (error) {
             console.error('Error converting PDF:', error);
             await customAlert.alert(
-                'LocalPDF Studio - ERROR',
-                'An error occurred during conversion: ' + error.message,
-                ['OK']
+                i18n.t('alerts.error'),
+                i18n.t('pdfToPdfAJS.conversion-error'),
+                [i18n.t('common.ok')]
             );
         } finally {
             loadingUI.forceHide();
             convertBtn.disabled = false;
-            convertBtn.textContent = 'Convert to PDF/A';
+            convertBtn.textContent = i18n.t('pdfToPdfAJS.convert-btn');
         }
     });
 
@@ -249,19 +252,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop only one PDF file at a time.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('pdfToPdfAJS.drop-one-file'), [i18n.t('common.ok')]);
                 return;
             }
 
-            loadingUI.show('Checking Ghostscript...');
+            loadingUI.show(i18n.t('pdfToPdfAJS.checking-gs'));
             try {
                 const isGhostscriptAvailable = await checkGhostscriptAvailability();
                 if (!isGhostscriptAvailable) {
                     loadingUI.hide();
                     const result = await customAlert.alert(
-                        'LocalPDF Studio - REQUIREMENT',
-                        'Ghostscript is required to use the Compress PDF feature.\nPlease install Ghostscript on your system to continue:\n\n• Windows: Download from https://www.ghostscript.com/\n• macOS: Install using Homebrew: \"brew install ghostscript\"\n• Linux: Install using your package manager\n   - Ubuntu/Debian: \"sudo apt install ghostscript\"\n   - Fedora: \"sudo dnf install ghostscript\"\n   - Arch: \"sudo pacman -S ghostscript\"\nNote: Most modern linux distros have ghostscript pre-installed. Checking command=> gs -v',
-                        ['OK', 'Tutorial']
+                        i18n.t('alerts.requirement'),
+                        i18n.t('pdfToPdfAJS.gs-required-msg'),
+                        [i18n.t('common.ok'), i18n.t('pdfToPdfAJS.tutorial')]
                     );
                     if (result === 1) {
                         window.electronAPI.openExternal('https://youtu.be/fKrnSytg_z4');
@@ -269,7 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                loadingUI.updateMessage('Processing dropped file...');
+                loadingUI.updateMessage(i18n.t('pdfToPdfAJS.processing-droppped-file'));
                 await cleanupDroppedFile();
                 const file = pdfFiles[0];
                 const buffer = await file.arrayBuffer();
@@ -286,21 +289,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                         size: file.size || 0
                     });
                 } else {
-                    await customAlert.alert('LocalPDF Studio - ERROR', 'Failed to save dropped file: ' + saveResult.error, ['OK']);
+                    console.error('Failed to save dropped file: ', error);
+                    await customAlert.alert(i18n.t('alerts.error'), i18n.t('pdfToPdfAJS.dropped-error'), [i18n.t('common.ok')]);
                 }
             } catch (error) {
                 console.error('Error processing dropped file:', error);
                 await customAlert.alert(
-                    'LocalPDF Studio - ERROR',
-                    'An error occurred while processing the dropped file: ' + error.message,
-                    ['OK']
+                    i18n.t('alerts.error'),
+                    i18n.t('pdfToPdfAJS.dropped-error2'),
+                    [i18n.t('common.ok')]
                 );
             } finally {
                 loadingUI.hide();
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('LocalPDF Studio - NOTICE', 'Please drop a valid PDF file.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('pdfToPdfAJS.drop-valid-pdf'), [i18n.t('common.ok')]);
         }
     });
 

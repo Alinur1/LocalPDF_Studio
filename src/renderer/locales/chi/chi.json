@@ -26,7 +26,8 @@
     "tool-redact-pdf": "PDF 内容擦除",
     "pdf-grayscale": "PDF 灰度转换器",
     "fillable-pdf-builder": "可填写 PDF 生成器",
-    "image-editor": "图片编辑器"
+    "image-editor": "图片编辑器",
+    "pdf-to-pdfa": "PDF 转 PDF/A 转换器"
   },
   "error": {
     "empty-message": "未打开PDF。点击\"打开PDF阅读器\"开始使用！"
@@ -1030,5 +1031,48 @@
     "templateSaveCancelled": "模板保存已取消",
     "errorSavingTemplate": "保存模板时发生错误",
     "loadingTemplate": "正在加载模板..."
+  },
+  "pdfToPdfA": {
+    "tool-title": "PDF 转 PDF/A 转换器",
+    "convert-options": "转换设置",
+    "conformance-level": "PDF/A 合规级别",
+    "option1": "PDF/A-1b",
+    "option1-helpTxt": "ISO 19005-1，B 级 — 基本视觉再现。兼容性最好，广泛支持。",
+    "option2": "PDF/A-1a",
+    "option2-helpTxt": "ISO 19005-1，A 级 — 完整的无障碍访问，包括结构和标记。",
+    "option3": "PDF/A-2b（推荐）",
+    "option3-helpTxt": "ISO 19005-2，B 级 — 支持 JPEG 2000、透明度和图层。",
+    "option4": "PDF/A-2a",
+    "option4-helpTxt": "ISO 19005-2，A 级 — 完整的无障碍访问，支持 PDF 1.7 功能。",
+    "option5": "PDF/A-3b",
+    "option5-helpTxt": "ISO 19005-3，B 级 — 允许嵌入任何文件类型作为附件。",
+    "font-embedding": "字体嵌入",
+    "embed1": "嵌入所有字体（推荐）",
+    "embed1-helpTxt": "确保文本在任何设备上正确渲染。有效 PDF/A 必需。",
+    "embed2": "子集字体",
+    "embed2-helpTxt": "仅嵌入使用的字符以减小文件大小。",
+    "convert-btn": "转换为 PDF/A"
+  },
+  "pdfToPdfAJS": {
+    "checking-gs": "正在检查 Ghostscript...",
+    "gs-required-msg": "使用 PDF 压缩功能需要 Ghostscript。\n请在您的系统上安装 Ghostscript 以继续：\n\n• Windows：从 https://www.ghostscript.com/ 下载\n• macOS：使用 Homebrew 安装：\"brew install ghostscript\"\n• Linux：使用包管理器安装\n   - Ubuntu/Debian：\"sudo apt install ghostscript\"\n   - Fedora：\"sudo dnf install ghostscript\"\n   - Arch：\"sudo pacman -S ghostscript\"\n注意：大多数现代 Linux 发行版预装了 Ghostscript。检查命令 => gs -v",
+    "tutorial": "教程",
+    "selecting-pdf": "正在选择 PDF...",
+    "file-selection-error": "选择文件时发生错误。",
+    "select-pdf": "请先选择一个 PDF 文件。",
+    "verifying-gs": "正在验证 Ghostscript...",
+    "gs-na": "Ghostscript 不可用。请安装 Ghostscript 以使用 PDF/A 转换。",
+    "gs-verify-failed": "验证 Ghostscript 失败。",
+    "converting-pdfa": "正在转换为 PDF/A...",
+    "converting": "正在转换...",
+    "conversion-success": "PDF 已成功转换为 PDF/A。",
+    "conversion-cancalled": "操作已取消或保存失败。",
+    "conversion-error": "转换过程中发生错误。",
+    "convert-btn": "转换为 PDF/A",
+    "drop-one-file": "请一次只拖放一个 PDF 文件。",
+    "processing-droppped-file": "正在处理拖放的文件...",
+    "dropped-error": "保存拖放的文件失败。",
+    "dropped-error2": "处理拖放的文件时发生错误。",
+    "drop-valid-pdf": "请拖放一个有效的 PDF 文件。"
   }
 }

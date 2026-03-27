@@ -39,14 +39,14 @@
 <body>
     <div id="app">
         <div class="top-bar">
-            <a href="../../index.html" class="top-btn">← Back</a>
-            <h1 class="tool-title">PDF to PDF/A Converter</h1>
+            <a href="../../index.html" class="top-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="pdfToPdfA.tool-title">PDF to PDF/A Converter</h1>
         </div>
         <main class="tool-container">
             <div class="file-selection-area">
                 <button id="select-pdf-btn" class="select-pdf-btn">
-                    <span>Click to Select a PDF File or drop PDF here</span>
-                    <p><small class="select-hint">Supports PDF</small></p>
+                    <span data-i18n="common.btn-select">Click to Select a PDF File or drop PDF here</span>
+                    <p><small class="select-hint" data-i18n="common.supported-formats">Supports PDF</small></p>
                 </button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
                     <div style="flex-grow: 1;">
@@ -58,17 +58,17 @@
             </div>
 
             <div class="convert-options-container">
-                <h2>Conversion Settings</h2>
+                <h2 data-i18n="pdfToPdfA.convert-options">Conversion Settings</h2>
 
                 <div class="conformance-section">
-                    <h3>PDF/A Conformance Level</h3>
+                    <h3 data-i18n="pdfToPdfA.conformance-level">PDF/A Conformance Level</h3>
 
                     <div class="quality-option">
                         <label class="radio-label">
                             <input type="radio" name="conformance" value="pdfa1b">
                             <div class="option-content">
-                                <span class="option-title">PDF/A-1b</span>
-                                <span class="option-desc">ISO 19005-1, Level B — Basic visual reproducibility. Most
+                                <span class="option-title" data-i18n="pdfToPdfA.option1">PDF/A-1b</span>
+                                <span class="option-desc" data-i18n="pdfToPdfA.option1-helpTxt">ISO 19005-1, Level B — Basic visual reproducibility. Most
                                     compatible, widely supported.</span>
                             </div>
                         </label>
@@ -78,8 +78,8 @@
                         <label class="radio-label">
                             <input type="radio" name="conformance" value="pdfa1a">
                             <div class="option-content">
-                                <span class="option-title">PDF/A-1a</span>
-                                <span class="option-desc">ISO 19005-1, Level A — Full accessibility including structure
+                                <span class="option-title" data-i18n="pdfToPdfA.option2">PDF/A-1a</span>
+                                <span class="option-desc" data-i18n="pdfToPdfA.option2-helpTxt">ISO 19005-1, Level A — Full accessibility including structure
                                     and tagging.</span>
                             </div>
                         </label>
@@ -89,8 +89,8 @@
                         <label class="radio-label">
                             <input type="radio" name="conformance" value="pdfa2b" checked>
                             <div class="option-content">
-                                <span class="option-title">PDF/A-2b (Recommended)</span>
-                                <span class="option-desc">ISO 19005-2, Level B — Supports JPEG 2000, transparency, and
+                                <span class="option-title" data-i18n="pdfToPdfA.option3">PDF/A-2b (Recommended)</span>
+                                <span class="option-desc" data-i18n="pdfToPdfA.option3-helpTxt">ISO 19005-2, Level B — Supports JPEG 2000, transparency, and
                                     layers.</span>
                             </div>
                         </label>
@@ -100,8 +100,8 @@
                         <label class="radio-label">
                             <input type="radio" name="conformance" value="pdfa2a">
                             <div class="option-content">
-                                <span class="option-title">PDF/A-2a</span>
-                                <span class="option-desc">ISO 19005-2, Level A — Full accessibility with PDF 1.7
+                                <span class="option-title" data-i18n="pdfToPdfA.option4">PDF/A-2a</span>
+                                <span class="option-desc" data-i18n="pdfToPdfA.option4-helpTxt">ISO 19005-2, Level A — Full accessibility with PDF 1.7
                                     features.</span>
                             </div>
                         </label>
@@ -111,8 +111,8 @@
                         <label class="radio-label">
                             <input type="radio" name="conformance" value="pdfa3b">
                             <div class="option-content">
-                                <span class="option-title">PDF/A-3b</span>
-                                <span class="option-desc">ISO 19005-3, Level B — Allows embedding any file type as
+                                <span class="option-title" data-i18n="pdfToPdfA.option5">PDF/A-3b</span>
+                                <span class="option-desc" data-i18n="pdfToPdfA.option5-helpTxt">ISO 19005-3, Level B — Allows embedding any file type as
                                     attachment.</span>
                             </div>
                         </label>
@@ -120,14 +120,14 @@
                 </div>
 
                 <div class="embed-section">
-                    <h3>Font Embedding</h3>
+                    <h3 data-i18n="pdfToPdfA.font-embedding">Font Embedding</h3>
 
                     <div class="quality-option">
                         <label class="radio-label">
                             <input type="radio" name="fontEmbed" value="embed" checked>
                             <div class="option-content">
-                                <span class="option-title">Embed All Fonts (Recommended)</span>
-                                <span class="option-desc">Ensures text renders correctly on any device. Required for
+                                <span class="option-title" data-i18n="pdfToPdfA.embed1">Embed All Fonts (Recommended)</span>
+                                <span class="option-desc" data-i18n="pdfToPdfA.embed1-helpTxt">Ensures text renders correctly on any device. Required for
                                     valid PDF/A.</span>
                             </div>
                         </label>
@@ -137,8 +137,8 @@
                         <label class="radio-label">
                             <input type="radio" name="fontEmbed" value="subset">
                             <div class="option-content">
-                                <span class="option-title">Subset Fonts</span>
-                                <span class="option-desc">Embeds only used characters to reduce file size.</span>
+                                <span class="option-title" data-i18n="pdfToPdfA.embed2">Subset Fonts</span>
+                                <span class="option-desc" data-i18n="pdfToPdfA.embed2-helpTxt">Embeds only used characters to reduce file size.</span>
                             </div>
                         </label>
                     </div>
@@ -146,7 +146,7 @@
             </div>
 
             <div class="action-buttons">
-                <button id="convert-btn" class="top-btn" disabled>Convert to PDF/A</button>
+                <button id="convert-btn" class="top-btn" data-i18n="pdfToPdfA.convert-btn" disabled>Convert to PDF/A</button>
             </div>
         </main>
     </div>

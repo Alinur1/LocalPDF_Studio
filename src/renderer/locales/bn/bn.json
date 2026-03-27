@@ -26,7 +26,8 @@
     "tool-redact-pdf": "পিডিএফ কন্টেন্ট রিড্যাক্ট করুন",
     "pdf-grayscale": "পিডিএফ গ্রেস্কেল কনভার্টার",
     "fillable-pdf-builder": "ফিলেবল পিডিএফ বিল্ডার",
-    "image-editor": "ইমেজ এডিটর"
+    "image-editor": "ইমেজ এডিটর",
+    "pdf-to-pdfa": "পিডিএফ থেকে PDF/A কনভার্টার"
   },
   "error": {
     "empty-message": "কোন পিডিএফ খোলা নেই। শুরু করতে \"পিডিএফ রিডার খুলুন\" ক্লিক করুন!"
@@ -1030,5 +1031,48 @@
     "templateSaveCancelled": "টেমপ্লেট সংরক্ষণ বাতিল করা হয়েছে",
     "errorSavingTemplate": "টেমপ্লেট সংরক্ষণ করার সময় একটি ত্রুটি ঘটেছে",
     "loadingTemplate": "টেমপ্লেট লোড করা হচ্ছে..."
+  },
+  "pdfToPdfA": {
+    "tool-title": "PDF থেকে PDF/A কনভার্টার",
+    "convert-options": "কনভার্শন সেটিংস",
+    "conformance-level": "PDF/A কনফরম্যান্স লেভেল",
+    "option1": "PDF/A-1b",
+    "option1-helpTxt": "ISO 19005-1, লেভেল B — মৌলিক ভিজুয়াল রিপ্রোডাকশন। সবচেয়ে সামঞ্জস্যপূর্ণ, ব্যাপকভাবে সমর্থিত।",
+    "option2": "PDF/A-1a",
+    "option2-helpTxt": "ISO 19005-1, লেভেল A — সম্পূর্ণ অ্যাক্সেসিবিলিটি, স্ট্রাকচার এবং ট্যাগিং সহ।",
+    "option3": "PDF/A-2b (সুপারিশকৃত)",
+    "option3-helpTxt": "ISO 19005-2, লেভেল B — JPEG 2000, ট্রান্সপারেন্সি এবং লেয়ার সমর্থন করে।",
+    "option4": "PDF/A-2a",
+    "option4-helpTxt": "ISO 19005-2, লেভেল A — PDF 1.7 ফিচার সহ সম্পূর্ণ অ্যাক্সেসিবিলিটি।",
+    "option5": "PDF/A-3b",
+    "option5-helpTxt": "ISO 19005-3, লেভেল B — যেকোনো ফাইল টাইপ অ্যাটাচমেন্ট হিসেবে এম্বেড করার অনুমতি দেয়।",
+    "font-embedding": "ফন্ট এম্বেডিং",
+    "embed1": "সব ফন্ট এম্বেড করুন (সুপারিশকৃত)",
+    "embed1-helpTxt": "যেকোনো ডিভাইসে টেক্সট সঠিকভাবে রেন্ডার হয় তা নিশ্চিত করে। বৈধ PDF/A-এর জন্য প্রয়োজনীয়।",
+    "embed2": "সাবসেট ফন্ট",
+    "embed2-helpTxt": "ফাইল সাইজ কমাতে শুধুমাত্র ব্যবহৃত ক্যারেক্টার এম্বেড করে।",
+    "convert-btn": "PDF/A-তে কনভার্ট করুন"
+  },
+  "pdfToPdfAJS": {
+    "checking-gs": "Ghostscript চেক করা হচ্ছে...",
+    "gs-required-msg": "PDF কম্প্রেস ফিচার ব্যবহার করতে Ghostscript প্রয়োজন।\nঅনুগ্রহ করে আপনার সিস্টেমে Ghostscript ইনস্টল করুন:\n\n• Windows: https://www.ghostscript.com/ থেকে ডাউনলোড করুন\n• macOS: Homebrew ব্যবহার করে ইনস্টল করুন: \"brew install ghostscript\"\n• Linux: আপনার প্যাকেজ ম্যানেজার ব্যবহার করে ইনস্টল করুন\n   - Ubuntu/Debian: \"sudo apt install ghostscript\"\n   - Fedora: \"sudo dnf install ghostscript\"\n   - Arch: \"sudo pacman -S ghostscript\"\nদ্রষ্টব্য: বেশিরভাগ আধুনিক লিনাক্স ডিস্ট্রোতে Ghostscript প্রি-ইনস্টল করা থাকে। চেক করতে => gs -v",
+    "tutorial": "টিউটোরিয়াল",
+    "selecting-pdf": "PDF নির্বাচন করা হচ্ছে...",
+    "file-selection-error": "ফাইল নির্বাচন করার সময় একটি ত্রুটি ঘটেছে।",
+    "select-pdf": "প্রথমে একটি PDF ফাইল নির্বাচন করুন।",
+    "verifying-gs": "Ghostscript যাচাই করা হচ্ছে...",
+    "gs-na": "Ghostscript উপলব্ধ নেই। PDF/A কনভার্শন ব্যবহার করতে Ghostscript ইনস্টল করুন।",
+    "gs-verify-failed": "Ghostscript যাচাই করতে ব্যর্থ হয়েছে।",
+    "converting-pdfa": "PDF/A-তে কনভার্ট করা হচ্ছে...",
+    "converting": "কনভার্ট করা হচ্ছে...",
+    "conversion-success": "PDF সফলভাবে PDF/A-তে কনভার্ট করা হয়েছে।",
+    "conversion-cancalled": "অপারেশন বাতিল করা হয়েছে বা সংরক্ষণ করতে ব্যর্থ হয়েছে।",
+    "conversion-error": "কনভার্শনের সময় একটি ত্রুটি ঘটেছে।",
+    "convert-btn": "PDF/A-তে কনভার্ট করুন",
+    "drop-one-file": "একবারে একটি মাত্র PDF ফাইল ড্রপ করুন।",
+    "processing-droppped-file": "ড্রপ করা ফাইল প্রসেস করা হচ্ছে...",
+    "dropped-error": "ড্রপ করা ফাইল সংরক্ষণ করতে ব্যর্থ হয়েছে।",
+    "dropped-error2": "ড্রপ করা ফাইল প্রসেস করার সময় একটি ত্রুটি ঘটেছে।",
+    "drop-valid-pdf": "একটি বৈধ PDF ফাইল ড্রপ করুন।"
   }
 }

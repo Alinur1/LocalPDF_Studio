@@ -26,7 +26,8 @@
     "tool-redact-pdf": "Redact PDF Content",
     "pdf-grayscale": "PDF Grayscale Converter",
     "fillable-pdf-builder": "Fillable PDF Builder",
-    "image-editor": "Image Editor"
+    "image-editor": "Image Editor",
+    "pdf-to-pdfa": "PDF to PDF/A Converter"
   },
   "error": {
     "empty-message": "No PDFs open. Click \"Open PDF Reader\" to get started!"
@@ -1030,5 +1031,48 @@
     "templateSaveCancelled": "Template save cancelled",
     "errorSavingTemplate": "An error occurred while saving template",
     "loadingTemplate": "Loading template..."
+  },
+  "pdfToPdfA": {
+    "tool-title": "PDF to PDF/A Converter",
+    "convert-options": "Conversion Settings",
+    "conformance-level": "PDF/A Conformance Level",
+    "option1": "PDF/A-1b",
+    "option1-helpTxt": "ISO 19005-1, Level B — Basic visual reproducibility. Most compatible, widely supported.",
+    "option2": "PDF/A-1a",
+    "option2-helpTxt": "ISO 19005-1, Level A — Full accessibility including structure and tagging.",
+    "option3": "PDF/A-2b (Recommended)",
+    "option3-helpTxt": "ISO 19005-2, Level B — Supports JPEG 2000, transparency, and layers.",
+    "option4": "PDF/A-2a",
+    "option4-helpTxt": "ISO 19005-2, Level A — Full accessibility with PDF 1.7 features.",
+    "option5": "PDF/A-3b",
+    "option5-helpTxt": "ISO 19005-3, Level B — Allows embedding any file type as attachment.",
+    "font-embedding": "Font Embedding",
+    "embed1": "Embed All Fonts (Recommended)",
+    "embed1-helpTxt": "Ensures text renders correctly on any device. Required for valid PDF/A.",
+    "embed2": "Subset Fonts",
+    "embed2-helpTxt": "Embeds only used characters to reduce file size.",
+    "convert-btn": "Convert to PDF/A"
+  },
+  "pdfToPdfAJS": {
+    "checking-gs": "Checking Ghostscript...",
+    "gs-required-msg": "Ghostscript is required to use the Compress PDF feature.\nPlease install Ghostscript on your system to continue:\n\n• Windows: Download from https://www.ghostscript.com/\n• macOS: Install using Homebrew: \"brew install ghostscript\"\n• Linux: Install using your package manager\n   - Ubuntu/Debian: \"sudo apt install ghostscript\"\n   - Fedora: \"sudo dnf install ghostscript\"\n   - Arch: \"sudo pacman -S ghostscript\"\nNote: Most modern linux distros have ghostscript pre-installed. Checking command=> gs -v",
+    "tutorial": "Tutorial",
+    "selecting-pdf": "Selecting PDF...",
+    "file-selection-error": "An error occurred while selecting the file.",
+    "select-pdf": "Please select a PDF file first.",
+    "verifying-gs": "Verifying Ghostscript...",
+    "gs-na": "Ghostscript is not available. Please install Ghostscript to use PDF/A conversion.",
+    "gs-verify-failed": "Failed to verify Ghostscript.",
+    "converting-pdfa": "Converting to PDF/A...",
+    "converting": "Converting...",
+    "conversion-success": "PDF successfully converted to PDF/A.",
+    "conversion-cancalled": "Operation was cancelled or failed to save.",
+    "conversion-error": "An error occurred during conversion.",
+    "convert-btn": "Convert to PDF/A",
+    "drop-one-file": "Please drop only one PDF file at a time.",
+    "processing-droppped-file": "Processing dropped file...",
+    "dropped-error": "Failed to save dropped file.",
+    "dropped-error2": "An error occurred while processing the dropped file.",
+    "drop-valid-pdf": "Please drop a valid PDF file."
   }
 }

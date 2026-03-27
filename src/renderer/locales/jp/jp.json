@@ -26,7 +26,8 @@
     "tool-redact-pdf": "PDF 内容墨消し",
     "pdf-grayscale": "PDF グレースケール変換",
     "fillable-pdf-builder": "入力可能 PDF ビルダー",
-    "image-editor": "画像エディタ"
+    "image-editor": "画像エディタ",
+    "pdf-to-pdfa": "PDF から PDF/A への変換"
   },
   "error": {
     "empty-message": "PDFが開かれていません。「PDFリーダーを開く」をクリックして開始してください！"
@@ -1030,5 +1031,48 @@
     "templateSaveCancelled": "テンプレートの保存がキャンセルされました",
     "errorSavingTemplate": "テンプレートの保存中にエラーが発生しました",
     "loadingTemplate": "テンプレートを読み込み中..."
+  },
+  "pdfToPdfA": {
+    "tool-title": "PDF から PDF/A への変換",
+    "convert-options": "変換設定",
+    "conformance-level": "PDF/A 準拠レベル",
+    "option1": "PDF/A-1b",
+    "option1-helpTxt": "ISO 19005-1、レベル B — 基本的な視覚的再現。最も互換性が高く、広くサポートされています。",
+    "option2": "PDF/A-1a",
+    "option2-helpTxt": "ISO 19005-1、レベル A — 構造やタグ付けを含む完全なアクセシビリティ。",
+    "option3": "PDF/A-2b（推奨）",
+    "option3-helpTxt": "ISO 19005-2、レベル B — JPEG 2000、透過、レイヤーに対応。",
+    "option4": "PDF/A-2a",
+    "option4-helpTxt": "ISO 19005-2、レベル A — PDF 1.7 機能を備えた完全なアクセシビリティ。",
+    "option5": "PDF/A-3b",
+    "option5-helpTxt": "ISO 19005-3、レベル B — 任意のファイル形式を添付ファイルとして埋め込むことができます。",
+    "font-embedding": "フォント埋め込み",
+    "embed1": "すべてのフォントを埋め込む（推奨）",
+    "embed1-helpTxt": "どのデバイスでもテキストが正しく表示されます。有効な PDF/A には必須です。",
+    "embed2": "サブセットフォント",
+    "embed2-helpTxt": "使用された文字のみを埋め込み、ファイルサイズを削減します。",
+    "convert-btn": "PDF/A に変換"
+  },
+  "pdfToPdfAJS": {
+    "checking-gs": "Ghostscript を確認しています...",
+    "gs-required-msg": "PDF 圧縮機能を使用するには Ghostscript が必要です。\n続行するにはシステムに Ghostscript をインストールしてください：\n\n• Windows：https://www.ghostscript.com/ からダウンロード\n• macOS：Homebrew を使用してインストール：\"brew install ghostscript\"\n• Linux：パッケージマネージャーを使用してインストール\n   - Ubuntu/Debian：\"sudo apt install ghostscript\"\n   - Fedora：\"sudo dnf install ghostscript\"\n   - Arch：\"sudo pacman -S ghostscript\"\n注：ほとんどの最新の Linux ディストリビューションには Ghostscript がプリインストールされています。確認コマンド => gs -v",
+    "tutorial": "チュートリアル",
+    "selecting-pdf": "PDF を選択しています...",
+    "file-selection-error": "ファイル選択中にエラーが発生しました。",
+    "select-pdf": "まず PDF ファイルを選択してください。",
+    "verifying-gs": "Ghostscript を検証しています...",
+    "gs-na": "Ghostscript が利用できません。PDF/A 変換を使用するには Ghostscript をインストールしてください。",
+    "gs-verify-failed": "Ghostscript の検証に失敗しました。",
+    "converting-pdfa": "PDF/A に変換しています...",
+    "converting": "変換中...",
+    "conversion-success": "PDF は正常に PDF/A に変換されました。",
+    "conversion-cancalled": "操作がキャンセルされるか、保存に失敗しました。",
+    "conversion-error": "変換中にエラーが発生しました。",
+    "convert-btn": "PDF/A に変換",
+    "drop-one-file": "一度に1つの PDF ファイルのみをドロップしてください。",
+    "processing-droppped-file": "ドロップされたファイルを処理中...",
+    "dropped-error": "ドロップされたファイルの保存に失敗しました。",
+    "dropped-error2": "ドロップされたファイルの処理中にエラーが発生しました。",
+    "drop-valid-pdf": "有効な PDF ファイルをドロップしてください。"
   }
 }
