@@ -328,14 +328,21 @@ window.addEventListener('DOMContentLoaded', async() => {
         const isMac = navigator.platform.toUpperCase().includes('MAC');
         const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
 
-        if (ctrlOrCmd && (e.key.toLowerCase() === 's' || e.key.toLowerCase() === 'p')) {
+        if (ctrlOrCmd && (e.key.toLowerCase() === 's' || e.key.toLowerCase() === 'p' || e.key.toLowerCase() === 'f')) {
             e.preventDefault();
 
             if (tabManager.activeTabId && window.pdfIframes) {
                 const iframe = window.pdfIframes.get(tabManager.activeTabId);
                 if (iframe && iframe.contentWindow) {
+                    let messageType = 'pdf-print';
+                    const keyLower = e.key.toLowerCase();
+                    if (keyLower === 's') {
+                        messageType = 'pdf-save';
+                    } else if (keyLower === 'f') {
+                        messageType = 'pdf-find';
+                    }
                     iframe.contentWindow.postMessage({
-                        type: e.key.toLowerCase() === 's' ? 'pdf-save' : 'pdf-print'
+                        type: messageType
                     }, '*');
                 }
             }

@@ -19386,7 +19386,7 @@ window.addEventListener('keydown', function (e) {
   }
 }, true);
 
-// LocalPDF Studio — handle save and print commands from parent
+// LocalPDF Studio — handle save, print, and find commands from parent
 window.addEventListener('message', function (event) {
   if (event.data?.type === 'pdf-save') {
     if (typeof PDFViewerApplication !== 'undefined') {
@@ -19396,6 +19396,11 @@ window.addEventListener('message', function (event) {
   if (event.data?.type === 'pdf-print') {
     if (typeof PDFViewerApplication !== 'undefined') {
       PDFViewerApplication.triggerPrinting();
+    }
+  }
+  if (event.data?.type === 'pdf-find') {
+    if (typeof PDFViewerApplication !== 'undefined' && PDFViewerApplication.findBar) {
+      PDFViewerApplication.findBar.open();
     }
   }
 });
