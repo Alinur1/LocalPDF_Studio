@@ -715,6 +715,7 @@ def _redact_hex_to_rgb(hex_color):
 
 def _redact_apply(input_path, output_path, redactions):
     try:
+        fitz.TOOLS.mupdf_display_errors(False)
         doc = fitz.open(input_path)
         total_redactions = 0
         pages_redacted = set()

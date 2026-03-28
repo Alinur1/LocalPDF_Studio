@@ -228,6 +228,15 @@ namespace LocalPDF_Studio_api.BLL.Services
                 };
             }
 
+            string jsonPart = stdout;
+            if (stdout.Contains("{") && stdout.Contains("}"))
+            {
+                // Find the boundaries of the JSON object to ignore MuPDF's "xref" warnings
+                int startIndex = stdout.IndexOf('{');
+                int endIndex = stdout.LastIndexOf('}');
+                jsonPart = stdout.Substring(startIndex, (endIndex - startIndex) + 1);
+            }
+
             // Parse JSON result
             try
             {
