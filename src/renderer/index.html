@@ -81,10 +81,11 @@
                     <div id="time" class="time">--:-- --</div>
                     <div id="date" class="date">-- Month --</div>
                     <div id="day" class="day">--</div>
-                </div>
-                <div class="empty-message">
-                    <p data-i18n="error.empty-message">No PDFs open. Click "Open PDF Reader" to get started!</p>
-                </div>
+                    <br>
+                    <div class="empty-message">
+                        <p data-i18n="error.empty-message">No PDFs open. Click "Open PDF Reader" to get started!</p>
+                    </div>
+                </div>                
             </div>
         </div>
     </div>
@@ -107,7 +108,7 @@
                         <span data-i18n="settings.theme-title">Theme</span>
                     </h3>
 
-                    <div class="settings-options">
+                    <div class="settings-options horizontal-row">
                         <label class="option-item radio-option">
                             <input type="radio" name="theme-mode" value="dark" aria-label="Dark theme">
                             <span class="option-content">
@@ -136,7 +137,7 @@
                         <span class="category-icon">🚀</span>
                         <span data-i18n="settings.startup-behavior">Startup Behavior</span>
                     </h3>
-                    <div class="settings-options">
+                    <div class="settings-options horizontal-row">
                         <label class="option-item radio-option">
                             <input type="radio" name="restore-tabs" value="restore" checked>
                             <span class="option-content">
@@ -204,6 +205,17 @@
                             </span>
                         </label>
                     </div>
+                    <div class="wallpaper-grid">
+                            <div class="wallpaper-option" data-wallpaper="none" title="None">🚫</div>
+                            <div class="wallpaper-option" data-wallpaper="wallpaper-1" title="Countryside Sunset"
+                                style="background-image: url('./wallpapers/wallpaper-1.jpg')"></div>
+                            <div class="wallpaper-option" data-wallpaper="wallpaper-2" title="Explorer green hill"
+                                style="background-image: url('./wallpapers/wallpaper-2.jpg')"></div>
+                            <div class="wallpaper-option" data-wallpaper="wallpaper-3" title="Lake house"
+                                style="background-image: url('./wallpapers/wallpaper-3.jpg')"></div>
+                            <div class="wallpaper-option" data-wallpaper="wallpaper-4" title="Japanese house"
+                                style="background-image: url('./wallpapers/wallpaper-4.jpg')"></div>
+                        </div>
                 </div>
 
                 <div class="settings-divider"></div>

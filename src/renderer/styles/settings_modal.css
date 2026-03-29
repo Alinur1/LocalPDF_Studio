@@ -37,7 +37,6 @@
   right: 0;
   bottom: 0;
   background: var(--modal-overlay);
-  backdrop-filter: blur(5px);
 }
 
 .modal.hidden {
@@ -49,7 +48,7 @@
   position: relative;
   background: var(--modal-bg);
   border-radius: 12px;
-  width: 500px;
+  width: 680px;
   max-width: 90vw;
   max-height: 85vh;
   display: flex;
@@ -158,6 +157,32 @@
   gap: 0.75rem;
 }
 
+.settings-options.horizontal-row {
+  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.settings-options.horizontal-row .option-item {
+  padding: 0.75rem;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  min-height: 100px;
+}
+
+.settings-options.horizontal-row .radio-option input[type="radio"] {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.settings-options.horizontal-row .option-description {
+  font-size: 0.75rem;
+  text-align: center;
+}
+
 .option-item {
   display: flex;
   align-items: flex-start;
@@ -264,11 +289,11 @@
   display: none;
 }
 
-.toggle-option input[type="checkbox"]:checked + .toggle-slider {
+.toggle-option input[type="checkbox"]:checked+.toggle-slider {
   background: var(--accent-color);
 }
 
-.toggle-option input[type="checkbox"]:checked + .toggle-slider::after {
+.toggle-option input[type="checkbox"]:checked+.toggle-slider::after {
   transform: translateX(26px);
 }
 

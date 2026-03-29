@@ -27,7 +27,7 @@ import i18n from './utils/i18n.js';
 import { SearchBar } from './utils/searchBar.js';
 import { SearchIndexManager } from './utils/searchIndexManager.js';
 
-window.addEventListener('DOMContentLoaded', async() => {
+window.addEventListener('DOMContentLoaded', async () => {
 
     await i18n.init();
 
@@ -117,7 +117,7 @@ window.addEventListener('DOMContentLoaded', async() => {
         isDialogOpen = true;
         openPdfBtn.disabled = true;
         // openPdfBtn.textContent = 'Selecting...';
-        openPdfBtn.textContent =  i18n.t('nav.selecting');
+        openPdfBtn.textContent = i18n.t('nav.selecting');
 
         try {
             const files = await window.electronAPI.selectPdfs();
@@ -268,7 +268,7 @@ window.addEventListener('DOMContentLoaded', async() => {
     // Initialize language from localStorage or default to 'en'
     const savedLanguage = localStorage.getItem('language') || 'en';
     languageSelect.value = savedLanguage;
-    
+
     const savedSetting = localStorage.getItem('restoreTabs') || 'restore';
     radios.forEach(r => {
         r.checked = (r.value === savedSetting);
@@ -295,9 +295,11 @@ window.addEventListener('DOMContentLoaded', async() => {
             clockEnabled: localStorage.getItem('clockEnabled') !== 'false',
             searchEnabled: searchIndexManager.isEnabled(),
             language: localStorage.getItem('language') || 'en',
-            theme: localStorage.getItem('theme') || 'system'
+            theme: localStorage.getItem('theme') || 'system',
+            wallpaper: localStorage.getItem('activeWallpaper') || 'none'
         };
         document.querySelector(`input[name="restore-tabs"][value="${originalSettings.restoreTabs}"]`).checked = true;
+        document.querySelectorAll('.wallpaper-option').forEach(opt => { opt.classList.toggle('selected', opt.dataset.wallpaper === originalSettings.wallpaper); });
         document.getElementById('clock-enabled').checked = originalSettings.clockEnabled;
         document.getElementById('search-enabled').checked = originalSettings.searchEnabled;
         languageSelect.value = originalSettings.language;
@@ -354,17 +356,19 @@ window.addEventListener('DOMContentLoaded', async() => {
         modal.classList.add('hidden');
     });
 
-    saveBtn.addEventListener('click', async() => {
+    saveBtn.addEventListener('click', async () => {
         const selectedRestore = document.querySelector('input[name="restore-tabs"]:checked').value;
         const clockEnabled = document.getElementById('clock-enabled').checked;
         const searchEnabled = document.getElementById('search-enabled').checked;
         const selectedLanguage = languageSelect.value;
         const selectedTheme = document.querySelector('input[name="theme-mode"]:checked')?.value || 'system';
+        const selectedWallpaper = document.querySelector('.wallpaper-option.selected')?.dataset.wallpaper || 'none';
         localStorage.setItem('theme', selectedTheme);
         applyTheme(selectedTheme);
         localStorage.setItem('language', selectedLanguage);
         localStorage.setItem('restoreTabs', selectedRestore);
         localStorage.setItem('clockEnabled', clockEnabled.toString());
+        localStorage.setItem('activeWallpaper', selectedWallpaper);
         clockManager.setEnabled(clockEnabled);
         searchIndexManager.setEnabled(searchEnabled);
         searchBar.setVisible(searchEnabled);
@@ -380,7 +384,9 @@ window.addEventListener('DOMContentLoaded', async() => {
         localStorage.setItem('restoreTabs', originalSettings.restoreTabs);
         localStorage.setItem('clockEnabled', originalSettings.clockEnabled.toString());
         localStorage.setItem('theme', originalSettings.theme);
+        localStorage.setItem('activeWallpaper', originalSettings.wallpaper);
         applyTheme(originalSettings.theme);
+        applyWallpaper(originalSettings.wallpaper);
         searchIndexManager.setEnabled(originalSettings.searchEnabled);
         searchBar.setVisible(originalSettings.searchEnabled);
         clockManager.setEnabled(originalSettings.clockEnabled);
@@ -388,6 +394,7 @@ window.addEventListener('DOMContentLoaded', async() => {
         document.getElementById('clock-enabled').checked = originalSettings.clockEnabled;
         document.getElementById('search-enabled').checked = originalSettings.searchEnabled;
         document.querySelector(`input[name="theme-mode"][value="${originalSettings.theme}"]`).checked = true;
+        document.querySelectorAll('.wallpaper-option').forEach(opt => { opt.classList.toggle('selected', opt.dataset.wallpaper === originalSettings.wallpaper); });
         languageSelect.value = originalSettings.language;
 
         await i18n.setLanguage(originalSettings.language);
@@ -476,32 +483,53 @@ window.addEventListener('DOMContentLoaded', async() => {
         }
     }
 
-// Initial Theme on startup
+    // Initial Theme on startup
 
-const savedTheme = localStorage.getItem('theme') || 'system';
+    const savedTheme = localStorage.getItem('theme') || 'system';
+    const savedWallpaper = localStorage.getItem('activeWallpaper') || 'none';
 
-// Apply theme
-applyTheme(savedTheme);
+    // Apply theme
+    applyTheme(savedTheme);
+    applyWallpaper(savedWallpaper);
 
-// Set radio state
-const themeRadio = document.querySelector(`input[name="theme-mode"][value="${savedTheme}"]`);
-if (themeRadio) {
-    themeRadio.checked = true;
-}
+    // Set radio state
+    const themeRadio = document.querySelector(`input[name="theme-mode"][value="${savedTheme}"]`);
+    if (themeRadio) {
+        themeRadio.checked = true;
+    }
 
-themeRadios.forEach(radio => {
-    radio.addEventListener('change', (e) => {
-        const selectedTheme = e.target.value;
-        localStorage.setItem('theme', selectedTheme);
-        applyTheme(selectedTheme);
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const selectedTheme = e.target.value;
+            localStorage.setItem('theme', selectedTheme);
+            applyTheme(selectedTheme);
+        });
     });
-});
 
-window.matchMedia('(prefers-color-scheme: dark)')
-    .addEventListener('change', () => {
-        const currentTheme = localStorage.getItem('theme') || 'system';
-        if (currentTheme === 'system') {
-            applyTheme('system');
+    window.matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', () => {
+            const currentTheme = localStorage.getItem('theme') || 'system';
+            if (currentTheme === 'system') {
+                applyTheme('system');
+            }
+        });
+
+    function applyWallpaper(wallpaperId) {
+        const emptyState = document.getElementById('empty-state');
+        if (!emptyState) return;
+
+        if (wallpaperId === 'none' || !wallpaperId) {
+            emptyState.style.backgroundImage = 'none';
+        } else {
+            emptyState.style.backgroundImage = `url('./wallpapers/${wallpaperId}.jpg')`;
         }
+    }
+
+    document.querySelectorAll('.wallpaper-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.wallpaper-option').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            applyWallpaper(btn.dataset.wallpaper);
+        });
     });
 });
