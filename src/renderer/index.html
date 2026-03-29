@@ -93,7 +93,7 @@
         <div class="modal-overlay" id="modal-overlay"></div>
         <div class="modal-container">
             <div class="modal-header">
-                <h2 class="modal-title" >
+                <h2 class="modal-title">
                     <span class="modal-icon">⚙️</span>
                     <span data-i18n="settings.settings-title">Settings</span>
                 </h2>
@@ -102,37 +102,36 @@
 
             <div class="modal-body">
                 <div class="settings-category">
-                     <h3 class="category-title">
-        <span class="category-icon">🎨</span>
-        <span data-i18n="settings.theme-title">Theme</span>
-    </h3>
+                    <h3 class="category-title">
+                        <span class="category-icon">🎨</span>
+                        <span data-i18n="settings.theme-title">Theme</span>
+                    </h3>
 
-    <div class="settings-options">
-        <label class="option-item radio-option">
-            <input type="radio" name="theme-mode" value="dark" aria-label="Dark theme">
-            <span class="option-content">
-                <span class="option-title" data-i18n="settings.theme-dark">Dark</span>
-            </span>
-        </label>
+                    <div class="settings-options">
+                        <label class="option-item radio-option">
+                            <input type="radio" name="theme-mode" value="dark" aria-label="Dark theme">
+                            <span class="option-content">
+                                <span class="option-title" data-i18n="settings.theme-dark">Dark</span>
+                            </span>
+                        </label>
 
-        <label class="option-item radio-option">
-            <input type="radio" name="theme-mode" value="light">
-            <span class="option-content">
-                <span class="option-title" data-i18n="settings.theme-light">Light</span>
-            </span>
-        </label>
+                        <label class="option-item radio-option">
+                            <input type="radio" name="theme-mode" value="light">
+                            <span class="option-content">
+                                <span class="option-title" data-i18n="settings.theme-light">Light</span>
+                            </span>
+                        </label>
 
-        <label class="option-item radio-option">
-            <input type="radio" name="theme-mode" value="system" checked>
-            <span class="option-content">
-                <span class="option-title" data-i18n="settings.theme-system">System (Auto)</span>
-                <span class="option-description"
-                      data-i18n="settings.theme-system-desc">
-                    Automatically match your operating system theme
-                </span>
-            </span>
-        </label>
-    </div>
+                        <label class="option-item radio-option">
+                            <input type="radio" name="theme-mode" value="system" checked>
+                            <span class="option-content">
+                                <span class="option-title" data-i18n="settings.theme-system">System (Auto)</span>
+                                <span class="option-description" data-i18n="settings.theme-system-desc">
+                                    Automatically match your operating system theme
+                                </span>
+                            </span>
+                        </label>
+                    </div>
                     <h3 class="category-title">
                         <span class="category-icon">🚀</span>
                         <span data-i18n="settings.startup-behavior">Startup Behavior</span>
@@ -142,7 +141,8 @@
                             <input type="radio" name="restore-tabs" value="restore" checked>
                             <span class="option-content">
                                 <span class="option-title" data-i18n="settings.restore-session">Restore Session</span>
-                                <span class="option-description" data-i18n="settings.restore-session-desc">Automatically reopen all PDFs from your last
+                                <span class="option-description" data-i18n="settings.restore-session-desc">Automatically
+                                    reopen all PDFs from your last
                                     session</span>
                             </span>
                         </label>
@@ -150,12 +150,14 @@
                             <input type="radio" name="restore-tabs" value="no-restore">
                             <span class="option-content">
                                 <span class="option-title" data-i18n="settings.fresh-start">Fresh Start</span>
-                                <span class="option-description" data-i18n="settings.fresh-start-desc">Start with a clean slate every time</span>
+                                <span class="option-description" data-i18n="settings.fresh-start-desc">Start with a
+                                    clean slate every time</span>
                             </span>
                         </label>
                         <div class="option-note">
                             <span class="note-icon">💡</span>
-                            <span data-i18n="settings.sidebar-note">Sidebar layout and size preferences are always remembered</span>
+                            <span data-i18n="settings.sidebar-note">Sidebar layout and size preferences are always
+                                remembered</span>
                         </div>
                     </div>
                 </div>
@@ -169,8 +171,10 @@
                     <div class="settings-options">
                         <label class="option-item">
                             <span class="option-content">
-                                <span class="option-title" data-i18n="settings.interface-language">Interface Language</span>
-                                <span class="option-description" data-i18n="settings.interface-language-desc">Select your preferred language for the application</span>
+                                <span class="option-title" data-i18n="settings.interface-language">Interface
+                                    Language</span>
+                                <span class="option-description" data-i18n="settings.interface-language-desc">Select
+                                    your preferred language for the application</span>
                             </span>
                             <select id="language-select" class="styled-select">
                                 <option value="en" selected>English</option>
@@ -195,7 +199,8 @@
                             <span class="toggle-slider"></span>
                             <span class="option-content">
                                 <span class="option-title" data-i18n="settings.show-clock">Show Clock</span>
-                                <span class="option-description" data-i18n="settings.show-clock-desc">Display time and date when no PDFs are open</span>
+                                <span class="option-description" data-i18n="settings.show-clock-desc">Display time and
+                                    date when no PDFs are open</span>
                             </span>
                         </label>
                     </div>
@@ -214,18 +219,20 @@
                             <span class="toggle-slider"></span>
                             <span class="option-content">
                                 <span class="option-title" data-i18n="settings.enable-search">Enable Search Bar</span>
-                                <span class="option-description" data-i18n="settings.enable-search-desc">Quickly find and reopen previously opened PDF
+                                <span class="option-description" data-i18n="settings.enable-search-desc">Quickly find
+                                    and reopen previously opened PDF
                                     files</span>
                             </span>
                         </label>
                         <div class="option-note">
                             <span class="note-icon">ℹ️</span>
-                            <span data-i18n="settings.search-note">Only indexes PDF files you've opened in LocalPDF Studio</span>
+                            <span data-i18n="settings.search-note">Only indexes PDF files you've opened in LocalPDF
+                                Studio</span>
                         </div>
                         <button id="clear-search-history" class="btn-secondary"
                             style="margin-top: 0.5rem; width: 100%;">
                             <span class="btn-icon">🗑️</span>
-                           <span data-i18n="settings.clear-history-btn"> Clear Search History</span>
+                            <span data-i18n="settings.clear-history-btn"> Clear Search History</span>
                         </button>
                     </div>
                 </div>
@@ -242,7 +249,7 @@
                             <p id="update-status-message" data-i18n="settings.update-status">Checking for updates...</p>
                             <button id="check-for-updates-btn" class="btn-secondary">
                                 <span class="btn-icon">🔍</span>
-                               <span data-i18n="settings.check-updates-btn"> Check for Updates</span>
+                                <span data-i18n="settings.check-updates-btn"> Check for Updates</span>
                             </button>
                         </div>
                     </div>
