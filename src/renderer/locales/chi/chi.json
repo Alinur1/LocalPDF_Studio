@@ -27,7 +27,8 @@
     "pdf-grayscale": "PDF 灰度转换器",
     "fillable-pdf-builder": "可填写 PDF 生成器",
     "image-editor": "图片编辑器",
-    "pdf-to-pdfa": "PDF 转 PDF/A 转换器"
+    "pdf-to-pdfa": "PDF 转 PDF/A 转换器",
+    "split-pdf-vertical": "拆分 PDF（垂直）"
   },
   "error": {
     "empty-message": "未打开PDF。点击\"打开PDF阅读器\"开始使用！"
@@ -1074,5 +1075,32 @@
     "dropped-error": "保存拖放的文件失败。",
     "dropped-error2": "处理拖放的文件时发生错误。",
     "drop-valid-pdf": "请拖放一个有效的 PDF 文件。"
+  },
+  "splitPdfVertical": {
+    "tool-title": "拆分 PDF（垂直）",
+    "pdf-preview": "PDF 预览",
+    "split-options": "拆分选项",
+    "split-option1": "平均拆分（50 / 50）",
+    "split-option1-helpTxt": "每个页面将精确地从中间拆分为左侧和右侧 PDF。",
+    "split-option2": "自定义拆分位置",
+    "split-option2-instruction": "拆分位置（从左边缘的百分比）",
+    "split-option2-helpTxt": "拖动滑块或输入 1 到 99 之间的值。",
+    "split-btn": "拆分 PDF（垂直）"
+  },
+  "splitPdfVerticalJS": {
+    "selecting-pdf": "正在选择 PDF...",
+    "loading-preview": "正在加载预览...",
+    "drop-pdf": "请只拖放一个 PDF 文件。",
+    "pdf-drop-failed": "保存拖放的文件失败。",
+    "drop-a-pdf": "请拖放一个 PDF 文件。",
+    "pdf-required": "请先选择一个 PDF 文件。",
+    "enter-split-position": "请输入 1 到 99 之间的拆分位置。",
+    "splitting-pdf": "正在垂直拆分 PDF...",
+    "splitting": "正在拆分...",
+    "split-success": "PDF 已垂直拆分并成功保存。",
+    "split-save-cancelled": "保存操作已取消。",
+    "unexpected-response": "意外响应。",
+    "failed-to-split": "拆分 PDF 失败。",
+    "split-btn": "拆分 PDF（垂直）"
   }
 }

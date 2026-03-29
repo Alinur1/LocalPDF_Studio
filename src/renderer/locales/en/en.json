@@ -27,7 +27,8 @@
     "pdf-grayscale": "PDF Grayscale Converter",
     "fillable-pdf-builder": "Fillable PDF Builder",
     "image-editor": "Image Editor",
-    "pdf-to-pdfa": "PDF to PDF/A Converter"
+    "pdf-to-pdfa": "PDF to PDF/A Converter",
+    "split-pdf-vertical": "Split PDF (Vertical)"
   },
   "error": {
     "empty-message": "No PDFs open. Click \"Open PDF Reader\" to get started!"
@@ -1074,5 +1075,32 @@
     "dropped-error": "Failed to save dropped file.",
     "dropped-error2": "An error occurred while processing the dropped file.",
     "drop-valid-pdf": "Please drop a valid PDF file."
+  },
+  "splitPdfVertical": {
+    "tool-title": "Split PDF (Vertical)",
+    "pdf-preview": "PDF Preview",
+    "split-options": "Split Options",
+    "split-option1": "Split evenly (50 / 50)",
+    "split-option1-helpTxt": "Each page will be split exactly down the middle into a left and right PDF.",
+    "split-option2": "Custom split position",
+    "split-option2-instruction": "Split position (% from left edge)",
+    "split-option2-helpTxt": "Drag the slider or type a value between 1 and 99.",
+    "split-btn": "Split PDF (Vertical)"
+  },
+  "splitPdfVerticalJS": {
+    "selecting-pdf": "Selecting PDF...",
+    "loading-preview": "Loading preview...",
+    "drop-pdf": "Please drop only one PDF file.",
+    "pdf-drop-failed": "Failed to save dropped file.",
+    "drop-a-pdf": "Please drop a PDF file.",
+    "pdf-required": "Please select a PDF file first.",
+    "enter-split-position": "Please enter a split position between 1 and 99.",
+    "splitting-pdf": "Splitting PDF vertically...",
+    "splitting": "Splitting...",
+    "split-success": "PDF split vertically and saved successfully.",
+    "split-save-cancelled": "Save operation was cancelled.",
+    "unexpected-response": "Unexpected response.",
+    "failed-to-split": "Failed to split PDF.",
+    "split-btn": "Split PDF (Vertical)"
   }
 }

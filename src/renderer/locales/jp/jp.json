@@ -27,7 +27,8 @@
     "pdf-grayscale": "PDF グレースケール変換",
     "fillable-pdf-builder": "入力可能 PDF ビルダー",
     "image-editor": "画像エディタ",
-    "pdf-to-pdfa": "PDF から PDF/A への変換"
+    "pdf-to-pdfa": "PDF から PDF/A への変換",
+    "split-pdf-vertical": "PDF を分割（垂直）"
   },
   "error": {
     "empty-message": "PDFが開かれていません。「PDFリーダーを開く」をクリックして開始してください！"
@@ -1074,5 +1075,32 @@
     "dropped-error": "ドロップされたファイルの保存に失敗しました。",
     "dropped-error2": "ドロップされたファイルの処理中にエラーが発生しました。",
     "drop-valid-pdf": "有効な PDF ファイルをドロップしてください。"
+  },
+  "splitPdfVertical": {
+    "tool-title": "PDF を分割（垂直）",
+    "pdf-preview": "PDF プレビュー",
+    "split-options": "分割オプション",
+    "split-option1": "均等に分割（50 / 50）",
+    "split-option1-helpTxt": "各ページが中央で正確に左右の PDF に分割されます。",
+    "split-option2": "カスタム分割位置",
+    "split-option2-instruction": "分割位置（左端からの割合）",
+    "split-option2-helpTxt": "スライダーをドラッグするか、1 から 99 の間の値を入力してください。",
+    "split-btn": "PDF を分割（垂直）"
+  },
+  "splitPdfVerticalJS": {
+    "selecting-pdf": "PDF を選択しています...",
+    "loading-preview": "プレビューを読み込み中...",
+    "drop-pdf": "1つの PDF ファイルのみをドロップしてください。",
+    "pdf-drop-failed": "ドロップされたファイルの保存に失敗しました。",
+    "drop-a-pdf": "PDF ファイルをドロップしてください。",
+    "pdf-required": "まず PDF ファイルを選択してください。",
+    "enter-split-position": "1 から 99 の間の分割位置を入力してください。",
+    "splitting-pdf": "PDF を垂直に分割しています...",
+    "splitting": "分割中...",
+    "split-success": "PDF が垂直に分割され、正常に保存されました。",
+    "split-save-cancelled": "保存操作はキャンセルされました。",
+    "unexpected-response": "予期しない応答。",
+    "failed-to-split": "PDF の分割に失敗しました。",
+    "split-btn": "PDF を分割（垂直）"
   }
 }

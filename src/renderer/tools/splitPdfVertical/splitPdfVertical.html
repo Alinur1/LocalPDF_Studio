@@ -40,16 +40,16 @@
 <body>
     <div id="app">
         <div class="top-bar">
-            <a href="../../index.html" class="top-btn">← Back</a>
-            <h1 class="tool-title">Split PDF (Vertical)</h1>
+            <a href="../../index.html" class="top-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="splitPdfVertical.tool-title">Split PDF (Vertical)</h1>
         </div>
         <main class="tool-container">
 
             <!-- File Selection -->
             <div class="file-selection-area">
                 <button id="select-pdf-btn" class="select-pdf-btn">
-                    Click to Select a PDF File or drop PDF here
-                    <p><small class="select-hint">Supports PDF</small></p>
+                    <span data-i18n="common.btn-select">Click to Select a PDF File or drop PDF here</span>
+                    <p><small class="select-hint" data-i18n="common.supported-formats">Supports PDF</small></p>
                 </button>
                 <div id="selected-file-info" class="selected-file-info" style="display: none;">
                     <div style="flex-grow: 1;">
@@ -63,7 +63,7 @@
             <!-- PDF Preview -->
             <div id="preview-container" class="preview-container" style="display: none;">
                 <div class="preview-header">
-                    <h3>PDF Preview</h3>
+                    <h3 data-i18n="splitPdfVertical.pdf-preview">PDF Preview</h3>
                     <span id="page-count" class="page-count"></span>
                 </div>
                 <div id="preview-grid" class="preview-grid"></div>
@@ -71,26 +71,27 @@
 
             <!-- Split Options -->
             <div class="split-options-container">
-                <h2>Split Options</h2>
+                <h2 data-i18n="splitPdfVertical.split-options">Split Options</h2>
 
                 <!-- 50/50 -->
                 <div class="split-method">
                     <input type="radio" id="splitEvenHalf" name="splitMode" value="half" checked>
-                    <label for="splitEvenHalf">Split evenly (50 / 50)</label>
+                    <label for="splitEvenHalf" data-i18n="splitPdfVertical.split-option1">Split evenly (50 / 50)</label>
                 </div>
                 <div class="options-panel" id="optionsHalf" style="border: none; padding-left: 2rem;">
-                    <small class="help-text">Each page will be split exactly down the middle into a left and right
+                    <small class="help-text" data-i18n="splitPdfVertical.split-option1-helpTxt">Each page will be split exactly down the middle into a left and right
                         PDF.</small>
                 </div>
 
                 <!-- Custom % -->
                 <div class="split-method">
                     <input type="radio" id="splitCustom" name="splitMode" value="custom">
-                    <label for="splitCustom">Custom split position</label>
+                    <label for="splitCustom" data-i18n="splitPdfVertical.split-option2">Custom split position</label>
                 </div>
                 <div class="options-panel" id="optionsCustom" style="display: none;">
                     <label
-                        style="color: var(--options-label-color); font-size: 0.9rem; display: block; margin-bottom: 0.6rem;">
+                        style="color: var(--options-label-color); font-size: 0.9rem; display: block; margin-bottom: 0.6rem;"
+                        data-i18n="splitPdfVertical.split-option2-instruction">
                         Split position (% from left edge)
                     </label>
                     <div class="slider-row">
@@ -109,7 +110,7 @@
                             <span class="split-visual-label" id="label-right">Right — 50%</span>
                         </div>
                     </div>
-                    <small class="help-text" style="margin-top: 0.5rem;">
+                    <small class="help-text" style="margin-top: 0.5rem;" data-i18n="splitPdfVertical.split-option2-helpTxt">
                         Drag the slider or type a value between 1 and 99.
                     </small>
                 </div>
@@ -117,7 +118,7 @@
 
             <!-- Action -->
             <div class="action-buttons">
-                <button id="split-btn" class="top-btn" disabled>Split PDF (Vertical)</button>
+                <button id="split-btn" class="top-btn" data-i18n="splitPdfVertical.split-btn" disabled>Split PDF (Vertical)</button>
             </div>
 
         </main>

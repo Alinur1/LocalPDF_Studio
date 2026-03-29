@@ -24,12 +24,14 @@ import customAlert from '../../utils/customAlert.js';
 import { initializeGlobalDragDrop } from '../../utils/globalDragDrop.js';
 import loadingUI from '../../utils/loading.js';
 import { ThemeManager } from '../../utils/themeManager.js';
+import i18n from '../../utils/i18n.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 window.pdfjsLib = pdfjsLib;
 
 document.addEventListener('DOMContentLoaded', async () => {
     await API.init();
+    await i18n.init();
     ThemeManager.init();
 
     const selectPdfBtn = document.getElementById('select-pdf-btn');
@@ -85,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateVisualPreview(50);
 
     selectPdfBtn.addEventListener('click', async () => {
-        loadingUI.show('Selecting PDF...');
+        loadingUI.show(i18n.t('splitPdfVerticalJS.selecting-pdf'));
         const files = await window.electronAPI.selectPdfs();
         if (files && files.length > 0) {
             const filePath = files[0];
@@ -123,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function loadPdfPreview(filePath) {
-        loadingUI.show('Loading preview...');
+        loadingUI.show(i18n.t('splitPdfVerticalJS.loading-preview'));
         try {
             previewContainer.style.display = 'block';
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
@@ -205,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeGlobalDragDrop({
         onFilesDropped: async (pdfFiles) => {
             if (pdfFiles.length > 1) {
-                await customAlert.alert('Notice', 'Please drop only one PDF file.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfVerticalJS.drop-pdf'), [i18n.t('common.ok')]);
                 return;
             }
             await cleanupDroppedFile();
@@ -217,11 +219,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 droppedFilePath = result.filePath;
                 handleFileSelected({ path: result.filePath, name: file.name, size: file.size || 0 });
             } else {
-                await customAlert.alert('Error', 'Failed to save dropped file: ' + result.error, ['OK']);
+                console.log('Failed to save dropped file: ' + result.error);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfVerticalJS.pdf-drop-failed'), [i18n.t('common.ok')]);
             }
         },
         onInvalidFiles: async () => {
-            await customAlert.alert('Notice', 'Please drop a PDF file.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfVerticalJS.drop-a-pdf'), [i18n.t('common.ok')]);
         }
     });
 
@@ -231,7 +234,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     splitBtn.addEventListener('click', async () => {
         if (!selectedFile) {
-            await customAlert.alert('Notice', 'Please select a PDF file first.', ['OK']);
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('splitPdfVerticalJS.pdf-required'), [i18n.t('common.ok')]);
             return;
         }
 
@@ -241,7 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (mode === 'custom') {
             const raw = parseInt(percentageInput.value, 10);
             if (isNaN(raw) || raw < 1 || raw > 99) {
-                await customAlert.alert('Warning', 'Please enter a split position between 1 and 99.', ['OK']);
+                await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfVerticalJS.enter-split-position'), [i18n.t('common.ok')]);
                 return;
             }
             splitPercentage = raw;
@@ -253,9 +256,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            loadingUI.show('Splitting PDF vertically...');
+            loadingUI.show(i18n.t('splitPdfVerticalJS.splitting-pdf'));
             splitBtn.disabled = true;
-            splitBtn.textContent = 'Splitting...';
+            splitBtn.textContent = i18n.t('splitPdfVerticalJS.splitting');
 
             const endpoint = await API.pdf.verticalSplit;
             const result = await API.request.post(endpoint, requestBody);
@@ -266,21 +269,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
 
                 if (savedPath) {
-                    await customAlert.alert('Success', `PDF split vertically and saved to:\n${savedPath}`, ['OK']);
+                    await customAlert.alert(i18n.t('alerts.success'), i18n.t('splitPdfVerticalJS.split-success'), [i18n.t('common.ok')]);
                 } else {
-                    await customAlert.alert('Cancelled', 'Save operation was cancelled.', ['OK']);
+                    await customAlert.alert(i18n.t('alerts.warning'), i18n.t('splitPdfVerticalJS.split-save-cancelled'), [i18n.t('common.ok')]);
                 }
             } else {
                 console.error('Vertical split API returned JSON:', result);
-                await customAlert.alert('Error', 'Unexpected response: ' + JSON.stringify(result), ['OK']);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfVerticalJS.unexpected-response'), [i18n.t('common.ok')]);
             }
         } catch (error) {
             console.error('Error splitting PDF vertically:', error);
-            await customAlert.alert('Error', 'Failed to split PDF: ' + error.message, ['OK']);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfVerticalJS.failed-to-split'), [i18n.t('common.ok')]);
         } finally {
             loadingUI.hide();
             splitBtn.disabled = false;
-            splitBtn.textContent = 'Split PDF (Vertical)';
+            splitBtn.textContent = i18n.t('splitPdfVerticalJS.split-btn');
             updateSplitButtonState();
         }
     });
