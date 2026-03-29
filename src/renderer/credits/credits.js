@@ -18,8 +18,10 @@
 // src/renderer/credits/credits.js
 
 import i18n from '../utils/i18n.js';
+import { ThemeManager } from '../utils/themeManager.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    ThemeManager.init();
     await i18n.init();
     setupCreditLinks();
     fixImagePaths();
@@ -45,8 +47,8 @@ function setupCreditLinks() {
     document.getElementById('ghostscript-link')?.addEventListener('click', () => 
         openExternalLink('https://ghostscript.com/'));
     
-    document.getElementById('pdfsharpcore-link')?.addEventListener('click', () => 
-        openExternalLink('https://www.nuget.org/packages/PdfSharpCore'));
+    document.getElementById('pdfsharp-link')?.addEventListener('click', () => 
+        openExternalLink('https://www.nuget.org/packages/PDFSharp'));
     
     document.getElementById('imagesharp-link')?.addEventListener('click', () => 
         openExternalLink('https://www.nuget.org/packages/sixlabors.imagesharp/'));
@@ -72,6 +74,15 @@ function setupCreditLinks() {
 
     document.getElementById('pymupdf-link')?.addEventListener('click', () => 
         openExternalLink('https://github.com/pymupdf/PyMuPDF'));
+
+    document.getElementById('pdf-lib-link')?.addEventListener('click', () => 
+        openExternalLink('https://www.npmjs.com/package/pdf-lib'));
+
+    document.getElementById('i18next-link')?.addEventListener('click', () => 
+        openExternalLink('https://www.npmjs.com/package/i18next'));
+
+    document.getElementById('wallpaper-link')?.addEventListener('click', () => 
+        openExternalLink('https://github.com/xCaptaiN09/Aur-ora-Wallz'));
 }
 
 async function fixImagePaths() {
@@ -118,7 +129,7 @@ function addButtonTooltips() {
         'electron-builder-link': 'https://www.npmjs.com/package/electron-builder',
         'electron-updater-link': 'https://www.npmjs.com/package/electron-updater',
         'ghostscript-link': 'https://ghostscript.com/',
-        'pdfsharpcore-link': 'https://www.nuget.org/packages/PdfSharpCore',
+        'pdfsharp-link': 'https://www.nuget.org/packages/PDFSharp',
         'imagesharp-link': 'https://www.nuget.org/packages/sixlabors.imagesharp/',
         'dotnet-link': 'https://dotnet.microsoft.com/en-us/',
         'python-link': 'https://www.python.org/',
@@ -127,6 +138,9 @@ function addButtonTooltips() {
         'tesseract-link': 'https://tesseract.projectnaptha.com/',
         'pdfjs-link': 'https://mozilla.github.io/pdf.js/',
         'pymupdf-link': 'https://github.com/pymupdf/PyMuPDF',
+        'pdf-lib-link': 'https://www.npmjs.com/package/pdf-lib',
+        'i18next-link': 'https://www.npmjs.com/package/i18next',
+        'wallpaper-link': 'https://github.com/xCaptaiN09/Aur-ora-Wallz',
     };
 
     Object.entries(buttonUrls).forEach(([id, url]) => {

@@ -17,6 +17,30 @@
 
 /* src/renderer/credits/credits.css */
 
+:root {
+  --credits-bg-card: #2c3e50;
+  --credits-border: #34495e;
+  --credits-text: #ecf0f1;
+  --credits-text-secondary: #bdc3c7;
+  --credits-gradient-start: #3498db;
+  --credits-gradient-end: #2ecc71;
+  --credits-gradient-dark: #2980b9;
+  --credits-gradient-accent: #9b59b6;
+  --credits-shadow: rgba(0, 0, 0, 0.3);
+}
+
+body.light {
+  --credits-bg-card: #FFFFFF;
+  --credits-border: #D1CEC5;
+  --credits-text: #1a1a1a;
+  --credits-text-secondary: #666666;
+  --credits-gradient-start: #D97757;
+  --credits-gradient-end: #C06647;
+  --credits-gradient-dark: #B85A3D;
+  --credits-gradient-accent: #A86B45;
+  --credits-shadow: rgba(0, 0, 0, 0.08);
+}
+
 .credits-container {
     max-width: 1920px;
     padding: 1rem;
@@ -36,7 +60,7 @@ main {
     flex: 1;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: #3498db #1e2a38;
+    scrollbar-color: var(--credits-gradient-start) var(--bg-primary);
 }
 
 main::-webkit-scrollbar {
@@ -44,22 +68,22 @@ main::-webkit-scrollbar {
 }
 
 main::-webkit-scrollbar-track {
-    background: #1e2a38;
+    background: var(--bg-primary);
 }
 
 main::-webkit-scrollbar-thumb {
-    background: #3498db;
+    background: var(--credits-gradient-start);
     border-radius: 4px;
 }
 
 main::-webkit-scrollbar-thumb:hover {
-    background: #2980b9;
+    background: var(--credits-gradient-dark);
 }
 
 
 
 .page-title {
-    color: #ecf0f1;
+    color: var(--credits-text);
     font-size: 1.5rem;
     margin: 0;
     text-align: center;
@@ -69,7 +93,7 @@ main::-webkit-scrollbar-thumb:hover {
 .hero-section {
     text-align: left;
     padding: 2rem 0;
-    border-bottom: 1px solid #34495e;
+    border-bottom: 1px solid var(--credits-border);
     width: 100%;
 }
 
@@ -81,20 +105,20 @@ main::-webkit-scrollbar-thumb:hover {
     font-size: 4rem;
     width: 120px;
     height: 120px;
-    background: linear-gradient(135deg, #3498db, #2ecc71);
+    background: linear-gradient(135deg, var(--credits-gradient-start), var(--credits-gradient-dark));
     border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 25px rgba(155, 89, 182, 0.3);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
 }
 
 .app-name {
     font-size: 3rem;
     font-weight: 700;
-    color: #ecf0f1;
+    color: var(--credits-text);
     margin: 0 0 0.5rem 0;
-    background: linear-gradient(135deg, #3498db, #2ecc71);
+    background: linear-gradient(135deg, var(--credits-gradient-start), var(--credits-gradient-end));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -102,20 +126,20 @@ main::-webkit-scrollbar-thumb:hover {
 
 .app-version {
     font-size: 1.2rem;
-    color: #bdc3c7;
+    color: var(--credits-text-secondary);
     margin: 0 0 1rem 0;
 }
 
 .app-tagline {
     font-size: 1.5rem;
-    color: #3498db;
+    color: var(--credits-gradient-start);
     font-weight: 600;
     margin: 0 0 1rem 0;
 }
 
 .app-description {
     font-size: 1.1rem;
-    color: #bdc3c7;
+    color: var(--credits-text-secondary);
     line-height: 1.6;
     max-width: 700px;
     margin: 0;
@@ -123,7 +147,7 @@ main::-webkit-scrollbar-thumb:hover {
 
 .section-title {
     font-size: 2rem;
-    color: #ecf0f1;
+    color: var(--credits-text);
     text-align: left;
     margin: 0 0 2rem 0;
     position: relative;
@@ -137,7 +161,7 @@ main::-webkit-scrollbar-thumb:hover {
     left: 0;
     width: 60px;
     height: 3px;
-    background: linear-gradient(90deg, #9b59b6, #3498db);
+    background: linear-gradient(90deg, var(--credits-gradient-accent), var(--credits-gradient-start));
     border-radius: 2px;
 }
 
@@ -155,17 +179,17 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .credits-item {
-    background: #2c3e50;
+    background: var(--credits-bg-card);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid #34495e;
+    border: 1px solid var(--credits-border);
     text-align: left;
     transition: all 0.3s ease;
 }
 
 .credits-item:hover {
-    border-color: #3498db;
-    background: #34495e;
+    border-color: var(--credits-gradient-start);
+    background: var(--credits-bg-card);
 }
 
 .item-header {
@@ -173,16 +197,16 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .item-title {
-    color: #ecf0f1;
+    color: var(--credits-text);
     margin: 0;
     font-size: 1.1rem;
 }
 
 .list-link {
     display: inline-block;
-    color: #3498db;
+    color: var(--credits-gradient-start);
     background: transparent;
-    border: 1px solid #3498db;
+    border: 1px solid var(--credits-gradient-start);
     padding: 0.5rem 1rem;
     border-radius: 6px;
     font-size: 0.9rem;
@@ -192,7 +216,7 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .list-link:hover {
-    background: #3498db;
+    background: var(--credits-gradient-start);
     color: white;
 }
 
@@ -201,15 +225,15 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .acknowledgment-card {
-    background: #2c3e50;
+    background: var(--credits-bg-card);
     padding: 2rem;
     border-radius: 12px;
-    border: 1px solid #34495e;
+    border: 1px solid var(--credits-border);
     text-align: left;
 }
 
 .acknowledgment-card p {
-    color: #bdc3c7;
+    color: var(--credits-text-secondary);
     line-height: 1.6;
     margin: 0 0 1rem 0;
     font-size: 1rem;
@@ -231,15 +255,15 @@ main::-webkit-scrollbar-thumb:hover {
 }
 
 .license-card {
-    background: #2c3e50;
+    background: var(--credits-bg-card);
     padding: 2rem;
     border-radius: 12px;
-    border: 1px solid #34495e;
+    border: 1px solid var(--credits-border);
     text-align: left;
 }
 
 .license-card p {
-    color: #bdc3c7;
+    color: var(--credits-text-secondary);
     line-height: 1.6;
     margin: 0 0 1rem 0;
     font-size: 1rem;
@@ -255,7 +279,7 @@ main::-webkit-scrollbar-thumb:hover {
     justify-content: center;
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #3498db, #2980b9);
+    background: linear-gradient(135deg, var(--credits-gradient-start), var(--credits-gradient-dark));
     color: white;
     border: none;
     border-radius: 8px;
@@ -270,8 +294,8 @@ main::-webkit-scrollbar-thumb:hover {
 
 .redirect-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-    background: linear-gradient(135deg, #2980b9, #2573a7);
+    box-shadow: 0 5px 15px var(--credits-shadow);
+    background: linear-gradient(135deg, var(--credits-gradient-dark), var(--credits-gradient-start));
 }
 
 .redirect-icon {
