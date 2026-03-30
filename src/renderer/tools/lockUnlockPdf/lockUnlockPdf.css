@@ -130,7 +130,6 @@ body.light {
     background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
-    transition: background 0.2s, border-color 0.2s;
 }
 
 .file-selection-area .select-pdf-btn:hover {
@@ -240,7 +239,6 @@ body.light {
     cursor: pointer;
     padding: 0.2rem;
     border-radius: 3px;
-    transition: color 0.2s, background 0.2s;
 }
 
 .toggle-password:hover {
@@ -265,7 +263,6 @@ body.light {
     cursor: pointer;
     padding: 0.3rem;
     border-radius: 4px;
-    transition: background 0.2s;
 }
 
 .permission-item:hover {
@@ -323,7 +320,6 @@ body.light {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
     flex-shrink: 0;
     line-height: 1;
 }

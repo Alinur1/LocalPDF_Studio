@@ -141,7 +141,6 @@ export class SearchBar {
             resultItem.style.cssText = `
                 border-bottom: 1px solid var(--border-color);
                 color: var(--text-primary);
-                transition: background-color 0.2s ease;
             `;
 
             resultItem.innerHTML = `

@@ -184,7 +184,6 @@ main::-webkit-scrollbar-thumb:hover {
     border-radius: 8px;
     border: 1px solid var(--credits-border);
     text-align: left;
-    transition: all 0.3s ease;
 }
 
 .credits-item:hover {
@@ -212,7 +211,6 @@ main::-webkit-scrollbar-thumb:hover {
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
 }
 
 .list-link:hover {
@@ -286,7 +284,6 @@ main::-webkit-scrollbar-thumb:hover {
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
     text-decoration: none;
     margin-top: 0.5rem;
     width: 100%;

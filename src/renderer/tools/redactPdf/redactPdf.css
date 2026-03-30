@@ -240,7 +240,6 @@ body.light {
     border: 2px solid transparent;
     border-radius: 6px;
     overflow: hidden;
-    transition: all 0.2s ease;
     /* background: #2c3e50; */
     background: var(--thumbnail-bg);
     position: relative;
@@ -342,7 +341,6 @@ body.light {
     border-radius: 6px;
     border: 2px solid transparent;
     cursor: pointer;
-    transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -375,7 +373,6 @@ body.light {
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9rem;
-    transition: background 0.2s ease;
     min-width: 40px;
 }
 
@@ -478,7 +475,6 @@ body.light {
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9rem;
-    transition: background 0.2s ease;
     display: none;
 }
 

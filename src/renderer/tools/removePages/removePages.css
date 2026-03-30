@@ -154,7 +154,6 @@ body.light {
     background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
-    transition: background 0.2s, border-color 0.2s;
 }
 
 .file-selection-area .select-pdf-btn:hover {
@@ -198,7 +197,6 @@ body.light {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
     flex-shrink: 0;
     line-height: 1;
 }
@@ -254,7 +252,6 @@ body.light {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background 0.2s;
 }
 
 .action-btn:hover {
@@ -304,7 +301,6 @@ body.light {
     border-radius: 6px;
     padding: 0.5rem;
     border: 2px solid var(--page-thumbnail-border);
-    transition: border-color 0.2s, transform 0.2s;
     cursor: pointer;
     position: relative;
 }
@@ -342,7 +338,6 @@ body.light {
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     opacity: 1;
-    transition: opacity 0.2s;
 }
 
 .page-thumbnail.selected canvas {
@@ -440,7 +435,6 @@ body.light {
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.85rem;
-    transition: background 0.2s, border-color 0.2s;
 }
 
 .quick-action-btn:hover {

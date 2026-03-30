@@ -103,7 +103,6 @@
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 4px;
-  transition: all 0.2s ease;
   width: 32px;
   height: 32px;
   display: flex;
@@ -191,7 +190,6 @@
   border-radius: 8px;
   background: rgba(52, 73, 94, 0.05);
   border: 1px solid var(--border-color);
-  transition: all 0.2s ease;
   cursor: pointer;
 }
 
@@ -268,7 +266,6 @@
   height: 24px;
   background: var(--border-color);
   border-radius: 12px;
-  transition: background 0.3s ease;
   flex-shrink: 0;
   margin-top: 0.1rem;
 }
@@ -282,7 +279,6 @@
   border-radius: 50%;
   top: 3px;
   left: 3px;
-  transition: transform 0.3s ease;
 }
 
 .toggle-option input[type="checkbox"] {
@@ -339,7 +335,6 @@
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
   font-size: 0.9rem;
 }
 

@@ -41,10 +41,7 @@
   --modal-bg: #2c3e50;
   --modal-overlay: rgba(0, 0, 0, 0.7);
   --help-text-color: #7f8c8d;
-
-  /* Common variables */
   --border-radius: 6px;
-  --transition-speed: 0.3s;
 }
 
 body.light {
@@ -84,7 +81,6 @@ html {
   color: var(--text-primary);
   background: var(--bg-primary);
   overflow: hidden;
-  transition: background-color var(--transition-speed), color var(--transition-speed);
 }
 
 #app {
@@ -109,7 +105,6 @@ html {
   border: none;
   font-weight: 600;
   font-size: 14px;
-  transition: background var(--transition-speed), color var(--transition-speed), transform 0.2s;
   padding: 10px 18px;
   cursor: pointer;
   margin-right: 8px;
@@ -162,7 +157,6 @@ html {
   display: block;
   text-align: center;
   border-radius: 4px;
-  transition: background-color 0.2s ease;
   background: var(--bg-secondary);
 }
 
@@ -195,7 +189,6 @@ html {
   width: 5px;
   cursor: col-resize;
   background: var(--border-color);
-  transition: background 0.3s ease;
 }
 
 .resizer:hover {
@@ -212,7 +205,6 @@ html {
   border: 0.1px solid var(--border-color-tab);
   border-radius: 8px;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
   overflow: hidden;
   cursor: grab;
   user-select: none;
@@ -236,11 +228,6 @@ html {
   border-bottom: 2px solid var(--accent-color);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-}
-
-.tab,
-.tab-content {
-  transition: all 0.2s ease;
 }
 
 .tab-title {
@@ -267,7 +254,6 @@ html {
   cursor: pointer;
   font-weight: bold;
   color: var(--text-tertiary);
-  transition: color 0.2s ease, transform 0.1s ease;
   font-size: 18px;
   transform: scale(1.5);
 }
@@ -328,7 +314,6 @@ html {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  transition: background-image 0.8s ease-in-out, opacity 0.2s ease;
 }
 
 .empty-state.hidden {
@@ -399,7 +384,6 @@ html {
   height: 24px;
   background: #34495e;
   border-radius: 12px;
-  transition: background 0.3s ease;
 }
 
 .toggle-slider::after {
@@ -411,7 +395,6 @@ html {
   border-radius: 50%;
   top: 2px;
   left: 2px;
-  transition: transform 0.3s ease;
 }
 
 #clock-enabled:checked+.toggle-slider {
@@ -455,7 +438,6 @@ html {
   color: var(--text-primary);
   font-size: 14px;
   width: 280px;
-  transition: all 0.3s ease;
   outline: none;
 }
 
@@ -474,7 +456,6 @@ html {
   left: 12px;
   color: var(--text-tertiary);
   pointer-events: none;
-  transition: color var(--transition-speed);
 }
 
 .search-input:focus+.search-icon {
@@ -504,7 +485,6 @@ html {
   padding: 12px 16px;
   border-bottom: 1px solid var(--border-color);
   cursor: pointer;
-  transition: background 0.2s ease;
   color: var(--text-primary);
 }
 
@@ -614,7 +594,6 @@ body.dark .search-result-item:hover .search-result-meta {
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
-  transition: background var(--transition-speed), transform 0.2s;
   outline: none;
   position: relative;
 }
@@ -647,7 +626,6 @@ body.dark .search-result-item:hover .search-result-meta {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s;
   margin-bottom: 8px;
   border: 1px solid var(--border-color);
   z-index: 1001;
@@ -670,7 +648,6 @@ body.dark .search-result-item:hover .search-result-meta {
   border-top: 5px solid var(--bg-tertiary);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s;
   margin-bottom: 0;
   z-index: 1001;
 }
@@ -724,7 +701,6 @@ body.dark .search-result-item:hover .search-result-meta {
   padding: 10px 16px;
   color: var(--text-primary);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
   user-select: none;
   white-space: nowrap;
   font-size: 14px;
@@ -763,7 +739,6 @@ body.dark .search-result-item:hover .search-result-meta {
   cursor: pointer;
   background-size: cover;
   background-position: center;
-  transition: transform 0.2s, border-color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;

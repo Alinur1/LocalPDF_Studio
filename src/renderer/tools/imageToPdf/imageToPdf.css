@@ -182,7 +182,6 @@ body.light {
      background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
-    transition: background 0.2s, border-color 0.2s;
 }
 
 .select-images-btn:hover {
@@ -234,7 +233,6 @@ body.light {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
     line-height: 1;
     flex-shrink: 0;
 }
@@ -333,7 +331,6 @@ body.light {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .image-item:hover {
@@ -433,7 +430,6 @@ body.light {
     padding: 0.3rem 0.6rem;
     font-size: 0.8rem;
     cursor: pointer;
-    transition: background 0.2s;
 }
 
 .remove-image-btn:hover {
@@ -571,7 +567,6 @@ body.light {
     /* background: #3498db; */
       background: var(--slider-accent);
     cursor: pointer;
-    transition: background 0.2s;
 }
 
 .quality-slider::-webkit-slider-thumb:hover {
@@ -588,7 +583,6 @@ body.light {
      background: var(--slider-accent);
     cursor: pointer;
     border: none;
-    transition: background 0.2s;
 }
 
 .quality-slider::-moz-range-thumb:hover {
@@ -616,7 +610,6 @@ body.light {
     border-radius: 6px;
     padding: 0.7rem 1.2rem;
     cursor: pointer;
-    transition: background 0.2s;
     font-weight: 500;
 }
 
@@ -694,7 +687,6 @@ body.light {
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
-    transition: color 0.2s;
 }
 
 .close-btn:hover,

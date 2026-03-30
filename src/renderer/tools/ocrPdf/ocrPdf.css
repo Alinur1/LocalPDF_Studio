@@ -270,7 +270,6 @@ body.light {
     background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
-    transition: background 0.2s, border-color 0.2s;
 }
 
 .file-selection-area .select-pdf-btn:hover {
@@ -314,7 +313,6 @@ body.light {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
     flex-shrink: 0;
     line-height: 1;
 }
@@ -409,7 +407,6 @@ body.light {
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 500;
-    transition: background 0.2s, border-color 0.2s;
 }
 
 .quick-action-btn:hover {
@@ -427,7 +424,6 @@ body.light {
     color: var(--options-input-color);
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
-    transition: border-color 0.2s;
 }
 
 .options-input:focus {
@@ -453,7 +449,6 @@ body.light {
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 500;
-    transition: background 0.2s;
 }
 
 .action-btn:hover {
@@ -503,7 +498,6 @@ body.light {
     border-radius: 6px;
     padding: 0.5rem;
     border: 2px solid var(--page-thumbnail-border);
-    transition: border-color 0.2s, transform 0.2s, background 0.2s;
     cursor: pointer;
 }
 
@@ -578,7 +572,6 @@ body.light {
     justify-content: space-between;
     align-items: center;
     gap: 0.5rem;
-    transition: border-color 0.2s;
     user-select: none;
     flex-wrap: wrap;
 }
@@ -622,7 +615,6 @@ body.light {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s, opacity 0.2s;
 }
 
 .tag-remove:hover {
@@ -636,7 +628,6 @@ body.light {
 
 .dropdown-arrow {
     font-size: 0.7rem;
-    transition: transform 0.2s;
 }
 
 .dropdown-header.active .dropdown-arrow {
@@ -708,7 +699,6 @@ body.light {
     padding: 0.7rem;
     color: var(--dropdown-option-color);
     cursor: pointer;
-    transition: background 0.15s;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -816,7 +806,6 @@ body.light {
     height: 100%;
     width: 0%;
     border-radius: 8px;
-    transition: width 0.5s ease;
 }
 
 .progress-info {
@@ -901,7 +890,6 @@ body.light {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    transition: background 0.2s;
     width: 100%;
 }
 
@@ -938,7 +926,6 @@ body.light {
     height: 10px;
     border-radius: 50%;
     background: var(--batch-dot-bg);
-    transition: background 0.3s;
 }
 
 .batch-dot.active {

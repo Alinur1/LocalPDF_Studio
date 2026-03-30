@@ -174,7 +174,6 @@ main::-webkit-scrollbar-thumb:hover {
     border-radius: 12px;
     text-align: left;
     border: 1px solid var(--donate-border);
-    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
 }
@@ -254,7 +253,6 @@ main::-webkit-scrollbar-thumb:hover {
     padding: 2rem;
     border-radius: 12px;
     border: 1px solid var(--donate-border);
-    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     text-align: left;
@@ -315,7 +313,6 @@ main::-webkit-scrollbar-thumb:hover {
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
     background: linear-gradient(135deg, #27ae60, #229954);
     color: white;
     white-space: nowrap;
@@ -339,7 +336,6 @@ main::-webkit-scrollbar-thumb:hover {
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
     align-self: flex-start;
 }
 
@@ -441,7 +437,6 @@ main::-webkit-scrollbar-thumb:hover {
     cursor: pointer;
     padding: 0.25rem;
     border-radius: 4px;
-    transition: all 0.2s ease;
     width: 32px;
     height: 32px;
     display: flex;
@@ -531,7 +526,6 @@ main::-webkit-scrollbar-thumb:hover {
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
     font-size: 0.9rem;
 }
 
@@ -575,7 +569,6 @@ main::-webkit-scrollbar-thumb:hover {
     border-radius: 10px;
     border: 1px solid var(--donate-border);
     text-align: left;
-    transition: all 0.3s ease;
 }
 
 .alt-support-card:hover {
@@ -611,7 +604,6 @@ main::-webkit-scrollbar-thumb:hover {
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.9rem;
-    transition: all 0.3s ease;
     display: inline-block;
 }
 

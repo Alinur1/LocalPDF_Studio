@@ -117,7 +117,6 @@ body.light {
     background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
-    transition: background 0.2s, border-color 0.2s;
 }
 
 .file-selection-area .select-pdf-btn:hover {
@@ -236,7 +235,6 @@ body.light {
     padding: 0.6rem;
     width: 100%;
     box-sizing: border-box;
-    transition: border-color 0.2s;
 }
 
 .metadata-input:focus,
@@ -258,7 +256,6 @@ body.light {
     border-radius: 6px;
     padding: 0.7rem 1.2rem;
     cursor: pointer;
-    transition: background 0.2s;
     font-size: 0.9rem;
 }
 
@@ -308,7 +305,6 @@ body.light {
     border-radius: 6px;
     padding: 0.7rem 1.2rem;
     cursor: pointer;
-    transition: background 0.2s;
     font-size: 0.9rem;
     display: flex;
     align-items: center;
@@ -352,7 +348,6 @@ body.light {
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s;
 }
 
 .copy-clean-metadata-btn:hover::after {
@@ -371,17 +366,12 @@ body.light {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
     flex-shrink: 0;
     line-height: 1;
 }
 
 .remove-btn:hover {
     background: var(--remove-btn-hover);
-}
-
-.metadata-view {
-    transition: opacity 0.3s ease;
 }
 
 @media (max-width: 768px) {

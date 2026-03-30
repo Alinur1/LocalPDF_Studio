@@ -144,7 +144,6 @@ class CustomAlert {
                 cursor: pointer;
                 padding: 0.25rem;
                 border-radius: 4px;
-                transition: all 0.2s ease;
                 width: 32px;
                 height: 32px;
                 display: flex;
@@ -268,7 +267,6 @@ class CustomAlert {
                     border-radius: 4px;
                     cursor: pointer;
                     font-size: 0.9rem;
-                    transition: all 0.2s ease;
                     min-width: 80px;
                 `;
 

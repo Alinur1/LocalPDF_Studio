@@ -154,7 +154,6 @@ body.light {
     background: var(--select-btn-bg);
     font-size: 1.1rem;
     font-weight: 500;
-    transition: background 0.2s, border-color 0.2s;
 }
 
 .file-selection-area .select-pdf-btn:hover {
@@ -198,7 +197,6 @@ body.light {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
     flex-shrink: 0;
     line-height: 1;
 }
@@ -275,7 +273,6 @@ body.light {
     border-radius: 6px;
     padding: 0.5rem;
     border: 2px solid var(--page-thumbnail-border);
-    transition: border-color 0.2s, transform 0.2s;
     cursor: pointer;
 }
 
@@ -374,7 +371,6 @@ body.light {
     background: var(--slider-thumb-bg);
     border: 2px solid var(--slider-thumb-border);
     cursor: pointer;
-    transition: transform 0.15s;
 }
 
 .split-slider::-webkit-slider-thumb:hover {
@@ -429,7 +425,6 @@ body.light {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: width 0.1s;
     min-width: 0;
 }
 
