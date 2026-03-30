@@ -67,20 +67,6 @@ class DonationManager {
         this.setupDonationListLink();
     }
 
-    setupDonationListLink() {
-    const donationListBtn = document.getElementById('donation-list-link');
-    if (donationListBtn) {
-        donationListBtn.addEventListener('click', () => {
-            this.openDonationList();
-            });
-        }
-    }
-
-    openDonationList() {
-    const donationListUrl = 'https://docs.google.com/spreadsheets/d/1dZtq7XCQ-jI0-ib7mR5trBLqtb9JuRKXkMFP6O41z3E/edit?gid=0#gid=0';
-    this.openExternal(donationListUrl);
-    }
-
     setupDonationHandlers() {
         const bkashBtn = document.getElementById('show-bkash-qr');
         if (bkashBtn) bkashBtn.addEventListener('click', () => this.showBkashQR());
