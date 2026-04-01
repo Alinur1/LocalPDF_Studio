@@ -19,7 +19,6 @@
 // src/renderer/utils/searchBar.js
 
 import i18n from "./i18n.js";
-import { loadEmojiImagesIn } from "./emojiLoader.js";
 
 export class SearchBar {
     constructor(searchIndexManager, tabManager) {
@@ -41,13 +40,10 @@ export class SearchBar {
         this.container.innerHTML = `
             <div class="search-input-wrapper">
                 <input type="text" id="pdf-search" placeholder="" class="search-input">
-                <span class="search-icon">
-                    <span data-emoji="mag" width="15" height="15"></span>
-                </span>
+                <span class="search-icon">🔍</span>
             </div>
             <div class="search-results hidden"></div>
         `;
-        loadEmojiImagesIn(this.container);
 
         this.input = this.container.querySelector('#pdf-search');
         this.results = this.container.querySelector('.search-results');
