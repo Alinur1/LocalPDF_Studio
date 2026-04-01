@@ -98,12 +98,12 @@
     "license-description1": "このソフトウェアはAGPL 3.0（GNU Affero 一般公衆利用許諾書バージョン3）の下でライセンスされています",
     "license-description2": "このソフトウェアを自由に使用、変更、配布できますが、AGPL 3.0の条件を遵守する必要があります。これには、ネットワークを介してソフトウェアと対話するユーザーにソースコードを提供することが含まれます。",
     "support-card": "このプロジェクトをサポート",
-    "support-dev-btn": "💝 開発をサポート",
+    "support-dev-btn": "開発をサポート",
     "release-note-btn": "リリースノート",
     "github-link": "ソースコードを表示",
     "current-progress": "現在取り組んでいる機能",
     "report-issues": "問題を報告",
-    "credits-btn": "🤝クレジット"
+    "credits-btn": "クレジット"
   },
   "donate": {
     "back-btn": "← アプリに戻る",

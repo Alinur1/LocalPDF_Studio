@@ -98,12 +98,12 @@
     "license-description1": "本软件采用 AGPL 3.0（GNU Affero 通用公共许可证第3版）授权",
     "license-description2": "您可以自由使用、修改和分发本软件，但必须遵守 AGPL 3.0 的条款。这包括向通过网络与本软件交互的用户提供源代码。",
     "support-card": "支持本项目",
-    "support-dev-btn": "💝 支持开发",
+    "support-dev-btn": "支持开发",
     "release-note-btn": "发布说明",
     "github-link": "查看源代码",
     "current-progress": "当前正在开发",
     "report-issues": "报告问题",
-    "credits-btn": "🤝致谢"
+    "credits-btn": "致谢"
   },
   "donate": {
     "back-btn": "← 返回应用",

@@ -98,12 +98,12 @@
     "license-description1": "This software is licensed under the AGPL 3.0 (GNU Affero General Public License version 3)",
     "license-description2": "You are free to use, modify, and distribute this software, but you must adhere to the terms of the AGPL 3.0. This includes providing the source code to users who interact with the software over a network.",
     "support-card": "Support This Project",
-    "support-dev-btn": "💝 Support Development",
+    "support-dev-btn": "Support Development",
     "release-note-btn": "Release Note",
     "github-link": "View Source Code",
     "current-progress": "Currently Working On",
     "report-issues": "Report Issues",
-    "credits-btn": "🤝Credits"
+    "credits-btn": "Credits"
   },
   "donate": {
     "back-btn": "← Back to App",
