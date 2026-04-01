@@ -26,10 +26,12 @@ import customAlert from './utils/customAlert.js';
 import i18n from './utils/i18n.js';
 import { SearchBar } from './utils/searchBar.js';
 import { SearchIndexManager } from './utils/searchIndexManager.js';
+import { loadEmojiImages } from './utils/emojiLoader.js';
 
 window.addEventListener('DOMContentLoaded', async () => {
 
     await i18n.init();
+    await loadEmojiImages();
 
     const themeRadios = document.querySelectorAll('input[name="theme-mode"]');
     const tabManager = new TabManager('#tab-bar', '#tab-content');
