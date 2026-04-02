@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const rotateBtn = document.createElement('button');
         rotateBtn.className = 'control-btn';
-        rotateBtn.innerHTML = '↻ 90°';
+        rotateBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-cw-icon lucide-rotate-cw"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg> 90°';
         rotateBtn.onclick = (e) => {
             e.stopPropagation();
             rotatePage(page.id);
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const duplicateBtn = document.createElement('button');
         duplicateBtn.className = 'control-btn duplicate-btn';
-        duplicateBtn.innerHTML = '+ Copy';
+        duplicateBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Copy';
         duplicateBtn.onclick = (e) => {
             e.stopPropagation();
             duplicatePage(page.id);
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'control-btn delete-btn';
-        deleteBtn.innerHTML = '✕';
+        deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
         deleteBtn.onclick = (e) => {
             e.stopPropagation();
             deletePage(page.id);

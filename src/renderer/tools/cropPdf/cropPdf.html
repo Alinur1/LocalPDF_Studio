@@ -52,7 +52,9 @@
                         <p id="pdf-name" class="pdf-name"></p>
                         <p id="pdf-size" class="pdf-size"></p>
                     </div>
-                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                    <button id="remove-pdf-btn" class="remove-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
                 </div>
             </div>
 
@@ -69,15 +71,26 @@
                         </div>
 
                         <div class="zoom-controls">
-                            <button id="zoom-out-btn" class="secondary-btn" title="Zoom Out">−</button>
+                            <button id="zoom-out-btn" class="secondary-btn" title="Zoom Out">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus-icon lucide-minus"><path d="M5 12h14"/></svg>
+                            </button>
                             <span id="zoom-level" class="zoom-level">100%</span>
-                            <button id="zoom-in-btn" class="secondary-btn" title="Zoom In">+</button>
-                            <button id="reset-zoom-btn" class="secondary-btn" title="Reset Zoom">⟲</button>
+                            <button id="zoom-in-btn" class="secondary-btn" title="Zoom In">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                            </button>
+                            <button id="reset-zoom-btn" class="secondary-btn" title="Reset Zoom">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw-icon lucide-rotate-ccw"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            </button>
                             
                             <div class="separator"></div>
                             <button id="view-single-btn" class="secondary-btn active"
-                                title="Single Page View">▢</button>
-                            <button id="view-double-btn" class="secondary-btn" title="Double Page View">▢▢</button>
+                                title="Single Page View">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-icon lucide-square"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+                            </button>
+                            <button id="view-double-btn" class="secondary-btn" title="Double Page View">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-icon lucide-square"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-icon lucide-square"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+                            </button>
                         </div>
 
                         <span id="page-count" class="page-count"></span>

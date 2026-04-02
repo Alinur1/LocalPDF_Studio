@@ -519,8 +519,8 @@
   "lockUnlockPdfJS": {
     "analyzingPdf": "PDFを分析中...",
     "failedAnalyze": "PDFの選択または分析に失敗しました。",
-    "encryptedPdf": "🔒 暗号化されたPDF",
-    "unencryptedPdf": "🔓 暗号化されていないPDF",
+    "encryptedPdf": "暗号化されたPDF",
+    "unencryptedPdf": "暗号化されていないPDF",
     "lockPdf": "PDFをロック",
     "unlockPdf": "PDFのロックを解除",
     "lockingPdf": "PDFをロック中...",

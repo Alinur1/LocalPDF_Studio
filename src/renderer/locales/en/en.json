@@ -519,8 +519,8 @@
   "lockUnlockPdfJS": {
     "analyzingPdf": "Analyzing PDF...",
     "failedAnalyze": "Failed to select or analyze the PDF.",
-    "encryptedPdf": "🔒 Encrypted PDF",
-    "unencryptedPdf": "🔓 Unencrypted PDF",
+    "encryptedPdf": "Encrypted PDF",
+    "unencryptedPdf": "Unencrypted PDF",
     "lockPdf": "Lock PDF",
     "unlockPdf": "Unlock PDF",
     "lockingPdf": "Locking PDF...",

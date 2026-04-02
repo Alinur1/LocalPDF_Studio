@@ -519,8 +519,8 @@
   "lockUnlockPdfJS": {
     "analyzingPdf": "正在分析 PDF...",
     "failedAnalyze": "无法选择或分析 PDF。",
-    "encryptedPdf": "🔒 已加密的 PDF",
-    "unencryptedPdf": "🔓 未加密的 PDF",
+    "encryptedPdf": "已加密的 PDF",
+    "unencryptedPdf": "未加密的 PDF",
     "lockPdf": "锁定 PDF",
     "unlockPdf": "解锁 PDF",
     "lockingPdf": "正在锁定 PDF...",

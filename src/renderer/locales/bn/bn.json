@@ -519,8 +519,8 @@
   "lockUnlockPdfJS": {
     "analyzingPdf": "PDF বিশ্লেষণ করা হচ্ছে...",
     "failedAnalyze": "PDF নির্বাচন বা বিশ্লেষণ করতে ব্যর্থ।",
-    "encryptedPdf": "🔒 এনক্রিপ্টেড PDF",
-    "unencryptedPdf": "🔓 আনএনক্রিপ্টেড PDF",
+    "encryptedPdf": "এনক্রিপ্টেড PDF",
+    "unencryptedPdf": "আনএনক্রিপ্টেড PDF",
     "lockPdf": "PDF লক করুন",
     "unlockPdf": "PDF আনলক করুন",
     "lockingPdf": "PDF লক করা হচ্ছে...",

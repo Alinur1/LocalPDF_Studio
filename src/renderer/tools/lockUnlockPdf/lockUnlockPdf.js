@@ -100,11 +100,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         pdfSizeEl.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
         const securityStatus = file.securityStatus;
         if (securityStatus.isEncrypted) {
-            pdfSecurityEl.textContent = i18n.t('lockUnlockPdfJS.encryptedPdf');
+            pdfSecurityEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-icon lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' + i18n.t('lockUnlockPdfJS.encryptedPdf');
             pdfSecurityEl.className = 'pdf-security security-locked';
             document.querySelector('input[name="operation"][value="unlock"]').checked = true;
         } else {
-            pdfSecurityEl.textContent = i18n.t('lockUnlockPdfJS.unencryptedPdf');
+            pdfSecurityEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-open-icon lucide-lock-open"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>' + i18n.t('lockUnlockPdfJS.unencryptedPdf');
             pdfSecurityEl.className = 'pdf-security security-unlocked';
             document.querySelector('input[name="operation"][value="lock"]').checked = true;
         }
@@ -131,12 +131,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function handleTogglePassword(event) {
-        const targetId = event.target.getAttribute('data-target');
+        const targetId = event.currentTarget.getAttribute('data-target');
         const passwordInput = document.getElementById(targetId);
-        const isCurrentlyPassword = passwordInput.type === 'password';
+        if (!passwordInput) return;
 
+        const isCurrentlyPassword = passwordInput.type === 'password';
         passwordInput.type = isCurrentlyPassword ? 'text' : 'password';
-        event.target.textContent = isCurrentlyPassword ? '🙈' : '👁️';
+
+        event.currentTarget.innerHTML = isCurrentlyPassword ?
+            '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-.722-3.25"/><path d="M2 8a10.645 10.645 0 0 0 20 0"/><path d="m20 15-1.726-2.05"/><path d="m4 15 1.726-2.05"/><path d="m9 18 .722-3.25"/></svg>'
+            :
+            '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>';
     }
 
     function clearInputError(event) {
@@ -263,7 +268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             input.type = 'password';
         });
         document.querySelectorAll('.toggle-password').forEach(btn => {
-            btn.textContent = '👁️';
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>';
         });
     }
 
