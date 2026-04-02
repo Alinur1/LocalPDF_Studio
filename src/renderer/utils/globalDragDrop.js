@@ -52,7 +52,7 @@ export function initializeGlobalDragDropForImages(options = {}) {
         border: 3px dashed white;
         box-shadow: 0 0 20px rgba(52, 152, 219, 0.8);
     `;
-    message.textContent = '🖼️ Drop your images here';
+    message.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-icon lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> Drop your images here';
 
     overlay.appendChild(message);
     document.body.appendChild(overlay);
@@ -176,7 +176,7 @@ export function initializeGlobalDragDrop(options = {}) {
         border: 3px dashed white;
         box-shadow: 0 0 20px rgba(52, 152, 219, 0.8);
     `;
-    message.textContent = '📄 Drop your files here';
+    message.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-text-icon lucide-book-text"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M8 11h8"/><path d="M8 7h6"/></svg> Drop your files here';
 
     overlay.appendChild(message);
     document.body.appendChild(overlay);
@@ -313,7 +313,7 @@ export function initializeGlobalDragDropForOCR(options = {}) {
         border: 3px dashed white;
         box-shadow: 0 0 20px rgba(52, 152, 219, 0.8);
     `;
-    message.textContent = '📄 Drop your files here';
+    message.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-text-icon lucide-book-text"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M8 11h8"/><path d="M8 7h6"/></svg> Drop your files here';
 
     overlay.appendChild(message);
     document.body.appendChild(overlay);
