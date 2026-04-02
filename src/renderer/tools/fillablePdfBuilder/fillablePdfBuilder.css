@@ -528,15 +528,6 @@ body.light {
     border-color: var(--palette-field-btn-hover-border);
 }
 
-.field-icon {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--palette-icon-color);
-    width: 18px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
 .field-label {
     font-size: 0.75rem;
     color: var(--palette-field-btn-color);
@@ -996,10 +987,6 @@ body.light {
 
 .label-field-btn {
     border-style: dashed !important;
-}
-
-.label-field-btn .field-icon {
-    font-style: normal;
 }
 
 .date-field-note {

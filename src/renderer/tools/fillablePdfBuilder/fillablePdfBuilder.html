@@ -46,12 +46,16 @@
                     <p class="mode-subtitle" data-i18n="fillablePdfBuilder.subtitle">Choose how you want to start building your form</p>
                     <div class="mode-cards">
                         <button class="mode-card" id="mode-blank">
-                            <div class="mode-card-icon">📄</div>
+                            <div class="mode-card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text-icon lucide-file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                            </div>
                             <div class="mode-card-title" data-i18n="fillablePdfBuilder.mode-blank-title">Blank Template</div>
                             <div class="mode-card-desc" data-i18n="fillablePdfBuilder.mode-blank-desc">Start with a blank page and design your form from scratch</div>
                         </button>
                         <button class="mode-card" id="mode-existing">
-                            <div class="mode-card-icon">📑</div>
+                            <div class="mode-card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-files-icon lucide-files"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></svg>
+                            </div>
                             <div class="mode-card-title" data-i18n="fillablePdfBuilder.mode-existing-title">Existing PDF</div>
                             <div class="mode-card-desc" data-i18n="fillablePdfBuilder.mode-existing-desc">Load a PDF and add interactive form fields on top of it</div>
                         </button>
@@ -67,11 +71,11 @@
                         <div class="option-group">
                             <label data-i18n="fillablePdfBuilder.page-size-label">Page Size</label>
                             <select id="page-size" class="options-select">
-                                <option value="A4" data-i18n="fillablePdfBuilder.page-size-a4">A4 (210 × 297 mm)</option>
-                                <option value="Letter" data-i18n="fillablePdfBuilder.page-size-letter">Letter (8.5 × 11 in)</option>
-                                <option value="Legal" data-i18n="fillablePdfBuilder.page-size-legal">Legal (8.5 × 14 in)</option>
-                                <option value="A3" data-i18n="fillablePdfBuilder.page-size-a3">A3 (297 × 420 mm)</option>
-                                <option value="A5" data-i18n="fillablePdfBuilder.page-size-a5">A5 (148 × 210 mm)</option>
+                                <option value="A4" data-i18n="fillablePdfBuilder.page-size-a4">A4 (210 x 297 mm)</option>
+                                <option value="Letter" data-i18n="fillablePdfBuilder.page-size-letter">Letter (8.5 x 11 in)</option>
+                                <option value="Legal" data-i18n="fillablePdfBuilder.page-size-legal">Legal (8.5 x 14 in)</option>
+                                <option value="A3" data-i18n="fillablePdfBuilder.page-size-a3">A3 (297 x 420 mm)</option>
+                                <option value="A5" data-i18n="fillablePdfBuilder.page-size-a5">A5 (148 x 210 mm)</option>
                             </select>
                         </div>
                         <div class="option-group">
@@ -114,7 +118,9 @@
                                 <p id="pdf-name" class="pdf-name"></p>
                                 <p id="pdf-size" class="pdf-size"></p>
                             </div>
-                            <button id="remove-pdf-btn" class="remove-btn" title="Remove">×</button>
+                            <button id="remove-pdf-btn" class="remove-btn" title="Remove">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
                         </div>
                     </div>
                     <div class="setup-actions">
@@ -132,35 +138,27 @@
                     <div class="palette-header" data-i18n="fillablePdfBuilder.palette-header-fields">Form Fields</div>
                     <div class="palette-fields">
                         <button class="palette-field-btn" data-type="text" title="Text Field">
-                            <span class="field-icon">T</span>
                             <span class="field-label" data-i18n="fillablePdfBuilder.field-text">Text Field</span>
                         </button>
                         <button class="palette-field-btn" data-type="textarea" title="Text Area">
-                            <span class="field-icon">¶</span>
                             <span class="field-label" data-i18n="fillablePdfBuilder.field-textarea">Text Area</span>
                         </button>
                         <button class="palette-field-btn" data-type="checkbox" title="Checkbox">
-                            <span class="field-icon">✓</span>
                             <span class="field-label" data-i18n="fillablePdfBuilder.field-checkbox">Checkbox</span>
                         </button>
                         <button class="palette-field-btn" data-type="radio" title="Radio Button">
-                            <span class="field-icon">◉</span>
                             <span class="field-label" data-i18n="fillablePdfBuilder.field-radio">Radio Button</span>
                         </button>
                         <button class="palette-field-btn" data-type="dropdown" title="Dropdown">
-                            <span class="field-icon">▼</span>
                             <span class="field-label" data-i18n="fillablePdfBuilder.field-dropdown">Dropdown</span>
                         </button>
                         <button class="palette-field-btn" data-type="date" title="Date (text)">
-                            <span class="field-icon">📅</span>
                             <span class="field-label" data-i18n="fillablePdfBuilder.field-date">Date (text)</span>
                         </button>
                         <button class="palette-field-btn" data-type="signature" title="Signature">
-                            <span class="field-icon">✍</span>
                             <span class="field-label" data-i18n="fillablePdfBuilder.field-signature">Signature</span>
                         </button>
                         <button class="palette-field-btn label-field-btn" data-type="label" title="Label (static)">
-                            <span class="field-icon">𝐀</span>
                             <span class="field-label" data-i18n="fillablePdfBuilder.field-label">Label (static)</span>
                         </button>
                     </div>
@@ -174,8 +172,22 @@
                     <div class="palette-divider"></div>
 
                     <div class="palette-header" data-i18n="fillablePdfBuilder.palette-header-template">Template</div>
-                    <button class="palette-action-btn" id="save-template-btn" data-i18n="fillablePdfBuilder.save-template-btn">💾 Save Template</button>
-                    <button class="palette-action-btn" id="load-template-btn" data-i18n="fillablePdfBuilder.load-template-btn">📂 Load Template</button>
+                    <button class="palette-action-btn" id="save-template-btn">
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
+                        </span>
+                        <span data-i18n="fillablePdfBuilder.save-template-btn">
+                            Save Template
+                        </span>
+                    </button>
+                    <button class="palette-action-btn" id="load-template-btn">
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-icon lucide-folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                        </span>
+                        <span data-i18n="fillablePdfBuilder.load-template-btn">
+                            Load Template
+                        </span>
+                    </button>
                 </div>
 
                 <!-- Center: Canvas Area -->
@@ -183,18 +195,26 @@
                     <div class="canvas-toolbar">
                         <div class="toolbar-left">
                             <span class="canvas-page-info" id="canvas-page-info">Page 1 of 1</span>
-                            <button class="toolbar-btn" id="prev-page-btn" disabled>◀</button>
-                            <button class="toolbar-btn" id="next-page-btn" disabled>▶</button>
+                            <button class="toolbar-btn" id="prev-page-btn" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-step-back-icon lucide-step-back"><path d="M13.971 4.285A2 2 0 0 1 17 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"/><path d="M21 20V4"/></svg>
+                            </button>
+                            <button class="toolbar-btn" id="next-page-btn" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-step-forward-icon lucide-step-forward"><path d="M10.029 4.285A2 2 0 0 0 7 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"/><path d="M3 4v16"/></svg>
+                            </button>
                         </div>
                         <div class="toolbar-center">
-                            <button class="toolbar-btn" id="zoom-out-btn">−</button>
+                            <button class="toolbar-btn" id="zoom-out-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus-icon lucide-minus"><path d="M5 12h14"/></svg>
+                            </button>
                             <span class="zoom-level" id="zoom-level">100%</span>
-                            <button class="toolbar-btn" id="zoom-in-btn">+</button>
+                            <button class="toolbar-btn" id="zoom-in-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                            </button>
                             <button class="toolbar-btn" id="zoom-fit-btn" data-i18n="fillablePdfBuilder.zoom-fit-btn">Fit</button>
                         </div>
                         <div class="toolbar-right">
-                            <button class="toolbar-btn danger-btn" id="delete-field-btn" data-i18n="fillablePdfBuilder.delete-field-btn" disabled>🗑 Delete Field</button>
-                            <button class="toolbar-btn danger-btn" id="delete-page-btn" data-i18n="fillablePdfBuilder.delete-page-btn">🗑 Delete Page</button>
+                            <button class="toolbar-btn danger-btn" id="delete-field-btn" data-i18n="fillablePdfBuilder.delete-field-btn" disabled>Delete Field</button>
+                            <button class="toolbar-btn danger-btn" id="delete-page-btn" data-i18n="fillablePdfBuilder.delete-page-btn">Delete Page</button>
                         </div>
                     </div>
 
@@ -216,7 +236,9 @@
 
                     <!-- No selection state -->
                     <div id="props-empty" class="props-empty">
-                        <div class="props-empty-icon">↖</div>
+                        <div class="props-empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-up-left-icon lucide-move-up-left"><path d="M5 11V5H11"/><path d="M5 5L19 19"/></svg>
+                        </div>
                         <p data-i18n="fillablePdfBuilder.props-empty-text">Click a field on the canvas to edit its properties</p>
                     </div>
 
@@ -312,7 +334,14 @@
                             </div>
                         </div>
 
-                        <button class="action-pill full-width" id="duplicate-field-btn" data-i18n="fillablePdfBuilder.duplicate-field-btn">⧉ Duplicate Field</button>
+                        <button class="action-pill full-width" id="duplicate-field-btn">
+                            <span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy-icon lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                            </span>
+                            <span data-i18n="fillablePdfBuilder.duplicate-field-btn">
+                                Duplicate Field
+                            </span>
+                        </button>
                     </div>
                 </div>
 
@@ -324,8 +353,8 @@
                     <span class="field-count-label" id="field-count-label">0 fields on this document</span>
                 </div>
                 <div class="export-right">
-                    <button class="top-btn secondary-btn" id="export-flattened-btn" data-i18n="fillablePdfBuilder.save-flattened-btn">📄 Save as Flattened PDF</button>
-                    <button class="top-btn" id="export-fillable-btn" data-i18n="fillablePdfBuilder.save-fillable-btn">📋 Save as Fillable PDF</button>
+                    <button class="top-btn secondary-btn" id="export-flattened-btn" data-i18n="fillablePdfBuilder.save-flattened-btn">Save as Flattened PDF</button>
+                    <button class="top-btn" id="export-fillable-btn" data-i18n="fillablePdfBuilder.save-fillable-btn">Save as Fillable PDF</button>
                 </div>
             </div>
 

@@ -51,7 +51,9 @@
                         <p id="image-name" class="pdf-name"></p>
                         <p id="image-size" class="pdf-size"></p>
                     </div>
-                    <button id="remove-image-btn" class="remove-btn" title="Remove image" data-i18n-title="imageEditorJS.remove-image">×</button>
+                    <button id="remove-image-btn" class="remove-btn" title="Remove image" data-i18n-title="imageEditorJS.remove-image">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
                 </div>
             </div>
 
@@ -64,7 +66,12 @@
                         <span class="canvas-label" data-i18n="imageEditor.canvas-label">Preview</span>
                         <div class="canvas-info">
                             <span id="canvas-dimensions" class="canvas-dimensions"></span>
-                            <button id="reset-btn" class="icon-btn reset-btn" title="Reset all edits" data-i18n="imageEditor.reset-btn">↺ Reset</button>
+                            <button id="reset-btn" class="icon-btn reset-btn" title="Reset all edits">
+                                <span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw-icon lucide-rotate-ccw"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                </span>
+                                <span data-i18n="imageEditor.reset-btn">Reset</span>
+                            </button>
                         </div>
                     </div>
                     <div class="canvas-wrapper" id="canvas-wrapper">
@@ -79,11 +86,11 @@
 
                     <!-- Tab Nav -->
                     <div class="tool-tabs">
-                        <button class="tab-btn active" data-tab="adjustments" data-i18n="imageEditor.tab-adjust">🎨 Adjust</button>
-                        <button class="tab-btn" data-tab="transform" data-i18n="imageEditor.tab-transform">🔄 Transform</button>
-                        <button class="tab-btn" data-tab="filters" data-i18n="imageEditor.tab-filters">✨ Filters</button>
-                        <button class="tab-btn" data-tab="text" data-i18n="imageEditor.tab-text">📝 Text</button>
-                        <button class="tab-btn" data-tab="crop" data-i18n="imageEditor.tab-crop">✂️ Crop</button>
+                        <button class="tab-btn active" data-tab="adjustments" data-i18n="imageEditor.tab-adjust">Adjust</button>
+                        <button class="tab-btn" data-tab="transform" data-i18n="imageEditor.tab-transform">Transform</button>
+                        <button class="tab-btn" data-tab="filters" data-i18n="imageEditor.tab-filters">Filters</button>
+                        <button class="tab-btn" data-tab="text" data-i18n="imageEditor.tab-text">Text</button>
+                        <button class="tab-btn" data-tab="crop" data-i18n="imageEditor.tab-crop">Crop</button>
                     </div>
 
                     <!-- Adjustments Tab -->
@@ -305,7 +312,7 @@
                     <option value="image/jpeg" data-i18n="imageEditor.save-jpeg">JPEG</option>
                     <option value="image/webp" data-i18n="imageEditor.save-webp">WebP</option>
                 </select>
-                <button id="save-btn" class="top-btn" data-i18n="imageEditor.save-btn">💾 Save Image</button>
+                <button id="save-btn" class="top-btn" data-i18n="imageEditor.save-btn">Save Image</button>
             </div>
 
         </main>

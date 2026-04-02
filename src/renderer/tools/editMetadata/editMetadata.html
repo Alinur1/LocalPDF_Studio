@@ -48,7 +48,9 @@
                         <p id="pdf-name" class="pdf-name"></p>
                         <p id="pdf-size" class="pdf-size"></p>
                     </div>
-                    <button id="remove-pdf-btn" class="remove-btn">×</button>
+                    <button id="remove-pdf-btn" class="remove-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
                 </div>
             </div>
             <div id="metadata-container" class="metadata-container" style="display: none;">
@@ -57,11 +59,11 @@
                     <div class="header-actions">
                         <button id="copy-metadata-btn" class="secondary-btn copy-clean-metadata-btn"
                             title="Copy all metadata to clipboard" data-i18n="editMetadata.copy-metadata-btn">
-                            📋 Copy Metadata
+                            Copy Metadata
                         </button>
                         <button id="sanitize-metadata-btn" class="secondary-btn copy-clean-metadata-btn"
                             title="Remove all metadata from PDF and save" data-i18n="editMetadata.sanitize-metedata-btn">
-                            🧹 Clean Metadata and Save
+                            Clean Metadata and Save
                         </button>
                         <button id="edit-toggle-btn" class="secondary-btn copy-clean-metadata-btn" data-i18n="editMetadata.edit-metadata-btn">
                             Edit Metadata
