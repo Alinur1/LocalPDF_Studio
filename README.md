@@ -1,4 +1,6 @@
-# LocalPDF Studio.
+![LocalPDF Studio](<https://github.com/Alinur1/LocalPDF_Studio/blob/main/Screenshots/LPS2.png?raw=true>)
+
+# LocalPDF Studio
 
 ##  Your Complete Offline PDF Toolkit.
 
@@ -21,14 +23,14 @@ This software is completely free, open-source, and privacy-focused.
 LocalPDF Studio is built with modern web technologies and follows open-source principles. We welcome contributions from developers who believe in privacy-focused, offline-first software.
 
 ### > Development Setup
-- Node.JS v22 or later
+- Node.JS v24 or later
 - Git
-- .NET Core SDK (.NET 8 is recommended) and Python (For backend development)
+- .NET Core SDK (.NET 8 is recommended) and Python (Minimum 3.8.10)
 
 ### > Clone the repository
 - git clone https://github.com/Alinur1/LocalPDF_Studio.git
 - cd LocalPDF_Studio
-- For the devs who are using macOS only -> run this command after doing cd LocalPDF_Studio: chmod +x assets/backend_mac/*
+- For the devs who are using macOS only -> run this command after doing "cd LocalPDF_Studio": chmod +x assets/backend_mac/*
 
 ### > Install dependencies
 - npm install
@@ -36,13 +38,6 @@ LocalPDF Studio is built with modern web technologies and follows open-source pr
 
 ### > How to build one for yourself
 - npm run dist (Works on all platforms)
-
-    #### OR Platform-Specific Builds
-
-- npm run build-win (Only for windows)
-- npm run build-linux (Only for linux)
-- npm run build-mac (Only for macOS)
-- npm run pack (Create unpacked app for testing)
 - NOTE: Please see the "docs" folder for building snap package for linux and python executables for all platforms.
 
 ### > Quick Contribution Guide:
