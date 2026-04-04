@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(python3:*)",
-      "Bash(node --input-type=module --eval ':*)",
-      "Bash(node:*)"
-    ]
-  }
-}

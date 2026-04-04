@@ -590,3 +590,4 @@ FodyWeavers.xsd
 /build
 /.flatpak-builder
 *.traineddata
+.claude/
