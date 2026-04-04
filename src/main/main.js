@@ -24,6 +24,7 @@
 const { app, BrowserWindow, dialog, ipcMain, shell, Menu } = require('electron/main');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const { spawn } = require('child_process');
 const { autoUpdater } = require('electron-updater');
 const { PDFDocument, PDFName, PDFRawStream } = require('pdf-lib');
@@ -36,6 +37,94 @@ let mainWindow = null;
 let isDownloading = false;
 let lastUpdateStatus = { status: 'No updates checked yet.', details: '' };
 let openFileQueue = [];
+
+function getPythonToolLaunchConfig() {
+    if (app.isPackaged) {
+        let relativeExecutable = '';
+        switch (process.platform) {
+            case 'win32':
+                relativeExecutable = 'assets/backend_win/scripts/localpdf_studio_python.exe';
+                break;
+            case 'linux':
+                relativeExecutable = 'assets/backend_linux/scripts/localpdf_studio_python';
+                break;
+            case 'darwin':
+                relativeExecutable = 'assets/backend_mac/scripts/localpdf_studio_python';
+                break;
+            default:
+                throw new Error(`Unsupported platform for Python helper: ${process.platform}`);
+        }
+
+        const executablePath = path.join(process.resourcesPath, relativeExecutable);
+        return { command: executablePath, baseArgs: [] };
+    }
+
+    const scriptPath = path.join(app.getAppPath(), 'scripts/localpdf_studio_python/localpdf_studio_python.py');
+    return { command: 'python3', baseArgs: [scriptPath] };
+}
+
+async function runPythonJsonCommand(commandName, payload, event, progressChannel) {
+    const { command, baseArgs } = getPythonToolLaunchConfig();
+    const payloadPath = path.join(os.tmpdir(), `localpdf-studio-${commandName}-${Date.now()}-${Math.random().toString(36).slice(2)}.json`);
+    fs.writeFileSync(payloadPath, JSON.stringify(payload), 'utf-8');
+
+    return await new Promise((resolve, reject) => {
+        const child = spawn(command, [...baseArgs, commandName, payloadPath], {
+            stdio: ['ignore', 'pipe', 'pipe']
+        });
+
+        let stdout = '';
+        let stderr = '';
+        let stderrBuffer = '';
+
+        const cleanup = () => {
+            try { fs.unlinkSync(payloadPath); } catch {}
+        };
+
+        child.stdout.on('data', chunk => {
+            stdout += chunk.toString();
+        });
+
+        child.stderr.on('data', chunk => {
+            const text = chunk.toString();
+            stderr += text;
+            stderrBuffer += text;
+
+            const lines = stderrBuffer.split(/\r?\n/);
+            stderrBuffer = lines.pop() || '';
+
+            for (const line of lines) {
+                if (line.startsWith('PROGRESS_JSON:') && event?.sender && progressChannel) {
+                    try {
+                        const progress = JSON.parse(line.slice('PROGRESS_JSON:'.length));
+                        event.sender.send(progressChannel, progress);
+                    } catch (err) {
+                        console.warn('Failed to parse python progress update:', err);
+                    }
+                }
+            }
+        });
+
+        child.on('error', err => {
+            cleanup();
+            reject(err);
+        });
+
+        child.on('close', code => {
+            cleanup();
+            try {
+                const result = JSON.parse(stdout || '{}');
+                if (code === 0 || result.success) {
+                    resolve(result);
+                } else {
+                    reject(new Error(result.error || stderr || `Python command failed with code ${code}`));
+                }
+            } catch (err) {
+                reject(new Error(`Failed to parse python output: ${err.message}\n${stdout}\n${stderr}`));
+            }
+        });
+    });
+}
 
 // Helper to send or queue file paths to renderer
 function queueOrSendOpenFile(filePath) {
@@ -657,6 +746,129 @@ ipcMain.handle('save-text-file', async (event, { filename, text }) => {
     } catch (err) {
         console.error("Failed to save text file:", err);
         return { success: false, error: err.message };
+    }
+});
+
+ipcMain.handle('save-markdown-file', async (event, { filename, text, sourcePath, assets = [] }) => {
+    const sourceDir   = sourcePath ? path.dirname(sourcePath) : undefined;
+    const defaultPath = sourceDir ? path.join(sourceDir, filename) : filename;
+    const { filePath, canceled } = await dialog.showSaveDialog({
+        defaultPath,
+        filters: [
+            { name: 'Markdown Files', extensions: ['md'] },
+            { name: 'All Files', extensions: ['*'] }
+        ]
+    });
+
+    if (canceled || !filePath) {
+        return { success: false };
+    }
+
+    try {
+        fs.writeFileSync(filePath, Buffer.from(text, 'utf-8'));
+        if (Array.isArray(assets) && assets.length) {
+            const assetDir = path.join(path.dirname(filePath), 'assets');
+            fs.mkdirSync(assetDir, { recursive: true });
+            for (const asset of assets) {
+                if (!asset?.filename || !asset?.data) continue;
+                fs.writeFileSync(path.join(assetDir, asset.filename), Buffer.from(asset.data, 'base64'));
+            }
+        }
+        return { success: true, path: filePath };
+    } catch (err) {
+        console.error('Failed to save markdown file:', err);
+        return { success: false, error: err.message };
+    }
+});
+
+ipcMain.handle('convert-pdf-to-markdown', async (event, { filePath, options = {} }) => {
+    try {
+        return await runPythonJsonCommand(
+            'pdf_to_markdown',
+            { filePath, options },
+            event,
+            'pdf-to-markdown-progress'
+        );
+    } catch (err) {
+        console.error('Python PDF to Markdown conversion failed:', err);
+        return { success: false, error: err.message, markdown: '', assets: [], engine: 'python' };
+    }
+});
+
+ipcMain.handle('extract-pdf-images', async (event, { filePath }) => {
+    try {
+        const { PDFDocument, PDFName, PDFRawStream } = require('pdf-lib');
+        const pdfBytes = fs.readFileSync(filePath);
+        const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+
+        const images = [];
+        const pages = pdfDoc.getPages();
+
+        for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+            const page = pages[pageIndex];
+            const { node } = page;
+
+            let resources;
+            try {
+                resources = node.Resources();
+            } catch {
+                continue;
+            }
+            if (!resources) continue;
+
+            let xObjectDict;
+            try {
+                xObjectDict = resources.lookup(PDFName.of('XObject'));
+            } catch {
+                continue;
+            }
+            if (!xObjectDict || typeof xObjectDict.keys !== 'function') continue;
+
+            const keys = xObjectDict.keys();
+            for (const key of keys) {
+                let xobj;
+                try {
+                    xobj = xObjectDict.lookup(key);
+                } catch {
+                    continue;
+                }
+                if (!xobj) continue;
+
+                let subtype;
+                try {
+                    subtype = xobj.lookup(PDFName.of('Subtype'));
+                } catch {
+                    continue;
+                }
+                if (!subtype || subtype.toString() !== '/Image') continue;
+
+                if (!(xobj instanceof PDFRawStream)) continue;
+
+                let filter;
+                try {
+                    filter = xobj.lookup(PDFName.of('Filter'));
+                } catch {
+                    filter = null;
+                }
+                const filterStr = filter ? filter.toString() : '';
+                const mimeType = (filterStr.includes('DCTDecode') || filterStr.includes('JFIF'))
+                    ? 'image/jpeg'
+                    : 'image/png';
+
+                const data = Buffer.from(xobj.contents).toString('base64');
+                images.push({
+                    pageNum: pageIndex + 1,
+                    name: key.toString().replace('/', ''),
+                    data,
+                    mimeType
+                });
+            }
+        }
+
+        return { success: true, images };
+    } catch (err) {
+        console.error('Failed to extract PDF images:', err);
+        return { success: false, error: err.message, images: [] };
     }
 });
 

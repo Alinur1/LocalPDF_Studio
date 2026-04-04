@@ -69,4 +69,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onTesseractProgress: (callback) => ipcRenderer.on('tesseract-progress', (event, progress) => callback(progress)),
     saveImageFile: (filename, buffer) => ipcRenderer.invoke('save-image-file', { filename, buffer }),
     buildFillablePdf: (options) => ipcRenderer.invoke('build-fillable-pdf', options),
+    saveMarkdownFile: (filename, text, sourcePath, assets) => ipcRenderer.invoke('save-markdown-file', { filename, text, sourcePath, assets }),
+    extractPdfImages: (filePath) => ipcRenderer.invoke('extract-pdf-images', { filePath }),
+    convertPdfToMarkdown: (filePath, options) => ipcRenderer.invoke('convert-pdf-to-markdown', { filePath, options }),
+    onPdfToMarkdownProgress: (callback) => ipcRenderer.on('pdf-to-markdown-progress', (event, progress) => callback(progress)),
 });

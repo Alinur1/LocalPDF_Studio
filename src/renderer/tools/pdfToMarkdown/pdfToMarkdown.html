@@ -1,0 +1,187 @@
+<!--
+ * LocalPDF Studio - Offline PDF Toolkit
+ * ======================================
+ *
+ * @author      Md. Alinur Hossain <alinur1160@gmail.com>
+ * @license     AGPL 3.0 (GNU Affero General Public License version 3)
+ * @website     https://alinur1.github.io/LocalPDF_Studio_Website/
+ * @repository  https://github.com/Alinur1/LocalPDF_Studio
+ *
+ * Copyright (c) 2025 Md. Alinur Hossain. All rights reserved.
+ *
+ * Architecture:
+ * - Frontend: Electron + HTML/CSS/JS
+ * - Backend: ASP.NET Core Web API, Python
+ * - PDF Engine: PdfSharp + Mozilla PDF.js
+-->
+
+
+<!-- src/renderer/tools/pdfToMarkdown/pdfToMarkdown.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - PDF to Markdown</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./pdfToMarkdown.css">
+    <script type="module" src="../../utils/themeManager.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="pdfToMarkdown.page-title">PDF to Markdown</h1>
+            <a href="./pdfToMarkdownFixture.html" class="top-btn">Fixture</a>
+        </div>
+
+        <main class="tool-container">
+
+            <!-- File Selection -->
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">
+                    <span data-i18n="common.btn-select-pdf">Click to Select a PDF File or drop it here</span>
+                    <p><small class="select-hint" data-i18n="common.supported-formats-pdf">Supports PDF</small></p>
+                </button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn" title="Remove file">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="M18 6 6 18"/>
+                            <path d="m6 6 12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Conversion Options -->
+            <div class="options-container">
+                <h2 data-i18n="pdfToMarkdown.options-title">Conversion Options</h2>
+
+                <div class="option-group">
+                    <h3 data-i18n="pdfToMarkdown.heading-options">Heading Detection</h3>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="detect-headings" checked>
+                        <label for="detect-headings" data-i18n="pdfToMarkdown.detect-headings">
+                            Semantic heading detection (font-size ratio mapping)
+                        </label>
+                    </div>
+                    <small class="help-text" data-i18n="pdfToMarkdown.detect-headings-help">
+                        Computes document base font size and maps larger text to # / ## / ### levels.
+                    </small>
+                </div>
+
+                <div class="option-group">
+                    <h3 data-i18n="pdfToMarkdown.table-options">Table Extraction</h3>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="detect-tables" checked>
+                        <label for="detect-tables" data-i18n="pdfToMarkdown.detect-tables">
+                            Detect and render tables as GitHub-Flavored Markdown
+                        </label>
+                    </div>
+                    <small class="help-text" data-i18n="pdfToMarkdown.detect-tables-help">
+                        Uses spatial column alignment to detect grids and output pipe-delimited tables.
+                    </small>
+                </div>
+
+                <div class="option-group">
+                    <h3 data-i18n="pdfToMarkdown.format-options">Inline Formatting</h3>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="detect-formatting" checked>
+                        <label for="detect-formatting" data-i18n="pdfToMarkdown.detect-formatting">
+                            Detect bold, italic, and monospace text
+                        </label>
+                    </div>
+                    <small class="help-text" data-i18n="pdfToMarkdown.detect-formatting-help">
+                        Reads font name flags to wrap text in **bold**, *italic*, and `mono` markers.
+                    </small>
+                </div>
+
+                <div class="option-group">
+                    <h3 data-i18n="pdfToMarkdown.image-options">Image Extraction</h3>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="include-images" checked>
+                        <label for="include-images" data-i18n="pdfToMarkdown.include-images">
+                            Extract and embed images as data URIs
+                        </label>
+                    </div>
+                    <small class="help-text" data-i18n="pdfToMarkdown.include-images-help">
+                        Extracts embedded images from the PDF and links them inline in the Markdown output.
+                    </small>
+                </div>
+
+                <div class="option-group">
+                    <h3 data-i18n="pdfToMarkdown.ocr-options">OCR Fallback</h3>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="ocr-fallback">
+                        <label for="ocr-fallback" data-i18n="pdfToMarkdown.ocr-fallback">
+                            OCR fallback for scanned / image-only pages
+                        </label>
+                    </div>
+                    <small class="help-text" data-i18n="pdfToMarkdown.ocr-fallback-help">
+                        Detects pages with no extractable text and runs Tesseract OCR automatically.
+                        Requires internet connection once per language to download the model.
+                    </small>
+                </div>
+
+                <div class="option-group">
+                    <h3 data-i18n="pdfToMarkdown.paragraph-options">Paragraph Healing</h3>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="heal-paragraphs" checked>
+                        <label for="heal-paragraphs" data-i18n="pdfToMarkdown.heal-paragraphs">
+                            Repair PDF line-wrap artifacts into natural paragraphs
+                        </label>
+                    </div>
+                    <small class="help-text" data-i18n="pdfToMarkdown.heal-paragraphs-help">
+                        Joins broken lines using sentence-boundary heuristics to restore paragraph flow.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Convert Button -->
+            <div class="action-buttons">
+                <button id="convert-btn" class="action-btn" disabled data-i18n="pdfToMarkdown.convert-btn">
+                    Convert to Markdown
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Progress Modal -->
+    <div id="progress-modal" class="progress-overlay" style="display: none;">
+        <div class="progress-content">
+            <h3 class="progress-title" data-i18n="pdfToMarkdown.progress-title">Converting PDF to Markdown</h3>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+
+            <div class="progress-info" id="progress-info" data-i18n="pdfToMarkdown.progress-init">
+                Initializing...
+            </div>
+
+            <button class="progress-cancel-btn" id="cancel-btn" data-i18n="pdfToMarkdown.cancel-btn">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <script type="module" src="./pdfToMarkdown.js"></script>
+</body>
+
+</html>

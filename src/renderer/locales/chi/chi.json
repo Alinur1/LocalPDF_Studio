@@ -29,6 +29,8 @@
     "image-editor": "图片编辑器",
     "pdf-to-pdfa": "PDF 转 PDF/A 转换器",
     "split-pdf-vertical": "拆分 PDF（垂直）"
+,
+    "pdf-to-markdown": "PDF to Markdown"
   },
   "error": {
     "empty-message": "未打开PDF。点击\"打开PDF阅读器\"开始使用！"
@@ -1073,6 +1075,43 @@
     "dropped-error": "保存拖放的文件失败。",
     "dropped-error2": "处理拖放的文件时发生错误。",
     "drop-valid-pdf": "请拖放一个有效的 PDF 文件。"
+  },
+  "pdfToMarkdown": {
+    "page-title": "PDF to Markdown",
+    "options-title": "Conversion Options",
+    "heading-options": "Heading Detection",
+    "detect-headings": "Semantic heading detection (font-size ratio mapping)",
+    "detect-headings-help": "Computes document base font size and maps larger text to # / ## / ### levels.",
+    "table-options": "Table Extraction",
+    "detect-tables": "Detect and render tables as GitHub-Flavored Markdown",
+    "detect-tables-help": "Uses spatial column alignment to detect grids and output pipe-delimited tables.",
+    "format-options": "Inline Formatting",
+    "detect-formatting": "Detect bold, italic, and monospace text",
+    "detect-formatting-help": "Reads font name flags to wrap text in **bold**, *italic*, and monospace markers.",
+    "image-options": "Image Extraction",
+    "include-images": "Extract and embed images as data URIs",
+    "include-images-help": "Extracts embedded images from the PDF and links them inline in the Markdown output.",
+    "ocr-options": "OCR Fallback",
+    "ocr-fallback": "OCR fallback for scanned / image-only pages",
+    "ocr-fallback-help": "Detects pages with no extractable text and runs Tesseract OCR automatically.",
+    "paragraph-options": "Paragraph Healing",
+    "heal-paragraphs": "Repair PDF line-wrap artifacts into natural paragraphs",
+    "heal-paragraphs-help": "Joins broken lines using sentence-boundary heuristics to restore paragraph flow.",
+    "convert-btn": "Convert to Markdown",
+    "progress-title": "Converting PDF to Markdown",
+    "progress-init": "Initializing...",
+    "cancel-btn": "Cancel"
+  },
+  "pdfToMarkdownJS": {
+    "selecting": "Selecting PDF...",
+    "initializing": "Initializing...",
+    "empty-result": "No text content could be extracted from this PDF.",
+    "saved": "Markdown file saved successfully.",
+    "cancelled": "Conversion was cancelled.",
+    "error": "Conversion failed: ",
+    "drop-one": "Please drop only one PDF file.",
+    "drop-pdf": "Please drop a valid PDF file.",
+    "drop-failed": "Failed to save dropped file."
   },
   "splitPdfVertical": {
     "tool-title": "拆分 PDF（垂直）",

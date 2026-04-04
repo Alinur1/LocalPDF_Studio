@@ -1,7 +1,7 @@
 # localpdf_studio_python.py
 # Single entry point for all LocalPDF Studio Python features.
 # Usage: localpdf_studio_python <command> [args...]
-# Commands: watermark, extract_images, convert_pdf_images, grayscale, redact
+# Commands: watermark, extract_images, convert_pdf_images, grayscale, redact, pdf_to_markdown
 
 import sys
 import json
@@ -9,7 +9,7 @@ import json
 
 def main():
     if len(sys.argv) < 2:
-        print(json.dumps({"success": False, "error": "No command specified. Available: watermark, extract_images, convert_pdf_images, grayscale, redact"}))
+        print(json.dumps({"success": False, "error": "No command specified. Available: watermark, extract_images, convert_pdf_images, grayscale, redact, pdf_to_markdown"}))
         sys.exit(1)
 
     command = sys.argv[1]
@@ -31,8 +31,11 @@ def main():
     elif command == "redact":
         from redact_pdf import main as _main
         _main()
+    elif command == "pdf_to_markdown":
+        from pdf_to_markdown import main as _main
+        _main()
     else:
-        print(json.dumps({"success": False, "error": f"Unknown command: '{command}'. Available: watermark, extract_images, convert_pdf_images, grayscale, redact"}))
+        print(json.dumps({"success": False, "error": f"Unknown command: '{command}'. Available: watermark, extract_images, convert_pdf_images, grayscale, redact, pdf_to_markdown"}))
         sys.exit(1)
 
 

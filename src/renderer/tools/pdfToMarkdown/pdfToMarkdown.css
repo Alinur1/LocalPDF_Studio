@@ -1,0 +1,356 @@
+/**
+ * LocalPDF Studio - Offline PDF Toolkit
+ * ======================================
+ *
+ * @author      Md. Alinur Hossain <alinur1160@gmail.com>
+ * @license     AGPL 3.0 (GNU Affero General Public License version 3)
+ * @website     https://alinur1.github.io/LocalPDF_Studio_Website/
+ * @repository  https://github.com/Alinur1/LocalPDF_Studio
+ *
+ * Copyright (c) 2025 Md. Alinur Hossain. All rights reserved.
+ *
+ * Architecture:
+ * - Frontend: Electron + HTML/CSS/JS
+ * - Backend: ASP.NET Core Web API, Python
+ * - PDF Engine: PdfSharp + Mozilla PDF.js
+**/
+
+
+/* src/renderer/tools/pdfToMarkdown/pdfToMarkdown.css */
+
+:root {
+    --tool-title-color: #ecf0f1;
+    --select-btn-color: #ecf0f1;
+    --select-btn-bg: #2c3e50;
+    --select-btn-border: #3498db;
+    --select-btn-hover-bg: #34495e;
+    --select-btn-hover-border: #3498db;
+    --selected-file-bg: #2c3e50;
+    --selected-file-border: #18222e;
+    --selected-file-color: #ecf0f1;
+    --pdf-name-color: #ecf0f1;
+    --pdf-size-color: #bdc3c7;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --options-bg: #2c3e50;
+    --options-border: #18222e;
+    --options-title-color: #ecf0f1;
+    --options-title-border: #34495e;
+    --option-group-title-color: #ecf0f1;
+    --option-label-color: #bdc3c7;
+    --options-input-bg: #1c2833;
+    --options-input-border: #34495e;
+    --options-input-color: #ecf0f1;
+    --options-input-focus-border: #3498db;
+    --checkbox-accent: #3498db;
+    --action-btn-bg: #27ae60;
+    --action-btn-hover: #1e8449;
+    --progress-overlay-bg: rgba(0, 0, 0, 0.85);
+    --progress-content-bg: #1c2833;
+    --progress-content-border: #34495e;
+    --progress-title-color: #ecf0f1;
+    --progress-bar-bg: #34495e;
+    --progress-bar-fill: #3498db;
+    --progress-info-color: #bdc3c7;
+    --progress-cancel-bg: #e74c3c;
+    --progress-cancel-hover: #c0392b;
+    --preview-bg: #2c3e50;
+    --preview-border: #18222e;
+    --preview-header-color: #ecf0f1;
+    --preview-text-color: #bdc3c7;
+    --preview-code-bg: #1c2833;
+}
+
+[data-theme="light"] {
+    --tool-title-color: #2c3e50;
+    --select-btn-color: #2c3e50;
+    --select-btn-bg: #f0f3f4;
+    --select-btn-border: #2980b9;
+    --select-btn-hover-bg: #dce1e7;
+    --select-btn-hover-border: #2980b9;
+    --selected-file-bg: #f0f3f4;
+    --selected-file-border: #bdc3c7;
+    --selected-file-color: #2c3e50;
+    --pdf-name-color: #2c3e50;
+    --pdf-size-color: #7f8c8d;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --options-bg: #f0f3f4;
+    --options-border: #bdc3c7;
+    --options-title-color: #2c3e50;
+    --options-title-border: #bdc3c7;
+    --option-group-title-color: #2c3e50;
+    --option-label-color: #7f8c8d;
+    --options-input-bg: #ffffff;
+    --options-input-border: #bdc3c7;
+    --options-input-color: #2c3e50;
+    --options-input-focus-border: #2980b9;
+    --checkbox-accent: #2980b9;
+    --action-btn-bg: #27ae60;
+    --action-btn-hover: #1e8449;
+    --progress-content-bg: #ffffff;
+    --progress-content-border: #bdc3c7;
+    --progress-title-color: #2c3e50;
+    --progress-bar-bg: #bdc3c7;
+    --progress-info-color: #7f8c8d;
+    --preview-bg: #f0f3f4;
+    --preview-border: #bdc3c7;
+    --preview-header-color: #2c3e50;
+    --preview-text-color: #2c3e50;
+    --preview-code-bg: #e8ecf0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.tool-container {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* File Selection */
+.file-selection-area {
+    width: 100%;
+}
+
+.select-pdf-btn {
+    width: 100%;
+    padding: 32px 20px;
+    background: var(--select-btn-bg);
+    color: var(--select-btn-color);
+    border: 2px dashed var(--select-btn-border);
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    text-align: center;
+}
+
+.select-pdf-btn:hover {
+    background: var(--select-btn-hover-bg);
+    border-color: var(--select-btn-hover-border);
+}
+
+.select-hint {
+    color: var(--pdf-size-color);
+    font-size: 12px;
+}
+
+.selected-file-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--selected-file-bg);
+    border: 1px solid var(--selected-file-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--selected-file-color);
+}
+
+.pdf-name {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--pdf-name-color);
+    word-break: break-all;
+}
+
+.pdf-size {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--pdf-size-color);
+}
+
+.remove-btn {
+    background: var(--remove-btn-bg);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.remove-btn:hover {
+    background: var(--remove-btn-hover);
+}
+
+/* Options Panel */
+.options-container {
+    background: var(--options-bg);
+    border: 1px solid var(--options-border);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.options-container h2 {
+    margin: 0 0 16px;
+    font-size: 16px;
+    color: var(--options-title-color);
+    border-bottom: 1px solid var(--options-title-border);
+    padding-bottom: 10px;
+}
+
+.option-group {
+    margin-bottom: 16px;
+}
+
+.option-group:last-child {
+    margin-bottom: 0;
+}
+
+.option-group h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: var(--option-group-title-color);
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.checkbox-row input[type="checkbox"] {
+    accent-color: var(--checkbox-accent);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.checkbox-row label {
+    font-size: 14px;
+    color: var(--option-label-color);
+    cursor: pointer;
+    user-select: none;
+}
+
+.help-text {
+    font-size: 12px;
+    color: var(--option-label-color);
+    display: block;
+    margin-top: 4px;
+    margin-left: 26px;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-start;
+}
+
+.action-btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+    background: var(--action-btn-bg);
+    color: white;
+}
+
+.action-btn:hover:not(:disabled) {
+    background: var(--action-btn-hover);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Progress Modal */
+.progress-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--progress-overlay-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.progress-content {
+    background: var(--progress-content-bg);
+    border: 1px solid var(--progress-content-border);
+    border-radius: 12px;
+    padding: 32px;
+    min-width: 360px;
+    max-width: 480px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.progress-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--progress-title-color);
+    text-align: center;
+}
+
+.progress-bar-container {
+    background: var(--progress-bar-bg);
+    border-radius: 8px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--progress-bar-fill);
+    border-radius: 8px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.progress-info {
+    font-size: 13px;
+    color: var(--progress-info-color);
+    text-align: center;
+    min-height: 20px;
+}
+
+.progress-cancel-btn {
+    background: var(--progress-cancel-bg);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+    align-self: center;
+}
+
+.progress-cancel-btn:hover {
+    background: var(--progress-cancel-hover);
+}

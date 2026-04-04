@@ -1,0 +1,255 @@
+:root {
+    --fixture-bg: #102033;
+    --fixture-panel: rgba(10, 22, 37, 0.82);
+    --fixture-border: rgba(120, 156, 187, 0.25);
+    --fixture-text: #e8f0f5;
+    --fixture-muted: #98a9b8;
+    --fixture-accent: #3d8bfd;
+    --fixture-accent-strong: #2f74d8;
+    --fixture-card: rgba(18, 30, 47, 0.88);
+    --fixture-code: #0b1725;
+    --fixture-good: #1f9d63;
+}
+
+[data-theme="light"] {
+    --fixture-bg: #f3f5f7;
+    --fixture-panel: rgba(255, 255, 255, 0.9);
+    --fixture-border: rgba(40, 60, 80, 0.14);
+    --fixture-text: #1d2a38;
+    --fixture-muted: #586574;
+    --fixture-accent: #2368cc;
+    --fixture-accent-strong: #1857b0;
+    --fixture-card: rgba(255, 255, 255, 0.96);
+    --fixture-code: #eef3f7;
+    --fixture-good: #188053;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    color: var(--fixture-text);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(61, 139, 253, 0.14), transparent 28%),
+        linear-gradient(180deg, rgba(9, 18, 30, 0.18), transparent 30%),
+        var(--fixture-bg);
+}
+
+.fixture-shell {
+    width: min(1220px, calc(100% - 32px));
+    margin: 0 auto 40px;
+    display: grid;
+    gap: 18px;
+}
+
+.fixture-panel,
+.fixture-card {
+    background: var(--fixture-panel);
+    border: 1px solid var(--fixture-border);
+    border-radius: 18px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+}
+
+.fixture-panel {
+    padding: 22px;
+}
+
+.fixture-panel h2,
+.fixture-card h3,
+.fixture-card h4 {
+    margin: 0;
+}
+
+.fixture-copy,
+.fixture-path,
+.fixture-progress-text,
+.fixture-status,
+.label {
+    color: var(--fixture-muted);
+}
+
+.option-grid {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.option-grid label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--fixture-card);
+    border: 1px solid var(--fixture-border);
+}
+
+.fixture-actions {
+    margin-top: 18px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.action-btn,
+.secondary-btn,
+.run-btn,
+.save-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 11px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.action-btn,
+.run-btn {
+    color: white;
+    background: linear-gradient(135deg, var(--fixture-accent), var(--fixture-accent-strong));
+}
+
+.secondary-btn,
+.save-btn {
+    color: var(--fixture-text);
+    background: transparent;
+    border: 1px solid var(--fixture-border);
+}
+
+.save-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.fixture-status {
+    margin: 16px 0 0;
+    font-size: 14px;
+}
+
+.fixture-list {
+    display: grid;
+    gap: 18px;
+}
+
+.fixture-card {
+    padding: 20px;
+    background: var(--fixture-card);
+}
+
+.fixture-card-header,
+.fixture-card-actions,
+.fixture-summary {
+    display: flex;
+    gap: 12px;
+}
+
+.fixture-card-header {
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.fixture-title {
+    font-size: 20px;
+}
+
+.fixture-path {
+    margin: 6px 0 0;
+    font-size: 13px;
+    word-break: break-all;
+}
+
+.fixture-progress {
+    margin-top: 16px;
+}
+
+.fixture-progress-bar {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.fixture-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--fixture-good), var(--fixture-accent));
+    transition: width 0.2s ease;
+}
+
+.fixture-progress-text {
+    margin: 8px 0 0;
+    font-size: 13px;
+}
+
+.fixture-summary {
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.fixture-summary > div {
+    min-width: 110px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--fixture-border);
+}
+
+.fixture-summary span {
+    display: block;
+}
+
+.fixture-summary .label {
+    font-size: 12px;
+}
+
+.fixture-panels {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+}
+
+.fixture-subpanel {
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.list-preview,
+.markdown-output {
+    flex: 1;
+    margin: 0;
+    width: 100%;
+    border: 1px solid var(--fixture-border);
+    border-radius: 14px;
+    background: var(--fixture-code);
+    color: var(--fixture-text);
+    padding: 14px;
+    font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+.list-preview {
+    overflow: auto;
+    white-space: pre-wrap;
+}
+
+.markdown-output {
+    resize: vertical;
+    min-height: 320px;
+}
+
+@media (max-width: 880px) {
+    .fixture-panels {
+        grid-template-columns: 1fr;
+    }
+
+    .fixture-card-header {
+        flex-direction: column;
+    }
+}

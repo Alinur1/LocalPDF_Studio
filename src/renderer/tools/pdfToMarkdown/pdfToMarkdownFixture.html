@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Markdown Fixture</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./pdfToMarkdownFixture.css">
+    <script type="module" src="../../utils/themeManager.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="./pdfToMarkdown.html" class="top-btn">Back To Tool</a>
+            <h1 class="tool-title">PDF to Markdown Fixture</h1>
+        </div>
+
+        <main class="fixture-shell">
+            <section class="fixture-panel">
+                <h2>Fixture Options</h2>
+                <p class="fixture-copy">
+                    Runs the same converter as the production PDF-to-Markdown tool and preloads your two sample PDFs.
+                </p>
+
+                <div class="option-grid">
+                    <label><input type="checkbox" id="detect-headings" checked> Detect headings</label>
+                    <label><input type="checkbox" id="detect-tables" checked> Detect tables</label>
+                    <label><input type="checkbox" id="detect-formatting" checked> Detect formatting</label>
+                    <label><input type="checkbox" id="include-images" checked> Include images</label>
+                    <label><input type="checkbox" id="ocr-fallback"> OCR fallback</label>
+                    <label><input type="checkbox" id="heal-paragraphs" checked> Heal paragraphs</label>
+                </div>
+
+                <div class="fixture-actions">
+                    <button id="run-all-btn" class="action-btn">Run All Fixtures</button>
+                    <button id="select-pdf-btn" class="secondary-btn">Add PDF</button>
+                </div>
+
+                <p id="fixture-status" class="fixture-status">Ready.</p>
+            </section>
+
+            <section id="fixture-list" class="fixture-list"></section>
+        </main>
+    </div>
+
+    <template id="fixture-card-template">
+        <article class="fixture-card">
+            <div class="fixture-card-header">
+                <div>
+                    <h3 class="fixture-title"></h3>
+                    <p class="fixture-path"></p>
+                </div>
+                <div class="fixture-card-actions">
+                    <button class="run-btn">Run</button>
+                    <button class="save-btn" disabled>Save Markdown</button>
+                </div>
+            </div>
+
+            <div class="fixture-progress">
+                <div class="fixture-progress-bar"><div class="fixture-progress-fill"></div></div>
+                <p class="fixture-progress-text">Waiting to run.</p>
+            </div>
+
+            <div class="fixture-summary">
+                <div><span class="label">Headings</span><span class="summary-headings">0</span></div>
+                <div><span class="label">Tables</span><span class="summary-tables">0</span></div>
+                <div><span class="label">Lists</span><span class="summary-lists">0</span></div>
+                <div><span class="label">Output lines</span><span class="summary-lines">0</span></div>
+            </div>
+
+            <div class="fixture-panels">
+                <section class="fixture-subpanel">
+                    <h4>Detected List Lines</h4>
+                    <pre class="list-preview">No output yet.</pre>
+                </section>
+                <section class="fixture-subpanel">
+                    <h4>Markdown Output</h4>
+                    <textarea class="markdown-output" spellcheck="false" placeholder="Markdown will appear here..."></textarea>
+                </section>
+            </div>
+        </article>
+    </template>
+
+    <script type="module" src="./pdfToMarkdownFixture.js"></script>
+</body>
+</html>
