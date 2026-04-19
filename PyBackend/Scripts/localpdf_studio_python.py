@@ -1,7 +1,17 @@
-# localpdf_studio_python.py
-# Single entry point for all LocalPDF Studio Python features.
-# Usage: localpdf_studio_python <command> [args...]
-# Commands: watermark, extract_images, convert_pdf_images, grayscale, redact
+# LocalPDF Studio - Offline PDF Toolkit
+# ======================================
+
+# @author      Md. Alinur Hossain <alinur1160@gmail.com>
+# @license     AGPL 3.0 (GNU Affero General Public License version 3)
+# @website     https://alinur1.github.io/LocalPDF_Studio_Website/
+# @repository  https://github.com/Alinur1/LocalPDF_Studio
+
+# Copyright (c) 2025 Md. Alinur Hossain. All rights reserved.
+
+# Architecture:
+# - Frontend: Electron + HTML/CSS/JS
+# - Backend: ASP.NET Core Web API, Python
+# - PDF Engine: PdfSharp + Mozilla PDF.js
 
 import sys
 import json
@@ -37,7 +47,7 @@ def main():
 
 
 # ============================================================
-# add_watermark.py
+# add_watermark
 # ============================================================
 import argparse
 import fitz  # PyMuPDF
@@ -398,7 +408,7 @@ class add_watermark:
 
 
 # ============================================================
-# extract_images.py
+# extract_images
 # ============================================================
 
 def _extract_images_from_pdf(pdf_path, pages=None, page_ranges=None, mode="extract"):
@@ -533,7 +543,7 @@ class extract_images:
 
 
 # ============================================================
-# convert_pdf_images.py
+# convert_pdf_images
 # ============================================================
 
 def _convert_pdf_to_images(input_path, output_path, dpi=150, fmt="jpg", include_page_numbers=True):
@@ -608,7 +618,7 @@ class convert_pdf_images:
 
 
 # ============================================================
-# pdf_to_grayscale.py
+# pdf_to_grayscale
 # ============================================================
 
 def _grayscale_convert(input_path, output_path, custom_pages=None, skip_images=False):
@@ -704,7 +714,7 @@ class pdf_to_grayscale:
 
 
 # ============================================================
-# redact_pdf.py
+# redact_pdf
 # ============================================================
 
 def _redact_hex_to_rgb(hex_color):
