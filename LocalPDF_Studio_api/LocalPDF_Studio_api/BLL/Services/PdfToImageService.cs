@@ -27,12 +27,19 @@ namespace LocalPDF_Studio_api.BLL.Services
     public class PdfToImageService : IPdfToImageInterface
     {
         private readonly ILogger<PdfToImageService> _logger;
-        private readonly string _pythonExecutablePath;
+        private readonly string _pythonExePath;
+        private readonly string _scriptPath;
+        private readonly string _vendorPath;
 
         public PdfToImageService(ILogger<PdfToImageService> logger)
         {
             _logger = logger;
-            _pythonExecutablePath = GetPythonExecutablePath();
+            // AppContext.BaseDirectory should be '.../assets/backend_win/', '.../assets/backend_linux/' and '.../assets/backend_mac/'.
+            var baseDir = AppContext.BaseDirectory;
+            bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            _pythonExePath = Path.Combine(baseDir, "PyBackend", "Engine", isWindows ? "python.exe" : "bin/python3");
+            _scriptPath = Path.Combine(baseDir, "PyBackend", "Scripts", "localpdf_studio_python.py");
+            _vendorPath = Path.Combine(baseDir, "PyBackend", "vendor");
         }
 
         public async Task<byte[]> ConvertPdfToImagesAsync(PdfToImageRequest request)
@@ -44,17 +51,14 @@ namespace LocalPDF_Studio_api.BLL.Services
                 if (!File.Exists(request.FilePath))
                     throw new FileNotFoundException($"File not found: {request.FilePath}");
 
-                _logger.LogInformation($"Starting Python-based PDF → {request.Format.ToUpper()} conversion (DPI: {request.Dpi})");
+                _logger.LogInformation($"Starting Python-based conversion: {request.FilePath} -> {request.Format.ToUpper()}");
 
                 var conversionResult = await RunPythonConversionAsync(request, tempZipPath);
 
                 if (!conversionResult.Success)
                     throw new Exception(conversionResult.Error ?? "Unknown Python conversion error");
 
-                var zipBytes = await File.ReadAllBytesAsync(tempZipPath);
-                _logger.LogInformation($"PDF successfully converted to images (ZIP size: {zipBytes.Length / 1024} KB)");
-
-                return zipBytes;
+                return await File.ReadAllBytesAsync(tempZipPath);
             }
             catch (Exception ex)
             {
@@ -63,25 +67,22 @@ namespace LocalPDF_Studio_api.BLL.Services
             }
             finally
             {
-                try
+                if (File.Exists(tempZipPath))
                 {
-                    if (File.Exists(tempZipPath))
-                        File.Delete(tempZipPath);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to clean up temp ZIP");
+                    try { File.Delete(tempZipPath); } catch { /* Ignore cleanup errors */ }
                 }
             }
         }
 
         private async Task<PythonPdfToImageResult> RunPythonConversionAsync(PdfToImageRequest request, string outputZipPath)
         {
-            if (!File.Exists(_pythonExecutablePath))
-                throw new FileNotFoundException($"Python converter not found: {_pythonExecutablePath}");
+            if (!File.Exists(_pythonExePath))
+                throw new FileNotFoundException($"Python Engine not found: {_pythonExePath}");
 
+            // Arguments list updated to include the script path and command
             var arguments = new List<string>
             {
+                $"\"{_scriptPath}\"",
                 "convert_pdf_images",
                 $"\"{request.FilePath}\"",
                 $"\"{outputZipPath}\"",
@@ -95,7 +96,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = _pythonExecutablePath,
+                FileName = _pythonExePath,
                 Arguments = string.Join(" ", arguments),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -103,84 +104,40 @@ namespace LocalPDF_Studio_api.BLL.Services
                 CreateNoWindow = true
             };
 
+            // Set PYTHONPATH so the engine can find the libraries in the vendor folder
+            startInfo.EnvironmentVariables["PYTHONPATH"] = _vendorPath;
+
             using var process = new Process { StartInfo = startInfo };
             var outputBuilder = new System.Text.StringBuilder();
             var errorBuilder = new System.Text.StringBuilder();
 
-            process.OutputDataReceived += (_, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                    outputBuilder.AppendLine(e.Data);
-            };
-            process.ErrorDataReceived += (_, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                    errorBuilder.AppendLine(e.Data);
-            };
+            process.OutputDataReceived += (_, e) => { if (e.Data != null) outputBuilder.AppendLine(e.Data); };
+            process.ErrorDataReceived += (_, e) => { if (e.Data != null) errorBuilder.AppendLine(e.Data); };
 
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
             await process.WaitForExitAsync();
 
-            var stdout = outputBuilder.ToString();
-            var stderr = errorBuilder.ToString();
+            var stdout = outputBuilder.ToString().Trim();
+            var stderr = errorBuilder.ToString().Trim();
 
-            _logger.LogDebug($"Python stdout: {stdout}");
-            _logger.LogDebug($"Python stderr: {stderr}");
+            if (process.ExitCode != 0)
+            {
+                return new PythonPdfToImageResult { Success = false, Error = $"Process Exit {process.ExitCode}: {stderr}" };
+            }
 
             try
             {
-                var result = JsonSerializer.Deserialize<PythonPdfToImageResult>(stdout, new JsonSerializerOptions
+                return JsonSerializer.Deserialize<PythonPdfToImageResult>(stdout, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
-                });
-
-                if (result == null)
-                    throw new Exception("Failed to parse JSON output from Python");
-
-                return result;
+                }) ?? throw new Exception("Empty result from Python");
             }
             catch (Exception ex)
             {
-                return new PythonPdfToImageResult { Success = false, Error = $"JSON parse error: {ex.Message} | Raw: {stdout}" };
+                return new PythonPdfToImageResult { Success = false, Error = $"JSON Error: {ex.Message} | Raw: {stdout}" };
             }
-        }
-
-        private string GetPythonExecutablePath()
-        {
-            var baseDir = AppContext.BaseDirectory;
-            string exeName;
-            string platformFolder;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                exeName = "localpdf_studio_python.exe";
-                platformFolder = "backend_win";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                exeName = "localpdf_studio_python";
-                platformFolder = "backend_linux";
-            }
-            else
-            {
-                exeName = "localpdf_studio_python";
-                platformFolder = "backend_mac";
-            }
-
-            var possiblePaths = new[]
-            {
-                Path.Combine(baseDir, exeName),
-                Path.Combine(baseDir, "scripts", exeName),
-                Path.Combine(baseDir, "python", exeName),
-                Path.Combine(baseDir, "..", "..", "assets", platformFolder, "scripts", exeName)
-            };
-
-            foreach (var path in possiblePaths)
-                if (File.Exists(path)) return path;
-
-            return possiblePaths[0];
         }
     }
 }

@@ -27,12 +27,19 @@ namespace LocalPDF_Studio_api.BLL.Services
     public class PdfGrayscaleService : IPdfGrayscaleInterface
     {
         private readonly ILogger<PdfGrayscaleService> _logger;
-        private readonly string _pythonExecutablePath;
+        private readonly string _pythonExePath;
+        private readonly string _scriptPath;
+        private readonly string _vendorPath;
 
         public PdfGrayscaleService(ILogger<PdfGrayscaleService> logger)
         {
             _logger = logger;
-            _pythonExecutablePath = GetPythonExecutablePath();
+            // AppContext.BaseDirectory should be '.../assets/backend_win/', '.../assets/backend_linux/' and '.../assets/backend_mac/'.
+            var baseDir = AppContext.BaseDirectory;
+            bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            _pythonExePath = Path.Combine(baseDir, "PyBackend", "Engine", isWindows ? "python.exe" : "bin/python3");
+            _scriptPath = Path.Combine(baseDir, "PyBackend", "Scripts", "localpdf_studio_python.py");
+            _vendorPath = Path.Combine(baseDir, "PyBackend", "vendor");
         }
 
         public async Task<byte[]> ConvertToGrayscaleAsync(GrayscaleRequest request)
@@ -44,24 +51,14 @@ namespace LocalPDF_Studio_api.BLL.Services
                 if (!File.Exists(request.FilePath))
                     throw new FileNotFoundException($"File not found: {request.FilePath}");
 
-                _logger.LogInformation($"Starting PDF to grayscale conversion: {request.FilePath}");
+                _logger.LogInformation($"Starting Grayscale conversion. Engine: {_pythonExePath}");
 
                 var grayscaleResult = await RunPythonGrayscaleAsync(request, tempOutputPath);
 
                 if (!grayscaleResult.Success)
                     throw new Exception(grayscaleResult.Error ?? "Unknown Python grayscale conversion error");
 
-                if (!File.Exists(tempOutputPath))
-                    throw new FileNotFoundException("Grayscale PDF was not created");
-
-                var pdfBytes = await File.ReadAllBytesAsync(tempOutputPath);
-                _logger.LogInformation(
-                    $"Grayscale conversion successful (PDF size: {pdfBytes.Length / 1024} KB, " +
-                    $"Pages: {grayscaleResult.PageCount}, " +
-                    $"Has Images: {grayscaleResult.HasImages}, " +
-                    $"Has Vector: {grayscaleResult.HasVectorGraphics})");
-
-                return pdfBytes;
+                return await File.ReadAllBytesAsync(tempOutputPath);
             }
             catch (Exception ex)
             {
@@ -70,45 +67,35 @@ namespace LocalPDF_Studio_api.BLL.Services
             }
             finally
             {
-                try
+                if (File.Exists(tempOutputPath))
                 {
-                    if (File.Exists(tempOutputPath))
-                        File.Delete(tempOutputPath);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to clean up temp PDF");
+                    try { File.Delete(tempOutputPath); } catch { /* Ignore cleanup errors */ }
                 }
             }
         }
 
         private async Task<PythonGrayscaleResult> RunPythonGrayscaleAsync(GrayscaleRequest request, string outputPath)
         {
-            if (!File.Exists(_pythonExecutablePath))
-                throw new FileNotFoundException($"PDF grayscale tool not found: {_pythonExecutablePath}");
+            if (!File.Exists(_pythonExePath))
+                throw new FileNotFoundException($"Python Engine not found: {_pythonExePath}");
 
             var arguments = new List<string>
             {
+                $"\"{_scriptPath}\"",
                 "grayscale",
                 $"\"{request.FilePath}\"",
                 $"\"{outputPath}\""
             };
 
-            // Add custom pages argument
             if (!string.IsNullOrEmpty(request.CustomPages) && request.PagesRange == "custom")
-            {
                 arguments.Add($"--custom-pages \"{request.CustomPages}\"");
-            }
 
-            // Add image preservation flag
             if (!request.PreserveImages)
-            {
                 arguments.Add("--skip-images");
-            }
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = _pythonExecutablePath,
+                FileName = _pythonExePath,
                 Arguments = string.Join(" ", arguments),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -118,31 +105,20 @@ namespace LocalPDF_Studio_api.BLL.Services
                 StandardErrorEncoding = System.Text.Encoding.UTF8
             };
 
+            // Inject the vendor folder for PyMuPDF/Ghostscript dependencies
+            startInfo.EnvironmentVariables["PYTHONPATH"] = _vendorPath;
+
             using var process = new Process { StartInfo = startInfo };
             var outputBuilder = new System.Text.StringBuilder();
             var errorBuilder = new System.Text.StringBuilder();
 
-            process.OutputDataReceived += (_, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                    outputBuilder.AppendLine(e.Data);
-            };
-
+            process.OutputDataReceived += (_, e) => { if (e.Data != null) outputBuilder.AppendLine(e.Data); };
             process.ErrorDataReceived += (_, e) =>
             {
-                if (!string.IsNullOrEmpty(e.Data))
+                if (e.Data != null)
                 {
                     errorBuilder.AppendLine(e.Data);
-
-                    // Log progress messages if any
-                    if (e.Data.StartsWith("PROGRESS:"))
-                    {
-                        _logger.LogDebug($"Grayscale conversion progress: {e.Data}");
-                    }
-                    else
-                    {
-                        _logger.LogDebug($"Python stderr: {e.Data}");
-                    }
+                    if (e.Data.StartsWith("PROGRESS:")) _logger.LogDebug($"Grayscale Progress: {e.Data}");
                 }
             };
 
@@ -150,114 +126,31 @@ namespace LocalPDF_Studio_api.BLL.Services
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
-            // Wait with timeout (5 minutes for large files)
+            // 5-minute timeout for heavy PDFs
             var timeout = TimeSpan.FromMinutes(5);
-            var completed = await Task.Run(() => process.WaitForExit((int)timeout.TotalMilliseconds));
+            var completed = await process.WaitForExitAsync(new CancellationTokenSource(timeout).Token).ContinueWith(t => !t.IsCanceled);
 
             if (!completed)
             {
-                try
-                {
-                    process.Kill();
-                }
-                catch { }
-
-                return new PythonGrayscaleResult
-                {
-                    Success = false,
-                    Error = $"Python process timed out after {timeout.TotalMinutes} minutes"
-                };
+                try { process.Kill(); } catch { }
+                return new PythonGrayscaleResult { Success = false, Error = "Python process timed out" };
             }
 
             var stdout = outputBuilder.ToString().Trim();
             var stderr = errorBuilder.ToString().Trim();
 
-            _logger.LogDebug($"Python stdout: {stdout}");
-            if (!string.IsNullOrEmpty(stderr) && !stderr.Contains("PROGRESS:"))
-                _logger.LogWarning($"Python stderr: {stderr}");
-
             if (process.ExitCode != 0)
-            {
-                return new PythonGrayscaleResult
-                {
-                    Success = false,
-                    Error = $"Python process exited with code {process.ExitCode}. Error: {stderr}"
-                };
-            }
-
-            if (string.IsNullOrEmpty(stdout))
-            {
-                return new PythonGrayscaleResult
-                {
-                    Success = false,
-                    Error = "Python process returned no output"
-                };
-            }
+                return new PythonGrayscaleResult { Success = false, Error = $"Exit {process.ExitCode}: {stderr}" };
 
             try
             {
-                var result = JsonSerializer.Deserialize<PythonGrayscaleResult>(stdout, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (result == null)
-                    throw new Exception("Failed to parse JSON output from Python");
-
-                return result;
+                return JsonSerializer.Deserialize<PythonGrayscaleResult>(stdout, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                       ?? throw new Exception("Empty result from Python");
             }
             catch (Exception ex)
             {
-                return new PythonGrayscaleResult
-                {
-                    Success = false,
-                    Error = $"JSON parse error: {ex.Message} | Raw stdout: {stdout} | Stderr: {stderr}"
-                };
+                return new PythonGrayscaleResult { Success = false, Error = $"JSON Error: {ex.Message}. Raw: {stdout}" };
             }
-        }
-
-        private string GetPythonExecutablePath()
-        {
-            var baseDir = AppContext.BaseDirectory;
-            string exeName;
-            string platformFolder;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                exeName = "localpdf_studio_python.exe";
-                platformFolder = "backend_win";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                exeName = "localpdf_studio_python";
-                platformFolder = "backend_linux";
-            }
-            else
-            {
-                exeName = "localpdf_studio_python";
-                platformFolder = "backend_mac";
-            }
-
-            var possiblePaths = new[]
-            {
-                Path.Combine(baseDir, exeName),
-                Path.Combine(baseDir, "scripts", exeName),
-                Path.Combine(baseDir, "python", exeName),
-                Path.Combine(baseDir, "..", "..", "assets", platformFolder, "scripts", exeName),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Executables", exeName)
-            };
-
-            foreach (var path in possiblePaths)
-            {
-                if (File.Exists(path))
-                {
-                    _logger.LogInformation($"Found Python executable at: {path}");
-                    return path;
-                }
-            }
-
-            _logger.LogWarning($"Python executable not found, using default: {possiblePaths[0]}");
-            return possiblePaths[0];
         }
     }
 }

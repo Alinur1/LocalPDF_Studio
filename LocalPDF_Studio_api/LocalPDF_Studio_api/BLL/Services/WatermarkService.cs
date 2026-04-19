@@ -27,12 +27,19 @@ namespace LocalPDF_Studio_api.BLL.Services
     public class WatermarkService : IWatermarkInterface
     {
         private readonly ILogger<WatermarkService> _logger;
-        private readonly string _pythonExecutablePath;
+        private readonly string _pythonExePath;
+        private readonly string _scriptPath;
+        private readonly string _vendorPath;
 
         public WatermarkService(ILogger<WatermarkService> logger)
         {
             _logger = logger;
-            _pythonExecutablePath = GetPythonExecutablePath();
+            // AppContext.BaseDirectory should be '.../assets/backend_win/', '.../assets/backend_linux/' and '.../assets/backend_mac/'.
+            var baseDir = AppContext.BaseDirectory;
+            bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            _pythonExePath = Path.Combine(baseDir, "PyBackend", "Engine", isWindows ? "python.exe" : "bin/python3");
+            _scriptPath = Path.Combine(baseDir, "PyBackend", "Scripts", "localpdf_studio_python.py");
+            _vendorPath = Path.Combine(baseDir, "PyBackend", "vendor");
         }
 
         public async Task<byte[]> AddWatermarkAsync(WatermarkRequest request)
@@ -44,48 +51,33 @@ namespace LocalPDF_Studio_api.BLL.Services
                 if (!File.Exists(request.FilePath))
                     throw new FileNotFoundException($"File not found: {request.FilePath}");
 
-                _logger.LogInformation($"Starting Python-based watermark addition: {request.FilePath}, Type: {request.WatermarkType}");
+                _logger.LogInformation($"Running Python Watermark. Engine: {_pythonExePath}");
 
                 var watermarkResult = await RunPythonWatermarkAsync(request, tempOutputPath);
 
                 if (!watermarkResult.Success)
                     throw new Exception(watermarkResult.Error ?? "Unknown Python watermark error");
 
-                if (!File.Exists(tempOutputPath))
-                    throw new FileNotFoundException("Watermarked PDF was not created");
-
-                var pdfBytes = await File.ReadAllBytesAsync(tempOutputPath);
-                _logger.LogInformation($"Watermark successfully added (PDF size: {pdfBytes.Length / 1024} KB, Pages: {watermarkResult.WatermarkedPages})");
-
-                return pdfBytes;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error adding watermark to PDF. File: {FilePath}, Type: {WatermarkType}",
-                    request.FilePath, request.WatermarkType);
-                throw;
+                return await File.ReadAllBytesAsync(tempOutputPath);
             }
             finally
             {
-                try
+                if (File.Exists(tempOutputPath))
                 {
-                    if (File.Exists(tempOutputPath))
-                        File.Delete(tempOutputPath);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to clean up temp PDF");
+                    try { File.Delete(tempOutputPath); } catch { /* Ignore cleanup errors */ }
                 }
             }
         }
 
         private async Task<PythonWatermarkResult> RunPythonWatermarkAsync(WatermarkRequest request, string outputPath)
         {
-            if (!File.Exists(_pythonExecutablePath))
-                throw new FileNotFoundException($"Python watermark tool not found: {_pythonExecutablePath}");
+            if (!File.Exists(_pythonExePath))
+                throw new FileNotFoundException($"Python Engine not found: {_pythonExePath}");
 
+            // Pass the .py script path as the first argument to the python executable
             var arguments = new List<string>
             {
+                $"\"{_scriptPath}\"",
                 "watermark",
                 $"\"{request.FilePath}\"",
                 $"\"{outputPath}\"",
@@ -109,11 +101,13 @@ namespace LocalPDF_Studio_api.BLL.Services
             }
 
             if (!string.IsNullOrEmpty(request.CustomPages))
+            {
                 arguments.Add($"--custom-pages \"{request.CustomPages}\"");
+            }
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = _pythonExecutablePath,
+                FileName = _pythonExePath,
                 Arguments = string.Join(" ", arguments),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -121,20 +115,15 @@ namespace LocalPDF_Studio_api.BLL.Services
                 CreateNoWindow = true
             };
 
+            // Inject the vendor folder so PyMuPDF is found automatically
+            startInfo.EnvironmentVariables["PYTHONPATH"] = _vendorPath;
+
             using var process = new Process { StartInfo = startInfo };
             var outputBuilder = new System.Text.StringBuilder();
             var errorBuilder = new System.Text.StringBuilder();
 
-            process.OutputDataReceived += (_, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                    outputBuilder.AppendLine(e.Data);
-            };
-            process.ErrorDataReceived += (_, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                    errorBuilder.AppendLine(e.Data);
-            };
+            process.OutputDataReceived += (_, e) => { if (e.Data != null) outputBuilder.AppendLine(e.Data); };
+            process.ErrorDataReceived += (_, e) => { if (e.Data != null) errorBuilder.AppendLine(e.Data); };
 
             process.Start();
             process.BeginOutputReadLine();
@@ -144,82 +133,20 @@ namespace LocalPDF_Studio_api.BLL.Services
             var stdout = outputBuilder.ToString().Trim();
             var stderr = errorBuilder.ToString().Trim();
 
-            _logger.LogDebug($"Python stdout: {stdout}");
-            if (!string.IsNullOrEmpty(stderr))
-                _logger.LogWarning($"Python stderr: {stderr}");
-
             if (process.ExitCode != 0)
             {
-                return new PythonWatermarkResult
-                {
-                    Success = false,
-                    Error = $"Python process exited with code {process.ExitCode}. Error: {stderr}"
-                };
+                return new PythonWatermarkResult { Success = false, Error = $"Exit {process.ExitCode}: {stderr}" };
             }
-            if (string.IsNullOrEmpty(stdout))
-            {
-                return new PythonWatermarkResult
-                {
-                    Success = false,
-                    Error = "Python process returned no output"
-                };
-            }
+
             try
             {
-                var result = JsonSerializer.Deserialize<PythonWatermarkResult>(stdout, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (result == null)
-                    throw new Exception("Failed to parse JSON output from Python");
-
-                return result;
+                return JsonSerializer.Deserialize<PythonWatermarkResult>(stdout, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                       ?? new PythonWatermarkResult { Success = false, Error = "Empty JSON output" };
             }
             catch (Exception ex)
             {
-                return new PythonWatermarkResult
-                {
-                    Success = false,
-                    Error = $"JSON parse error: {ex.Message} | Raw stdout: {stdout} | Stderr: {stderr}"
-                };
+                return new PythonWatermarkResult { Success = false, Error = $"Parse Error: {ex.Message}. Raw: {stdout}" };
             }
-        }
-
-        private string GetPythonExecutablePath()
-        {
-            var baseDir = AppContext.BaseDirectory;
-            string exeName;
-            string platformFolder;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                exeName = "localpdf_studio_python.exe";
-                platformFolder = "backend_win";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                exeName = "localpdf_studio_python";
-                platformFolder = "backend_linux";
-            }
-            else
-            {
-                exeName = "localpdf_studio_python";
-                platformFolder = "backend_mac";
-            }
-
-            var possiblePaths = new[]
-            {
-                Path.Combine(baseDir, exeName),
-                Path.Combine(baseDir, "scripts", exeName),
-                Path.Combine(baseDir, "python", exeName),
-                Path.Combine(baseDir, "..", "..", "assets", platformFolder, "scripts", exeName)
-            };
-
-            foreach (var path in possiblePaths)
-                if (File.Exists(path)) return path;
-
-            return possiblePaths[0];
         }
     }
 }

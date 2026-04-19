@@ -27,12 +27,19 @@ namespace LocalPDF_Studio_api.BLL.Services
     public class PdfExtractImagesService : IPdfExtractImagesInterface
     {
         private readonly ILogger<PdfExtractImagesService> _logger;
-        private readonly string _pythonExecutablePath;
+        private readonly string _pythonExePath;
+        private readonly string _scriptPath;
+        private readonly string _vendorPath;
 
         public PdfExtractImagesService(ILogger<PdfExtractImagesService> logger)
         {
             _logger = logger;
-            _pythonExecutablePath = GetPythonExecutablePath();
+            // AppContext.BaseDirectory should be '.../assets/backend_win/', '.../assets/backend_linux/' and '.../assets/backend_mac/'.
+            var baseDir = AppContext.BaseDirectory;
+            bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            _pythonExePath = Path.Combine(baseDir, "PyBackend", "Engine", isWindows ? "python.exe" : "bin/python3");
+            _scriptPath = Path.Combine(baseDir, "PyBackend", "Scripts", "localpdf_studio_python.py");
+            _vendorPath = Path.Combine(baseDir, "PyBackend", "vendor");
         }
 
         public async Task<byte[]> ProcessImagesAsync(PdfExtractImagesRequest request)
@@ -42,86 +49,39 @@ namespace LocalPDF_Studio_api.BLL.Services
                 if (!File.Exists(request.FilePath))
                     throw new FileNotFoundException($"File not found: {request.FilePath}");
 
-                if (request.Options == null)
-                    throw new ArgumentException("Options are required");
-
-                _logger.LogInformation($"Starting Python-based image processing: {request.FilePath}, Mode: {request.Options.Mode}");
+                _logger.LogInformation($"Starting Image Processing Mode: {request.Options.Mode}");
 
                 var pythonResult = await RunPythonImageProcessingAsync(request);
 
                 if (!pythonResult.Success)
-                {
-                    var errorMsg = pythonResult.Error ?? "Unknown Python image processing error";
-                    _logger.LogError($"Python processing failed: {errorMsg}");
-                    throw new Exception(errorMsg);
-                }
+                    throw new Exception(pythonResult.Error ?? "Unknown Python image processing error");
 
                 if (request.Options.Mode == "extract")
                 {
                     if (pythonResult.Images == null || pythonResult.Images.Count == 0)
-                    {
-                        _logger.LogWarning("No images found to extract");
-                        // Return empty zip instead of error
                         return CreateEmptyZip();
-                    }
 
-                    _logger.LogInformation($"Successfully extracted {pythonResult.ExtractedCount} images from {pythonResult.ProcessedPages} pages");
                     return CreateZipFromImages(pythonResult.Images);
                 }
                 else // remove mode
                 {
-                    _logger.LogInformation($"DEBUG: PdfData length: {pythonResult.PdfData?.Length ?? 0}");
-                    _logger.LogInformation($"DEBUG: First 100 chars of PdfData: {pythonResult.PdfData?.Substring(0, Math.Min(100, pythonResult.PdfData.Length))}");
-
                     if (string.IsNullOrEmpty(pythonResult.PdfData))
-                    {
-                        _logger.LogError("No PDF data returned from image removal");
                         throw new Exception("No PDF data returned from image removal");
-                    }
 
-                    try
-                    {
-                        var pdfBytes = Convert.FromBase64String(pythonResult.PdfData);
-                        _logger.LogInformation($"DEBUG: Converted to {pdfBytes.Length} bytes");
-                        _logger.LogInformation($"Successfully removed images from {pythonResult.ProcessedPages} pages. PDF size: {pdfBytes.Length} bytes");
-                        return pdfBytes;
-                    }
-                    catch (FormatException ex)
-                    {
-                        _logger.LogError($"Invalid base64 PDF data: {ex.Message}");
-                        _logger.LogInformation($"DEBUG: PdfData sample: {pythonResult.PdfData?.Substring(0, Math.Min(200, pythonResult.PdfData.Length))}");
-                        throw new Exception("Invalid PDF data returned from image removal");
-                    }
+                    return Convert.FromBase64String(pythonResult.PdfData);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing images in PDF");
-                throw new Exception($"Error processing images: {ex.Message}", ex);
+                throw;
             }
-        }
-
-        private byte[] CreateEmptyZip()
-        {
-            using var memoryStream = new System.IO.MemoryStream();
-            using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true))
-            {
-                // Create a readme file explaining no images were found
-                var entry = archive.CreateEntry("no_images_found.txt", System.IO.Compression.CompressionLevel.NoCompression);
-                using var writer = new System.IO.StreamWriter(entry.Open());
-                writer.WriteLine("No images were found in the specified pages.");
-                writer.WriteLine("This could mean:");
-                writer.WriteLine("- The PDF contains no images");
-                writer.WriteLine("- The selected pages contain no images");
-                writer.WriteLine("- The images are in a format that couldn't be extracted");
-            }
-            return memoryStream.ToArray();
         }
 
         private async Task<PythonImageResult> RunPythonImageProcessingAsync(PdfExtractImagesRequest request)
         {
-            if (!File.Exists(_pythonExecutablePath))
-                throw new FileNotFoundException($"Python image tool not found: {_pythonExecutablePath}");
+            if (!File.Exists(_pythonExePath))
+                throw new FileNotFoundException($"Python Engine not found: {_pythonExePath}");
 
             var pythonRequest = new
             {
@@ -131,41 +91,32 @@ namespace LocalPDF_Studio_api.BLL.Services
                 mode = request.Options.Mode
             };
 
-            var jsonRequest = JsonSerializer.Serialize(pythonRequest);
-
-            // Write JSON to a temporary file to avoid command line escaping issues
-            var tempJsonFile = Path.GetTempFileName();
+            string jsonRequest = JsonSerializer.Serialize(pythonRequest);
+            string tempJsonFile = Path.GetTempFileName();
             await File.WriteAllTextAsync(tempJsonFile, jsonRequest);
 
             try
             {
                 var startInfo = new ProcessStartInfo
                 {
-                    FileName = _pythonExecutablePath,
-                    Arguments = $"extract_images \"{tempJsonFile}\"", // Pass the temp file path instead of raw JSON
+                    FileName = _pythonExePath,
+                    Arguments = $"\"{_scriptPath}\" extract_images \"{tempJsonFile}\"",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    WorkingDirectory = Path.GetDirectoryName(_pythonExecutablePath)
+                    CreateNoWindow = true
                 };
+
+                // Allow Python to find PyMuPDF/Pillow
+                startInfo.EnvironmentVariables["PYTHONPATH"] = _vendorPath;
 
                 using var process = new Process { StartInfo = startInfo };
                 var outputBuilder = new System.Text.StringBuilder();
                 var errorBuilder = new System.Text.StringBuilder();
 
-                process.OutputDataReceived += (_, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                        outputBuilder.AppendLine(e.Data);
-                };
-                process.ErrorDataReceived += (_, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                        errorBuilder.AppendLine(e.Data);
-                };
+                process.OutputDataReceived += (_, e) => { if (e.Data != null) outputBuilder.AppendLine(e.Data); };
+                process.ErrorDataReceived += (_, e) => { if (e.Data != null) errorBuilder.AppendLine(e.Data); };
 
-                _logger.LogInformation($"Starting Python process: {startInfo.FileName} {startInfo.Arguments}");
                 process.Start();
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
@@ -174,46 +125,15 @@ namespace LocalPDF_Studio_api.BLL.Services
                 var stdout = outputBuilder.ToString().Trim();
                 var stderr = errorBuilder.ToString().Trim();
 
-                _logger.LogDebug($"Python stdout: {stdout}");
-                if (!string.IsNullOrEmpty(stderr))
-                    _logger.LogWarning($"Python stderr: {stderr}");
+                if (process.ExitCode != 0)
+                    throw new Exception($"Python Process Failed (Code {process.ExitCode}): {stderr}");
 
-                if (string.IsNullOrEmpty(stdout))
-                {
-                    throw new Exception("Python process returned no output");
-                }
-
-                try
-                {
-                    //_logger.LogInformation($"Raw Python output: {stdout}");
-                    var result = JsonSerializer.Deserialize<PythonImageResult>(stdout, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-
-                    if (result == null)
-                        throw new Exception("Failed to parse JSON output from Python");
-
-                    return result;
-                }
-                catch (JsonException ex)
-                {
-                    _logger.LogError($"JSON parse error. Raw output: {stdout}");
-                    throw new Exception($"JSON parse error: {ex.Message}. Raw output: {stdout}");
-                }
+                return JsonSerializer.Deserialize<PythonImageResult>(stdout, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                       ?? throw new Exception("Failed to parse Python JSON output");
             }
             finally
             {
-                // Clean up temp file
-                try
-                {
-                    if (File.Exists(tempJsonFile))
-                        File.Delete(tempJsonFile);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to delete temp JSON file");
-                }
+                if (File.Exists(tempJsonFile)) File.Delete(tempJsonFile);
             }
         }
 
@@ -236,40 +156,21 @@ namespace LocalPDF_Studio_api.BLL.Services
             return memoryStream.ToArray();
         }
 
-        private string GetPythonExecutablePath()
+        private byte[] CreateEmptyZip()
         {
-            var baseDir = AppContext.BaseDirectory;
-            string exeName;
-            string platformFolder;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            using var memoryStream = new System.IO.MemoryStream();
+            using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true))
             {
-                exeName = "localpdf_studio_python.exe";
-                platformFolder = "backend_win";
+                // Create a readme file explaining no images were found
+                var entry = archive.CreateEntry("no_images_found.txt", System.IO.Compression.CompressionLevel.NoCompression);
+                using var writer = new System.IO.StreamWriter(entry.Open());
+                writer.WriteLine("No images were found in the specified pages.");
+                writer.WriteLine("This could mean:");
+                writer.WriteLine("- The PDF contains no images");
+                writer.WriteLine("- The selected pages contain no images");
+                writer.WriteLine("- The images are in a format that couldn't be extracted");
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                exeName = "localpdf_studio_python";
-                platformFolder = "backend_linux";
-            }
-            else
-            {
-                exeName = "localpdf_studio_python";
-                platformFolder = "backend_mac";
-            }
-
-            var possiblePaths = new[]
-            {
-                Path.Combine(baseDir, exeName),
-                Path.Combine(baseDir, "scripts", exeName),
-                Path.Combine(baseDir, "python", exeName),
-                Path.Combine(baseDir, "..", "..", "assets", platformFolder, "scripts", exeName)
-            };
-
-            foreach (var path in possiblePaths)
-                if (File.Exists(path)) return path;
-
-            return possiblePaths[0];
+            return memoryStream.ToArray();
         }
     }
 }

@@ -17,12 +17,15 @@
     "url": "https://github.com/Alinur1/LocalPDF_Studio/issues"
   },
   "scripts": {
+    "prestart": "node scripts/setup-python.js",
     "start": "electron . --no-sandbox",
+    "prepack": "node scripts/setup-python.js",
     "pack": "electron-builder --dir",
+    "predist": "node scripts/setup-python.js",
     "dist": "electron-builder",
-    "build:win": "electron-builder --win",
-    "build:linux": "electron-builder --linux",
-    "build:mac": "electron-builder --mac --x64"
+    "build:win": "node scripts/setup-python.js && electron-builder --win",
+    "build:linux": "node scripts/setup-python.js && electron-builder --linux",
+    "build:mac": "node scripts/setup-python.js && electron-builder --mac --x64"
   },
   "devDependencies": {
     "electron": "^40.8.0",

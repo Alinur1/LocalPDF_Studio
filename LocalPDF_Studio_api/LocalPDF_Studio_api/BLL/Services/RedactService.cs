@@ -27,12 +27,19 @@ namespace LocalPDF_Studio_api.BLL.Services
     public class RedactService : IRedactInterface
     {
         private readonly ILogger<RedactService> _logger;
-        private readonly string _pythonExecutablePath;
+        private readonly string _pythonExePath;
+        private readonly string _scriptPath;
+        private readonly string _vendorPath;
 
         public RedactService(ILogger<RedactService> logger)
         {
             _logger = logger;
-            _pythonExecutablePath = GetPythonExecutablePath();
+            // AppContext.BaseDirectory should be '.../assets/backend_win/', '.../assets/backend_linux/' and '.../assets/backend_mac/'.
+            var baseDir = AppContext.BaseDirectory;
+            bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            _pythonExePath = Path.Combine(baseDir, "PyBackend", "Engine", isWindows ? "python.exe" : "bin/python3");
+            _scriptPath = Path.Combine(baseDir, "PyBackend", "Scripts", "localpdf_studio_python.py");
+            _vendorPath = Path.Combine(baseDir, "PyBackend", "vendor");
         }
 
         public async Task<byte[]> RedactPdfAsync(RedactRequest request)
@@ -41,40 +48,18 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             try
             {
-                // Validate input
-                if (string.IsNullOrWhiteSpace(request.File))
-                    throw new ArgumentException("File path is required");
-
                 if (!File.Exists(request.File))
                     throw new FileNotFoundException($"File not found: {request.File}");
 
-                if (request.Redactions == null || request.Redactions.Count == 0)
-                    throw new ArgumentException("At least one redaction area is required");
-
-                // Validate redaction areas
                 ValidateRedactions(request.Redactions);
+                _logger.LogInformation($"Starting Redaction. Redactions: {request.Redactions.Count}");
 
-                _logger.LogInformation($"Starting PDF redaction: {request.File}, Redactions: {request.Redactions.Count}");
-
-                // Run Python redaction script
                 var redactResult = await RunPythonRedactAsync(request, tempOutputPath);
 
                 if (!redactResult.Success)
                     throw new Exception(redactResult.Error ?? "Unknown redaction error");
 
-                if (!File.Exists(tempOutputPath))
-                    throw new FileNotFoundException("Redacted PDF was not created");
-
-                // Read and return the redacted PDF
-                var pdfBytes = await File.ReadAllBytesAsync(tempOutputPath);
-
-                _logger.LogInformation(
-                    $"Redaction successful - Size: {pdfBytes.Length / 1024} KB, " +
-                    $"Total Redactions: {redactResult.TotalRedactions}, " +
-                    $"Pages Redacted: {redactResult.PagesRedacted}"
-                );
-
-                return pdfBytes;
+                return await File.ReadAllBytesAsync(tempOutputPath);
             }
             catch (Exception ex)
             {
@@ -83,16 +68,83 @@ namespace LocalPDF_Studio_api.BLL.Services
             }
             finally
             {
-                // Clean up temporary file
-                try
+                if (File.Exists(tempOutputPath))
                 {
-                    if (File.Exists(tempOutputPath))
-                        File.Delete(tempOutputPath);
+                    try { File.Delete(tempOutputPath); } catch { /* Cleanup silent */ }
                 }
-                catch (Exception ex)
+            }
+        }
+
+        private async Task<PythonRedactResult> RunPythonRedactAsync(RedactRequest request, string outputPath)
+        {
+            if (!File.Exists(_pythonExePath))
+                throw new FileNotFoundException($"Python Engine not found: {_pythonExePath}");
+
+            // Create a temporary JSON file to pass redaction data safely
+            var payload = new
+            {
+                file_path = request.File,
+                output_path = outputPath,
+                redactions = request.Redactions
+            };
+
+            string tempJsonFile = Path.GetTempFileName();
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = false
+            };
+            await File.WriteAllTextAsync(tempJsonFile, JsonSerializer.Serialize(payload, options));
+
+            try
+            {
+                var startInfo = new ProcessStartInfo
                 {
-                    _logger.LogWarning(ex, "Failed to clean up temporary redacted PDF");
+                    FileName = _pythonExePath,
+                    // Use the 'redact' command pointing to the temp JSON file
+                    Arguments = $"\"{_scriptPath}\" redact \"{tempJsonFile}\" --json",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                startInfo.EnvironmentVariables["PYTHONPATH"] = _vendorPath;
+
+                using var process = new Process { StartInfo = startInfo };
+                var outputBuilder = new System.Text.StringBuilder();
+                var errorBuilder = new System.Text.StringBuilder();
+
+                process.OutputDataReceived += (_, e) => { if (e.Data != null) outputBuilder.AppendLine(e.Data); };
+                process.ErrorDataReceived += (_, e) => { if (e.Data != null) errorBuilder.AppendLine(e.Data); };
+
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+                await process.WaitForExitAsync();
+
+                var stdout = outputBuilder.ToString().Trim();
+                var stderr = errorBuilder.ToString().Trim();
+
+                if (process.ExitCode != 0)
+                    throw new Exception($"Redaction Failed (Code {process.ExitCode}): {stderr}");
+
+                // Extract valid JSON from stdout (handles possible MuPDF xref warnings)
+                string jsonPart = stdout;
+                if (stdout.Contains("{") && stdout.Contains("}"))
+                {
+                    int startIndex = stdout.IndexOf('{');
+                    int endIndex = stdout.LastIndexOf('}');
+                    jsonPart = stdout.Substring(startIndex, (endIndex - startIndex) + 1);
                 }
+
+                return JsonSerializer.Deserialize<PythonRedactResult>(jsonPart, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                       ?? throw new Exception("Failed to parse redaction result");
+            }
+            finally
+            {
+                if (File.Exists(tempJsonFile)) File.Delete(tempJsonFile);
             }
         }
 
@@ -148,159 +200,6 @@ namespace LocalPDF_Studio_api.BLL.Services
                 (c >= 'A' && c <= 'F') ||
                 (c >= 'a' && c <= 'f')
             );
-        }
-
-        private async Task<PythonRedactResult> RunPythonRedactAsync(RedactRequest request, string outputPath)
-        {
-            if (!File.Exists(_pythonExecutablePath))
-                throw new FileNotFoundException($"Python redaction tool not found: {_pythonExecutablePath}");
-
-            // Serialize redactions to JSON
-            var redactionsJson = JsonSerializer.Serialize(request.Redactions, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
-
-            // Build command arguments
-            var arguments = new List<string>
-            {
-                "redact",
-                $"\"{request.File}\"",
-                $"\"{outputPath}\"",
-                $"--redactions \"{redactionsJson.Replace("\"", "\\\"")}\"",
-                "--json"
-            };
-
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = _pythonExecutablePath,
-                Arguments = string.Join(" ", arguments),
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
-
-            using var process = new Process { StartInfo = startInfo };
-            var outputBuilder = new System.Text.StringBuilder();
-            var errorBuilder = new System.Text.StringBuilder();
-
-            process.OutputDataReceived += (_, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                    outputBuilder.AppendLine(e.Data);
-            };
-
-            process.ErrorDataReceived += (_, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                    errorBuilder.AppendLine(e.Data);
-            };
-
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            await process.WaitForExitAsync();
-
-            var stdout = outputBuilder.ToString().Trim();
-            var stderr = errorBuilder.ToString().Trim();
-
-            _logger.LogDebug($"Python stdout: {stdout}");
-            if (!string.IsNullOrEmpty(stderr))
-                _logger.LogWarning($"Python stderr: {stderr}");
-
-            // Check exit code
-            if (process.ExitCode != 0)
-            {
-                return new PythonRedactResult
-                {
-                    Success = false,
-                    Error = $"Python process exited with code {process.ExitCode}. Error: {stderr}"
-                };
-            }
-
-            if (string.IsNullOrEmpty(stdout))
-            {
-                return new PythonRedactResult
-                {
-                    Success = false,
-                    Error = "Python process returned no output"
-                };
-            }
-
-            string jsonPart = stdout;
-            if (stdout.Contains("{") && stdout.Contains("}"))
-            {
-                // Find the boundaries of the JSON object to ignore MuPDF's "xref" warnings
-                int startIndex = stdout.IndexOf('{');
-                int endIndex = stdout.LastIndexOf('}');
-                jsonPart = stdout.Substring(startIndex, (endIndex - startIndex) + 1);
-            }
-
-            // Parse JSON result
-            try
-            {
-                var result = JsonSerializer.Deserialize<PythonRedactResult>(stdout, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (result == null)
-                    throw new Exception("Failed to parse JSON output from Python");
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return new PythonRedactResult
-                {
-                    Success = false,
-                    Error = $"JSON parse error: {ex.Message} | Raw stdout: {stdout} | Stderr: {stderr}"
-                };
-            }
-        }
-
-        private string GetPythonExecutablePath()
-        {
-            var baseDir = AppContext.BaseDirectory;
-            string exeName;
-            string platformFolder;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                exeName = "localpdf_studio_python.exe";
-                platformFolder = "backend_win";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                exeName = "localpdf_studio_python";
-                platformFolder = "backend_linux";
-            }
-            else
-            {
-                exeName = "localpdf_studio_python";
-                platformFolder = "backend_mac";
-            }
-
-            var possiblePaths = new[]
-            {
-                Path.Combine(baseDir, exeName),
-                Path.Combine(baseDir, "scripts", exeName),
-                Path.Combine(baseDir, "python", exeName),
-                Path.Combine(baseDir, "..", "..", "assets", platformFolder, "scripts", exeName)
-            };
-
-            foreach (var path in possiblePaths)
-            {
-                if (File.Exists(path))
-                {
-                    _logger.LogInformation($"Found Python redaction executable at: {path}");
-                    return path;
-                }
-            }
-
-            _logger.LogWarning($"Python redaction executable not found, using default path: {possiblePaths[0]}");
-            return possiblePaths[0];
         }
     }
 }
