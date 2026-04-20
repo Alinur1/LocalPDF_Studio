@@ -591,6 +591,6 @@ FodyWeavers.xsd
 /.flatpak-builder
 *.traineddata
 *.gz
-/assets/backend_win/PyBackend
-/assets/backend_linux/PyBackend
-/assets/backend_mac/PyBackend
+/assets/backend_win
+/assets/backend_linux
+/assets/backend_mac
