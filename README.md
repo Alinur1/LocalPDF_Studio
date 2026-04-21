@@ -92,6 +92,9 @@ To build for ARM64, you must update the `rid` (Runtime Identifier) and the Pytho
 ### > How to build snap package for linux
 - Please see the "docs" folder for detailed instructions.
 
+---
+---
+
 ### > Quick Contribution Guide:
 - Fork the repository on GitHub
 - Clone your fork locally.
