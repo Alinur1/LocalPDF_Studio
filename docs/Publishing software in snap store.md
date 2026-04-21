@@ -53,7 +53,7 @@ localpdf-studio
 ---
 ---
 
-## To publish an app in the snapstore, the following steps are needed to be followed.
+## To publish an app in the snapstore, follow these steps:
 
 ### 10. **Login to Snapcraft:**  
 ```bash
