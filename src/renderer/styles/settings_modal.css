@@ -169,7 +169,7 @@
   align-items: center;
   text-align: center;
   justify-content: center;
-  min-height: 100px;
+  min-height: 40px;
 }
 
 .settings-options.horizontal-row .radio-option input[type="radio"] {

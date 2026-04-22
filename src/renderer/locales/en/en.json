@@ -61,8 +61,7 @@
     "theme-title": "Theme",
     "theme-dark": "Dark",
     "theme-light": "Light",
-    "theme-system": "System (Auto)",
-    "theme-system-desc": "Automatically match your operating system theme"
+    "theme-system": "System (Auto)"
   },
   "search": {
     "placeholder": "Search opened PDFs...",

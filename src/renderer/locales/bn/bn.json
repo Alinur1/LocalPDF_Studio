@@ -61,8 +61,7 @@
     "theme-title": "থিম",
     "theme-dark": "ডার্ক",
     "theme-light": "লাইট",
-    "theme-system": "সিস্টেম (স্বয়ংক্রিয়)",
-    "theme-system-desc": "আপনার অপারেটিং সিস্টেমের থিম অনুযায়ী স্বয়ংক্রিয়ভাবে পরিবর্তন হবে"
+    "theme-system": "সিস্টেম (স্বয়ংক্রিয়)"
   },
   "search": {
     "placeholder": "খোলা PDF খুঁজুন...",

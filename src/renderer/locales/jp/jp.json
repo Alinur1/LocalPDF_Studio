@@ -61,8 +61,7 @@
     "theme-title": "テーマ",
     "theme-dark": "ダーク",
     "theme-light": "ライト",
-    "theme-system": "システム（自動）",
-    "theme-system-desc": "オペレーティングシステムのテーマに自動的に合わせます"
+    "theme-system": "システム（自動）"
   },
   "search": {
     "placeholder": "開いたPDFを検索...",
