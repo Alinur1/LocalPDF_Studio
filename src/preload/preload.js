@@ -70,3 +70,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveImageFile: (filename, buffer) => ipcRenderer.invoke('save-image-file', { filename, buffer }),
     buildFillablePdf: (options) => ipcRenderer.invoke('build-fillable-pdf', options),
 });
+
+contextBridge.exposeInMainWorld('loggerAPI', {
+    send: (level, message) => ipcRenderer.send('log-to-db', { level, message }),
+    export: () => ipcRenderer.invoke('export-log-file'),
+    clearLogs: () => ipcRenderer.invoke('clear-logs')
+});

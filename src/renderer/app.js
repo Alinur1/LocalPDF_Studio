@@ -26,9 +26,10 @@ import customAlert from './utils/customAlert.js';
 import i18n from './utils/i18n.js';
 import { SearchBar } from './utils/searchBar.js';
 import { SearchIndexManager } from './utils/searchIndexManager.js';
+import { initGlobalLogging } from './utils/consoleLogger.js';
 
 window.addEventListener('DOMContentLoaded', async () => {
-
+    initGlobalLogging();
     await i18n.init();
 
     const themeRadios = document.querySelectorAll('input[name="theme-mode"]');
@@ -418,6 +419,42 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('donate-btn').addEventListener('click', () => {
         window.location.href = './donate/donate.html';
     });
+
+    // Export Logs Button
+    const exportLogsBtn = document.getElementById('export-logs-btn');
+    if (exportLogsBtn) {
+        exportLogsBtn.addEventListener('click', async () => {
+            try {
+                const success = await window.loggerAPI.export();
+                if (success) {
+                    customAlert.alert('Success', 'Logs exported successfully!');
+                } else {
+                    customAlert.alert('Info', 'Export cancelled.');
+                }
+            } catch (err) {
+                console.error('Error exporting logs:', err);
+                customAlert.alert('Error', 'Failed to export logs.');
+            }
+        });
+    }
+
+    // Clear Log History Button
+    const clearLogsBtn = document.getElementById('clear-logs-btn');
+    if (clearLogsBtn) {
+        clearLogsBtn.addEventListener('click', async () => {
+            try {
+                const success = await window.loggerAPI.clearLogs();
+                if (success) {
+                    customAlert.alert('Success', 'Log history cleared!');
+                } else {
+                    customAlert.alert('Error', 'Failed to clear log history.');
+                }
+            } catch (err) {
+                console.error('Error clearing logs:', err);
+                customAlert.alert('Error', 'Failed to clear logs.');
+            }
+        });
+    }
 
     tabManager.onTabChange = () => saveTabs(tabManager);
     tabManager.onTabClose = () => saveTabs(tabManager);

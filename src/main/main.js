@@ -29,6 +29,7 @@ const { autoUpdater } = require('electron-updater');
 const { PDFDocument, PDFName, PDFRawStream } = require('pdf-lib');
 const Tesseract = require('tesseract.js');
 const gotTheLock = app.requestSingleInstanceLock();
+const loggerService = require('./services/loggerService.js');
 
 let apiProcess = null;
 let apiPort = null;
@@ -1295,3 +1296,27 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
 function sanitizeName(name) {
     return (name || 'field').replace(/[^a-zA-Z0-9_\-.]/g, '_').substring(0, 64);
 }
+
+ipcMain.on('log-to-db', (event, { level, message }) => {
+    loggerService.insert(level, message);
+});
+
+ipcMain.handle('export-log-file', async () => {
+    const { filePath } = await dialog.showSaveDialog({
+        title: 'Export LocalPDF Logs',
+        defaultPath: 'LocalPDF_Studio_Logs.txt',
+        filters: [{ name: 'Text Files', extensions: ['txt'] }]
+    });
+
+    if (filePath) {
+        const rows = loggerService.fetchAll();
+        const content = rows.map(r => `[${r.timestamp}] [${r.level}] ${r.message}`).join('\n');
+        fs.writeFileSync(filePath, content);
+        return true;
+    }
+    return false;
+});
+
+ipcMain.handle('clear-logs', async () => {
+    return loggerService.clearAll();
+});
