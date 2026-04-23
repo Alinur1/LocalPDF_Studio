@@ -22,11 +22,12 @@ const { getDB } = require('../db/sqliteManager');
 const queries = require('../db/sqlQueries');
 
 const loggerService = {
-    insert: (level, message) => {
+    insert: (message) => {
         const db = getDB();
         if (!db) return;
         try {
-            db.prepare(queries.INSERT_LOG).run(level, message);
+            db.prepare(queries.INSERT_LOG).run(message);
+            console.log(`[Log] ${message}`);
         } catch (err) {
             console.error('Logging Service Error:', err);
         }
@@ -44,8 +45,9 @@ const loggerService = {
     },
 
     clearAll: () => {
+        const db = getDB();
+        if (!db) return false;
         try {
-            const db = getDB();
             db.prepare(queries.CLEAR_LOGS).run();
             return true;
         } catch (err) {
@@ -56,3 +58,18 @@ const loggerService = {
 };
 
 module.exports = loggerService;
+
+
+/*
+Usage example:
+
+In main.js:
+const logger = require('./services/loggerService.js');
+logger.insert("App started at main.js with API Port: " + apiPort);
+
+=====================================================================================
+=====================================================================================
+
+In other js files:
+localpdfStudio.log("Error occurred at createPdfTab.js during PDF merging: " + err);
+*/

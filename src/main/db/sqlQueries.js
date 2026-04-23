@@ -23,11 +23,10 @@ module.exports = {
         CREATE TABLE IF NOT EXISTS logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp DATETIME DEFAULT (datetime('now', 'localtime')),
-            level TEXT,
             message TEXT
         )
     `,
-    INSERT_LOG: `INSERT INTO logs (level, message) VALUES (?, ?)`,
+    INSERT_LOG: `INSERT INTO logs (message) VALUES (?)`,
     GET_ALL_LOGS: `SELECT * FROM logs ORDER BY timestamp ASC`,
     PRUNE_LOGS: `DELETE FROM logs WHERE timestamp < date('now', '-7 days')`,
     CLEAR_LOGS: `DELETE FROM logs`

@@ -72,7 +72,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 });
 
 contextBridge.exposeInMainWorld('loggerAPI', {
-    send: (level, message) => ipcRenderer.send('log-to-db', { level, message }),
+    log: (message) => ipcRenderer.send('manual-log', message),
     export: () => ipcRenderer.invoke('export-log-file'),
     clearLogs: () => ipcRenderer.invoke('clear-logs')
 });

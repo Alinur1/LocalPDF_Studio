@@ -29,7 +29,7 @@ const { autoUpdater } = require('electron-updater');
 const { PDFDocument, PDFName, PDFRawStream } = require('pdf-lib');
 const Tesseract = require('tesseract.js');
 const gotTheLock = app.requestSingleInstanceLock();
-const loggerService = require('./services/loggerService.js');
+const logger = require('./services/loggerService.js');
 
 let apiProcess = null;
 let apiPort = null;
@@ -48,6 +48,7 @@ function queueOrSendOpenFile(filePath) {
         }
     } catch (err) {
         console.error('Failed to send open-file to renderer:', err);
+        logger.insert("Failed to send open-file to renderer, main.js: " + err);
         openFileQueue.push(filePath);
     }
 }
@@ -75,6 +76,7 @@ try {
     }
 } catch (err) {
     console.error('Error scanning initial argv for PDF files:', err);
+    logger.insert("Error scanning initial argv for PDF files, main.js: " + err);
 }
 
 function startBackend() {
@@ -98,6 +100,7 @@ function startBackend() {
             default:
                 const errorMsg = `Your OS (${process.platform}) is not supported.`;
                 dialog.showErrorBox('Unsupported OS', errorMsg);
+                logger.insert("Unsupported OS, main.js:" + errorMsg);
                 reject(new Error(errorMsg));
                 return;
         }
@@ -108,6 +111,7 @@ function startBackend() {
         if (!fs.existsSync(backendPath)) {
             const errorMsg = `Backend executable not found at: ${backendPath}`;
             console.error(errorMsg);
+            logger.insert("Backend executable not found, main.js: " + errorMsg);
             dialog.showErrorBox('Backend Not Found', errorMsg);
             reject(new Error(errorMsg));
             return;
@@ -123,6 +127,7 @@ function startBackend() {
             }
 
             console.log(`Starting backend from: ${backendPath}`);
+            logger.insert("Starting backend from, main.js: " + backendPath);
             apiProcess = spawn(backendPath);
 
             apiProcess.stdout.on('data', (data) => {
@@ -132,16 +137,19 @@ function startBackend() {
                 if (match) {
                     apiPort = parseInt(match[1]);
                     console.log(`Backend started on port ${apiPort}`);
+                    logger.insert("Backend started on port, main.js: " + apiPort);
                     resolve(apiPort);
                 }
             });
 
             apiProcess.stderr.on('data', (data) => {
                 console.error('Backend Error:', data.toString());
+                logger.insert("Backend error, main.js: " + data.toString());
             });
 
             apiProcess.on('error', (err) => {
                 console.error('Failed to start backend:', err);
+                logger.insert("Failed to start backend, main.js: " + err);
                 reject(err);
             });
 
@@ -161,12 +169,14 @@ function startBackend() {
                 if (!apiPort) {
                     const errorMsg = 'Backend failed to start within 60 seconds. Please try again.';
                     console.error(errorMsg);
+                    logger.insert(errorMsg);
                     reject(new Error(errorMsg));
                 }
             }, 60000);
 
         } catch (err) {
             console.error('Error starting backend:', err);
+            logger.insert("Error starting backend, main.js: " + err);
             reject(err);
         }
     });
@@ -186,6 +196,7 @@ const getIcon = () => {
 };
 
 const createWindow = () => {
+    logger.insert("Application starting");
     Menu.setApplicationMenu(null);
     mainWindow = new BrowserWindow({
         minWidth: 700,
@@ -272,6 +283,7 @@ function setupAutoUpdater() {
                 await autoUpdater.downloadUpdate();
             } catch (err) {
                 console.error('Silent auto-update failed on Linux:', err);
+                logger.insert("Silent auto-update failed on Linux, main.js: " + err);
                 isDownloading = false;
                 sendUpdateStatus('Auto-update failed', err.message || 'Unknown error');
                 dialog.showMessageBox(mainWindow, {
@@ -354,6 +366,7 @@ function setupAutoUpdater() {
 
 if (!gotTheLock) {
     console.log("LocalPDF Studio is already running.");
+    logger.insert("LocalPDF Studio is already running, main.js.");
     // app.whenReady().then(() => {
     //     dialog.showMessageBoxSync({
     //         type: 'info',
@@ -380,6 +393,7 @@ if (!gotTheLock) {
             }
         } catch (err) {
             console.error('Error processing second-instance args:', err);
+            logger.insert("Error processing second-instance args, main.js: " + err);
         }
 
         // Bring window to focus
@@ -397,6 +411,7 @@ if (!gotTheLock) {
             setupAutoUpdater();
         } catch (err) {
             console.error('Failed to initialize app:', err);
+            logger.insert("Failed to initialize app, main.js: " + err);
             dialog.showErrorBox('Startup Error', `Failed to start the application backend.\n\nError: ${err.message}`);
             app.quit();
         }
@@ -428,6 +443,7 @@ function ensureTaskFolderExists() {
             console.log(`Created LocalPDF_Studio_Task folder at: ${taskFolder}`);
         } catch (err) {
             console.error(`Failed to create LocalPDF_Studio_Task folder:`, err);
+            logger.insert("Failed to create LocalPDF_Studio_Task folder, main.js: " + err);
             throw err;
         }
     }
@@ -451,6 +467,7 @@ function cleanupTaskFolder() {
         }
     } catch (err) {
         console.error('Error cleaning up task folder:', err);
+        logger.insert("Error cleaning up task folder, main.js: " + err);
     }
 }
 
@@ -483,6 +500,7 @@ app.on('window-all-closed', () => {
             console.log('Backend process stopped.');
         } catch (err) {
             console.error('Error killing backend process:', err);
+            logger.insert("Error killing backend process, main.js: " + err);
         } finally {
             apiProcess = null;
             apiPort = null;
@@ -498,6 +516,7 @@ app.on('before-quit', () => {
             apiProcess.kill();
         } catch (err) {
             console.error('Error killing backend process on quit:', err);
+            logger.insert("Error killing backend process on quit: " + err);
         }
     }
 });
@@ -507,6 +526,7 @@ app.on('before-quit', () => {
 ipcMain.handle('get-api-port', () => {
     if (!mainWindow || mainWindow.isDestroyed()) {
         console.warn('get-api-port called with no active window');
+        logger.insert("get-api-port called with no active window, main.js.");
     }
     return apiPort;
 });
@@ -521,6 +541,7 @@ ipcMain.on('open-external-link', (event, url) => {
         shell.openExternal(url);
     } else {
         console.warn(`Blocked attempt to open non-web URL: ${url}`);
+        logger.insert("Blocked attempt to open non-web URL, main.js: " + url);
     }
 });
 
@@ -561,6 +582,7 @@ ipcMain.handle('save-merged-pdf', async (event, arrayBuffer) => {
         return { success: true, path: filePath };
     } catch (err) {
         console.error("Failed to save PDF:", err);
+        logger.insert("Failed to save PDF, main.js (save-merged-pdf): " + err);
         return { success: false, error: err.message };
     }
 });
@@ -594,6 +616,7 @@ ipcMain.handle('save-zip-file', async (event, { filename, buffer }) => {
         return filePath;
     } catch (err) {
         console.error("Failed to save file:", err);
+        logger.insert("Failed to save PDF, main.js (save-zip-file): " + err);
         return null;
     }
 });
@@ -624,6 +647,7 @@ ipcMain.handle('save-pdf-file', async (event, { filename, buffer }) => {
         return filePath;
     } catch (err) {
         console.error("Failed to save file:", err);
+        logger.insert("Failed to save PDF, main.js (save-pdf-file): " + err);
         return null;
     }
 });
@@ -657,6 +681,7 @@ ipcMain.handle('save-text-file', async (event, { filename, text }) => {
         return { success: true, path: filePath };
     } catch (err) {
         console.error("Failed to save text file:", err);
+        logger.insert("Failed to save PDF, main.js (save-text-file): " + err);
         return { success: false, error: err.message };
     }
 });
@@ -674,6 +699,7 @@ ipcMain.handle('save-json-file', async (event, { filename, json }) => {
         return filePath;
     } catch (err) {
         console.error('Failed to save JSON file:', err);
+        logger.insert("Failed to save JSON file, main.js (save-json-file): " + err);
         return null;
     }
 });
@@ -693,6 +719,7 @@ ipcMain.handle('read-json-file', async (event, filePath) => {
         return fs.readFileSync(filePath, 'utf-8');
     } catch (err) {
         console.error('Failed to read JSON file:', err);
+        logger.insert("Failed to read JSON file, main.js (read-json-file): " + err);
         return null;
     }
 });
@@ -751,6 +778,7 @@ ipcMain.handle('save-pdf-with-metadata', async (event, { filePath, metadata }) =
         return { success: true, path: savedPath };
     } catch (err) {
         console.error("Failed to save metadata:", err);
+        logger.insert("Failed to save metadata, main.js (save-pdf-with-metadata): " + err);
         return { success: false, error: err.message };
     }
 });
@@ -766,6 +794,7 @@ ipcMain.handle('save-dropped-file', async (event, { name, buffer }) => {
         return { success: true, filePath: filePath };
     } catch (err) {
         console.error('Failed to save dropped file:', err);
+        logger.insert("Failed to save dropped file, main.js (save-dropped-file): " + err);
         return { success: false, error: err.message };
     }
 });
@@ -780,6 +809,7 @@ ipcMain.handle('delete-file', async (event, filePath) => {
         return { success: true }; // File doesn't exist, consider it success
     } catch (err) {
         console.error('Failed to delete file:', err);
+        logger.insert("Failed to delete file, main.js (delete-file): " + err);
         return { success: false, error: err.message };
     }
 });
@@ -807,6 +837,7 @@ ipcMain.handle('perform-tesseract-ocr', async (event, { imagePath, language, opt
         };
     } catch (error) {
         console.error('Tesseract OCR failed:', error);
+        logger.insert("Tesseract OCR failed, main.js (perform-tesseract-ocr): " + error);
         return {
             success: false,
             error: error.message
@@ -844,6 +875,7 @@ ipcMain.handle('perform-tesseract-pdf-ocr', async (event, { pages, language, opt
 
                 } catch (pageError) {
                     console.error(`Page ${page.pageNumber} OCR failed:`, pageError);
+                    logger.insert(`Page ${page.pageNumber} OCR failed, main.js (perform-tesseract-pdf-ocr):`, pageError);
                     results.push({
                         page: page.pageNumber,
                         success: false,
@@ -861,6 +893,7 @@ ipcMain.handle('perform-tesseract-pdf-ocr', async (event, { pages, language, opt
         }
     } catch (error) {
         console.error('PDF OCR failed:', error);
+        logger.insert("PDF OCR failed, main.js (perform-tesseract-pdf-ocr): " + err);
         return {
             success: false,
             error: error.message,
@@ -1038,6 +1071,7 @@ ipcMain.handle('get-tesseract-languages', async () => {
         return { success: true, languages: availableLanguages };
     } catch (error) {
         console.error('Failed to get languages:', error);
+        logger.insert("Failed to get languages, main.js (get-tesseract-languages): " + err);
         return { success: false, error: error.message };
     }
 });
@@ -1095,6 +1129,7 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
             fontRegular = await pdfDoc.embedFont(regularBytes, { subset: false });
         } catch (err) {
             console.warn('GoNotoKurrent-Regular not found, falling back to Helvetica:', err.message);
+            logger.insert("GoNotoKurrent-Regular not found, falling back to Helvetica, main.js (build-fillable-pdf): " + err);
             fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
         }
 
@@ -1104,6 +1139,7 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
             fontBold = await pdfDoc.embedFont(boldBytes, { subset: false });
         } catch (err) {
             console.warn('GoNotoKurrent-Bold not found, falling back to Helvetica-Bold:', err.message);
+            logger.insert("GoNotoKurrent-Bold not found, falling back to Helvetica-Bold, main.js (build-fillable-pdf): " + err);
             fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         }
 
@@ -1113,6 +1149,7 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
             fontCJK = await pdfDoc.embedFont(cjkBytes, { subset: false });
         } catch (err) {
             console.warn('GoNotoCJKCore not found, CJK text may not render:', err.message);
+            logger.insert("GoNotoCJKCore not found, CJK text may not render, main.js (build-fillable-pdf): " + err);
             fontCJK = fontRegular;
         }
 
@@ -1289,6 +1326,7 @@ ipcMain.handle('build-fillable-pdf', async (event, { mode, pages, existingPdfPat
 
     } catch (err) {
         console.log('build-fillable-pdf error:', err);
+        logger.insert("build-fillable-pdf error, main.js (build-fillable-pdf): " + err);
         return { success: false, error: err.message };
     }
 });
@@ -1297,8 +1335,8 @@ function sanitizeName(name) {
     return (name || 'field').replace(/[^a-zA-Z0-9_\-.]/g, '_').substring(0, 64);
 }
 
-ipcMain.on('log-to-db', (event, { level, message }) => {
-    loggerService.insert(level, message);
+ipcMain.on('manual-log', (event, message) => {
+    logger.insert(message);
 });
 
 ipcMain.handle('export-log-file', async () => {
@@ -1309,8 +1347,8 @@ ipcMain.handle('export-log-file', async () => {
     });
 
     if (filePath) {
-        const rows = loggerService.fetchAll();
-        const content = rows.map(r => `[${r.timestamp}] [${r.level}] ${r.message}`).join('\n');
+        const rows = logger.fetchAll();
+        const content = rows.map(r => `[${r.timestamp}] ${r.message}`).join('\n');
         fs.writeFileSync(filePath, content);
         return true;
     }
@@ -1318,5 +1356,5 @@ ipcMain.handle('export-log-file', async () => {
 });
 
 ipcMain.handle('clear-logs', async () => {
-    return loggerService.clearAll();
+    return logger.clearAll();
 });
