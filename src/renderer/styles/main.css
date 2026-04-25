@@ -253,7 +253,7 @@ html {
 
 .tab-close {
   margin-left: auto;
-  padding-left: 15px;
+  padding-left: 0.5px;
   cursor: pointer;
   font-weight: bold;
   color: var(--text-tertiary);
