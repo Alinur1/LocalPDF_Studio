@@ -18787,11 +18787,14 @@ function onWheel(evt) {
     } else {
       const delta = normalizeWheelEventDirection(evt);
       let ticks = 0;
-      if (deltaMode === WheelEvent.DOM_DELTA_LINE || deltaMode === WheelEvent.DOM_DELTA_PAGE) {
-        ticks = Math.abs(delta) >= 1 ? Math.sign(delta) : this._accumulateTicks(delta, "_wheelUnusedTicks");
-      } else {
-        const PIXELS_PER_LINE_SCALE = 30;
-        ticks = this._accumulateTicks(delta / PIXELS_PER_LINE_SCALE, "_wheelUnusedTicks");
+      // if (deltaMode === WheelEvent.DOM_DELTA_LINE || deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+      //   ticks = Math.abs(delta) >= 1 ? Math.sign(delta) : this._accumulateTicks(delta, "_wheelUnusedTicks");
+      // } else {
+      //   const PIXELS_PER_LINE_SCALE = 30;
+      //   ticks = this._accumulateTicks(delta / PIXELS_PER_LINE_SCALE, "_wheelUnusedTicks");
+      // }
+      if (Math.abs(delta) > 0.5) {
+        ticks = Math.sign(delta);
       }
       this.updateZoom(ticks, null, origin);
     }

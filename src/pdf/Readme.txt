@@ -47,6 +47,23 @@ class BasePreferences {
     enableHighlightFloatingButton: false,
     .......
 
+---------------------------------------------------------------
+
+if (isPinchToZoom && supportsPinchToZoom) {
+  scaleFactor = this._accumulateFactor(pdfViewer.currentScale, scaleFactor, "_wheelUnusedFactor");
+  this.updateZoom(null, scaleFactor, origin);
+} else {
+  const delta = normalizeWheelEventDirection(evt);
+  let ticks = 0;
+  if (deltaMode === WheelEvent.DOM_DELTA_LINE || deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+    ticks = Math.abs(delta) >= 1 ? Math.sign(delta) : this._accumulateTicks(delta, "_wheelUnusedTicks");
+  } else {
+    const PIXELS_PER_LINE_SCALE = 30;
+    ticks = this._accumulateTicks(delta / PIXELS_PER_LINE_SCALE, "_wheelUnusedTicks");
+  }
+  this.updateZoom(ticks, null, origin);
+}
+
 ===================================================================================================================================
 ===================================================================================================================================
 
@@ -91,6 +108,21 @@ class BasePreferences {
     enableComment: true,
     enableHighlightFloatingButton: true,
     .......
+
+---------------------------------------------------------------
+
+if (isPinchToZoom && supportsPinchToZoom) {
+  scaleFactor = this._accumulateFactor(pdfViewer.currentScale, scaleFactor, "_wheelUnusedFactor");
+  this.updateZoom(null, scaleFactor, origin);
+} else {
+  const delta = normalizeWheelEventDirection(evt);
+  let ticks = 0;
+  if (Math.abs(delta) > 0.5) {
+    ticks = Math.sign(delta);
+  }
+  this.updateZoom(ticks, null, origin);
+}
+
 
 ===================================================================================================================================
 ===================================================================================================================================
