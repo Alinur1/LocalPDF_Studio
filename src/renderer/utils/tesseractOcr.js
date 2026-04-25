@@ -37,6 +37,7 @@ class TesseractOcr {
         // Check if API exists
         if (!window.electronAPI || !window.electronAPI.performTesseractOCR) {
             console.error('Tesseract API not available in electronAPI');
+            localpdfStudio.log("Tesseract API not available in electronAPI, tesseractOcr.js.");
             throw new Error('Tesseract OCR API is not available. Check main process setup.');
         }
 
@@ -51,6 +52,7 @@ class TesseractOcr {
             );
 
             if (!result.success) {
+                localpdfStudio.log("OCR failed, tesseractOcr.js: " + result.error);
                 throw new Error(result.error || 'OCR failed');
             }
 
@@ -63,6 +65,7 @@ class TesseractOcr {
             };
         } catch (error) {
             console.error('Image file OCR failed:', error);
+            localpdfStudio.log("Image file OCR failed, tesseractOcr.js: " + error);
             throw new Error(`Image OCR failed: ${error.message}`);
         }
     }
@@ -91,11 +94,13 @@ class TesseractOcr {
                 window.electronAPI.onTesseractProgress(() => { }); // Remove listener
             }
             if (!result.success) {
+                localpdfStudio.log("PDF OCR failed, tesseractOcr.js: " + result.error);
                 throw new Error(result.error || 'PDF OCR failed');
             }
             return result.results;
         } catch (error) {
             console.error('PDF OCR failed:', error);
+            localpdfStudio.log("PDF OCR failed - 2, tesseractOcr.js: " + error);
             if (onProgress) {
                 window.electronAPI.onTesseractProgress(() => { });
             }
@@ -132,6 +137,7 @@ class TesseractOcr {
             return result;
         } catch (error) {
             console.error(`Batch ${Math.floor(startIndex / 3) + 1} failed:`, error);
+            localpdfStudio.log(`Batch ${Math.floor(startIndex / 3) + 1} failed, tesseractOcr.js:`, error);
 
             // Return empty results for this batch but continue processing
             return pages.map((_, index) => ({
@@ -201,16 +207,19 @@ class TesseractOcr {
                 return result.languages;
             } else {
                 console.error('Failed to get languages:', result.error);
+                localpdfStudio.log('Failed to get languages, tesseractOcr.js:', result.error);
                 return [];
             }
         } catch (error) {
             console.error('Failed to get languages:', error);
+            localpdfStudio.log('Failed to get languages - 2, tesseractOcr.js:', error);
             return [];
         }
     }
 
     async terminate() {
         console.log('Tesseract IPC client terminated');
+        localpdfStudio.log('Tesseract IPC client terminated, tesseractOcr.js');
     }
 
     async extractTextFromPdfCanvasesWithProgress(canvases, progressCallback, batchSize = 2) {

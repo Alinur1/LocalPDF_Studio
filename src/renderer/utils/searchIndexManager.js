@@ -43,6 +43,7 @@ export class SearchIndexManager {
         try {
             localStorage.setItem('pdfSearchIndex', JSON.stringify(this.index));
         } catch (error) {
+            localpdfStudio.log("Failed to save search index, searchIndexManager.js: " + error);
             console.error('Failed to save search index:', error);
         }
     }

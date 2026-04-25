@@ -53,6 +53,7 @@ export class ClockManager {
         }
 
         console.log('Starting clock...');
+        localpdfStudio.log("Starting clock, clockManager.js");
 
         // Show clock container when starting
         if (this.clockContainer) {
@@ -78,6 +79,7 @@ export class ClockManager {
 
     updateClock() {
         if (!this.isEnabled || !this.timeElement || !this.dateElement || !this.dayElement) {
+            localpdfStudio.log("Failed to update the clock, clockManager.js.");
             return;
         }
 
@@ -106,6 +108,7 @@ export class ClockManager {
             this.dayElement.textContent = day;
         } catch (error) {
             console.error('Error updating clock:', error);
+            localpdfStudio.log("Error updating clock, clockManager: " + error);
         }
     }
 
