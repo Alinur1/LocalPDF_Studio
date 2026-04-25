@@ -64,7 +64,10 @@
                         <h3 id="preview-title" data-i18n="ocr.pdf-preview-header">PDF Preview - Select Pages</h3>
                         <p class="selection-info" id="selection-info" data-i18n="ocr.no-page-selected" style="display: none;">No pages selected</p>
                     </div>
-                    <span id="page-count" class="page-count"></span>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span id="page-count" class="page-count"></span>
+                        <button id="clear-selection-btn" class="action-btn secondary" data-i18n="ocr.clear-selection-btn" style="display: none;">Clear Selection</button>
+                    </div>
                 </div>
                 <div id="preview-grid" class="preview-grid">
                 </div>
@@ -91,9 +94,6 @@
                     <label for="page-ranges" data-i18n="ocr.page-range-spec">Page Ranges:</label>
                     <input type="text" id="page-ranges" class="options-input" data-i18n-placeholder="ocr.page-ranges-placeholder">
                     <small class="help-text" data-i18n="ocr.page-range-spec-helpTxt">Enter ranges like "1-5, 10-15" or mix both: "1, 3-5, 8"</small>
-                </div>
-                <div class="option-group">
-                    <button id="clear-selection-btn" class="action-btn secondary" data-i18n="ocr.clear-selection-btn">Clear Selection</button>
                 </div>
             </div>
             <div class="ocr-options-container">

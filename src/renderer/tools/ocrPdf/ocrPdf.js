@@ -403,10 +403,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             // selectionInfoEl.textContent = 'No pages selected';
             selectionInfoEl.textContent = i18n.t('OCR.preview_no_pages_selected');
             selectionInfoEl.style.display = 'none';
+            clearSelectionBtn.style.display = 'none';
         } else {
             const sortedPages = Array.from(selectedPages).sort((a, b) => a - b);
             selectionInfoEl.textContent = `${count} page(s) selected: ${sortedPages.join(', ')}`;
             selectionInfoEl.style.display = 'block';
+            clearSelectionBtn.style.display = 'block';
         }
     }
 
