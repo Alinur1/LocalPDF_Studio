@@ -226,7 +226,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         const handleMouseMove = (e) => {
             const sidebarWidth = e.clientX;
-            if (sidebarWidth >= 220 && sidebarWidth <= 600) {
+            if (sidebarWidth >= 100 && sidebarWidth <= 600) {
                 tabBar.style.width = `${sidebarWidth}px`;
             }
         };
@@ -351,6 +351,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // Send keystroke to the PDF.js
     document.addEventListener('keydown', (e) => {
         const isMac = navigator.platform.toUpperCase().includes('MAC');
         const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
