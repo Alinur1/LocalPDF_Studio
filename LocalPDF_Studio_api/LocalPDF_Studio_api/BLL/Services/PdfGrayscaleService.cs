@@ -90,8 +90,11 @@ namespace LocalPDF_Studio_api.BLL.Services
             if (!string.IsNullOrEmpty(request.CustomPages) && request.PagesRange == "custom")
                 arguments.Add($"--custom-pages \"{request.CustomPages}\"");
 
-            if (!request.PreserveImages)
-                arguments.Add("--skip-images");
+            // Add conversion mode
+            var mode = string.IsNullOrWhiteSpace(request.ConversionMode) ? "vector" : request.ConversionMode.ToLower();
+            if (mode == "raster")
+                arguments.Add("--mode raster");
+            // else, default is vector
 
             var startInfo = new ProcessStartInfo
             {

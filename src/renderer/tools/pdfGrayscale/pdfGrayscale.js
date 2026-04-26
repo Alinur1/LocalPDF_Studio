@@ -251,11 +251,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
+        const conversionMode = document.querySelector('input[name="conversionMode"]:checked').value;
         const requestBody = {
             filePath: selectedFile.path,
-            preserveImages: document.getElementById('preserveImages').checked,
             pagesRange: pageRange,
-            customPages: customPages
+            customPages: customPages,
+            conversionMode: conversionMode
         };
 
         try {

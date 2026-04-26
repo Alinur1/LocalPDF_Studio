@@ -805,10 +805,12 @@
     "all-pages": "所有页面",
     "custom-pages": "自定义页面",
     "custom-pages-label": "页面：",
-    "custom-pages-help": "输入单个页面或范围，用逗号分隔（例如：1、2、3-6、8）",
-    "conversion-settings": "转换设置",
-    "preserve-images": "将图像转换为灰度",
-    "preserve-images-help": "未选中时，图像将保持原始颜色",
+    "custom-pages-help": "输入单个页面或范围，用逗号分隔 (例如:1、2、3-6、8)",
+    "conversion-mode-title": "转换模式",
+    "mode-vector": "保留文本（推荐）",
+    "mode-vector-help": "保持文本可选择和可搜索。适用于大多数 PDF。",
+    "mode-raster": "转换为 PDF 内的图像",
+    "mode-raster-help": "如果表单或某些复杂的 PDF 有问题，请使用此选项。文本将无法选择。",
     "convert-btn": "转换为灰度"
   },
   "pdfGrayscaleJS": {

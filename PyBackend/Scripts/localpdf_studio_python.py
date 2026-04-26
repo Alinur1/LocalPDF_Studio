@@ -621,7 +621,8 @@ class convert_pdf_images:
 # pdf_to_grayscale
 # ============================================================
 
-def _grayscale_convert(input_path, output_path, custom_pages=None, skip_images=False):
+def _grayscale_convert_vector(input_path, output_path, custom_pages=None):
+    """Mode 1: Preserve text selectability using recolor()"""
     try:
         doc = fitz.open(input_path)
         output_doc = fitz.open()
@@ -629,52 +630,97 @@ def _grayscale_convert(input_path, output_path, custom_pages=None, skip_images=F
         pages_to_convert = set()
 
         if custom_pages:
-            try:
-                for part in custom_pages.split(','):
-                    part = part.strip()
-                    if not part:
-                        continue
-                    if '-' in part:
-                        range_parts = part.split('-')
-                        if len(range_parts) == 2:
-                            for page_num in range(int(range_parts[0].strip()), int(range_parts[1].strip()) + 1):
-                                if 1 <= page_num <= total_pages:
-                                    pages_to_convert.add(page_num)
-                    else:
-                        page_num = int(part)
-                        if 1 <= page_num <= total_pages:
-                            pages_to_convert.add(page_num)
-            except Exception as parse_error:
-                raise Exception(f"Invalid custom pages format: {str(parse_error)}")
+            for part in custom_pages.split(','):
+                part = part.strip()
+                if not part: continue
+                if '-' in part:
+                    start, end = map(int, part.split('-'))
+                    pages_to_convert.update(range(start - 1, end))
+                else:
+                    pages_to_convert.add(int(part) - 1)
         else:
-            pages_to_convert = set(range(1, total_pages + 1))
-
-        if not pages_to_convert:
-            raise Exception("No valid pages specified")
+            pages_to_convert = set(range(total_pages))
 
         converted_count = 0
-        for page_num in range(total_pages):
-            page = doc[page_num]
-            actual_page_num = page_num + 1
-            should_convert = actual_page_num in pages_to_convert
-            zoom = 2.0
-            mat = fitz.Matrix(zoom, zoom)
-            if should_convert:
-                pix = page.get_pixmap(matrix=mat, colorspace=fitz.csGRAY) if not skip_images else page.get_pixmap(matrix=mat)
+        for i in range(total_pages):
+            if i in pages_to_convert:
+                # Convert using recolor() - preserves text, vectors, annotations
+                temp_doc = fitz.open()
+                temp_doc.insert_pdf(doc, from_page=i, to_page=i)
+                temp_doc.recolor(components=1)
+                output_doc.insert_pdf(temp_doc, from_page=0, to_page=0)
+                temp_doc.close()
                 converted_count += 1
             else:
-                pix = page.get_pixmap(matrix=mat)
-            rect = page.rect
-            new_page = output_doc.new_page(width=rect.width, height=rect.height)
-            new_page.insert_image(rect, pixmap=pix)
-            sys.stderr.write(f"PROGRESS:{int(((page_num + 1) / total_pages) * 100)}\n")
+                # Keep page exactly as-is
+                output_doc.insert_pdf(doc, from_page=i, to_page=i)
+
+            sys.stderr.write(f"PROGRESS:{int(((i + 1) / total_pages) * 100)}\n")
 
         output_doc.save(output_path, garbage=4, deflate=True)
         output_doc.close()
         doc.close()
 
         return {
-            "success": True, "output": f"Successfully converted {converted_count} pages to grayscale",
+            "success": True,
+            "output": f"Successfully converted {converted_count} pages to grayscale (text preserved)",
+            "error": "",
+            "pageCount": total_pages,
+            "convertedPages": converted_count,
+            "hasImages": True,
+            "hasVectorGraphics": True
+        }
+    except Exception as e:
+        return {"success": False, "output": "", "error": str(e), "pageCount": 0, "convertedPages": 0, "hasImages": False, "hasVectorGraphics": False}
+
+
+def _grayscale_convert_raster(input_path, output_path, custom_pages=None):
+    """Mode 2: Convert pages to images (fallback for complex PDFs)"""
+    try:
+        doc = fitz.open(input_path)
+        output_doc = fitz.open()
+        total_pages = len(doc)
+
+        pages_to_convert = set()
+        if custom_pages:
+            for part in custom_pages.split(','):
+                part = part.strip()
+                if not part: continue
+                if '-' in part:
+                    start, end = map(int, part.split('-'))
+                    pages_to_convert.update(range(start - 1, end))
+                else:
+                    pages_to_convert.add(int(part) - 1)
+        else:
+            pages_to_convert = set(range(total_pages))
+
+        converted_count = 0
+        for i in range(total_pages):
+            page = doc[i]
+            should_convert = i in pages_to_convert
+            
+            # Use 2.0 zoom for reasonable quality
+            zoom = 2.0
+            mat = fitz.Matrix(zoom, zoom)
+            
+            if should_convert:
+                pix = page.get_pixmap(matrix=mat, colorspace=fitz.csGRAY)
+                converted_count += 1
+            else:
+                pix = page.get_pixmap(matrix=mat)
+            
+            rect = page.rect
+            new_page = output_doc.new_page(width=rect.width, height=rect.height)
+            new_page.insert_image(rect, pixmap=pix)
+            
+            sys.stderr.write(f"PROGRESS:{int(((i + 1) / total_pages) * 100)}\n")
+
+        output_doc.save(output_path, garbage=4, deflate=True)
+        output_doc.close()
+        doc.close()
+
+        return {
+            "success": True, "output": f"Successfully converted {converted_count} pages to grayscale (rasterized)",
             "error": "", "pageCount": total_pages, "convertedPages": converted_count,
             "hasImages": True, "hasVectorGraphics": True
         }
@@ -682,19 +728,28 @@ def _grayscale_convert(input_path, output_path, custom_pages=None, skip_images=F
         return {"success": False, "output": "", "error": str(e), "pageCount": 0, "convertedPages": 0, "hasImages": False, "hasVectorGraphics": False}
 
 
+def _grayscale_convert(input_path, output_path, custom_pages=None, mode="vector"):
+    if mode == "raster":
+        return _grayscale_convert_raster(input_path, output_path, custom_pages)
+    else:  # default
+        return _grayscale_convert_vector(input_path, output_path, custom_pages)
+
+
 class pdf_to_grayscale:
     @staticmethod
     def main():
-        args = {'input_path': None, 'output_path': None, 'custom_pages': None, 'skip_images': False}
+        args = {'input_path': None, 'output_path': None, 'custom_pages': None, 'mode': 'vector'}
         i = 1
         while i < len(sys.argv):
             arg = sys.argv[i]
             if arg == '--custom-pages' and i + 1 < len(sys.argv):
                 args['custom_pages'] = sys.argv[i + 1].strip('"')
                 i += 2
-            elif arg == '--skip-images':
-                args['skip_images'] = True
-                i += 1
+            elif arg == '--mode' and i + 1 < len(sys.argv):
+                mode_value = sys.argv[i + 1].strip('"').lower()
+                if mode_value in ['vector', 'raster']:
+                    args['mode'] = mode_value
+                i += 2
             elif not arg.startswith('--'):
                 if args['input_path'] is None:
                     args['input_path'] = arg.strip('"')
@@ -705,10 +760,10 @@ class pdf_to_grayscale:
                 i += 1
 
         if args['input_path'] is None or args['output_path'] is None:
-            print(json.dumps({"success": False, "error": "Usage: grayscale input.pdf output.pdf [--custom-pages \"1,2,3-6\"] [--skip-images]"}))
+            print(json.dumps({"success": False, "error": "Usage: grayscale input.pdf output.pdf [--custom-pages \"1,2,3-6\"] [--mode vector|raster]"}))
             return 1
 
-        result = _grayscale_convert(args['input_path'], args['output_path'], args['custom_pages'], args['skip_images'])
+        result = _grayscale_convert(args['input_path'], args['output_path'], args['custom_pages'], args['mode'])
         print(json.dumps(result))
         return 0 if result["success"] else 1
 

@@ -806,9 +806,11 @@
     "custom-pages": "Custom Pages",
     "custom-pages-label": "Pages:",
     "custom-pages-help": "Enter individual pages or ranges separated by commas (e.g., 1, 2, 3-6, 8)",
-    "conversion-settings": "Conversion Settings",
-    "preserve-images": "Convert images to grayscale",
-    "preserve-images-help": "When unchecked, images will remain in original color",
+    "conversion-mode-title": "Conversion Mode",
+    "mode-vector": "Preserve Text (Recommended)",
+    "mode-vector-help": "Keep text selectable and searchable. Best for most PDFs.",
+    "mode-raster": "Convert to Images inside the PDF",
+    "mode-raster-help": "Use if you have issues with forms or some complex PDFs. Text won't be selectable.",
     "convert-btn": "Convert to Grayscale"
   },
   "pdfGrayscaleJS": {

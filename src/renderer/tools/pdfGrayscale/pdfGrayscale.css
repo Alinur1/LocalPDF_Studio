@@ -59,6 +59,15 @@
     --options-input-focus-border: #3498db;
     --help-text-color: #7f8c8d;
     --disabled-btn-bg: #34495e;
+    --radio-label-bg: #1c2833;
+    --radio-label-border: #34495e;
+    --radio-label-hover-bg: #243342;
+    --radio-label-hover-border: #3498db;
+    --radio-label-checked-bg: #1e3545;
+    --radio-label-checked-border: #3498db;
+    --radio-accent: #3498db;
+    --option-title-color: #ecf0f1;
+    --option-desc-color: #95a5a6;
 }
 
 body.light {
@@ -102,6 +111,15 @@ body.light {
     --options-input-focus-border: #D97757;
     --help-text-color: #888888;
     --disabled-btn-bg: #E2B09F;
+    --radio-label-bg: #FAF9F5;
+    --radio-label-border: #D1CEC5;
+    --radio-label-hover-bg: #E6E5E0;
+    --radio-label-hover-border: #D97757;
+    --radio-label-checked-bg: #FFE8E0;
+    --radio-label-checked-border: #D97757;
+    --radio-accent: #D97757;
+    --option-title-color: #1a1a1a;
+    --option-desc-color: #888888;
 }
 
 .tool-title {
@@ -313,7 +331,61 @@ body.light {
     font-size: 0.9rem;
 }
 
-/* Radio and Checkbox Styles */
+.quality-option {
+    margin-bottom: 0.8rem;
+}
+
+/* Only apply card styling to radios inside .quality-option */
+.quality-option .radio-label {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    padding: 1rem;
+    background: var(--radio-label-bg);
+    border-radius: 6px;
+    border: 2px solid var(--radio-label-border);
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.quality-option .radio-label:hover {
+    border-color: var(--radio-label-hover-border);
+    background: var(--radio-label-hover-bg);
+}
+
+.quality-option .radio-label input[type="radio"] {
+    margin-top: 0.2rem;
+    margin-right: 0.8rem;
+    accent-color: var(--radio-accent);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Checked state for card-style radios */
+.quality-option .radio-label:has(input[type="radio"]:checked) {
+    border-color: var(--radio-label-checked-border);
+    background: var(--radio-label-checked-bg);
+}
+
+.quality-option .option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex-grow: 1;
+}
+
+.quality-option .option-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--option-title-color);
+}
+
+.quality-option .option-desc {
+    font-size: 0.8rem;
+    color: var(--option-desc-color);
+    line-height: 1.4;
+}
+
+
 .page-range-options {
     display: flex;
     gap: 1.5rem;
@@ -329,24 +401,6 @@ body.light {
 .radio-label input[type="radio"] {
     margin-right: 0.5rem;
     accent-color: var(--radio-accent);
-    cursor: pointer;
-}
-
-.checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-    margin-right: 0.5rem;
-    accent-color: var(--checkbox-accent);
     cursor: pointer;
 }
 

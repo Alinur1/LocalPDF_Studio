@@ -71,6 +71,30 @@
                 <h2 data-i18n="pdfGrayscale.grayscale-options">Grayscale Options</h2>
 
                 <div class="option-group">
+                    <h3 data-i18n="pdfGrayscale.conversion-mode-title">Conversion Mode</h3>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="conversionMode" value="vector" checked>
+                            <div class="option-content">
+                                <span class="option-title" data-i18n="pdfGrayscale.mode-vector">Preserve Text (Recommended)</span>
+                                <span class="option-desc" data-i18n="pdfGrayscale.mode-vector-help">Keep text selectable and searchable. Best for most PDFs.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="quality-option">
+                        <label class="radio-label">
+                            <input type="radio" name="conversionMode" value="raster">
+                            <div class="option-content">
+                                <span class="option-title" data-i18n="pdfGrayscale.mode-raster">Convert to Images inside the PDF</span>
+                                <span class="option-desc" data-i18n="pdfGrayscale.mode-raster-help">Use if you have issues with forms or some complex PDFs. Text won't be selectable.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="option-group">
                     <h3 data-i18n="pdfGrayscale.page-range-title">Page Selection</h3>
                     <div class="page-range-options">
                         <label class="radio-label">
@@ -86,18 +110,6 @@
                         <label for="customPages" data-i18n="pdfGrayscale.custom-pages-label">Pages:</label>
                         <input type="text" id="customPages" class="options-input" placeholder="e.g., 1, 2, 3-6, 8, 9-11">
                         <small class="help-text" data-i18n="pdfGrayscale.custom-pages-help">Enter individual pages or ranges separated by commas (e.g., 1, 2, 3-6, 8)</small>
-                    </div>
-                </div>
-
-                <div class="option-group">
-                    <h3 data-i18n="pdfGrayscale.conversion-settings">Conversion Settings</h3>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="preserveImages" checked>
-                            <span data-i18n="pdfGrayscale.preserve-images">Convert images to grayscale</span>
-                        </label>
-                        <small class="help-text" data-i18n="pdfGrayscale.preserve-images-help">When unchecked, images
-                            will remain in original color</small>
                     </div>
                 </div>
             </div>

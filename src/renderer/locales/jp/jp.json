@@ -805,10 +805,12 @@
     "all-pages": "すべてのページ",
     "custom-pages": "カスタムページ",
     "custom-pages-label": "ページ：",
-    "custom-pages-help": "個別ページまたは範囲をコンマで区切って入力（例：1、2、3-6、8）",
-    "conversion-settings": "変換設定",
-    "preserve-images": "画像をグレースケールに変換",
-    "preserve-images-help": "チェックを外すと、画像は元の色のままになります",
+    "custom-pages-help": "個別ページまたは範囲をコンマで区切って入力 (例: 1、2、3-6、8)",
+    "conversion-mode-title": "変換モード",
+    "mode-vector": "テキストを保持（推奨）",
+    "mode-vector-help": "テキストを選択・検索可能にします。ほとんどの PDF に最適です。",
+    "mode-raster": "PDF 内の画像に変換",
+    "mode-raster-help": "フォームや複雑な PDF に問題がある場合に使用します。テキストは選択できなくなります。",
     "convert-btn": "グレースケールに変換"
   },
   "pdfGrayscaleJS": {
