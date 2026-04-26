@@ -53,7 +53,7 @@ export class ClockManager {
         }
 
         console.log('Starting clock...');
-        localpdfStudio.log("Starting clock, clockManager.js");
+        // localpdfStudio.log("Starting clock, clockManager.js");
 
         // Show clock container when starting
         if (this.clockContainer) {
