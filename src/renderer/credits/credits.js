@@ -141,6 +141,7 @@ function addButtonTooltips() {
         'pdfsharp-link': 'https://www.nuget.org/packages/PDFSharp',
         'imagesharp-link': 'https://www.nuget.org/packages/sixlabors.imagesharp/',
         'dotnet-link': 'https://dotnet.microsoft.com/en-us/',
+        'python-link': 'https://www.python.org/',
         'python-standalone-build-link': 'https://github.com/astral-sh/python-build-standalone',
         'pikepdf-link': 'https://github.com/pikepdf/pikepdf',
         'Pillow-link': 'https://github.com/python-pillow/Pillow',
