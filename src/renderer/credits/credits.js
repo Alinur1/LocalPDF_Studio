@@ -59,6 +59,15 @@ function setupCreditLinks() {
 
     document.getElementById('python-link')?.addEventListener('click', () => 
         openExternalLink('https://www.python.org/'));
+
+    document.getElementById('python-standalone-build-link')?.addEventListener('click', () => 
+        openExternalLink('https://github.com/astral-sh/python-build-standalone'));
+
+    document.getElementById('pikepdf-link')?.addEventListener('click', () => 
+        openExternalLink('https://github.com/pikepdf/pikepdf'));
+
+    document.getElementById('Pillow-link')?.addEventListener('click', () => 
+        openExternalLink('https://github.com/python-pillow/Pillow'));
     
     document.getElementById('cliwrap-link')?.addEventListener('click', () => 
         openExternalLink('https://www.nuget.org/packages/CLIWrap'));
@@ -132,7 +141,9 @@ function addButtonTooltips() {
         'pdfsharp-link': 'https://www.nuget.org/packages/PDFSharp',
         'imagesharp-link': 'https://www.nuget.org/packages/sixlabors.imagesharp/',
         'dotnet-link': 'https://dotnet.microsoft.com/en-us/',
-        'python-link': 'https://www.python.org/',
+        'python-standalone-build-link': 'https://github.com/astral-sh/python-build-standalone',
+        'pikepdf-link': 'https://github.com/pikepdf/pikepdf',
+        'Pillow-link': 'https://github.com/python-pillow/Pillow',
         'cliwrap-link': 'https://www.nuget.org/packages/CLIWrap',
         'bouncycastle-link': 'https://www.nuget.org/packages/Portable.BouncyCastle',
         'tesseract-link': 'https://tesseract.projectnaptha.com/',
