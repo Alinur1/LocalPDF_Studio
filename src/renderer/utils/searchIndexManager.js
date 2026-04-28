@@ -20,92 +20,47 @@
 
 export class SearchIndexManager {
     constructor() {
-        this.index = {
-            enabled: false,
-            files: []
-        };
-        this.loadIndex();
-    }
-
-    loadIndex() {
-        try {
-            const saved = localStorage.getItem('pdfSearchIndex');
-            if (saved) {
-                this.index = JSON.parse(saved);
-            }
-        } catch (error) {
-            console.error('Failed to load search index:', error);
-            this.index = { enabled: false, files: [] };
-        }
-    }
-
-    saveIndex() {
-        try {
-            localStorage.setItem('pdfSearchIndex', JSON.stringify(this.index));
-        } catch (error) {
-            localpdfStudio.log("Failed to save search index, searchIndexManager.js: " + error);
-            console.error('Failed to save search index:', error);
-        }
-    }
-
-    setEnabled(enabled) {
-        this.index.enabled = enabled;
-        this.saveIndex();
+        this._enabled = localStorage.getItem('searchEnabled') === 'true';
     }
 
     isEnabled() {
-        return this.index.enabled;
+        return this._enabled;
+    }
+
+    setEnabled(enabled) {
+        this._enabled = enabled;
+        localStorage.setItem('searchEnabled', enabled.toString());
     }
 
     addFile(filePath) {
-        if (!this.index.enabled) return;
+        if (!this._enabled) return;
+        if (!filePath) return;
 
-        const fileName = filePath.split(/[\\/]/).pop();
-        const existingIndex = this.index.files.findIndex(file => file.filePath === filePath);
-
-        if (existingIndex >= 0) {
-            this.index.files[existingIndex].lastOpened = new Date().toISOString();
-            this.index.files[existingIndex].openCount += 1;
-        } else {
-            this.index.files.push({
-                filePath,
-                fileName,
-                lastOpened: new Date().toISOString(),
-                openCount: 1
-            });
-        }
-        if (this.index.files.length > 100) {
-            this.index.files = this.index.files
-                .sort((a, b) => new Date(b.lastOpened) - new Date(a.lastOpened))
-                .slice(0, 100);
-        }
-
-        this.saveIndex();
+        window.searchAPI.addEntry(filePath).catch(err => {
+            localpdfStudio.log("addFile error, searchIndexManager.js: " + err);
+            console.error('searchIndexManager.addFile error:', err);
+        });
     }
 
-    search(query) {
-        if (!this.index.enabled || !query.trim()) return [];
+    async search(query) {
+        if (!this._enabled || !query || !query.trim()) return [];
 
-        const searchTerm = query.toLowerCase();
-        return this.index.files
-            .filter(file =>
-                file.fileName.toLowerCase().includes(searchTerm) ||
-                file.filePath.toLowerCase().includes(searchTerm)
-            )
-            .sort((a, b) => {
-                const aNameMatch = a.fileName.toLowerCase().includes(searchTerm);
-                const bNameMatch = b.fileName.toLowerCase().includes(searchTerm);
-
-                if (aNameMatch && !bNameMatch) return -1;
-                if (!aNameMatch && bNameMatch) return 1;
-
-                return new Date(b.lastOpened) - new Date(a.lastOpened);
-            });
+        try {
+            return await window.searchAPI.query(query.trim());
+        } catch (err) {
+            localpdfStudio.log("search error, searchIndexManager.js: " + err);
+            console.error('searchIndexManager.search error:', err);
+            return [];
+        }
     }
 
-    clearHistory() {
-        this.index.files = [];
-        this.saveIndex();
+    async clearHistory() {
+        try {
+            await window.searchAPI.clear();
+        } catch (err) {
+            localpdfStudio.log("clearHistory error, searchIndexManager.js: " + err);
+            console.error('searchIndexManager.clearHistory error:', err);
+        }
     }
 
     async validateFile(filePath) {

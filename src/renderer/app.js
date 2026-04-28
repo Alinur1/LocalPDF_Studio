@@ -116,7 +116,49 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     searchBar.setVisible(searchIndexManager.isEnabled());
 
-    restoreTabs(tabManager);
+    async function migrateLocalStorageToSQLite() {
+        try {
+            const oldTabsRaw = localStorage.getItem('pdfTabs');
+            const oldIndexRaw = localStorage.getItem('pdfSearchIndex');
+            if (oldTabsRaw) {
+                const oldState = JSON.parse(oldTabsRaw);
+                if (oldState.tabs && Array.isArray(oldState.tabs) && oldState.tabs.length > 0) {
+                    const tabs = (oldState.tabOrder || []).map((tabId, idx) => {
+                        const found = oldState.tabs.find(t => t.id === tabId);
+                        return found ? {
+                            tabId: found.id,
+                            filePath: found.filePath,
+                            title: found.title,
+                            tabOrder: idx
+                        } : null;
+                    }).filter(Boolean);
+
+                    await window.pdfTabsAPI.save(tabs, oldState.activeTabId || null);
+                    console.log(`Migration: moved ${tabs.length} tab(s) from localStorage to SQLite`);
+                }
+                localStorage.removeItem('pdfTabs');
+            }
+            if (oldIndexRaw) {
+                const oldIndex = JSON.parse(oldIndexRaw);
+                if (oldIndex.files && Array.isArray(oldIndex.files) && oldIndex.files.length > 0) {
+                    for (const file of oldIndex.files) {
+                        await window.searchAPI.addEntry(file.filePath);
+                    }
+                    console.log(`Migration: moved ${oldIndex.files.length} search entry/entries from localStorage to SQLite`);
+                }
+                if (typeof oldIndex.enabled === 'boolean') {
+                    localStorage.setItem('searchEnabled', oldIndex.enabled.toString());
+                }
+                localStorage.removeItem('pdfSearchIndex');
+            }
+        } catch (err) {
+            console.error('migrateLocalStorageToSQLite error:', err);
+            localpdfStudio.log('migrateLocalStorageToSQLite error, app.js: ' + err);
+        }
+    }
+
+    await migrateLocalStorageToSQLite();
+    await restoreTabs(tabManager);
     updateEmptyState();
 
     let isDialogOpen = false;
@@ -129,7 +171,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             createPdfTab(filePath, tabManager);
             searchIndexManager.addFile(filePath);
         }
-        saveTabs(tabManager);
+        await saveTabs(tabManager);
     }
 
     openPdfBtn.addEventListener('click', async () => {
@@ -148,7 +190,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                     createPdfTab(filePath, tabManager);
                     searchIndexManager.addFile(filePath);
                 }
-                saveTabs(tabManager);
+                await saveTabs(tabManager);
             }
         } catch (error) {
             console.error('Error opening PDFs:', error);
@@ -242,51 +284,62 @@ window.addEventListener('DOMContentLoaded', async () => {
         document.addEventListener('mouseup', handleMouseUp);
     });
 
-    function saveTabs(manager) {
-        const state = {
-            activeTabId: manager.activeTabId,
-            tabOrder: manager.getTabOrder(),
-            tabs: Array.from(manager.tabs.entries()).map(([id, tab]) => ({
-                id,
-                filePath: decodeURIComponent((tab.content.querySelector('iframe')?.src || tab.content.src || '').replace(/^.*file:\/\//, '')),
-                title: tab.tabButton.querySelector('.tab-title')?.textContent || 'PDF'
-            }))
-        };
-        localStorage.setItem('pdfTabs', JSON.stringify(state));
+    async function saveTabs(manager) {
+        try {
+            const tabOrder = manager.getTabOrder();
+
+            const tabs = Array.from(manager.tabs.entries()).map(([id, tab]) => {
+                const rawSrc = tab.content.querySelector('iframe')?.src || '';
+                let filePath = decodeURIComponent(
+                    rawSrc.replace(/^.*file:\/\//, '').replace(/\?.*$/, '')
+                );
+                if (/^\/[A-Za-z]:[\\/]/.test(filePath)) {
+                    filePath = filePath.slice(1);
+                }
+                return {
+                    tabId: id,
+                    filePath: filePath,
+                    title: tab.tabButton.querySelector('.tab-title')?.textContent || 'PDF',
+                    tabOrder: tabOrder.indexOf(id)   // preserve visual order
+                };
+            });
+
+            await window.pdfTabsAPI.save(tabs, manager.activeTabId);
+        } catch (err) {
+            console.error('saveTabs error:', err);
+            localpdfStudio.log('saveTabs error, app.js: ' + err);
+        }
     }
 
-    function restoreTabs(manager) {
+    async function restoreTabs(manager) {
         const restoreSetting = localStorage.getItem('restoreTabs') || 'restore';
-        const saved = localStorage.getItem('pdfTabs');
-        if (!saved) return;
+        if (restoreSetting !== 'restore') return;
 
         try {
-            const state = JSON.parse(saved);
-            if (restoreSetting === 'restore' && state.tabs && Array.isArray(state.tabs)) {
-                // Disable saving during restoration
-                const originalOnTabChange = manager.onTabChange;
-                const originalOnTabReorder = manager.onTabReorder;
-                manager.onTabChange = null;
-                manager.onTabReorder = null;
+            const { tabs, activeTabId } = await window.pdfTabsAPI.load();
+            if (!tabs || tabs.length === 0) return;
 
-                for (const tab of state.tabs) {
-                    createPdfTab(tab.filePath, manager, tab.id);
-                }
-                if (state.tabOrder && Array.isArray(state.tabOrder)) {
-                    manager.restoreTabOrder(state.tabOrder);
-                }
-                if (state.activeTabId) {
-                    manager.switchTab(state.activeTabId);
-                }
+            const originalOnTabChange = manager.onTabChange;
+            const originalOnTabReorder = manager.onTabReorder;
+            manager.onTabChange = null;
+            manager.onTabReorder = null;
 
-                // Re-enable saving and save the final state
-                manager.onTabChange = originalOnTabChange;
-                manager.onTabReorder = originalOnTabReorder;
-                saveTabs(manager); // Save the correct state once everything is restored
+            for (const tab of tabs) {
+                if (tab.file_path) {
+                    createPdfTab(tab.file_path, manager, tab.tab_id);
+                }
             }
+
+            if (activeTabId && manager.tabs.has(activeTabId)) {
+                manager.switchTab(activeTabId);
+            }
+
+            manager.onTabChange = originalOnTabChange;
+            manager.onTabReorder = originalOnTabReorder;
+            await saveTabs(manager);
         } catch (err) {
-            console.error('Failed to restore tabs:', err);
-            localpdfStudio.log("Failed to restore tabs, app.js: " + err);
+            console.error('restoreTabs error:', err);
+            localpdfStudio.log('restoreTabs error, app.js: ' + err);
         }
     }
 
@@ -445,9 +498,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         window.location.href = './donate/donate.html';
     });
 
-    tabManager.onTabChange = () => saveTabs(tabManager);
-    tabManager.onTabClose = () => saveTabs(tabManager);
-    tabManager.onTabReorder = () => saveTabs(tabManager);
+    tabManager.onTabChange = () => saveTabs(tabManager).catch(console.error);
+    tabManager.onTabClose = () => saveTabs(tabManager).catch(console.error);
+    tabManager.onTabReorder = () => saveTabs(tabManager).catch(console.error);
 
     // Auto-update UI
     const checkForUpdatesBtn = document.getElementById('check-for-updates-btn');

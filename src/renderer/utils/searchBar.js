@@ -19,6 +19,7 @@
 // src/renderer/utils/searchBar.js
 
 import i18n from "./i18n.js";
+import createPdfTab from "./createPdfTab.js";
 
 export class SearchBar {
     constructor(searchIndexManager, tabManager) {
@@ -59,21 +60,12 @@ export class SearchBar {
     }
 
     setupThemeObserver() {
-        // Observe theme changes on body
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.attributeName === 'class') {
-                    this.applyThemeStyles();
-                }
-            });
-        });
-
+        const observer = new MutationObserver(() => this.applyThemeStyles());
         observer.observe(document.body, { attributes: true });
     }
 
     applyThemeStyles() {
-        // This will automatically use CSS variables defined in main.css
-        // No additional styling needed here since we're using CSS variables
+        // Intentionally empty — relies on CSS variables defined in main.css
     }
 
     updatePlaceholder() {
@@ -117,29 +109,31 @@ export class SearchBar {
             this.hideResults();
             return;
         }
-
-        const results = this.searchIndexManager.search(query);
+        const results = await this.searchIndexManager.search(query);
         await this.displayResults(results);
     }
 
     async displayResults(results) {
         this.results.innerHTML = '';
 
-        if (results.length === 0) {
+        if (!results || results.length === 0) {
             this.results.innerHTML = `<div class="search-no-results">${i18n.t('search.noResults')}</div>`;
             this.showResults();
             return;
         }
 
-        for (const file of results.slice(0, 8)) {
-            // Show max 8 results
+        for (const file of results) {
             const resultItem = document.createElement('div');
             resultItem.className = 'search-result-item';
 
-            const isValid = await this.searchIndexManager.validateFile(file.filePath);
+            const filePath = file.file_path;
+            const fileName = file.file_name;
+            const openCount = file.open_count;
+            const lastOpened = file.last_opened;
+
+            const isValid = await this.searchIndexManager.validateFile(filePath);
             resultItem.classList.toggle('file-missing', !isValid);
 
-            // Use CSS variables for inline styles
             resultItem.style.cssText = `
                 border-bottom: 1px solid var(--border-color);
                 color: var(--text-primary);
@@ -147,19 +141,17 @@ export class SearchBar {
 
             resultItem.innerHTML = `
                 <div class="search-result-content">
-                    <div class="search-result-title" style="color: var(--text-primary);">${file.fileName}</div>
-                    <div class="search-result-path" style="color: var(--text-secondary);">${file.filePath}</div>
+                    <div class="search-result-title" style="color: var(--text-primary);">${fileName}</div>
+                    <div class="search-result-path" style="color: var(--text-secondary);">${filePath}</div>
                     <div class="search-result-meta" style="color: var(--text-tertiary);">
-                        ${i18n.t('search.opened')} ${file.openCount} ${i18n.t('search.times')} • ${new Date(file.lastOpened).toLocaleDateString()}
+                        ${i18n.t('search.opened')} ${openCount} ${i18n.t('search.times')} • ${new Date(lastOpened).toLocaleDateString()}
                     </div>
                 </div>
                 ${!isValid ? `<div class="file-missing-badge" style="background: #e74c3c; color: white;">${i18n.t('search.fileNotFound')}</div>` : ''}
             `;
 
             if (isValid) {
-                resultItem.addEventListener('click', () => {
-                    this.openFile(file.filePath);
-                });
+                resultItem.addEventListener('click', () => this.openFile(filePath));
 
                 resultItem.addEventListener('mouseenter', () => {
                     resultItem.style.backgroundColor = 'var(--accent-color)';
@@ -194,69 +186,15 @@ export class SearchBar {
     }
 
     openFile(filePath) {
-        this.createPdfTab(filePath, this.tabManager);
+        createPdfTab(filePath, this.tabManager);
+        this.searchIndexManager.addFile(filePath);
         this.input.value = '';
         this.hideResults();
         this.input.blur();
     }
 
-    createPdfTab(filePath, tabManager) {
-        const tabId = `pdf:${filePath}:${Date.now()}`;
-        const title = filePath.split(/[\\/]/).pop();
-
-        const iframe = document.createElement('iframe');
-        iframe.src = `../pdf/web/viewer.html?file=file://${filePath}`;
-        iframe.style.width = '90%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.margin = 'auto';
-        iframe.style.display = 'block';
-
-        iframe.addEventListener('load', () => {
-            const iframeWin = iframe.contentWindow;
-            const iframeDoc = iframeWin.document;
-
-            iframeWin.addEventListener('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
-                    e.preventDefault();
-                    const event = new KeyboardEvent('keydown', {
-                        key: 'w',
-                        ctrlKey: e.ctrlKey,
-                        metaKey: e.metaKey,
-                        bubbles: true
-                    });
-                    window.dispatchEvent(event);
-                }
-            });
-
-            iframeDoc.addEventListener('click', (e) => {
-                const link = e.target.closest('a[href]');
-                if (link && /^https?:/i.test(link.href)) {
-                    e.preventDefault();
-                    iframeWin.parent.postMessage(
-                        { type: 'open-external', url: link.href },
-                        '*'
-                    );
-                }
-            });
-        });
-
-        tabManager.openTab({
-            id: tabId,
-            type: 'pdf',
-            title,
-            content: iframe,
-            closable: true,
-            onClose: () => {
-                iframe.src = 'about:blank';
-                iframe.remove();
-            }
-        });
-    }
-
     showResults() {
         this.results.classList.remove('hidden');
-        // Ensure proper styling when showing results
         this.results.style.cssText = `
             position: absolute;
             top: 100%;
@@ -279,20 +217,16 @@ export class SearchBar {
 
     setVisible(visible) {
         this.container.style.display = visible ? 'block' : 'none';
-
         if (!visible) {
             this.input.value = '';
             this.hideResults();
         }
     }
 
-    // Called when language changes to update dynamic text
     updateLanguage() {
         this.updatePlaceholder();
-        // Re-display results with updated translations if search is active
         if (this.isOpen && this.input.value.trim()) {
-            const results = this.searchIndexManager.search(this.input.value);
-            this.displayResults(results);
+            this.handleSearch(this.input.value);
         }
     }
 }

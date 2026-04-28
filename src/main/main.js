@@ -30,6 +30,7 @@ const { PDFDocument, PDFName, PDFRawStream } = require('pdf-lib');
 const Tesseract = require('tesseract.js');
 const gotTheLock = app.requestSingleInstanceLock();
 const logger = require('./services/loggerService.js');
+const pdfTabsService = require('./services/pdfTabsService.js');
 
 let apiProcess = null;
 let apiPort = null;
@@ -1357,4 +1358,39 @@ ipcMain.handle('export-log-file', async () => {
 
 ipcMain.handle('clear-logs', async () => {
     return logger.clearAll();
+});
+
+// Save the full tab state sent from the renderer
+ipcMain.handle('pdf-tabs-save', (event, { tabs, activeTabId }) => {
+    return pdfTabsService.saveTabs(tabs, activeTabId);
+});
+
+// Return saved tabs + active tab id for session restore
+ipcMain.handle('pdf-tabs-load', () => {
+    return pdfTabsService.loadTabs();
+});
+
+// Wipe all saved tabs (called when user disables "Restore Session")
+ipcMain.handle('pdf-tabs-clear', () => {
+    return pdfTabsService.clearTabs();
+});
+
+// Record that a file was opened (insert or increment open_count)
+ipcMain.handle('search-add-entry', (event, filePath) => {
+    return pdfTabsService.addSearchEntry(filePath);
+});
+
+// Query the index — returns rows sorted by name-match then recency
+ipcMain.handle('search-query', (event, query) => {
+    return pdfTabsService.searchFiles(query);
+});
+
+// Return every indexed entry (used during migration)
+ipcMain.handle('search-get-all', () => {
+    return pdfTabsService.getAllSearchEntries();
+});
+
+// Wipe the search index
+ipcMain.handle('search-clear', () => {
+    return pdfTabsService.clearSearchIndex();
 });

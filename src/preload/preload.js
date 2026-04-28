@@ -76,3 +76,16 @@ contextBridge.exposeInMainWorld('loggerAPI', {
     export: () => ipcRenderer.invoke('export-log-file'),
     clearLogs: () => ipcRenderer.invoke('clear-logs')
 });
+
+contextBridge.exposeInMainWorld('pdfTabsAPI', {
+    save: (tabs, activeTabId) => ipcRenderer.invoke('pdf-tabs-save', { tabs, activeTabId }),
+    load: () => ipcRenderer.invoke('pdf-tabs-load'),
+    clear: () => ipcRenderer.invoke('pdf-tabs-clear'),
+});
+
+contextBridge.exposeInMainWorld('searchAPI', {
+    addEntry: (filePath) => ipcRenderer.invoke('search-add-entry', filePath),
+    query: (query) => ipcRenderer.invoke('search-query', query),
+    getAll: () => ipcRenderer.invoke('search-get-all'),
+    clear: () => ipcRenderer.invoke('search-clear'),
+});

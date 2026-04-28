@@ -33,6 +33,14 @@ function initDB() {
     db.prepare(queries.INIT_LOG_TABLE).run();
     db.prepare(queries.PRUNE_LOGS).run();
 
+    // PDF Tabs + shared settings row
+    db.prepare(queries.INIT_PDF_TABS_TABLE).run();
+    db.prepare(queries.INIT_APP_SETTINGS_TABLE).run();
+
+    // Search index
+    db.prepare(queries.INIT_PDF_SEARCH_TABLE).run();
+    db.prepare(queries.PRUNE_SEARCH_INDEX).run();
+
     return db;
 }
 
@@ -42,9 +50,9 @@ function getDB() {
         if (!db) return initDB();
         return db;
     }
-    catch
+    catch (err)
     {
-        console.log("CRITICAL: Failed to initialize the database.");
+        console.error('CRITICAL: Failed to initialize the database.', err);
         return null;
     }
 }
