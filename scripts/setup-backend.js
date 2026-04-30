@@ -28,23 +28,29 @@ async function setup() {
     const engineDir = path.join(pyBackendDir, 'Engine');
     const vendorDir = path.join(pyBackendDir, 'vendor');
     const requirements = path.join(projectRoot, 'PyBackend', 'requirements.txt');
-    
+
     const urls = {
         win32: "https://github.com/astral-sh/python-build-standalone/releases/download/20260414/cpython-3.12.13+20260414-x86_64-pc-windows-msvc-install_only.tar.gz",
         linux: "https://github.com/astral-sh/python-build-standalone/releases/download/20260414/cpython-3.12.13+20260414-x86_64-unknown-linux-gnu-install_only.tar.gz",
         darwin: "https://github.com/astral-sh/python-build-standalone/releases/download/20260414/cpython-3.12.13+20260414-x86_64-apple-darwin-install_only.tar.gz"
     };
 
-    const pythonExe = platform === 'win32' ? 
-        path.join(engineDir, 'python.exe') : 
+    const pythonExe = platform === 'win32' ?
+        path.join(engineDir, 'python.exe') :
         path.join(engineDir, 'bin', 'python3');
 
     if (!fs.existsSync(pythonExe)) {
         console.log("Provisioning Python Engine...");
         try {
             if (!fs.existsSync(engineDir)) fs.mkdirSync(engineDir, { recursive: true });
-            execSync(`curl -L ${urls[platform]} | tar -xz -C "${engineDir}" --strip-components=1`);
-            
+
+            // Apply Windows-specific pipe fix for Windows 10/11 compatibility
+            const tarCmd = platform === 'win32'
+                ? `curl -L ${urls[platform]} | tar -xzf - -C "${engineDir}" --strip-components=1`
+                : `curl -L ${urls[platform]} | tar -xz -C "${engineDir}" --strip-components=1`;
+
+            execSync(tarCmd);
+
             if (platform !== 'win32') {
                 fs.chmodSync(pythonExe, '755');
                 const binDir = path.join(engineDir, 'bin');
@@ -52,7 +58,7 @@ async function setup() {
                     fs.readdirSync(binDir).forEach(bin => fs.chmodSync(path.join(binDir, bin), '755'));
                 }
             }
-            
+
             console.log("Installing Python packages...");
             execSync(`"${pythonExe}" -m pip install -r "${requirements}" --target "${vendorDir}"`);
         } catch (err) {
