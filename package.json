@@ -17,7 +17,6 @@
     "url": "https://github.com/Alinur1/LocalPDF_Studio/issues"
   },
   "scripts": {
-    "postinstall": "electron-rebuild",
     "prestart": "node scripts/setup-backend.js",
     "start": "electron . --no-sandbox",
     "prepack": "node scripts/setup-backend.js",
@@ -29,13 +28,12 @@
     "build:mac": "node scripts/setup-backend.js && electron-builder --mac --x64"
   },
   "devDependencies": {
-    "@electron/rebuild": "^4.0.4",
     "electron": "^40.8.0",
     "electron-builder": "^26.8.1"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
-    "better-sqlite3": "^12.9.0",
+    "@seald-io/nedb": "^4.1.2",
     "electron-updater": "^6.8.3",
     "i18next": "^25.8.14",
     "i18next-browser-languagedetector": "^8.2.1",
@@ -48,8 +46,6 @@
     "appId": "com.localpdfstudio.app",
     "productName": "LocalPDF Studio",
     "artifactName": "LocalPDF-Studio-${os}.${ext}",
-    "npmRebuild": true,
-    "nodeGypRebuild": false,
     "directories": {
       "output": "build",
       "buildResources": "assets/icons"

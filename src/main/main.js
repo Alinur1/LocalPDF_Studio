@@ -1348,7 +1348,7 @@ ipcMain.handle('export-log-file', async () => {
     });
 
     if (filePath) {
-        const rows = logger.fetchAll();
+        const rows = await logger.fetchAll();
         const content = rows.map(r => `[${r.timestamp}] ${r.message}`).join('\n');
         fs.writeFileSync(filePath, content);
         return true;
@@ -1357,7 +1357,7 @@ ipcMain.handle('export-log-file', async () => {
 });
 
 ipcMain.handle('clear-logs', async () => {
-    return logger.clearAll();
+    return await logger.clearAll();
 });
 
 // Save the full tab state sent from the renderer

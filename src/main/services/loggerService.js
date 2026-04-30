@@ -18,40 +18,80 @@
 
 // src/main/services/loggerService.js
 
-const { getDB } = require('../db/sqliteManager');
-const queries = require('../db/sqlQueries');
+const Datastore = require('@seald-io/nedb');
+const path = require('path');
+const { app } = require('electron');
+
+const logsDB = new Datastore({
+    filename: path.join(app.getPath('userData'), 'localpdf-logs.db'),
+    autoload: true
+});
+
+// Index timestamp for fast pruning and chronological fetching
+logsDB.ensureIndex({ fieldName: 'timestamp' });
+logsDB.ensureIndex({ fieldName: 'timestamp_iso' });
+
+// Prune logs older than 7 days on startup.
+(async () => {
+    try {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 7);
+        await logsDB.removeAsync(
+            { timestamp_iso: { $lt: cutoff.toISOString() } },
+            { multi: true }
+        );
+    } catch (err) {
+        console.error('loggerService: startup prune failed:', err);
+    }
+})();
+
+// Format the Date like => 29-April-2026 04:52PM
+function formatTimestamp(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    const hoursStr = String(hours).padStart(2, '0');
+
+    return `${day}-${month}-${year} ${hoursStr}:${minutes}${ampm}`;
+}
 
 const loggerService = {
-    insert: (message) => {
-        const db = getDB();
-        if (!db) return;
+    insert: async (message) => {
         try {
-            db.prepare(queries.INSERT_LOG).run(message);
+            const now = new Date();
+            await logsDB.insertAsync({
+                timestamp: formatTimestamp(now),
+                timestamp_iso: now.toISOString(),
+                message: String(message)
+            });
             console.log(`[Log] ${message}`);
         } catch (err) {
-            console.error('Logging Service Error:', err);
+            console.error('loggerService.insert error:', err);
         }
     },
 
-    fetchAll: () => {
-        const db = getDB();
-        if (!db) return [];
+    // Return all log entries sorted oldest-first.
+    fetchAll: async () => {
         try {
-            return db.prepare(queries.GET_ALL_LOGS).all();
+            return await logsDB.findAsync({}).sort({ timestamp: 1 });
         } catch (err) {
-            console.error('Failed to fetch logs:', err);
+            console.error('loggerService.fetchAll error:', err);
             return [];
         }
     },
 
-    clearAll: () => {
-        const db = getDB();
-        if (!db) return false;
+    // Delete all log entries.
+    clearAll: async () => {
         try {
-            db.prepare(queries.CLEAR_LOGS).run();
+            await logsDB.removeAsync({}, { multi: true });
             return true;
         } catch (err) {
-            console.error('Failed to clear logs:', err);
+            console.error('loggerService.clearAll error:', err);
             return false;
         }
     }
@@ -63,13 +103,10 @@ module.exports = loggerService;
 /*
 Usage example:
 
-In main.js:
-const logger = require('./services/loggerService.js');
-logger.insert("App started at main.js with API Port: " + apiPort);
+In main.js (async context):
+    const logger = require('./services/loggerService.js');
+    logger.insert("App started, API port: " + apiPort);
 
-=====================================================================================
-=====================================================================================
-
-In other js files:
-localpdfStudio.log("Error occurred at createPdfTab.js during PDF merging: " + err);
+In renderer / other JS files (via the IPC bridge):
+    localpdfStudio.log("Error occurred at createPdfTab.js: " + err);
 */

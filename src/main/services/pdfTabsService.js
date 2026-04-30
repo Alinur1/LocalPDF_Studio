@@ -1,122 +1,189 @@
+/**
+ * LocalPDF Studio - Offline PDF Toolkit
+ * ======================================
+ * 
+ * @author      Md. Alinur Hossain <alinur1160@gmail.com>
+ * @license     AGPL 3.0 (GNU Affero General Public License version 3)
+ * @website     https://alinur1.github.io/LocalPDF_Studio_Website/
+ * @repository  https://github.com/Alinur1/LocalPDF_Studio
+ * 
+ * Copyright (c) 2025 Md. Alinur Hossain. All rights reserved.
+ * 
+ * Architecture:
+ * - Frontend: Electron + HTML/CSS/JS
+ * - Backend: ASP.NET Core Web API, Python
+ * - PDF Engine: PdfSharp + Mozilla PDF.js
+**/
+
+
 // src/main/services/pdfTabsService.js
 
-const { getDB } = require('../db/sqliteManager');
-const queries = require('../db/sqlQueries');
+const fs = require('fs');
+const path = require('path');
+const { app } = require('electron');
 const logger = require('./loggerService.js');
+const userData = app.getPath('userData');
+const TABS_FILE = path.join(userData, 'pdf-tabs.json');
+const SEARCH_FILE = path.join(userData, 'pdf-search-index.json');
+const MAX_SEARCH_ENTRIES = 500;
+
+function readJSON(filePath, defaultValue) {
+    try {
+        if (!fs.existsSync(filePath)) return defaultValue;
+        const raw = fs.readFileSync(filePath, 'utf-8');
+        return JSON.parse(raw);
+    } catch (err) {
+        console.error(`pdfTabsService: failed to read ${filePath}:`, err);
+        logger.insert(`pdfTabsService: failed to read ${path.basename(filePath)}: ${err}`);
+        return defaultValue;
+    }
+}
+
+function writeJSON(filePath, data) {
+    const tmpPath = filePath + '.tmp';
+    try {
+        const json = JSON.stringify(data, null, 2);
+        fs.writeFileSync(tmpPath, json, 'utf-8');
+        fs.renameSync(tmpPath, filePath);
+    } catch (err) {
+        console.error(`pdfTabsService: failed to write ${filePath}:`, err);
+        logger.insert(`pdfTabsService: failed to write ${path.basename(filePath)}: ${err}`);
+        // Clean up the orphaned temp file if it was created
+        try {
+            if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+        } catch (_) { }
+        throw err;
+    }
+}
 
 const pdfTabsService = {
-
-    // Atomically replace every saved tab with the current renderer state.
     saveTabs(tabs, activeTabId) {
-        const db = getDB();
-        if (!db) return false;
-
         try {
-            const replaceAll = db.transaction(() => {
-                db.prepare(queries.DELETE_ALL_TABS).run();
-
-                const upsert = db.prepare(queries.UPSERT_PDF_TAB);
-                tabs.forEach(({ tabId, filePath, title, tabOrder }) => {
-                    upsert.run(tabId, filePath, title, tabOrder);
-                });
-
-                db.prepare(queries.UPSERT_APP_SETTING).run('active_tab_id', activeTabId || null);
-            });
-
-            replaceAll();
+            const state = {
+                activeTabId: activeTabId || null,
+                tabs: (tabs || []).map(({ tabId, filePath, title, tabOrder }) => ({
+                    tab_id: tabId,
+                    file_path: filePath,
+                    title: title,
+                    tab_order: tabOrder
+                }))
+            };
+            writeJSON(TABS_FILE, state);
             return true;
         } catch (err) {
-            logger.insert("saveTabs error, pdfTabsService: " + err);
             console.error('pdfTabsService.saveTabs error:', err);
+            logger.insert('pdfTabsService.saveTabs error: ' + err);
             return false;
         }
     },
 
-    // Returns { tabs: [...], activeTabId } for session restore.
     loadTabs() {
-        const db = getDB();
-        if (!db) return { tabs: [], activeTabId: null };
-
         try {
-            const tabs = db.prepare(queries.GET_ALL_TABS).all();
-            const row = db.prepare(queries.GET_APP_SETTING).get('active_tab_id');
+            const state = readJSON(TABS_FILE, { tabs: [], activeTabId: null });
+            const tabs = (state.tabs || []).sort((a, b) => a.tab_order - b.tab_order);
             return {
                 tabs: tabs,
-                activeTabId: row ? row.value : null
+                activeTabId: state.activeTabId || null
             };
         } catch (err) {
-            logger.insert("loadTabs error, pdfTabsService: " + err);
             console.error('pdfTabsService.loadTabs error:', err);
+            logger.insert('pdfTabsService.loadTabs error: ' + err);
             return { tabs: [], activeTabId: null };
         }
     },
 
     clearTabs() {
-        const db = getDB();
-        if (!db) return false;
         try {
-            db.prepare(queries.DELETE_ALL_TABS).run();
+            writeJSON(TABS_FILE, { tabs: [], activeTabId: null });
             return true;
         } catch (err) {
-            logger.insert("clearTabs error, pdfTabsService: " + err);
             console.error('pdfTabsService.clearTabs error:', err);
+            logger.insert('pdfTabsService.clearTabs error: ' + err);
             return false;
         }
     },
 
-    // Add or update an entry in the search index.
     addSearchEntry(filePath) {
-        const db = getDB();
-        if (!db) return false;
-
         try {
             const fileName = filePath.split(/[\\/]/).pop();
             const lastOpened = new Date().toISOString();
-            db.prepare(queries.UPSERT_SEARCH_ENTRY).run(filePath, fileName, lastOpened);
+
+            let entries = readJSON(SEARCH_FILE, []);
+
+            const existingIdx = entries.findIndex(e => e.file_path === filePath);
+
+            if (existingIdx >= 0) {
+                entries[existingIdx].last_opened = lastOpened;
+                entries[existingIdx].open_count += 1;
+            } else {
+                entries.push({
+                    file_path: filePath,
+                    file_name: fileName,
+                    last_opened: lastOpened,
+                    open_count: 1
+                });
+            }
+
+            // Trim to MAX_SEARCH_ENTRIES most recently opened
+            if (entries.length > MAX_SEARCH_ENTRIES) {
+                entries.sort((a, b) => b.last_opened.localeCompare(a.last_opened));
+                entries = entries.slice(0, MAX_SEARCH_ENTRIES);
+            }
+
+            writeJSON(SEARCH_FILE, entries);
             return true;
         } catch (err) {
-            logger.insert("addSearchEntry error, pdfTabsService: " + err);
             console.error('pdfTabsService.addSearchEntry error:', err);
+            logger.insert('pdfTabsService.addSearchEntry error: ' + err);
             return false;
         }
     },
 
-    // Full-text search across file_name and file_path.
     searchFiles(query) {
-        const db = getDB();
-        if (!db) return [];
-
         try {
-            const like = `%${query}%`;
-            return db.prepare(queries.SEARCH_FILES).all(like, like, like);
+            const entries = readJSON(SEARCH_FILE, []);
+            const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(escaped, 'i');
+
+            const matched = entries.filter(e =>
+                regex.test(e.file_name) || regex.test(e.file_path)
+            );
+
+            // Filename matches bubble to the top, then sort by recency within each group
+            matched.sort((a, b) => {
+                const aName = regex.test(a.file_name);
+                const bName = regex.test(b.file_name);
+                if (aName && !bName) return -1;
+                if (!aName && bName) return 1;
+                return b.last_opened.localeCompare(a.last_opened);
+            });
+
+            return matched.slice(0, 8);
         } catch (err) {
-            logger.insert("searchFiles error, pdfTabsService: " + err);
             console.error('pdfTabsService.searchFiles error:', err);
+            logger.insert('pdfTabsService.searchFiles error: ' + err);
             return [];
         }
     },
 
     getAllSearchEntries() {
-        const db = getDB();
-        if (!db) return [];
         try {
-            return db.prepare(queries.GET_ALL_SEARCH_ENTRIES).all();
+            const entries = readJSON(SEARCH_FILE, []);
+            return entries.sort((a, b) => b.last_opened.localeCompare(a.last_opened));
         } catch (err) {
-            logger.insert("getAllSearchEntries error, pdfTabsService: " + err);
             console.error('pdfTabsService.getAllSearchEntries error:', err);
+            logger.insert('pdfTabsService.getAllSearchEntries error: ' + err);
             return [];
         }
     },
 
     clearSearchIndex() {
-        const db = getDB();
-        if (!db) return false;
         try {
-            db.prepare(queries.CLEAR_SEARCH_INDEX).run();
+            writeJSON(SEARCH_FILE, []);
             return true;
         } catch (err) {
-            logger.insert("clearSearchIndex error, pdfTabsService: " + err);
             console.error('pdfTabsService.clearSearchIndex error:', err);
+            logger.insert('pdfTabsService.clearSearchIndex error: ' + err);
             return false;
         }
     }
