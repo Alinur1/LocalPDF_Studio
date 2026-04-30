@@ -92,6 +92,8 @@ function setupCreditLinks() {
 
     document.getElementById('wallpaper-link')?.addEventListener('click', () => 
         openExternalLink('https://github.com/xCaptaiN09/Aur-ora-Wallz'));
+    document.getElementById('nedb-link')?.addEventListener('click', () => 
+        openExternalLink('https://www.npmjs.com/package/@seald-io/nedb'));
 }
 
 async function fixImagePaths() {
@@ -153,6 +155,7 @@ function addButtonTooltips() {
         'pdf-lib-link': 'https://www.npmjs.com/package/pdf-lib',
         'i18next-link': 'https://www.npmjs.com/package/i18next',
         'wallpaper-link': 'https://github.com/xCaptaiN09/Aur-ora-Wallz',
+        'nedb-link': 'https://www.npmjs.com/package/@seald-io/nedb',
     };
 
     Object.entries(buttonUrls).forEach(([id, url]) => {
