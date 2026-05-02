@@ -19389,7 +19389,7 @@ window.addEventListener('keydown', function (e) {
   }
 }, true);
 
-// LocalPDF Studio — handle save, print, and find commands from parent
+// LocalPDF Studio — handle save, print, find, and zoom reset commands from parent
 window.addEventListener('message', function (event) {
   if (event.data?.type === 'pdf-save') {
     if (typeof PDFViewerApplication !== 'undefined') {
@@ -19404,6 +19404,11 @@ window.addEventListener('message', function (event) {
   if (event.data?.type === 'pdf-find') {
     if (typeof PDFViewerApplication !== 'undefined' && PDFViewerApplication.findBar) {
       PDFViewerApplication.findBar.open();
+    }
+  }
+  if (event.data?.type === 'pdf-zoom-reset') {
+    if (typeof PDFViewerApplication !== 'undefined' && PDFViewerApplication.pdfViewer) {
+      PDFViewerApplication.pdfViewer.currentScaleValue = '1';
     }
   }
 });
