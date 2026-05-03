@@ -182,36 +182,26 @@ export default function createPdfTab(filePath, tabManager, existingId = null) {
         // Apply initial theme override
         overrideMatchMedia(iframe.dataset.appTheme);
 
-        // Forward Ctrl+W to parent
-        iframeWin.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
-                e.preventDefault();
-                const event = new KeyboardEvent('keydown', {
-                    key: 'w',
-                    ctrlKey: e.ctrlKey,
-                    metaKey: e.metaKey,
-                    bubbles: true
-                });
-                window.dispatchEvent(event);
-            }
-        });
-
         iframeWin.addEventListener('keydown', (e) => {
             const isMac = navigator.platform.toUpperCase().includes('MAC');
             const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
 
+            // Forward Ctrl+W
+            if (ctrlOrCmd && e.key.toLowerCase() === 'w') {
+                e.preventDefault();
+                window.dispatchEvent(new KeyboardEvent('keydown', {
+                    key: 'w', ctrlKey: e.ctrlKey, metaKey: e.metaKey, bubbles: true
+                }));
+            }
+
+            // Forward Ctrl/Cmd+Tab and Ctrl/Cmd+Shift+Tab
             if (ctrlOrCmd && e.key === 'Tab') {
                 e.preventDefault();
                 e.stopImmediatePropagation();
-
-                const event = new KeyboardEvent('keydown', {
-                    key: 'Tab',
-                    ctrlKey: e.ctrlKey,
-                    metaKey: e.metaKey,
-                    shiftKey: e.shiftKey,
-                    bubbles: true
-                });
-                window.dispatchEvent(event);
+                window.dispatchEvent(new KeyboardEvent('keydown', {
+                    key: 'Tab', ctrlKey: e.ctrlKey, metaKey: e.metaKey,
+                    shiftKey: e.shiftKey, bubbles: true
+                }));
             }
         });
 
