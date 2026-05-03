@@ -327,9 +327,21 @@ window.addEventListener('DOMContentLoaded', async () => {
                 window.open(event.data.url, '_blank');
             }
         }
+
+        // Receive keystrokes from PDF.js
+        // Close active tabs = CTRL/CMD+W
         if (event.data?.type === 'close-active-tab') {
             if (tabManager.activeTabId) {
                 tabManager.closeTab(tabManager.activeTabId);
+            }
+        }
+
+        // Switch between tabs = Ctrl/Cmd+Tab & Ctrl/Cmd+Shift+Tab
+        if (event.data?.type === 'switch-tab') {
+            if (event.data.direction === 'next') {
+                tabManager.switchToNextTab();
+            } else if (event.data.direction === 'previous') {
+                tabManager.switchToPreviousTab();
             }
         }
     });

@@ -137,13 +137,29 @@ annotationEditorMode: 0 - (keep at 0 for disabled by default)
 
 Add this at the very end of viewer.mjs just right before the export:
 
-// LocalPDF Studio — forward Ctrl+W to parent tab manager
+// LocalPDF Studio — forward Ctrl+W and Ctrl+Tab to parent tab manager
 window.addEventListener('keydown', function (e) {
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
+  const isMac = navigator.platform.toUpperCase().includes('MAC');
+  const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+  // Forward Ctrl+W to close tab
+  if (ctrlOrCmd && e.key.toLowerCase() === 'w') {
     e.preventDefault();
     e.stopImmediatePropagation();
     if (window.parent && window.parent !== window) {
       window.parent.postMessage({ type: 'close-active-tab' }, '*');
+    }
+  }
+
+  // Forward Ctrl/Cmd+Tab and Ctrl/Cmd+Shift+Tab for tab switching
+  if (ctrlOrCmd && e.key === 'Tab') {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'switch-tab',
+        direction: e.shiftKey ? 'previous' : 'next'
+      }, '*');
     }
   }
 }, true);

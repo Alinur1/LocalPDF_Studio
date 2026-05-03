@@ -182,7 +182,7 @@ export default function createPdfTab(filePath, tabManager, existingId = null) {
         // Apply initial theme override
         overrideMatchMedia(iframe.dataset.appTheme);
 
-        // (1) Forward Ctrl+W to parent
+        // Forward Ctrl+W to parent
         iframeWin.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
                 e.preventDefault();
@@ -196,7 +196,26 @@ export default function createPdfTab(filePath, tabManager, existingId = null) {
             }
         });
 
-        // (2) External links → post to parent
+        iframeWin.addEventListener('keydown', (e) => {
+            const isMac = navigator.platform.toUpperCase().includes('MAC');
+            const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+            if (ctrlOrCmd && e.key === 'Tab') {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                const event = new KeyboardEvent('keydown', {
+                    key: 'Tab',
+                    ctrlKey: e.ctrlKey,
+                    metaKey: e.metaKey,
+                    shiftKey: e.shiftKey,
+                    bubbles: true
+                });
+                window.dispatchEvent(event);
+            }
+        });
+
+        // External links → post to parent
         iframeDoc.addEventListener('click', (e) => {
             const link = e.target.closest('a[href]');
             if (link && /^https?:/i.test(link.href)) {
@@ -208,7 +227,7 @@ export default function createPdfTab(filePath, tabManager, existingId = null) {
             }
         });
 
-        // (3) Listen for theme changes from parent app and apply immediately
+        // Listen for theme changes from parent app and apply immediately
         const handleThemeChange = (event) => {
             if (event.data?.type === 'theme-change') {
                 iframe.dataset.appTheme = event.data.theme;

@@ -32,15 +32,28 @@ export default class TabManager {
         // Enable tab reordering
         this.enableTabReordering();
 
-        // Close active tab with Ctrl/Cmd+W
         document.addEventListener('keydown', (e) => {
             const isMac = navigator.platform.toUpperCase().includes('MAC');
             const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+            // Close active tab with Ctrl/Cmd+W
             if (ctrlOrCmd && e.key.toLowerCase() === 'w') {
                 e.preventDefault();
                 if (this.activeTabId) {
                     this.closeTab(this.activeTabId);
                 }
+            }
+
+            // Ctrl/Cmd+Tab = Next tab
+            if (ctrlOrCmd && e.key === 'Tab' && !e.shiftKey) {
+                e.preventDefault();
+                this.switchToNextTab();
+            }
+
+            // Ctrl/Cmd+Shift+Tab = Previous tab
+            if (ctrlOrCmd && e.key === 'Tab' && e.shiftKey) {
+                e.preventDefault();
+                this.switchToPreviousTab();
             }
         });
     }
@@ -269,5 +282,31 @@ export default class TabManager {
             }
         });
         this.updateTabOrder();
+    }
+
+    // Switch to the next tab
+    switchToNextTab() {
+        if (this.tabs.size <= 1) return;
+
+        const tabIds = [...this.tabBar.querySelectorAll('.tab')].map(tab => tab.dataset.tabId);
+        const currentIndex = tabIds.indexOf(this.activeTabId);
+
+        if (currentIndex === -1) return;
+
+        const nextIndex = (currentIndex + 1) % tabIds.length;
+        this.switchTab(tabIds[nextIndex]);
+    }
+
+    // Switch to the previous tab
+    switchToPreviousTab() {
+        if (this.tabs.size <= 1) return;
+
+        const tabIds = [...this.tabBar.querySelectorAll('.tab')].map(tab => tab.dataset.tabId);
+        const currentIndex = tabIds.indexOf(this.activeTabId);
+
+        if (currentIndex === -1) return;
+
+        const prevIndex = (currentIndex - 1 + tabIds.length) % tabIds.length;
+        this.switchTab(tabIds[prevIndex]);
     }
 }
