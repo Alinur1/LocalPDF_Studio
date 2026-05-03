@@ -502,7 +502,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         const isMac = navigator.platform.toUpperCase().includes('MAC');
         const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
 
-        if (ctrlOrCmd && (e.key.toLowerCase() === 's' || e.key.toLowerCase() === 'p' || e.key.toLowerCase() === 'f' || e.key === '0')) {
+        if (ctrlOrCmd && (e.key.toLowerCase() === 's' || e.key.toLowerCase() === 'p' || e.key.toLowerCase() === 'f' || e.key === '0' ||
+            e.key === '+' || e.key === '=' || e.key === '-')) {
             e.preventDefault();
 
             if (tabManager.activeTabId && window.pdfIframes) {
@@ -516,6 +517,10 @@ window.addEventListener('DOMContentLoaded', async () => {
                         messageType = 'pdf-find';
                     } else if (e.key === '0') {
                         messageType = 'pdf-zoom-reset';
+                    } else if (e.key === '+' || e.key === '=') {
+                        messageType = 'pdf-zoom-in';
+                    } else if (e.key === '-') {
+                        messageType = 'pdf-zoom-out';
                     }
                     iframe.contentWindow.postMessage({
                         type: messageType

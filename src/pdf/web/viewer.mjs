@@ -19427,6 +19427,16 @@ window.addEventListener('message', function (event) {
       PDFViewerApplication.pdfViewer.currentScaleValue = '1';
     }
   }
+  if (event.data?.type === 'pdf-zoom-in') {
+    if (typeof PDFViewerApplication !== 'undefined') {
+      PDFViewerApplication.zoomIn();
+    }
+  }
+  if (event.data?.type === 'pdf-zoom-out') {
+    if (typeof PDFViewerApplication !== 'undefined') {
+      PDFViewerApplication.zoomOut();
+    }
+  }
 });
 
 export { PDFViewerApplication, AppConstants as PDFViewerApplicationConstants, AppOptions as PDFViewerApplicationOptions };
