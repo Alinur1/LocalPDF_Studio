@@ -102,3 +102,6 @@ To build for ARM64, you must update the `rid` (Runtime Identifier) and the Pytho
 - Test your code. (Must)
 - Commit with clear messages.
 - Push and create a Pull Request
+
+
+### > Please leave a review here if you've got time: https://alternativeto.net/software/localpdf-studio/about/
