@@ -79,7 +79,6 @@ export class ClockManager {
 
     updateClock() {
         if (!this.isEnabled || !this.timeElement || !this.dateElement || !this.dayElement) {
-            localpdfStudio.log("Failed to update the clock, clockManager.js.");
             return;
         }
 
