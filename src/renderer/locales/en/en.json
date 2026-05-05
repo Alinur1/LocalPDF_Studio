@@ -28,7 +28,8 @@
     "fillable-pdf-builder": "Fillable PDF Builder",
     "image-editor": "Image Editor",
     "pdf-to-pdfa": "PDF to PDF/A Converter",
-    "split-pdf-vertical": "Split PDF (Vertical)"
+    "split-pdf-vertical": "Split PDF (Vertical)",
+    "pdf-to-markdown": "PDF to Markdown"
   },
   "error": {
     "empty-message": "No PDFs open. Click \"Open PDF Reader\" to get started!"
@@ -1101,5 +1102,35 @@
     "unexpected-response": "Unexpected response.",
     "failed-to-split": "Failed to split PDF.",
     "split-btn": "Split PDF (Vertical)"
+  },
+  "pdfToMarkdown": {
+    "page-title": "PDF to Markdown",
+    "options-title": "Conversion Options",
+    "include-images": "Extract and include images",
+    "include-images-help": "Images are saved to your Pictures folder inside \"LocalPDF_Studio_Pictures_for_Markdown_converter\"",
+    "strip-header": "Remove repeated page headers",
+    "strip-header-help": "Strips headers that repeat on every page (e.g. document title, chapter name)",
+    "strip-footer": "Remove repeated page footers",
+    "strip-footer-help": "Strips footers that repeat on every page (e.g. page numbers, copyright lines)",
+    "convert-btn": "Convert to Markdown"
+  },
+  "pdfToMarkdownJS": {
+    "selectingPdf": "Selecting PDF...",
+    "loadingPreview": "Loading preview...",
+    "totalPages": "Total Pages: ",
+    "morePages": " more pages",
+    "failedToLoad": "Failed to load PDF preview",
+    "pageLabel": "Page ",
+    "selectFileFirst": "Please select a PDF file first.",
+    "converting": "Converting to Markdown...",
+    "conversionFailed": "Conversion failed.",
+    "missingDeps": "Missing Python dependencies: ",
+    "successMessage": "Markdown file saved successfully!",
+    "missingDepsWarning": "Some optional features were unavailable: ",
+    "cancelOrFailed": "Save was cancelled or failed.",
+    "errorOccurred": "An error occurred: ",
+    "dropOneFile": "Please drop only one PDF file.",
+    "failedToSave": "Failed to save dropped file: ",
+    "dropPdfFile": "Please drop a PDF file."
   }
 }

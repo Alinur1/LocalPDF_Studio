@@ -28,7 +28,8 @@
     "fillable-pdf-builder": "ফিলেবল পিডিএফ বিল্ডার",
     "image-editor": "ইমেজ এডিটর",
     "pdf-to-pdfa": "পিডিএফ থেকে PDF/A কনভার্টার",
-    "split-pdf-vertical": "পিডিএফ বিভক্ত করুন (উল্লম্বভাবে)"
+    "split-pdf-vertical": "পিডিএফ বিভক্ত করুন (উল্লম্বভাবে)",
+    "pdf-to-markdown": "পিডিএফ থেকে Markdown"
   },
   "error": {
     "empty-message": "কোন পিডিএফ খোলা নেই। শুরু করতে \"পিডিএফ রিডার খুলুন\" ক্লিক করুন!"
@@ -1101,5 +1102,35 @@
     "unexpected-response": "অপ্রত্যাশিত প্রতিক্রিয়া।",
     "failed-to-split": "PDF বিভক্ত করতে ব্যর্থ হয়েছে।",
     "split-btn": "PDF বিভক্ত করুন (উল্লম্বভাবে)"
+  },
+  "pdfToMarkdown": {
+    "page-title": "PDF থেকে Markdown",
+    "options-title": "কনভার্শন অপশন",
+    "include-images": "ইমেজ এক্সট্রাক্ট ও অন্তর্ভুক্ত করুন",
+    "include-images-help": "ইমেজ আপনার Pictures ফোল্ডারের ভিতরে \"LocalPDF_Studio_Pictures_for_Markdown_converter\" ফোল্ডারে সংরক্ষিত হবে",
+    "strip-header": "পুনরাবৃত্ত পৃষ্ঠা হেডার সরান",
+    "strip-header-help": "প্রতি পৃষ্ঠায় পুনরাবৃত্ত হেডার সরিয়ে দেয় (যেমন: ডকুমেন্ট টাইটেল, চ্যাপ্টারের নাম)",
+    "strip-footer": "পুনরাবৃত্ত পৃষ্ঠা ফুটার সরান",
+    "strip-footer-help": "প্রতি পৃষ্ঠায় পুনরাবৃত্ত ফুটার সরিয়ে দেয় (যেমন: পৃষ্ঠা নম্বর, কপিরাইট লাইন)",
+    "convert-btn": "Markdown-এ কনভার্ট করুন"
+  },
+  "pdfToMarkdownJS": {
+    "selectingPdf": "PDF নির্বাচন করা হচ্ছে...",
+    "loadingPreview": "প্রিভিউ লোড করা হচ্ছে...",
+    "totalPages": "মোট পৃষ্ঠা: ",
+    "morePages": " টি অতিরিক্ত পৃষ্ঠা",
+    "failedToLoad": "PDF প্রিভিউ লোড করতে ব্যর্থ হয়েছে",
+    "pageLabel": "পৃষ্ঠা ",
+    "selectFileFirst": "প্রথমে একটি PDF ফাইল নির্বাচন করুন।",
+    "converting": "Markdown-এ কনভার্ট করা হচ্ছে...",
+    "conversionFailed": "কনভার্শন ব্যর্থ হয়েছে।",
+    "missingDeps": "অনুপস্থিত Python ডিপেন্ডেন্সি: ",
+    "successMessage": "Markdown ফাইল সফলভাবে সংরক্ষিত হয়েছে!",
+    "missingDepsWarning": "কিছু ঐচ্ছিক ফিচার উপলব্ধ ছিল না: ",
+    "cancelOrFailed": "সংরক্ষণ বাতিল বা ব্যর্থ হয়েছে।",
+    "errorOccurred": "একটি ত্রুটি ঘটেছে: ",
+    "dropOneFile": "একবারে একটি মাত্র PDF ফাইল ড্রপ করুন।",
+    "failedToSave": "ড্রপ করা ফাইল সংরক্ষণ করতে ব্যর্থ হয়েছে: ",
+    "dropPdfFile": "একটি PDF ফাইল ড্রপ করুন।"
   }
 }

@@ -28,7 +28,8 @@
     "fillable-pdf-builder": "可填写 PDF 生成器",
     "image-editor": "图片编辑器",
     "pdf-to-pdfa": "PDF 转 PDF/A 转换器",
-    "split-pdf-vertical": "拆分 PDF（垂直）"
+    "split-pdf-vertical": "拆分 PDF (垂直)",
+    "pdf-to-markdown": "PDF 转 Markdown"
   },
   "error": {
     "empty-message": "未打开PDF。点击\"打开PDF阅读器\"开始使用！"
@@ -1100,6 +1101,36 @@
     "split-save-cancelled": "保存操作已取消。",
     "unexpected-response": "意外响应。",
     "failed-to-split": "拆分 PDF 失败。",
-    "split-btn": "拆分 PDF（垂直）"
+    "split-btn": "拆分 PDF (垂直)"
+  },
+  "pdfToMarkdown": {
+    "page-title": "PDF 转 Markdown",
+    "options-title": "转换选项",
+    "include-images": "提取并包含图片",
+    "include-images-help": "图片将保存到您的图片文件夹中的 \"LocalPDF_Studio_Pictures_for_Markdown_converter\" 文件夹内",
+    "strip-header": "删除重复的页眉",
+    "strip-header-help": "删除每页重复的页眉（例如：文档标题、章节名称）",
+    "strip-footer": "删除重复的页脚",
+    "strip-footer-help": "删除每页重复的页脚（例如：页码、版权信息）",
+    "convert-btn": "转换为 Markdown"
+  },
+  "pdfToMarkdownJS": {
+    "selectingPdf": "正在选择 PDF...",
+    "loadingPreview": "正在加载预览...",
+    "totalPages": "总页数：",
+    "morePages": " 更多页",
+    "failedToLoad": "加载 PDF 预览失败",
+    "pageLabel": "第 ",
+    "selectFileFirst": "请先选择一个 PDF 文件。",
+    "converting": "正在转换为 Markdown...",
+    "conversionFailed": "转换失败。",
+    "missingDeps": "缺少 Python 依赖：",
+    "successMessage": "Markdown 文件保存成功！",
+    "missingDepsWarning": "部分可选功能不可用：",
+    "cancelOrFailed": "保存已取消或失败。",
+    "errorOccurred": "发生错误：",
+    "dropOneFile": "请一次只拖放一个 PDF 文件。",
+    "failedToSave": "保存拖放的文件失败：",
+    "dropPdfFile": "请拖放一个 PDF 文件。"
   }
 }

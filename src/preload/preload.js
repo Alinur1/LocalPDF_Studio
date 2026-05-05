@@ -38,6 +38,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveZipFile: (filename, buffer) => ipcRenderer.invoke('save-zip-file', { filename, buffer }),
     savePdfFile: (filename, buffer) => ipcRenderer.invoke('save-pdf-file', { filename, buffer }),
     saveTextFile: (filename, text) => ipcRenderer.invoke('save-text-file', { filename, text }),
+    saveMarkdownFile: (filename, text) => ipcRenderer.invoke('save-markdown-file', { filename, text }),
     saveJsonFile: (filename, json) => ipcRenderer.invoke('save-json-file', { filename, json }),
     selectJsonFile: () => ipcRenderer.invoke('select-json-file'),
     readJsonFile: (filePath) => ipcRenderer.invoke('read-json-file', filePath),

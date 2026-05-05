@@ -45,6 +45,7 @@ builder.Services.AddScoped<IRedactInterface, RedactService>();
 builder.Services.AddScoped<IPdfGrayscaleInterface, PdfGrayscaleService>();
 builder.Services.AddScoped<IPdfToPdfaInterface, PdfToPdfaService>();
 builder.Services.AddScoped<IPdfVerticalSplitInterface, PdfVerticalSplitService>();
+builder.Services.AddScoped<IPdfMarkdownInterface, PdfMarkdownService>();
 
 builder.Services.AddCors(options =>
 {

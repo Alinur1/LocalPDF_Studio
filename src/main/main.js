@@ -687,6 +687,26 @@ ipcMain.handle('save-text-file', async (event, { filename, text }) => {
     }
 });
 
+ipcMain.handle('save-markdown-file', async (event, { filename, text }) => {
+    const { filePath, canceled } = await dialog.showSaveDialog({
+        defaultPath: filename,
+        filters: [{ name: 'Markdown Files', extensions: ['md'] }]
+    });
+
+    if (canceled || !filePath) {
+        return { success: false };
+    }
+
+    try {
+        fs.writeFileSync(filePath, Buffer.from(text, 'utf-8'));
+        return { success: true, path: filePath };
+    } catch (err) {
+        console.error("Failed to save markdown file:", err);
+        logger.insert("Failed to save markdown file, main.js (save-markdown-file): " + err);
+        return { success: false, error: err.message };
+    }
+});
+
 ipcMain.handle('save-json-file', async (event, { filename, json }) => {
     const { filePath, canceled } = await dialog.showSaveDialog({
         defaultPath: filename,

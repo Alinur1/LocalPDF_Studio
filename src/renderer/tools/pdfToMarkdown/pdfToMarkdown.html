@@ -1,0 +1,122 @@
+<!--
+ * LocalPDF Studio - Offline PDF Toolkit
+ * ======================================
+ * 
+ * @author      Md. Alinur Hossain <alinur1160@gmail.com>
+ * @license     AGPL 3.0 (GNU Affero General Public License version 3)
+ * @website     https://alinur1.github.io/LocalPDF_Studio_Website/
+ * @repository  https://github.com/Alinur1/LocalPDF_Studio
+ * 
+ * Copyright (c) 2025 Md. Alinur Hossain. All rights reserved.
+ * 
+ * Architecture:
+ * - Frontend: Electron + HTML/CSS/JS
+ * - Backend: ASP.NET Core Web API, Python
+ * - PDF Engine: PdfSharp + Mozilla PDF.js
+-->
+
+
+<!-- src/renderer/tools/pdfToMarkdown/pdfToMarkdown.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - PDF to Markdown</title>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://localhost:*;">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./pdfToMarkdown.css">
+    <script type="module" src="../../utils/themeManager.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn" data-i18n="common.back-btn">← Back</a>
+            <h1 class="tool-title" data-i18n="pdfToMarkdown.page-title">PDF to Markdown</h1>
+        </div>
+
+        <main class="tool-container">
+
+            <!-- File Selection -->
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">
+                    <span data-i18n="common.btn-select">Click to Select a PDF File or drop PDF here</span>
+                    <p><small class="select-hint" data-i18n="common.supported-formats">Supports PDF</small></p>
+                </button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6 6 18" />
+                            <path d="m6 6 12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PDF Preview -->
+            <div id="preview-container" class="preview-container" style="display: none;">
+                <div class="preview-header">
+                    <h3 data-i18n="common.pdf-preview">PDF Preview</h3>
+                    <span id="page-count" class="page-count"></span>
+                </div>
+                <div id="preview-grid" class="preview-grid"></div>
+            </div>
+
+            <!-- Options -->
+            <div class="options-container">
+                <h2 data-i18n="pdfToMarkdown.options-title">Conversion Options</h2>
+
+                <div class="option-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="includeImages" checked>
+                        <span data-i18n="pdfToMarkdown.include-images">Extract and include images</span>
+                    </label>
+                    <small class="help-text" data-i18n="pdfToMarkdown.include-images-help">
+                        Images are saved to your Pictures folder inside "LocalPDF_Studio_Pictures_for_Markdown_converter"
+                    </small>
+                </div>
+
+                <div class="option-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="stripHeader" checked>
+                        <span data-i18n="pdfToMarkdown.strip-header">Remove repeated page headers</span>
+                    </label>
+                    <small class="help-text" data-i18n="pdfToMarkdown.strip-header-help">
+                        Strips headers that repeat on every page (e.g. document title, chapter name)
+                    </small>
+                </div>
+
+                <div class="option-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="stripFooter" checked>
+                        <span data-i18n="pdfToMarkdown.strip-footer">Remove repeated page footers</span>
+                    </label>
+                    <small class="help-text" data-i18n="pdfToMarkdown.strip-footer-help">
+                        Strips footers that repeat on every page (e.g. page numbers, copyright lines)
+                    </small>
+                </div>
+            </div>
+
+            <!-- Action -->
+            <div class="action-buttons">
+                <button id="convert-btn" class="top-btn" data-i18n="pdfToMarkdown.convert-btn" disabled>
+                    Convert to Markdown
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <script type="module" src="./pdfToMarkdown.js"></script>
+</body>
+
+</html>

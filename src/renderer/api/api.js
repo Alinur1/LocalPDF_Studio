@@ -121,6 +121,7 @@ async function getEndpoints() {
         grayscale: `${base}/PdfGrayscale/convert`,
         pdfToPdfa: `${base}/PdfToPdfa/convert`,
         verticalSplit: `${base}/PdfVerticalSplit/split`,
+        pdfToMarkdown: `${base}/PdfMarkdown/convert`,
         // Add more as necessary
     };
 }

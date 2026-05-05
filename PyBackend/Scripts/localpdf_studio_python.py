@@ -41,6 +41,9 @@ def main():
     elif command == "redact":
         from redact_pdf import main as _main
         _main()
+    elif command == "pdf_to_markdown":
+        from pdf_to_markdown import main as _main
+        _main()
     else:
         print(json.dumps({"success": False, "error": f"Unknown command: '{command}'. Available: watermark, extract_images, convert_pdf_images, grayscale, redact"}))
         sys.exit(1)
@@ -854,6 +857,187 @@ class redact_pdf:
 
         return _redact_apply(input_pdf, output_pdf, redactions_data)
 
+# ============================================================
+# pdf_to_markdown
+# ============================================================
+
+import base64
+import json
+import os
+import re
+import sys
+
+
+def _progress(stage, value, page=None, total_pages=None):
+    payload = {"stage": stage, "value": value}
+    if page is not None: payload["page"] = page
+    if total_pages is not None: payload["totalPages"] = total_pages
+    sys.stderr.write("PROGRESS_JSON:" + json.dumps(payload) + "\n")
+    sys.stderr.flush()
+
+
+def _load_dependencies():
+    missing = []
+    modules = {}
+
+    for pkg in ["fitz", "pymupdf4llm"]:
+        try:
+            import importlib
+            modules[pkg] = importlib.import_module(pkg)
+        except Exception:
+            missing.append(pkg)
+
+    return modules, missing
+
+
+def _convert(input_path, output_path, options):
+    modules, missing = _load_dependencies()
+
+    if missing:
+        return {
+            "success":             False,
+            "error":               "Missing required Python dependencies: " + ", ".join(missing),
+            "markdown":            "",
+            "assets":              [],
+            "missingDependencies": missing,
+            "engine":              "pymupdf4llm",
+        }
+
+    fitz        = modules["fitz"]
+    pymupdf4llm = modules["pymupdf4llm"]
+
+    # Feature flags
+    include_images = bool(options.get("includeImages", True))
+    strip_header   = bool(options.get("stripHeader",   True))
+    strip_footer   = bool(options.get("stripFooter",   True))
+
+    # Asset directory lives alongside the output .md file
+    output_dir   = os.path.dirname(output_path)
+    asset_prefix = (
+        re.sub(r"[^a-zA-Z0-9]+", "-", os.path.splitext(os.path.basename(input_path))[0])
+        .strip("-").lower() or "document"
+    )
+    asset_dir = os.path.join(output_dir, f"{asset_prefix}_assets")
+
+    _progress("loading", 5)
+
+    try:
+        fitz_doc    = fitz.open(input_path)
+        total_pages = len(fitz_doc)
+        fitz_doc.close()
+    except Exception as exc:
+        return {
+            "success": False,
+            "error":   f"Failed to open PDF: {exc}",
+            "markdown": "", "assets": [], "engine": "pymupdf4llm",
+        }
+
+    _progress("analyzing", 10, total_pages=total_pages)
+
+    if include_images:
+        os.makedirs(asset_dir, exist_ok=True)
+
+    try:
+        _progress("converting", 20, total_pages=total_pages)
+
+        md_text = pymupdf4llm.to_markdown(
+            doc          = input_path,
+            write_images = include_images,
+            image_path   = asset_dir if include_images else None,
+            image_format = "png",
+            dpi          = 150,
+            show_warning = False,
+            header       = not strip_header,
+            footer       = not strip_footer,
+        )
+
+        _progress("assembling", 90, total_pages=total_pages)
+
+        # Collect extracted image files and base64-encode for the C# service layer
+        assets = []
+        if include_images and os.path.isdir(asset_dir):
+            for fname in sorted(os.listdir(asset_dir)):
+                fpath = os.path.join(asset_dir, fname)
+                if not os.path.isfile(fpath):
+                    continue
+                ext  = os.path.splitext(fname)[1].lower().lstrip(".")
+                mime = f"image/{'jpeg' if ext in ('jpg', 'jpeg') else ext}"
+                try:
+                    with open(fpath, "rb") as f:
+                        data = base64.b64encode(f.read()).decode("ascii")
+                    assets.append({"filename": fname, "mimeType": mime, "data": data})
+                except Exception:
+                    pass
+
+        # Write markdown to the requested output path
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(md_text)
+
+        _progress("done", 100, total_pages=total_pages)
+
+        return {
+            "success":    True,
+            "markdown":   md_text,
+            "outputPath": output_path,
+            "assets":     assets,
+            "engine":     "pymupdf4llm",
+            "meta": {
+                "pageCount":  total_pages,
+                "assetCount": len(assets),
+            },
+        }
+
+    except Exception as exc:
+        return {
+            "success":  False,
+            "error":    str(exc),
+            "markdown": "",
+            "assets":   [],
+            "engine":   "pymupdf4llm",
+        }
+
+class pdf_to_markdown:
+    @staticmethod
+    def main():
+        
+        args = {
+            "input_path":  None,
+            "output_path": None,
+            "includeImages": True,
+            "stripHeader":   True,
+            "stripFooter":   True,
+        }
+
+        i = 1
+        while i < len(sys.argv):
+            arg = sys.argv[i]
+            if   arg == "--no-images":   args["includeImages"] = False
+            elif arg == "--keep-header": args["stripHeader"]   = False
+            elif arg == "--keep-footer": args["stripFooter"]   = False
+            elif not arg.startswith("--"):
+                if   args["input_path"]  is None: args["input_path"]  = arg.strip('"')
+                elif args["output_path"] is None: args["output_path"] = arg.strip('"')
+            i += 1
+
+        if not args["input_path"] or not args["output_path"]:
+            print(json.dumps({
+                "success": False,
+                "error":   "Usage: pdf_to_markdown <input.pdf> <output.md> [--no-images] [--keep-header] [--keep-footer]",
+            }))
+            return 1
+
+        if not os.path.isfile(args["input_path"]):
+            print(json.dumps({
+                "success": False,
+                "error":   f"File not found: {args['input_path']}",
+            }))
+            return 1
+
+        options = {k: v for k, v in args.items() if k not in ("input_path", "output_path")}
+        result  = _convert(args["input_path"], args["output_path"], options)
+
+        print(json.dumps(result))
+        return 0 if result.get("success") else 1
 
 # ============================================================
 # Module shims — allow "from X import main" inside main()
@@ -870,6 +1054,7 @@ _make_module("extract_images",      extract_images.main)
 _make_module("convert_pdf_images",  convert_pdf_images.main)
 _make_module("pdf_to_grayscale",    pdf_to_grayscale.main)
 _make_module("redact_pdf",          redact_pdf.main)
+_make_module("pdf_to_markdown",     pdf_to_markdown.main)
 
 
 if __name__ == "__main__":

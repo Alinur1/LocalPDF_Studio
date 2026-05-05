@@ -1,3 +1,4 @@
 PyMuPDF
 pikepdf
 pillow
+pymupdf4llm

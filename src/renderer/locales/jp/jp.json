@@ -28,7 +28,8 @@
     "fillable-pdf-builder": "入力可能 PDF ビルダー",
     "image-editor": "画像エディタ",
     "pdf-to-pdfa": "PDF から PDF/A への変換",
-    "split-pdf-vertical": "PDF を分割（垂直）"
+    "split-pdf-vertical": "PDF を分割（垂直）",
+    "pdf-to-markdown": "PDF から Markdown へ変換"
   },
   "error": {
     "empty-message": "PDFが開かれていません。「PDFリーダーを開く」をクリックして開始してください！"
@@ -1101,5 +1102,35 @@
     "unexpected-response": "予期しない応答。",
     "failed-to-split": "PDF の分割に失敗しました。",
     "split-btn": "PDF を分割（垂直）"
+  },
+  "pdfToMarkdown": {
+    "page-title": "PDF から Markdown へ変換",
+    "options-title": "変換オプション",
+    "include-images": "画像を抽出して含める",
+    "include-images-help": "画像は Pictures フォルダ内の \"LocalPDF_Studio_Pictures_for_Markdown_converter\" フォルダに保存されます",
+    "strip-header": "繰り返しヘッダーを削除",
+    "strip-header-help": "全ページに繰り返されるヘッダーを削除します（例：ドキュメントタイトル、章名）",
+    "strip-footer": "繰り返しフッターを削除",
+    "strip-footer-help": "全ページに繰り返されるフッターを削除します（例：ページ番号、著作権表示）",
+    "convert-btn": "Markdown に変換"
+  },
+  "pdfToMarkdownJS": {
+    "selectingPdf": "PDF を選択しています...",
+    "loadingPreview": "プレビューを読み込み中...",
+    "totalPages": "総ページ数：",
+    "morePages": " ページ以上",
+    "failedToLoad": "PDF プレビューの読み込みに失敗しました",
+    "pageLabel": "ページ ",
+    "selectFileFirst": "まず PDF ファイルを選択してください。",
+    "converting": "Markdown に変換しています...",
+    "conversionFailed": "変換に失敗しました。",
+    "missingDeps": "不足している Python 依存関係：",
+    "successMessage": "Markdown ファイルを正常に保存しました！",
+    "missingDepsWarning": "⚠ 一部のオプション機能が利用できません：",
+    "cancelOrFailed": "保存がキャンセルされるか失敗しました。",
+    "errorOccurred": "エラーが発生しました：",
+    "dropOneFile": "一度に1つの PDF ファイルのみをドロップしてください。",
+    "failedToSave": "ドロップされたファイルの保存に失敗しました：",
+    "dropPdfFile": "PDF ファイルをドロップしてください。"
   }
 }
