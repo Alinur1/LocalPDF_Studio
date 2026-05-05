@@ -37,7 +37,6 @@ export class SearchIndexManager {
         if (!filePath) return;
 
         window.searchAPI.addEntry(filePath).catch(err => {
-            localpdfStudio.log("addFile error, searchIndexManager.js: " + err);
             console.error('searchIndexManager.addFile error:', err);
         });
     }
@@ -48,7 +47,6 @@ export class SearchIndexManager {
         try {
             return await window.searchAPI.query(query.trim());
         } catch (err) {
-            localpdfStudio.log("search error, searchIndexManager.js: " + err);
             console.error('searchIndexManager.search error:', err);
             return [];
         }
@@ -58,7 +56,6 @@ export class SearchIndexManager {
         try {
             await window.searchAPI.clear();
         } catch (err) {
-            localpdfStudio.log("clearHistory error, searchIndexManager.js: " + err);
             console.error('searchIndexManager.clearHistory error:', err);
         }
     }

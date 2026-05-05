@@ -28,28 +28,6 @@ import { SearchBar } from './utils/searchBar.js';
 import { SearchIndexManager } from './utils/searchIndexManager.js';
 
 window.addEventListener('DOMContentLoaded', async () => {
-    // manual logging system
-    window.localpdfStudio = {
-        log: (message) => {
-            try {
-                // Basic formatting: If it's an object, stringify it so it stores nicely in SQLite
-                const formattedMessage = typeof message === 'object'
-                    ? JSON.stringify(message)
-                    : String(message);
-
-                // Check the bridge
-                if (window.loggerAPI && typeof window.loggerAPI.log === 'function') {
-                    window.loggerAPI.log(formattedMessage);
-                } else {
-                    // Fallback to standard console if the bridge isn't loaded yet
-                    console.warn("LoggerAPI not ready. Message: ", formattedMessage);
-                }
-            } catch (err) {
-                console.error("LocalPDF Logging System Error:", err);
-            }
-        }
-    };
-
     await i18n.init();
 
     const themeRadios = document.querySelectorAll('input[name="theme-mode"]');
@@ -234,7 +212,6 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (err) {
             console.error('migrateLocalStorageToSQLite error:', err);
-            localpdfStudio.log('migrateLocalStorageToSQLite error, app.js: ' + err);
         }
     }
 
@@ -275,7 +252,6 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             console.error('Error opening PDFs:', error);
-            localpdfStudio.log("Error opening PDFs, app.js: " + error);
         } finally {
             isDialogOpen = false;
             openPdfBtn.disabled = false;
@@ -293,7 +269,6 @@ window.addEventListener('DOMContentLoaded', async () => {
                 }
             } catch (err) {
                 console.error('Error opening file from OS:', err);
-                localpdfStudio.log("Error opening file from OS, app.js: " + err);
             }
         });
     }
@@ -309,7 +284,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (err) {
         console.error('Error retrieving queued PDF files:', err);
-        localpdfStudio.log("Error retrieving queued PDF files, app.js: " + err);
     }
 
     setInterval(() => {
@@ -400,7 +374,6 @@ window.addEventListener('DOMContentLoaded', async () => {
             await window.pdfTabsAPI.save(tabs, manager.activeTabId);
         } catch (err) {
             console.error('saveTabs error:', err);
-            localpdfStudio.log('saveTabs error, app.js: ' + err);
         }
     }
 
@@ -432,7 +405,6 @@ window.addEventListener('DOMContentLoaded', async () => {
             await saveTabs(manager);
         } catch (err) {
             console.error('restoreTabs error:', err);
-            localpdfStudio.log('restoreTabs error, app.js: ' + err);
         }
     }
 
@@ -711,40 +683,4 @@ window.addEventListener('DOMContentLoaded', async () => {
             applyWallpaper(btn.dataset.wallpaper);
         });
     });
-
-    // Export Logs Button
-    const exportLogsBtn = document.getElementById('export-logs-btn');
-    if (exportLogsBtn) {
-        exportLogsBtn.addEventListener('click', async () => {
-            try {
-                const success = await window.loggerAPI.export();
-                if (success) {
-                    customAlert.alert('LocalPDF Studio - SUCCESS', 'Logs exported successfully!');
-                } else {
-                    customAlert.alert('LocalPDF Studio - NOTICE', 'Export cancelled.');
-                }
-            } catch (err) {
-                console.error('Error exporting logs:', err);
-                customAlert.alert('LocalPDF Studio - ERROR', 'Failed to export logs.');
-            }
-        });
-    }
-
-    // Clear Log History Button
-    const clearLogsBtn = document.getElementById('clear-logs-btn');
-    if (clearLogsBtn) {
-        clearLogsBtn.addEventListener('click', async () => {
-            try {
-                const success = await window.loggerAPI.clearLogs();
-                if (success) {
-                    customAlert.alert('LocalPDF Studio - SUCCESS', 'Log history cleared!');
-                } else {
-                    customAlert.alert('LocalPDF Studio - ERROR', 'Failed to clear log history.');
-                }
-            } catch (err) {
-                console.error('Error clearing logs:', err);
-                customAlert.alert('LocalPDF Studio - ERROR', 'Failed to clear logs.');
-            }
-        });
-    }
 });

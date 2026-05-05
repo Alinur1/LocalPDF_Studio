@@ -72,12 +72,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     buildFillablePdf: (options) => ipcRenderer.invoke('build-fillable-pdf', options),
 });
 
-contextBridge.exposeInMainWorld('loggerAPI', {
-    log: (message) => ipcRenderer.send('manual-log', message),
-    export: () => ipcRenderer.invoke('export-log-file'),
-    clearLogs: () => ipcRenderer.invoke('clear-logs')
-});
-
 contextBridge.exposeInMainWorld('pdfTabsAPI', {
     save: (tabs, activeTabId) => ipcRenderer.invoke('pdf-tabs-save', { tabs, activeTabId }),
     load: () => ipcRenderer.invoke('pdf-tabs-load'),

@@ -33,7 +33,6 @@
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
-    "@seald-io/nedb": "^4.1.2",
     "electron-updater": "^6.8.3",
     "i18next": "^25.8.14",
     "i18next-browser-languagedetector": "^8.2.1",

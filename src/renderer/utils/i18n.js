@@ -55,14 +55,12 @@ class I18n {
             const filePath = languageFiles[lang];
             if (!filePath) {
                 console.error(`Language ${lang} not supported`);
-                localpdfStudio.log(`Language ${lang} not supported, i18n.js`);
                 return false;
             }
 
             console.log(`Fetching language file: ${filePath}`);
             const response = await fetch(filePath);
             if (!response.ok) {
-                localpdfStudio.log(`Failed to load language file, i18n.js: ${filePath}, Status: ${response.status}`);
                 throw new Error(`Failed to load language file: ${filePath}, Status: ${response.status}`);
             }
 
@@ -70,7 +68,6 @@ class I18n {
             return true;
         } catch (error) {
             console.error(`Error loading language ${lang}:`, error);
-            localpdfStudio.log(`Error loading language, i18n.js ${lang}:`, error);
             return false;
         }
     }
@@ -87,12 +84,10 @@ class I18n {
                 return true;
             } else {
                 console.error('Failed to initialize i18n: Language loading failed');
-                localpdfStudio.log("Failed to initialize i18n: Language loading failed, i18n.js");
                 return false;
             }
         } catch (error) {
             console.error('Error initializing i18n:', error);
-            localpdfStudio.log('Error initializing i18n, i18n.js:', error);
             return false;
         }
     }
@@ -103,7 +98,6 @@ class I18n {
             const success = await this.loadLanguage(lang);
             if (!success) {
                 console.error(`Failed to set language: ${lang}`);
-                localpdfStudio.log(`Failed to set language, i18n.js: ${lang}`);
                 return;
             }
         }

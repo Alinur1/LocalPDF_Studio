@@ -21,7 +21,6 @@
 const fs = require('fs');
 const path = require('path');
 const { app } = require('electron');
-const logger = require('./loggerService.js');
 const userData = app.getPath('userData');
 const TABS_FILE = path.join(userData, 'pdf-tabs.json');
 const SEARCH_FILE = path.join(userData, 'pdf-search-index.json');
@@ -34,7 +33,6 @@ function readJSON(filePath, defaultValue) {
         return JSON.parse(raw);
     } catch (err) {
         console.error(`pdfTabsService: failed to read ${filePath}:`, err);
-        logger.insert(`pdfTabsService: failed to read ${path.basename(filePath)}: ${err}`);
         return defaultValue;
     }
 }
@@ -47,7 +45,6 @@ function writeJSON(filePath, data) {
         fs.renameSync(tmpPath, filePath);
     } catch (err) {
         console.error(`pdfTabsService: failed to write ${filePath}:`, err);
-        logger.insert(`pdfTabsService: failed to write ${path.basename(filePath)}: ${err}`);
         // Clean up the orphaned temp file if it was created
         try {
             if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
@@ -72,7 +69,6 @@ const pdfTabsService = {
             return true;
         } catch (err) {
             console.error('pdfTabsService.saveTabs error:', err);
-            logger.insert('pdfTabsService.saveTabs error: ' + err);
             return false;
         }
     },
@@ -87,7 +83,6 @@ const pdfTabsService = {
             };
         } catch (err) {
             console.error('pdfTabsService.loadTabs error:', err);
-            logger.insert('pdfTabsService.loadTabs error: ' + err);
             return { tabs: [], activeTabId: null };
         }
     },
@@ -98,7 +93,6 @@ const pdfTabsService = {
             return true;
         } catch (err) {
             console.error('pdfTabsService.clearTabs error:', err);
-            logger.insert('pdfTabsService.clearTabs error: ' + err);
             return false;
         }
     },
@@ -134,7 +128,6 @@ const pdfTabsService = {
             return true;
         } catch (err) {
             console.error('pdfTabsService.addSearchEntry error:', err);
-            logger.insert('pdfTabsService.addSearchEntry error: ' + err);
             return false;
         }
     },
@@ -161,7 +154,6 @@ const pdfTabsService = {
             return matched.slice(0, 8);
         } catch (err) {
             console.error('pdfTabsService.searchFiles error:', err);
-            logger.insert('pdfTabsService.searchFiles error: ' + err);
             return [];
         }
     },
@@ -172,7 +164,6 @@ const pdfTabsService = {
             return entries.sort((a, b) => b.last_opened.localeCompare(a.last_opened));
         } catch (err) {
             console.error('pdfTabsService.getAllSearchEntries error:', err);
-            logger.insert('pdfTabsService.getAllSearchEntries error: ' + err);
             return [];
         }
     },
@@ -183,7 +174,6 @@ const pdfTabsService = {
             return true;
         } catch (err) {
             console.error('pdfTabsService.clearSearchIndex error:', err);
-            logger.insert('pdfTabsService.clearSearchIndex error: ' + err);
             return false;
         }
     }
