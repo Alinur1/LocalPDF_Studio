@@ -949,6 +949,7 @@ def _convert(input_path, output_path, options):
             show_warning = False,
             header       = not strip_header,
             footer       = not strip_footer,
+            char_margin  = 0.5,
         )
 
         _progress("assembling", 90, total_pages=total_pages)
@@ -999,7 +1000,7 @@ def _convert(input_path, output_path, options):
 class pdf_to_markdown:
     @staticmethod
     def main():
-        
+
         args = {
             "input_path":  None,
             "output_path": None,
