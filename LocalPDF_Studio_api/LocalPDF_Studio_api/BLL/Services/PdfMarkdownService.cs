@@ -34,8 +34,6 @@ namespace LocalPDF_Studio_api.BLL.Services
 
         private static readonly TimeSpan ProcessTimeout = TimeSpan.FromMinutes(10);
 
-        private static readonly string AssetFolderName = "LocalPDF_Studio_Pictures_for_Markdown_converter";
-
         public PdfMarkdownService(ILogger<PdfMarkdownService> logger)
         {
             _logger = logger;
@@ -43,90 +41,41 @@ namespace LocalPDF_Studio_api.BLL.Services
             bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
             _pythonExePath = Path.Combine(baseDir, "PyBackend", "Engine", isWindows ? "python.exe" : "bin/python3");
             _scriptPath = Path.Combine(baseDir, "PyBackend", "Scripts", "localpdf_studio_python.py");
-            _vendorPath = Path.Combine(baseDir, "PyBackend", "vendor");        }
+            _vendorPath = Path.Combine(baseDir, "PyBackend", "vendor");
+        }
 
         public async Task<PythonMarkdownResult> ConvertToMarkdownAsync(PdfMarkdownRequest request)
         {
-            var tempOutputPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_output.md");
-
             try
             {
                 if (!File.Exists(request.FilePath))
                     throw new FileNotFoundException($"File not found: {request.FilePath}");
 
-                _logger.LogInformation("Starting PDF to Markdown conversion: {FilePath}", request.FilePath);
+                if (string.IsNullOrWhiteSpace(request.OutputFolder))
+                    throw new ArgumentException("Output folder must be provided.");
 
-                var result = await RunPythonAsync(request, tempOutputPath);
+                // Derive the PDF's name - PDF Steam (filename without extension)
+                var pdfStem = Path.GetFileNameWithoutExtension(request.FilePath);
 
-                if (!result.Success)
-                    return result;
-
-                // Read the markdown text back from the temp file
-                if (File.Exists(tempOutputPath))
-                {
-                    result.Markdown = await File.ReadAllTextAsync(tempOutputPath);
-                    result.OutputPath = tempOutputPath;
-                }
-
-                /* Write image assets to the permanent Pictures folder and rewrite
-                all image references in the markdown to point there.
-                This ensures images resolve correctly even after a restart on
-                Linux / macOS where the temp folder gets wiped. */
-                if (result.Assets?.Count > 0 && !string.IsNullOrEmpty(result.Markdown))
-                {
-                    var picturesRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-                    var assetDir = Path.Combine(picturesRoot, AssetFolderName);
-                    Directory.CreateDirectory(assetDir);
-
-                    // Write each image to the permanent folder
-                    foreach (var asset in result.Assets)
-                    {
-                        try
-                        {
-                            var assetPath = Path.Combine(assetDir, asset.Filename);
-                            var imageBytes = Convert.FromBase64String(asset.Data);
-                            await File.WriteAllBytesAsync(assetPath, imageBytes);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning(ex, "Failed to write asset: {Filename}", asset.Filename);
-                        }
-                    }
-
-                    /* pymupdf4llm embeds the temp path it used during conversion, e.g.:
-                       ![](C:/Users/user/AppData/Local/Temp/doc_assets/image.png)   ← Windows
-                       ![](/tmp/doc_assets/image.png)                               ← Linux/macOS
-                    
-                       Replace every such reference with the permanent Pictures path so
-                       the markdown stays valid across restarts and is portable. */
-                    var permanentPathFwd = assetDir.Replace("\\", "/");
-                    var markdown = result.Markdown.Replace("\\", "/");
-
-                    foreach (var asset in result.Assets)
-                    {
-                        // Match any directory prefix followed by this exact filename inside a markdown image tag: ![](...filename...) or ![alt](...filename...)
-                        var escapedFilename = Regex.Escape(asset.Filename);
-                        markdown = Regex.Replace(
-                            markdown,
-                            @"[^""(]*" + escapedFilename,
-                            permanentPathFwd + "/" + asset.Filename
-                        );
-                    }
-
-                    result.Markdown = markdown;
-                    result.AssetDirectory = assetDir;
-
-                    _logger.LogInformation("Wrote {Count} image asset(s) to: {Dir}", result.Assets.Count, assetDir);
-                }
-
-                if (result.MissingDependencies?.Count > 0)
-                    _logger.LogWarning("Missing optional dependencies: {Deps}", string.Join(", ", result.MissingDependencies));
+                // Create the output subfolder: <OutputFolder>/<pdfName>/
+                var outputSubFolder = Path.Combine(request.OutputFolder, pdfStem);
+                Directory.CreateDirectory(outputSubFolder);
 
                 _logger.LogInformation(
-                    "Markdown conversion complete — Pages: {Pages}, Assets: {Assets}, Chars: {Chars}",
-                    result.Meta?.PageCount ?? 0,
-                    result.Assets?.Count ?? 0,
-                    result.Markdown?.Length ?? 0);
+                    "Starting PDF to Markdown conversion: {FilePath} → {Folder}",
+                    request.FilePath, outputSubFolder);
+
+                var result = await RunPythonAsync(request, outputSubFolder, pdfStem);
+
+                if (result.MissingDependencies?.Count > 0)
+                    _logger.LogWarning("Missing optional dependencies: {Deps}",
+                        string.Join(", ", result.MissingDependencies));
+
+                if (result.Success)
+                    _logger.LogInformation(
+                        "Markdown conversion complete — Pages: {Pages}, Assets: {Assets}",
+                        result.Meta?.PageCount ?? 0,
+                        result.Meta?.AssetCount ?? 0);
 
                 return result;
             }
@@ -135,14 +84,9 @@ namespace LocalPDF_Studio_api.BLL.Services
                 _logger.LogError(ex, "Error converting PDF to Markdown: {FilePath}", request.FilePath);
                 throw;
             }
-            finally
-            {
-                TryDelete(tempOutputPath);
-            }
         }
 
-        private async Task<PythonMarkdownResult> RunPythonAsync(
-            PdfMarkdownRequest request, string outputPath)
+        private async Task<PythonMarkdownResult> RunPythonAsync(PdfMarkdownRequest request, string outputSubFolder, string pdfStem)
         {
             if (!File.Exists(_pythonExePath))
                 throw new FileNotFoundException($"Python engine not found: {_pythonExePath}");
@@ -150,7 +94,7 @@ namespace LocalPDF_Studio_api.BLL.Services
             if (!File.Exists(_scriptPath))
                 throw new FileNotFoundException($"Python script not found: {_scriptPath}");
 
-            var arguments = BuildArguments(request, outputPath);
+            var arguments = BuildArguments(request, outputSubFolder, pdfStem);
 
             var startInfo = new ProcessStartInfo
             {
@@ -203,8 +147,6 @@ namespace LocalPDF_Studio_api.BLL.Services
             var stdout = outputBuilder.ToString().Trim();
             var stderr = errorBuilder.ToString().Trim();
 
-            _logger.LogDebug("Python stdout length: {Len}", stdout.Length);
-
             if (process.ExitCode != 0)
                 return Failure($"Python exited with code {process.ExitCode}. stderr: {stderr}");
 
@@ -226,14 +168,15 @@ namespace LocalPDF_Studio_api.BLL.Services
             }
         }
 
-        private List<string> BuildArguments(PdfMarkdownRequest request, string outputPath)
+        private List<string> BuildArguments(PdfMarkdownRequest request, string outputSubFolder, string pdfStem)
         {
             var args = new List<string>
             {
                 $"\"{_scriptPath}\"",
                 "pdf_to_markdown",
                 $"\"{request.FilePath}\"",
-                $"\"{outputPath}\"",
+                $"\"{outputSubFolder}\"",
+                $"\"{pdfStem}\"",
             };
 
             if (!request.IncludeImages) args.Add("--no-images");
@@ -246,18 +189,9 @@ namespace LocalPDF_Studio_api.BLL.Services
         private static PythonMarkdownResult Failure(string error) =>
             new() { Success = false, Error = error };
 
-        private void TryDelete(string path)
-        {
-            try { if (File.Exists(path)) File.Delete(path); }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to delete temp file: {Path}", path);
-            }
-        }
-
         private static void TryKill(Process process)
         {
-            try { process.Kill(); } catch { /* ignore */ }
+            try { process.Kill(); } catch { /* best-effort */ }
         }
     }
 }

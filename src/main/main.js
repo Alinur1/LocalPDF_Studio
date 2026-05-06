@@ -680,6 +680,14 @@ ipcMain.handle('save-markdown-file', async (event, { filename, text }) => {
     }
 });
 
+ipcMain.handle('select-output-folder', async () => {
+    const { filePaths, canceled } = await dialog.showOpenDialog({
+        properties: ['openDirectory', 'createDirectory'],
+    });
+    if (canceled || filePaths.length === 0) return null;
+    return filePaths[0];
+});
+
 ipcMain.handle('save-json-file', async (event, { filename, json }) => {
     const { filePath, canceled } = await dialog.showSaveDialog({
         defaultPath: filename,

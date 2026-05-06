@@ -861,11 +861,12 @@ class redact_pdf:
 # pdf_to_markdown
 # ============================================================
 
-import base64
 import json
 import os
 import re
+import shutil
 import sys
+import tempfile
 
 
 def _progress(stage, value, page=None, total_pages=None):
@@ -879,26 +880,22 @@ def _progress(stage, value, page=None, total_pages=None):
 def _load_dependencies():
     missing = []
     modules = {}
-
     for pkg in ["fitz", "pymupdf4llm"]:
         try:
             import importlib
             modules[pkg] = importlib.import_module(pkg)
         except Exception:
             missing.append(pkg)
-
     return modules, missing
 
 
-def _convert(input_path, output_path, options):
+def _convert(input_path, output_folder, pdf_stem, options):
     modules, missing = _load_dependencies()
 
     if missing:
         return {
             "success":             False,
             "error":               "Missing required Python dependencies: " + ", ".join(missing),
-            "markdown":            "",
-            "assets":              [],
             "missingDependencies": missing,
             "engine":              "pymupdf4llm",
         }
@@ -906,18 +903,12 @@ def _convert(input_path, output_path, options):
     fitz        = modules["fitz"]
     pymupdf4llm = modules["pymupdf4llm"]
 
-    # Feature flags
     include_images = bool(options.get("includeImages", True))
     strip_header   = bool(options.get("stripHeader",   True))
     strip_footer   = bool(options.get("stripFooter",   True))
+    char_margin    = float(options.get("charMargin",   0.5))
 
-    # Asset directory lives alongside the output .md file
-    output_dir   = os.path.dirname(output_path)
-    asset_prefix = (
-        re.sub(r"[^a-zA-Z0-9]+", "-", os.path.splitext(os.path.basename(input_path))[0])
-        .strip("-").lower() or "document"
-    )
-    asset_dir = os.path.join(output_dir, f"{asset_prefix}_assets")
+    output_md_path = os.path.join(output_folder, f"{pdf_stem}.md")
 
     _progress("loading", 5)
 
@@ -926,87 +917,113 @@ def _convert(input_path, output_path, options):
         total_pages = len(fitz_doc)
         fitz_doc.close()
     except Exception as exc:
-        return {
-            "success": False,
-            "error":   f"Failed to open PDF: {exc}",
-            "markdown": "", "assets": [], "engine": "pymupdf4llm",
-        }
+        return {"success": False, "error": f"Failed to open PDF: {exc}", "engine": "pymupdf4llm"}
 
     _progress("analyzing", 10, total_pages=total_pages)
 
-    if include_images:
-        os.makedirs(asset_dir, exist_ok=True)
+    tmp_image_dir = None
 
     try:
         _progress("converting", 20, total_pages=total_pages)
 
+        if include_images:
+            # Create a temp dir
+            tmp_image_dir = tempfile.mkdtemp(prefix="localpdf_md_images_")
+            # Add trailing separator for pymupdf4llm
+            image_path_arg = tmp_image_dir.rstrip("/\\") + os.sep
+        else:
+            image_path_arg = None
+
         md_text = pymupdf4llm.to_markdown(
             doc          = input_path,
             write_images = include_images,
-            image_path   = asset_dir if include_images else None,
+            image_path   = image_path_arg,
             image_format = "png",
             dpi          = 150,
             show_warning = False,
             header       = not strip_header,
             footer       = not strip_footer,
-            char_margin  = 0.5,
+            char_margin  = char_margin,
         )
 
         _progress("assembling", 90, total_pages=total_pages)
 
-        # Collect extracted image files and base64-encode for the C# service layer
-        assets = []
-        if include_images and os.path.isdir(asset_dir):
-            for fname in sorted(os.listdir(asset_dir)):
-                fpath = os.path.join(asset_dir, fname)
-                if not os.path.isfile(fpath):
-                    continue
-                ext  = os.path.splitext(fname)[1].lower().lstrip(".")
-                mime = f"image/{'jpeg' if ext in ('jpg', 'jpeg') else ext}"
-                try:
-                    with open(fpath, "rb") as f:
-                        data = base64.b64encode(f.read()).decode("ascii")
-                    assets.append({"filename": fname, "mimeType": mime, "data": data})
-                except Exception:
-                    pass
+        asset_count = 0
 
-        # Write markdown to the requested output path
-        with open(output_path, "w", encoding="utf-8") as f:
+        if include_images and tmp_image_dir and os.path.isdir(tmp_image_dir):
+            image_extensions = (".png", ".jpg", ".jpeg", ".webp")
+
+            # Move every extracted image from temp dir to output_folder
+            for fname in os.listdir(tmp_image_dir):
+                if not fname.lower().endswith(image_extensions):
+                    continue
+                src  = os.path.join(tmp_image_dir, fname)
+                dest = os.path.join(output_folder, fname)
+                shutil.move(src, dest)
+                asset_count += 1
+
+            normalised_tmp = tmp_image_dir.replace("\\", "/").rstrip("/")
+            md_text = md_text.replace("\\", "/")
+            md_text = re.sub(
+                re.escape(normalised_tmp) + r"[/\\]?",
+                "",
+                md_text
+            )
+
+        # Write the markdown file into the output folder
+        with open(output_md_path, "w", encoding="utf-8") as f:
             f.write(md_text)
 
         _progress("done", 100, total_pages=total_pages)
 
         return {
-            "success":    True,
-            "markdown":   md_text,
-            "outputPath": output_path,
-            "assets":     assets,
-            "engine":     "pymupdf4llm",
+            "success":      True,
+            "outputMdPath": output_md_path,
+            "outputFolder": output_folder,
+            "engine":       "pymupdf4llm",
             "meta": {
                 "pageCount":  total_pages,
-                "assetCount": len(assets),
+                "assetCount": asset_count,
             },
         }
 
     except Exception as exc:
-        return {
-            "success":  False,
-            "error":    str(exc),
-            "markdown": "",
-            "assets":   [],
-            "engine":   "pymupdf4llm",
-        }
+        return {"success": False, "error": str(exc), "engine": "pymupdf4llm"}
+
+    finally:
+        # Cleanup temp folder
+        if tmp_image_dir and os.path.isdir(tmp_image_dir):
+            try:
+                shutil.rmtree(tmp_image_dir)
+            except Exception:
+                pass
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Module entry-point — called by the main dispatcher
+# ══════════════════════════════════════════════════════════════════════════════
 
 class pdf_to_markdown:
     @staticmethod
     def main():
+        """
+        Usage:
+            pdf_to_markdown <input.pdf> <output_folder> <pdf_stem>
+                            [--no-images]
+                            [--keep-header]
+                            [--keep-footer]
 
+        <output_folder>  — folder C# already created for this conversion
+        <pdf_stem>       — PDF filename without extension, used to name the .md file
+        """
         args = {
-            "input_path":  None,
-            "output_path": None,
+            "input_path":    None,
+            "output_folder": None,
+            "pdf_stem":      None,
             "includeImages": True,
             "stripHeader":   True,
             "stripFooter":   True,
+            "charMargin":    0.5,
         }
 
         i = 1
@@ -1016,27 +1033,92 @@ class pdf_to_markdown:
             elif arg == "--keep-header": args["stripHeader"]   = False
             elif arg == "--keep-footer": args["stripFooter"]   = False
             elif not arg.startswith("--"):
-                if   args["input_path"]  is None: args["input_path"]  = arg.strip('"')
-                elif args["output_path"] is None: args["output_path"] = arg.strip('"')
+                if   args["input_path"]    is None: args["input_path"]    = arg.strip('"')
+                elif args["output_folder"] is None: args["output_folder"] = arg.strip('"')
+                elif args["pdf_stem"]      is None: args["pdf_stem"]      = arg.strip('"')
             i += 1
 
-        if not args["input_path"] or not args["output_path"]:
+        if not args["input_path"] or not args["output_folder"] or not args["pdf_stem"]:
             print(json.dumps({
                 "success": False,
-                "error":   "Usage: pdf_to_markdown <input.pdf> <output.md> [--no-images] [--keep-header] [--keep-footer]",
+                "error":   "Usage: pdf_to_markdown <input.pdf> <output_folder> <pdf_stem> [options]",
             }))
             return 1
 
         if not os.path.isfile(args["input_path"]):
+            print(json.dumps({"success": False, "error": f"File not found: {args['input_path']}"}))
+            return 1
+
+        if not os.path.isdir(args["output_folder"]):
+            print(json.dumps({"success": False, "error": f"Output folder not found: {args['output_folder']}"}))
+            return 1
+
+        options = {k: v for k, v in args.items()
+                   if k not in ("input_path", "output_folder", "pdf_stem")}
+
+        result = _convert(args["input_path"], args["output_folder"], args["pdf_stem"], options)
+        print(json.dumps(result))
+        return 0 if result.get("success") else 1
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Module entry-point — called by the main dispatcher
+# ══════════════════════════════════════════════════════════════════════════════
+
+class pdf_to_markdown:
+    @staticmethod
+    def main():
+        """
+        Usage:
+            pdf_to_markdown <input.pdf> <output_folder> <pdf_stem>
+                            [--no-images]
+                            [--keep-header]
+                            [--keep-footer]
+
+        <output_folder>  — the folder C# already created for this conversion
+        <pdf_stem>       — PDF filename without extension, used to name the .md file
+        """
+        args = {
+            "input_path":    None,
+            "output_folder": None,
+            "pdf_stem":      None,
+            "includeImages": True,
+            "stripHeader":   True,
+            "stripFooter":   True,
+            "charMargin":    0.5,
+        }
+
+        i = 1
+        while i < len(sys.argv):
+            arg = sys.argv[i]
+            if   arg == "--no-images":   args["includeImages"] = False
+            elif arg == "--keep-header": args["stripHeader"]   = False
+            elif arg == "--keep-footer": args["stripFooter"]   = False
+            elif not arg.startswith("--"):
+                if   args["input_path"]    is None: args["input_path"]    = arg.strip('"')
+                elif args["output_folder"] is None: args["output_folder"] = arg.strip('"')
+                elif args["pdf_stem"]      is None: args["pdf_stem"]      = arg.strip('"')
+            i += 1
+
+        if not args["input_path"] or not args["output_folder"] or not args["pdf_stem"]:
             print(json.dumps({
                 "success": False,
-                "error":   f"File not found: {args['input_path']}",
+                "error":   "Usage: pdf_to_markdown <input.pdf> <output_folder> <pdf_stem> [options]",
             }))
             return 1
 
-        options = {k: v for k, v in args.items() if k not in ("input_path", "output_path")}
-        result  = _convert(args["input_path"], args["output_path"], options)
+        if not os.path.isfile(args["input_path"]):
+            print(json.dumps({"success": False, "error": f"File not found: {args['input_path']}"}))
+            return 1
 
+        if not os.path.isdir(args["output_folder"]):
+            print(json.dumps({"success": False, "error": f"Output folder not found: {args['output_folder']}"}))
+            return 1
+
+        options = {k: v for k, v in args.items()
+                   if k not in ("input_path", "output_folder", "pdf_stem")}
+
+        result = _convert(args["input_path"], args["output_folder"], args["pdf_stem"], options)
         print(json.dumps(result))
         return 0 if result.get("success") else 1
 

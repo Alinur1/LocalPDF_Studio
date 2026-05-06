@@ -185,8 +185,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        // Ask the user where to save BEFORE starting the conversion
+        const outputFolder = await window.electronAPI.selectOutputFolder();
+        if (!outputFolder) {
+            // User cancelled the folder picker — ignore
+            return;
+        }
+
         const requestBody = {
             filePath: selectedFile.path,
+            outputFolder: outputFolder,
             includeImages: includeImagesChk.checked,
             stripHeader: stripHeaderChk.checked,
             stripFooter: stripFooterChk.checked,
@@ -204,49 +212,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                 body: JSON.stringify(requestBody),
             });
 
+            const json = await response.json();
+
             if (!response.ok) {
-                // Try to surface missing-dependency info from the response
-                let errorMsg = i18n.t('pdfToMarkdownJS.conversionFailed');
-                try {
-                    const errJson = await response.json();
-                    if (errJson.missingDependencies?.length) {
-                        errorMsg = (i18n.t('pdfToMarkdownJS.missingDeps')) +
-                            errJson.missingDependencies.join(', ');
-                    } else if (errJson.error) {
-                        errorMsg = errJson.error;
-                    }
-                } catch { /* ignore */ }
+                let errorMsg = json.error || i18n.t('pdfToMarkdownJS.conversionFailed');
+
+                if (json.missingDependencies?.length) {
+                    errorMsg = (i18n.t('pdfToMarkdownJS.missingDeps')) +
+                        json.missingDependencies.join(', ');
+                }
 
                 await customAlert.alert(i18n.t('alerts.error'), errorMsg, [i18n.t('common.ok')]);
                 return;
             }
 
-            const outputName = response.headers.get('X-Output-Filename') ||
-                selectedFile.name.replace(/\.pdf$/i, '.md');
-            const missingDeps = response.headers.get('X-Missing-Dependencies');
-            const markdownText = await response.text();
-            const saveResult = await window.electronAPI.saveMarkdownFile(outputName, markdownText);
+            let successMsg = i18n.t('pdfToMarkdownJS.successMessage');
 
-            if (saveResult?.success) {
-                let successMsg = i18n.t('pdfToMarkdownJS.successMessage');
-
-                if (missingDeps) {
-                    successMsg += '\n\n' +
-                        (i18n.t('pdfToMarkdownJS.missingDepsWarning')) + missingDeps;
-                }
-
-                await customAlert.alert(
-                    i18n.t('alerts.success'),
-                    successMsg,
-                    [i18n.t('common.ok')]
-                );
-            } else {
-                await customAlert.alert(
-                    i18n.t('alerts.warning'),
-                    i18n.t('pdfToMarkdownJS.cancelOrFailed'),
-                    [i18n.t('common.ok')]
-                );
+            if (json.missingDependencies?.length) {
+                successMsg += '\n\n' +
+                    (i18n.t('pdfToMarkdownJS.missingDepsWarning')) +
+                    json.missingDependencies.join(', ');
             }
+
+            await customAlert.alert(
+                i18n.t('alerts.success'),
+                successMsg,
+                [i18n.t('common.ok')]
+            );
 
         } catch (error) {
             console.error('Conversion error:', error);
