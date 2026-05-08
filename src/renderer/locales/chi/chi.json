@@ -1107,7 +1107,7 @@
     "page-title": "PDF 转 Markdown",
     "options-title": "转换选项",
     "include-images": "提取并包含图片",
-    "include-images-help": "图片将保存到您的图片文件夹中的 \"LocalPDF_Studio_Pictures_for_Markdown_converter\" 文件夹内",
+    "include-images-help": "图片将保存到与 Markdown 文件相同的位置。",
     "strip-header": "删除重复的页眉",
     "strip-header-help": "删除每页重复的页眉（例如：文档标题、章节名称）",
     "strip-footer": "删除重复的页脚",
@@ -1131,6 +1131,7 @@
     "errorOccurred": "发生错误：",
     "dropOneFile": "请一次只拖放一个 PDF 文件。",
     "failedToSave": "保存拖放的文件失败：",
-    "dropPdfFile": "请拖放一个 PDF 文件。"
+    "dropPdfFile": "请拖放一个 PDF 文件。",
+    "folderExists": "所选位置已存在同名文件夹。请备份后删除，然后重试。"
   }
 }

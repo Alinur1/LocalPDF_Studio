@@ -53,8 +53,7 @@ namespace LocalPDF_Studio_api.Controllers
             if (!System.IO.Directory.Exists(request.OutputFolder))
                 return BadRequest(new { error = $"Output folder does not exist: {request.OutputFolder}" });
 
-            var extension = Path.GetExtension(request.FilePath).ToLowerInvariant();
-            if (extension != ".pdf")
+            if (Path.GetExtension(request.FilePath).ToLowerInvariant() != ".pdf")
                 return BadRequest(new { error = "File must be a PDF." });
 
             try
@@ -65,6 +64,17 @@ namespace LocalPDF_Studio_api.Controllers
 
                 if (!result.Success)
                 {
+                    if (result.Error?.StartsWith("FOLDER_EXISTS:") == true)
+                    {
+                        var folderPath = result.Error["FOLDER_EXISTS:".Length..];
+                        return BadRequest(new
+                        {
+                            folderExists = true,
+                            folderPath = folderPath,
+                            error = $"A folder named \"{Path.GetFileName(folderPath)}\" already exists at that location. Please back it up, delete it, and try again.",
+                        });
+                    }
+
                     if (result.MissingDependencies?.Count > 0)
                         return UnprocessableEntity(new
                         {

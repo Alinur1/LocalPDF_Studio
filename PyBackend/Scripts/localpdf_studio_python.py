@@ -890,6 +890,12 @@ def _load_dependencies():
 
 
 def _convert(input_path, output_folder, pdf_stem, options):
+    """
+    input_path — absolute path to the source PDF
+    output_folder — absolute path to the folder C# created for this conversion
+    pdf_stem — filename without extension, used as the .md filename
+    options — dict of feature flags
+    """
     modules, missing = _load_dependencies()
 
     if missing:
@@ -1012,9 +1018,6 @@ class pdf_to_markdown:
                             [--no-images]
                             [--keep-header]
                             [--keep-footer]
-
-        <output_folder>  — folder C# already created for this conversion
-        <pdf_stem>       — PDF filename without extension, used to name the .md file
         """
         args = {
             "input_path":    None,
@@ -1033,71 +1036,9 @@ class pdf_to_markdown:
             elif arg == "--keep-header": args["stripHeader"]   = False
             elif arg == "--keep-footer": args["stripFooter"]   = False
             elif not arg.startswith("--"):
-                if   args["input_path"]    is None: args["input_path"]    = arg.strip('"')
-                elif args["output_folder"] is None: args["output_folder"] = arg.strip('"')
-                elif args["pdf_stem"]      is None: args["pdf_stem"]      = arg.strip('"')
-            i += 1
-
-        if not args["input_path"] or not args["output_folder"] or not args["pdf_stem"]:
-            print(json.dumps({
-                "success": False,
-                "error":   "Usage: pdf_to_markdown <input.pdf> <output_folder> <pdf_stem> [options]",
-            }))
-            return 1
-
-        if not os.path.isfile(args["input_path"]):
-            print(json.dumps({"success": False, "error": f"File not found: {args['input_path']}"}))
-            return 1
-
-        if not os.path.isdir(args["output_folder"]):
-            print(json.dumps({"success": False, "error": f"Output folder not found: {args['output_folder']}"}))
-            return 1
-
-        options = {k: v for k, v in args.items()
-                   if k not in ("input_path", "output_folder", "pdf_stem")}
-
-        result = _convert(args["input_path"], args["output_folder"], args["pdf_stem"], options)
-        print(json.dumps(result))
-        return 0 if result.get("success") else 1
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# Module entry-point — called by the main dispatcher
-# ══════════════════════════════════════════════════════════════════════════════
-
-class pdf_to_markdown:
-    @staticmethod
-    def main():
-        """
-        Usage:
-            pdf_to_markdown <input.pdf> <output_folder> <pdf_stem>
-                            [--no-images]
-                            [--keep-header]
-                            [--keep-footer]
-
-        <output_folder>  — the folder C# already created for this conversion
-        <pdf_stem>       — PDF filename without extension, used to name the .md file
-        """
-        args = {
-            "input_path":    None,
-            "output_folder": None,
-            "pdf_stem":      None,
-            "includeImages": True,
-            "stripHeader":   True,
-            "stripFooter":   True,
-            "charMargin":    0.5,
-        }
-
-        i = 1
-        while i < len(sys.argv):
-            arg = sys.argv[i]
-            if   arg == "--no-images":   args["includeImages"] = False
-            elif arg == "--keep-header": args["stripHeader"]   = False
-            elif arg == "--keep-footer": args["stripFooter"]   = False
-            elif not arg.startswith("--"):
-                if   args["input_path"]    is None: args["input_path"]    = arg.strip('"')
-                elif args["output_folder"] is None: args["output_folder"] = arg.strip('"')
-                elif args["pdf_stem"]      is None: args["pdf_stem"]      = arg.strip('"')
+                if   args["input_path"]    is None: args["input_path"]    = arg
+                elif args["output_folder"] is None: args["output_folder"] = arg
+                elif args["pdf_stem"]      is None: args["pdf_stem"]      = arg
             i += 1
 
         if not args["input_path"] or not args["output_folder"] or not args["pdf_stem"]:

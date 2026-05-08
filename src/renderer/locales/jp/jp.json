@@ -1107,7 +1107,7 @@
     "page-title": "PDF から Markdown へ変換",
     "options-title": "変換オプション",
     "include-images": "画像を抽出して含める",
-    "include-images-help": "画像は Pictures フォルダ内の \"LocalPDF_Studio_Pictures_for_Markdown_converter\" フォルダに保存されます",
+    "include-images-help": "画像は Markdown ファイルと同じ場所に保存されます。",
     "strip-header": "繰り返しヘッダーを削除",
     "strip-header-help": "全ページに繰り返されるヘッダーを削除します（例：ドキュメントタイトル、章名）",
     "strip-footer": "繰り返しフッターを削除",
@@ -1126,11 +1126,12 @@
     "conversionFailed": "変換に失敗しました。",
     "missingDeps": "不足している Python 依存関係：",
     "successMessage": "Markdown ファイルを正常に保存しました！",
-    "missingDepsWarning": "⚠ 一部のオプション機能が利用できません：",
+    "missingDepsWarning": "一部のオプション機能が利用できません：",
     "cancelOrFailed": "保存がキャンセルされるか失敗しました。",
     "errorOccurred": "エラーが発生しました：",
     "dropOneFile": "一度に1つの PDF ファイルのみをドロップしてください。",
     "failedToSave": "ドロップされたファイルの保存に失敗しました：",
-    "dropPdfFile": "PDF ファイルをドロップしてください。"
+    "dropPdfFile": "PDF ファイルをドロップしてください。",
+    "folderExists": "選択した場所に同じ名前のフォルダが既に存在します。バックアップを取って削除してから、もう一度お試しください。"
   }
 }

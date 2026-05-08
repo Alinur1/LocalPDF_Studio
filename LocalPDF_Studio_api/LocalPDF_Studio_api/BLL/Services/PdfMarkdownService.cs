@@ -59,6 +59,17 @@ namespace LocalPDF_Studio_api.BLL.Services
 
                 // Create the output subfolder: <OutputFolder>/<pdfName>/
                 var outputSubFolder = Path.Combine(request.OutputFolder, pdfStem);
+
+                // Check for existing folder
+                if (Directory.Exists(outputSubFolder))
+                {
+                    return new PythonMarkdownResult
+                    {
+                        Success = false,
+                        Error = $"FOLDER_EXISTS:{outputSubFolder}",
+                    };
+                }
+
                 Directory.CreateDirectory(outputSubFolder);
 
                 _logger.LogInformation(
@@ -94,12 +105,9 @@ namespace LocalPDF_Studio_api.BLL.Services
             if (!File.Exists(_scriptPath))
                 throw new FileNotFoundException($"Python script not found: {_scriptPath}");
 
-            var arguments = BuildArguments(request, outputSubFolder, pdfStem);
-
             var startInfo = new ProcessStartInfo
             {
                 FileName = _pythonExePath,
-                Arguments = string.Join(" ", arguments),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -107,6 +115,17 @@ namespace LocalPDF_Studio_api.BLL.Services
                 StandardOutputEncoding = System.Text.Encoding.UTF8,
                 StandardErrorEncoding = System.Text.Encoding.UTF8,
             };
+
+            // Using ArgumentList instead of Arguments string so paths with spaces are passed correctly without any manual quoting.
+            startInfo.ArgumentList.Add(_scriptPath);
+            startInfo.ArgumentList.Add("pdf_to_markdown");
+            startInfo.ArgumentList.Add(request.FilePath);
+            startInfo.ArgumentList.Add(outputSubFolder);
+            startInfo.ArgumentList.Add(pdfStem);
+
+            if (!request.IncludeImages) startInfo.ArgumentList.Add("--no-images");
+            if (!request.StripHeader) startInfo.ArgumentList.Add("--keep-header");
+            if (!request.StripFooter) startInfo.ArgumentList.Add("--keep-footer");
 
             startInfo.EnvironmentVariables["PYTHONPATH"] = _vendorPath;
 
@@ -166,24 +185,6 @@ namespace LocalPDF_Studio_api.BLL.Services
                     $"JSON parse error: {ex.Message} | stdout (first 500): " +
                     $"{stdout[..Math.Min(500, stdout.Length)]}");
             }
-        }
-
-        private List<string> BuildArguments(PdfMarkdownRequest request, string outputSubFolder, string pdfStem)
-        {
-            var args = new List<string>
-            {
-                $"\"{_scriptPath}\"",
-                "pdf_to_markdown",
-                $"\"{request.FilePath}\"",
-                $"\"{outputSubFolder}\"",
-                $"\"{pdfStem}\"",
-            };
-
-            if (!request.IncludeImages) args.Add("--no-images");
-            if (!request.StripHeader) args.Add("--keep-header");
-            if (!request.StripFooter) args.Add("--keep-footer");
-
-            return args;
         }
 
         private static PythonMarkdownResult Failure(string error) =>

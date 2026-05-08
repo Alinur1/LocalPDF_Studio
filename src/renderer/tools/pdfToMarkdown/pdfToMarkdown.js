@@ -95,8 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
             pdfDoc = await loadingTask.promise;
-            pageCountEl.textContent =
-                (i18n.t('pdfToMarkdownJS.totalPages')) + pdfDoc.numPages;
+            pageCountEl.textContent = i18n.t('pdfToMarkdownJS.totalPages') + pdfDoc.numPages;
 
             const pagesToShow = Math.min(pdfDoc.numPages, 6);
             for (let i = 1; i <= pagesToShow; i++) await renderPageThumbnail(i);
@@ -134,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         wrapper.className = 'page-thumbnail';
         const label = document.createElement('div');
         label.className = 'page-label';
-        label.textContent = (i18n.t('pdfToMarkdownJS.pageLabel')) + pageNum;
+        label.textContent = i18n.t('pdfToMarkdownJS.pageLabel') + pageNum;
         wrapper.appendChild(canvas);
         wrapper.appendChild(label);
         previewGrid.appendChild(wrapper);
@@ -215,10 +214,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const json = await response.json();
 
             if (!response.ok) {
-                let errorMsg = json.error || i18n.t('pdfToMarkdownJS.conversionFailed');
+                if (json.folderExists) {
+                    await customAlert.alert(
+                        i18n.t('alerts.notice'),
+                        i18n.t('pdfToMarkdownJS.folderExists') + `\n\n${json.folderPath}`,
+                        [i18n.t('common.ok')]
+                    );
+                    return;
+                }
 
+                let errorMsg = json.error || i18n.t('pdfToMarkdownJS.conversionFailed');
                 if (json.missingDependencies?.length) {
-                    errorMsg = (i18n.t('pdfToMarkdownJS.missingDeps')) +
+                    errorMsg = i18n.t('pdfToMarkdownJS.missingDeps') +
                         json.missingDependencies.join(', ');
                 }
 
@@ -230,7 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (json.missingDependencies?.length) {
                 successMsg += '\n\n' +
-                    (i18n.t('pdfToMarkdownJS.missingDepsWarning')) +
+                    i18n.t('pdfToMarkdownJS.missingDepsWarning') +
                     json.missingDependencies.join(', ');
             }
 
@@ -244,14 +251,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Conversion error:', error);
             await customAlert.alert(
                 i18n.t('alerts.error'),
-                (i18n.t('pdfToMarkdownJS.errorOccurred')) + error.message,
+                i18n.t('pdfToMarkdownJS.errorOccurred') + error.message,
                 [i18n.t('common.ok')]
             );
         } finally {
             loadingUI.hide();
             convertBtn.disabled = false;
-            convertBtn.textContent =
-                i18n.t('pdfToMarkdown.convert-btn');
+            convertBtn.textContent = i18n.t('pdfToMarkdown.convert-btn');
         }
     });
 
@@ -270,22 +276,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const file = pdfFiles[0];
             const buffer = await file.arrayBuffer();
-            const result = await window.electronAPI.saveDroppedFile({
-                name: file.name,
-                buffer,
-            });
+            const result = await window.electronAPI.saveDroppedFile({ name: file.name, buffer });
 
             if (result.success) {
                 droppedFilePath = result.filePath;
-                handleFileSelected({
-                    path: result.filePath,
-                    name: file.name,
-                    size: file.size || 0,
-                });
+                handleFileSelected({ path: result.filePath, name: file.name, size: file.size || 0 });
             } else {
                 await customAlert.alert(
                     i18n.t('alerts.error'),
-                    (i18n.t('pdfToMarkdownJS.failedToSave')) + result.error,
+                    i18n.t('pdfToMarkdownJS.failedToSave') + result.error,
                     [i18n.t('common.ok')]
                 );
             }

@@ -1107,7 +1107,7 @@
     "page-title": "PDF to Markdown",
     "options-title": "Conversion Options",
     "include-images": "Extract and include images",
-    "include-images-help": "Images are saved to your Pictures folder inside \"LocalPDF_Studio_Pictures_for_Markdown_converter\"",
+    "include-images-help": "Images are saved to the same location with the markdown file.",
     "strip-header": "Remove repeated page headers",
     "strip-header-help": "Strips headers that repeat on every page (e.g. document title, chapter name)",
     "strip-footer": "Remove repeated page footers",
@@ -1131,6 +1131,7 @@
     "errorOccurred": "An error occurred: ",
     "dropOneFile": "Please drop only one PDF file.",
     "failedToSave": "Failed to save dropped file: ",
-    "dropPdfFile": "Please drop a PDF file."
+    "dropPdfFile": "Please drop a PDF file.",
+    "folderExists": "A folder with this name already exists at the selected location. Please back it up, delete it, and try again."
   }
 }
