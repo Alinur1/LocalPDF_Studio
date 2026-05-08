@@ -223,10 +223,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             console.error('Conversion error:', error);
-            
+
             try {
                 const errorData = JSON.parse(error.message);
-                
+
                 if (errorData.folderExists) {
                     await customAlert.alert(
                         i18n.t('alerts.notice'),
@@ -235,13 +235,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     );
                     return;
                 }
-                
+
                 let errorMsg = errorData.error || i18n.t('pdfToMarkdownJS.conversionFailed');
                 if (errorData.missingDependencies?.length) {
                     errorMsg = i18n.t('pdfToMarkdownJS.missingDeps') +
                         errorData.missingDependencies.join(', ');
                 }
-                
+
                 await customAlert.alert(i18n.t('alerts.error'), errorMsg, [i18n.t('common.ok')]);
             } catch (parseError) {
                 await customAlert.alert(
