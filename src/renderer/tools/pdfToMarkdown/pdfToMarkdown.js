@@ -205,33 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             convertBtn.textContent = i18n.t('pdfToMarkdownJS.converting');
 
             const endpoint = await API.pdf.pdfToMarkdown;
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody),
-            });
-
-            const json = await response.json();
-
-            if (!response.ok) {
-                if (json.folderExists) {
-                    await customAlert.alert(
-                        i18n.t('alerts.notice'),
-                        i18n.t('pdfToMarkdownJS.folderExists') + `\n\n${json.folderPath}`,
-                        [i18n.t('common.ok')]
-                    );
-                    return;
-                }
-
-                let errorMsg = json.error || i18n.t('pdfToMarkdownJS.conversionFailed');
-                if (json.missingDependencies?.length) {
-                    errorMsg = i18n.t('pdfToMarkdownJS.missingDeps') +
-                        json.missingDependencies.join(', ');
-                }
-
-                await customAlert.alert(i18n.t('alerts.error'), errorMsg, [i18n.t('common.ok')]);
-                return;
-            }
+            const json = await API.request.post(endpoint, requestBody);
 
             let successMsg = i18n.t('pdfToMarkdownJS.successMessage');
 
@@ -249,11 +223,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             console.error('Conversion error:', error);
-            await customAlert.alert(
-                i18n.t('alerts.error'),
-                i18n.t('pdfToMarkdownJS.errorOccurred') + error.message,
-                [i18n.t('common.ok')]
-            );
+            
+            try {
+                const errorData = JSON.parse(error.message);
+                
+                if (errorData.folderExists) {
+                    await customAlert.alert(
+                        i18n.t('alerts.notice'),
+                        i18n.t('pdfToMarkdownJS.folderExists') + `\n\n${errorData.folderPath}`,
+                        [i18n.t('common.ok')]
+                    );
+                    return;
+                }
+                
+                let errorMsg = errorData.error || i18n.t('pdfToMarkdownJS.conversionFailed');
+                if (errorData.missingDependencies?.length) {
+                    errorMsg = i18n.t('pdfToMarkdownJS.missingDeps') +
+                        errorData.missingDependencies.join(', ');
+                }
+                
+                await customAlert.alert(i18n.t('alerts.error'), errorMsg, [i18n.t('common.ok')]);
+            } catch (parseError) {
+                await customAlert.alert(
+                    i18n.t('alerts.error'),
+                    i18n.t('pdfToMarkdownJS.errorOccurred') + error.message,
+                    [i18n.t('common.ok')]
+                );
+            }
         } finally {
             loadingUI.hide();
             convertBtn.disabled = false;
