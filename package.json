@@ -84,6 +84,20 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "assets/js",
+        "to": "assets/js",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "assets/css",
+        "to": "assets/css",
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "asar": true,

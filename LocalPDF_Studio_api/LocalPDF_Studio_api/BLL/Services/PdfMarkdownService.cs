@@ -167,23 +167,31 @@ namespace LocalPDF_Studio_api.BLL.Services
             var stderr = errorBuilder.ToString().Trim();
 
             if (process.ExitCode != 0)
-                return Failure($"Python exited with code {process.ExitCode}. stderr: {stderr}");
+            {
+                _logger.LogError("Python process failed with ExitCode {Code}. Stderr: {Stderr}", process.ExitCode, stderr);
+                return Failure($"Python exited with code {process.ExitCode}. See logs for details.");
+            }
 
             if (string.IsNullOrEmpty(stdout))
-                return Failure("Python process produced no output");
+                return Failure("Python process produced no output.");
 
             try
             {
-                var result = JsonSerializer.Deserialize<PythonMarkdownResult>(stdout,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var lines = stdout.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                var jsonLine = lines.FirstOrDefault(line => line.TrimStart().StartsWith('{'));
 
-                return result ?? Failure("Failed to deserialize Python response");
+                if (string.IsNullOrEmpty(jsonLine))
+                {
+                    return Failure("Python output did not contain a valid JSON result.");
+                }
+
+                return JsonSerializer.Deserialize<PythonMarkdownResult>(jsonLine,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                    ?? Failure("Failed to deserialize Python response.");
             }
-            catch (Exception ex)
+            catch (JsonException ex)
             {
-                return Failure(
-                    $"JSON parse error: {ex.Message} | stdout (first 500): " +
-                    $"{stdout[..Math.Min(500, stdout.Length)]}");
+                return Failure($"JSON parse error: {ex.Message}");
             }
         }
 

@@ -940,17 +940,23 @@ def _convert(input_path, output_folder, pdf_stem, options):
         else:
             image_path_arg = None
 
-        md_text = pymupdf4llm.to_markdown(
+        import inspect as _inspect
+        _supported = set(_inspect.signature(pymupdf4llm.to_markdown).parameters.keys())
+
+        _kwargs = dict(
             doc          = input_path,
             write_images = include_images,
             image_path   = image_path_arg,
             image_format = "png",
             dpi          = 150,
-            show_warning = False,
-            header       = not strip_header,
-            footer       = not strip_footer,
-            char_margin  = char_margin,
+            show_warning = False
         )
+        if "show_warning"  in _supported: _kwargs["show_warning"]  = False
+        if "header"        in _supported: _kwargs["header"]        = not strip_header
+        if "footer"        in _supported: _kwargs["footer"]        = not strip_footer
+        if "char_margin"   in _supported: _kwargs["char_margin"]   = char_margin
+
+        md_text = pymupdf4llm.to_markdown(**_kwargs)
 
         _progress("assembling", 90, total_pages=total_pages)
 
@@ -960,6 +966,8 @@ def _convert(input_path, output_folder, pdf_stem, options):
             image_extensions = (".png", ".jpg", ".jpeg", ".webp")
 
             # Move every extracted image from temp dir to output_folder
+            normalised_tmp = os.path.normpath(tmp_image_dir).replace("\\", "/")
+            
             for fname in os.listdir(tmp_image_dir):
                 if not fname.lower().endswith(image_extensions):
                     continue
@@ -968,7 +976,6 @@ def _convert(input_path, output_folder, pdf_stem, options):
                 shutil.move(src, dest)
                 asset_count += 1
 
-            normalised_tmp = tmp_image_dir.replace("\\", "/").rstrip("/")
             md_text = md_text.replace("\\", "/")
             md_text = re.sub(
                 re.escape(normalised_tmp) + r"[/\\]?",

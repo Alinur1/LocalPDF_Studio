@@ -288,7 +288,9 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
                 htmlContent = markdownParser(editor.value);
             }
 
-            const result = await window.electronAPI.exportMarkdownToPdf(htmlContent, title);
+            const result = await window.electronAPI.exportMarkdownToPdf(htmlContent, title, {
+                mdFilePath: currentFilePath
+            });
 
             if (result?.success) {
                 const defaultName = title.replace(/\.md$/i, '') + '.pdf';

@@ -576,11 +576,14 @@ ipcMain.handle('save-markdown-file-direct', async (event, filePath, content) => 
 });
 
 ipcMain.handle('export-markdown-to-pdf', async (event, { html, title, options = {} }) => {
+    let tempHtmlPath = null;
     try {
         const { BrowserWindow } = require('electron');
         const path = require('path');
-        const os = require('os');
         const fs = require('fs');
+        const os = require('os');
+        const mdDir = options.mdFilePath ? path.dirname(options.mdFilePath) : os.tmpdir();
+        tempHtmlPath = path.join(mdDir, `.localpdf-export-${Date.now()}.html`);
 
         const printWindow = new BrowserWindow({
             show: false,
@@ -612,8 +615,14 @@ ipcMain.handle('export-markdown-to-pdf', async (event, { html, title, options = 
             </body>
             </html>`;
 
-        const tempHtmlPath = path.join(os.tmpdir(), `md-export-${Date.now()}.html`);
-        fs.writeFileSync(tempHtmlPath, fullHtml, 'utf-8');
+        // Write temp HTML (fallback to os.tmpdir() if directory is read-only)
+        try {
+            fs.writeFileSync(tempHtmlPath, fullHtml, 'utf-8');
+        } catch (writeErr) {
+            console.warn('Could not write to markdown directory, falling back to temp folder:', writeErr.message);
+            tempHtmlPath = path.join(os.tmpdir(), `.localpdf-export-${Date.now()}.html`);
+            fs.writeFileSync(tempHtmlPath, fullHtml, 'utf-8');
+        }
 
         await printWindow.loadFile(tempHtmlPath);
         await printWindow.webContents.insertCSS(`body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }`);
@@ -627,11 +636,14 @@ ipcMain.handle('export-markdown-to-pdf', async (event, { html, title, options = 
         });
 
         printWindow.close();
-        fs.unlinkSync(tempHtmlPath);
         return { success: true, data: Array.from(pdfBuffer) };
     } catch (err) {
         console.error('export-markdown-to-pdf error:', err);
         return { success: false, error: err.message };
+    } finally {
+        if (tempHtmlPath) {
+            try { fs.unlinkSync(tempHtmlPath); } catch (_) { }
+        }
     }
 });
 
