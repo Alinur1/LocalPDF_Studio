@@ -185,8 +185,14 @@ export class SearchBar {
         this.showResults();
     }
 
-    openFile(filePath) {
-        createPdfTab(filePath, this.tabManager);
+    async openFile(filePath) {
+        const ext = filePath.toLowerCase().split('.').pop();
+        if (ext === 'md' || ext === 'markdown') {
+            const { default: createMarkdownTab } = await import('./createMarkdownTab.js');
+            await createMarkdownTab(filePath, this.tabManager);
+        } else if (ext === 'pdf') {
+            createPdfTab(filePath, this.tabManager);
+        }
         this.searchIndexManager.addFile(filePath);
         this.input.value = '';
         this.hideResults();

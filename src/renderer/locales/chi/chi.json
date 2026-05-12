@@ -2,6 +2,7 @@
   "_comment": "index.html part",
   "nav": {
     "open-pdf-btn": "打开PDF阅读器",
+    "open-markdown-btn": "打开Markdown",
     "tools-btn": "工具",
     "settings-btn": "设置",
     "about-btn": "关于",

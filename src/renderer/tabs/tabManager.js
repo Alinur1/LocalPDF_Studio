@@ -240,7 +240,10 @@ export default class TabManager {
         const tab = this.tabs.get(id);
 
         if (tab.onClose) {
-            try { tab.onClose(); } catch (err) { console.error(err); }
+            try {
+                const shouldClose = tab.onClose();
+                if (shouldClose === false) return;
+            } catch (err) { console.error(err); }
         }
 
         tab.tabButton.remove();

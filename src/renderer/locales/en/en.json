@@ -2,6 +2,7 @@
   "_comment": "index.html part",
   "nav": {
     "open-pdf-btn": "Open PDF Reader",
+    "open-markdown-btn": "Open Markdown",
     "tools-btn": "Tools",
     "settings-btn": "Settings",
     "about-btn": "About",

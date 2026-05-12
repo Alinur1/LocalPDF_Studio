@@ -29,7 +29,7 @@
     default-src 'self';
     script-src 'self';
     style-src 'self' 'unsafe-inline';
-    img-src 'self' data:;
+    img-src 'self' data: https: http: file:;
     connect-src 'self' http://localhost:*;">
 
     <link rel="stylesheet" href="./styles/main.css">
@@ -40,6 +40,7 @@
     <div id="app">
         <div class="top-bar">
             <button class="top-btn" id="open-pdf-btn" data-i18n="nav.open-pdf-btn">Open PDF Reader</button>
+            <button class="top-btn" id="open-markdown-btn" data-i18n="nav.open-markdown-btn">Open Markdown</button>
             <div class="tools-dropdown">
                 <button class="top-btn" id="tools-btn" data-i18n="nav.tools-btn">Tools</button>
                 <div class="tools-menu" id="tools-menu">

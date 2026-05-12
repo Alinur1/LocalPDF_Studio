@@ -2,6 +2,7 @@
   "_comment": "index.html part",
   "nav": {
     "open-pdf-btn": "PDFリーダーを開く",
+    "open-markdown-btn": "マークダウンを開く",
     "tools-btn": "ツール",
     "settings-btn": "設定",
     "about-btn": "について",

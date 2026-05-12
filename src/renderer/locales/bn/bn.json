@@ -2,6 +2,7 @@
   "_comment": "index.html part",
   "nav": {
     "open-pdf-btn": "পিডিএফ রিডার খুলুন",
+    "open-markdown-btn": "মার্কডাউন খুলুন",
     "tools-btn": "টুলস",
     "settings-btn": "সেটিংস",
     "about-btn": "সম্পর্কে",

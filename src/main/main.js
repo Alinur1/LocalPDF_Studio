@@ -412,7 +412,7 @@ if (!gotTheLock) {
 // Provide queued PDF files to renderer on demand (renderer-pull instead of main-push)
 ipcMain.handle('get-queued-pdf-files', async () => {
     if (openFileQueue.length === 0) return [];
-    
+
     console.log(`Providing ${openFileQueue.length} queued PDF file(s) to renderer`);
     const filesToSend = [...openFileQueue];
     openFileQueue = []; // Clear queue after sending
@@ -542,6 +542,97 @@ ipcMain.handle('select-pdf-and-image-files', async () => {
         ]
     });
     return result.canceled ? [] : result.filePaths;
+});
+
+ipcMain.handle('select-markdown-files', async () => {
+    const result = await dialog.showOpenDialog({
+        properties: ['openFile', 'multiSelections'],
+        filters: [
+            { name: 'Markdown Files', extensions: ['md', 'markdown', 'txt'] },
+            { name: 'All Files', extensions: ['*'] }
+        ]
+    });
+    return result.canceled ? [] : result.filePaths;
+});
+
+ipcMain.handle('read-markdown-file', async (event, filePath) => {
+    try {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        return content;
+    } catch (err) {
+        console.error('Error reading markdown file:', err);
+        throw err;
+    }
+});
+
+ipcMain.handle('save-markdown-file-direct', async (event, filePath, content) => {
+    try {
+        fs.writeFileSync(filePath, content, 'utf-8');
+        return { success: true };
+    } catch (err) {
+        console.error('Error saving markdown file:', err);
+        throw err;
+    }
+});
+
+ipcMain.handle('export-markdown-to-pdf', async (event, { html, title, options = {} }) => {
+    try {
+        const { BrowserWindow } = require('electron');
+        const path = require('path');
+        const os = require('os');
+        const fs = require('fs');
+
+        const printWindow = new BrowserWindow({
+            show: false,
+            webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true }
+        });
+
+        const appPath = app.isPackaged ? process.resourcesPath : app.getAppPath();
+        const cssPath = `file://${path.join(appPath, 'assets', 'css', 'github-markdown.css')}`;
+
+        const fullHtml = `<!doctype html>
+            <html lang="en">
+            <head>
+            <meta charset="utf-8">
+            <title>${title || 'Document'}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" href="${cssPath}">
+            <style>
+                body { padding: 0; margin: 0; background: #fff !important; }
+                .markdown-body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; padding: 45px; }
+                @media print {
+                .markdown-body { padding: 20mm; max-width: 100%; }
+                a { color: inherit; text-decoration: none; }
+                pre, code { white-space: pre-wrap; word-break: break-word; }
+                }
+            </style>
+            </head>
+            <body>
+            <article class="markdown-body">${html}</article>
+            </body>
+            </html>`;
+
+        const tempHtmlPath = path.join(os.tmpdir(), `md-export-${Date.now()}.html`);
+        fs.writeFileSync(tempHtmlPath, fullHtml, 'utf-8');
+
+        await printWindow.loadFile(tempHtmlPath);
+        await printWindow.webContents.insertCSS(`body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }`);
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        const pdfBuffer = await printWindow.webContents.printToPDF({
+            printBackground: true,
+            pageSize: options.pageSize || 'A4',
+            margins: { marginType: 'default' },
+            preferCSSPageSize: true
+        });
+
+        printWindow.close();
+        fs.unlinkSync(tempHtmlPath);
+        return { success: true, data: Array.from(pdfBuffer) };
+    } catch (err) {
+        console.error('export-markdown-to-pdf error:', err);
+        return { success: false, error: err.message };
+    }
 });
 
 ipcMain.handle('save-merged-pdf', async (event, arrayBuffer) => {

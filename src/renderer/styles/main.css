@@ -808,3 +808,138 @@ body.dark .search-result-item:hover .search-result-meta {
   background: var(--bg-tertiary);
   color: var(--text-tertiary);
 }
+
+/* Markdown Editor Styles */
+.markdown-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+}
+
+.markdown-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.markdown-btn {
+  padding: 6px 12px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.markdown-btn:hover {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.markdown-btn:active {
+  transform: scale(0.98);
+}
+
+.markdown-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 1px;
+  background: var(--border-color);
+}
+
+.markdown-editor-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  min-width: 300px;
+}
+
+.markdown-editor {
+  flex: 1;
+  padding: 16px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: none;
+  outline: none;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  caret-color: var(--accent-color);
+}
+
+.markdown-editor::selection {
+  background: var(--accent-color);
+  color: white;
+}
+
+.markdown-preview-pane {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg-secondary);
+  min-width: 300px;
+}
+
+.markdown-preview {
+  padding: 16px;
+  color: var(--text-primary);
+}
+
+body.dark .markdown-preview {
+  background: var(--bg-secondary);
+}
+
+body.light .markdown-preview {
+  background: var(--bg-secondary);
+}
+
+.markdown-editor::-webkit-scrollbar,
+.markdown-preview-pane::-webkit-scrollbar {
+  width: 8px;
+}
+
+.markdown-editor::-webkit-scrollbar-track,
+.markdown-preview-pane::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+
+.markdown-editor::-webkit-scrollbar-thumb,
+.markdown-preview-pane::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.markdown-editor::-webkit-scrollbar-thumb:hover,
+.markdown-preview-pane::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+.markdown-preview-pane {
+  background: var(--bg-secondary) !important;
+}
+
+.markdown-preview-pane .markdown-body {
+  min-height: 100%;
+  background: transparent !important;
+  color: var(--text-primary) !important;
+}
+
+/* Prevent github-markdown-css from overriding app theme backgrounds */
+body.light .markdown-preview-pane .markdown-body,
+body:not(.light) .markdown-preview-pane .markdown-body {
+  background: transparent !important;
+}

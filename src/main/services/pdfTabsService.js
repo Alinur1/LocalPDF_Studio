@@ -58,11 +58,12 @@ const pdfTabsService = {
         try {
             const state = {
                 activeTabId: activeTabId || null,
-                tabs: (tabs || []).map(({ tabId, filePath, title, tabOrder }) => ({
+                tabs: (tabs || []).map(({ tabId, filePath, title, tabOrder, type }) => ({
                     tab_id: tabId,
                     file_path: filePath,
                     title: title,
-                    tab_order: tabOrder
+                    tab_order: tabOrder,
+                    type: type || 'pdf'
                 }))
             };
             writeJSON(TABS_FILE, state);

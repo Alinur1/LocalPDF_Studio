@@ -22,6 +22,7 @@ import TabManager from './tabs/tabManager.js';
 import TabContextMenu from './tabs/tabContext.js';
 import { ClockManager } from './utils/clockManager.js';
 import createPdfTab from './utils/createPdfTab.js';
+import createMarkdownTab from './utils/createMarkdownTab.js';
 import customAlert from './utils/customAlert.js';
 import i18n from './utils/i18n.js';
 import { SearchBar } from './utils/searchBar.js';
@@ -38,6 +39,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const searchBar = new SearchBar(searchIndexManager, tabManager);
     const emptyState = document.getElementById('empty-state');
     const openPdfBtn = document.getElementById('open-pdf-btn');
+    const openMarkdownBtn = document.getElementById('open-markdown-btn');
     const settingsBtn = document.getElementById('settings-btn');
     const donateBtn = document.getElementById('donate-btn');
     const modal = document.getElementById('settings-modal');
@@ -260,6 +262,32 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    openMarkdownBtn.addEventListener('click', async () => {
+        if (isDialogOpen) return;
+
+        isDialogOpen = true;
+        openMarkdownBtn.disabled = true;
+        openMarkdownBtn.textContent = i18n.t('nav.selecting');
+
+        try {
+            const files = await window.electronAPI.selectMarkdownFiles();
+
+            if (files && files.length > 0) {
+                for (const filePath of files) {
+                    await createMarkdownTab(filePath, tabManager);
+                    searchIndexManager.addFile(filePath);
+                }
+                await saveTabs(tabManager);
+            }
+        } catch (error) {
+            console.error('Error opening markdown files:', error);
+        } finally {
+            isDialogOpen = false;
+            openMarkdownBtn.disabled = false;
+            openMarkdownBtn.textContent = i18n.t('nav.open-markdown-btn');
+        }
+    });
+
     // Handle files opened via OS "Open with LocalPDF Studio" or second-instance events
     if (window.electronAPI && window.electronAPI.onOpenFile) {
         window.electronAPI.onOpenFile(async (filePath) => {
@@ -356,18 +384,31 @@ window.addEventListener('DOMContentLoaded', async () => {
             const tabOrder = manager.getTabOrder();
 
             const tabs = Array.from(manager.tabs.entries()).map(([id, tab]) => {
-                const rawSrc = tab.content.querySelector('iframe')?.src || '';
-                let filePath = decodeURIComponent(
-                    rawSrc.replace(/^.*file:\/\//, '').replace(/\?.*$/, '')
-                );
-                if (/^\/[A-Za-z]:[\\/]/.test(filePath)) {
-                    filePath = filePath.slice(1);
+                let filePath = '';
+                let type = 'pdf'; // default filetype
+
+                // Markdown tabs
+                if (tab.type === 'markdown' && tab.filePath) {
+                    filePath = tab.filePath;
+                    type = 'markdown';
+                } else {
+                    // PDF tabs
+                    const rawSrc = tab.content.querySelector('iframe')?.src || '';
+                    filePath = decodeURIComponent(
+                        rawSrc.replace(/^.*file:\/\//, '').replace(/\?.*$/, '')
+                    );
+                    if (/^\/[A-Za-z]:[\\/]/.test(filePath)) {
+                        filePath = filePath.slice(1);
+                    }
+                    type = 'pdf';
                 }
+
                 return {
                     tabId: id,
                     filePath: filePath,
-                    title: tab.tabButton.querySelector('.tab-title')?.textContent || 'PDF',
-                    tabOrder: tabOrder.indexOf(id)   // preserve visual order
+                    title: tab.tabButton.querySelector('.tab-title')?.textContent || 'Untitled',
+                    tabOrder: tabOrder.indexOf(id),
+                    type: type
                 };
             });
 
@@ -392,7 +433,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 
             for (const tab of tabs) {
                 if (tab.file_path) {
-                    createPdfTab(tab.file_path, manager, tab.tab_id);
+                    const tabType = tab.type || 'pdf';
+                    if (tabType === 'markdown') {
+                        await createMarkdownTab(tab.file_path, manager, tab.tab_id);
+                    } else {
+                        createPdfTab(tab.file_path, manager, tab.tab_id);
+                    }
                 }
             }
 
