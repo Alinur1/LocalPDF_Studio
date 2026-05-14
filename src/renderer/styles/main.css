@@ -139,7 +139,7 @@ html {
   display: none;
   position: absolute;
   top: 100%;
-  left: 0;
+  left: -70px;
   background-color: var(--bg-tertiary);
   min-width: 480px;
   max-height: calc(100vh - 120px);
