@@ -164,6 +164,12 @@
         "name": "PDF Document",
         "description": "Open PDF with LocalPDF Studio",
         "role": "Viewer"
+      },
+      {
+        "ext": "md",
+        "name": "Markdown File",
+        "description": "Open Markdown with LocalPDF Studio",
+        "role": "Editor"
       }
     ]
   }

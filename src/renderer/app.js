@@ -292,7 +292,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (window.electronAPI && window.electronAPI.onOpenFile) {
         window.electronAPI.onOpenFile(async (filePath) => {
             try {
-                if (filePath) {
+                if (!filePath) return;
+                if (/\.md$/i.test(filePath)) {
+                    await createMarkdownTab(filePath, tabManager);
+                    searchIndexManager.addFile(filePath);
+                    await saveTabs(tabManager);
+                } else {
                     await openPdfFiles([filePath]);
                 }
             } catch (err) {
@@ -303,11 +308,19 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Request any queued PDF files that were opened before app was ready
     try {
-        if (window.electronAPI && window.electronAPI.getQueuedPdfFiles) {
-            const queuedFiles = await window.electronAPI.getQueuedPdfFiles();
+        if (window.electronAPI && window.electronAPI.getQueuedFiles) {
+            const queuedFiles = await window.electronAPI.getQueuedFiles();
             if (queuedFiles && queuedFiles.length > 0) {
                 console.log(`Received ${queuedFiles.length} queued PDF file(s)`);
-                await openPdfFiles(queuedFiles);
+                for (const filePath of queuedFiles) {
+                    if (/\.md$/i.test(filePath)) {
+                        await createMarkdownTab(filePath, tabManager);
+                        searchIndexManager.addFile(filePath);
+                    } else {
+                        await openPdfFiles([filePath]);
+                    }
+                }
+                await saveTabs(tabManager);
             }
         }
     } catch (err) {

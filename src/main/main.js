@@ -57,7 +57,7 @@ app.on('open-file', (event, filePath) => {
     try {
         event.preventDefault();
     } catch (e) { }
-    if (filePath && filePath.toLowerCase().endsWith('.pdf')) {
+    if (filePath && /\.(pdf|md)$/i.test(filePath)) {
         queueOrSendOpenFile(filePath);
     }
 });
@@ -66,7 +66,7 @@ app.on('open-file', (event, filePath) => {
 try {
     if (process && process.argv && Array.isArray(process.argv)) {
         for (const a of process.argv) {
-            if (typeof a === 'string' && a.toLowerCase().endsWith('.pdf')) {
+            if (typeof a === 'string' && /\.(pdf|md)$/i.test(a)) {
                 console.log('Found PDF in argv:', a);
                 queueOrSendOpenFile(path.resolve(a));
                 //break;  // Only process the first PDF
@@ -370,7 +370,7 @@ if (!gotTheLock) {
             if (argv && Array.isArray(argv)) {
                 // Look for PDF files in argv
                 for (const arg of argv) {
-                    if (typeof arg === 'string' && arg.toLowerCase().endsWith('.pdf')) {
+                    if (typeof arg === 'string' && /\.(pdf|md)$/i.test(arg)) {
                         const resolvedPath = path.resolve(workingDirectory, arg);
                         console.log('Opening PDF from second-instance:', resolvedPath);
                         queueOrSendOpenFile(resolvedPath);
@@ -410,7 +410,7 @@ if (!gotTheLock) {
 }
 
 // Provide queued PDF files to renderer on demand (renderer-pull instead of main-push)
-ipcMain.handle('get-queued-pdf-files', async () => {
+ipcMain.handle('get-queued-files', async () => {
     if (openFileQueue.length === 0) return [];
 
     console.log(`Providing ${openFileQueue.length} queued PDF file(s) to renderer`);
