@@ -177,7 +177,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     searchBar.setVisible(searchIndexManager.isEnabled());
 
-    async function migrateLocalStorageToSQLite() {
+    async function migrateLocalStorageToJson() {
         try {
             const oldTabsRaw = localStorage.getItem('pdfTabs');
             const oldIndexRaw = localStorage.getItem('pdfSearchIndex');
@@ -195,7 +195,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                     }).filter(Boolean);
 
                     await window.pdfTabsAPI.save(tabs, oldState.activeTabId || null);
-                    console.log(`Migration: moved ${tabs.length} tab(s) from localStorage to SQLite`);
+                    console.log(`Migration: moved ${tabs.length} tab(s) from localStorage to Json`);
                 }
                 localStorage.removeItem('pdfTabs');
             }
@@ -205,7 +205,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                     for (const file of oldIndex.files) {
                         await window.searchAPI.addEntry(file.filePath);
                     }
-                    console.log(`Migration: moved ${oldIndex.files.length} search entry/entries from localStorage to SQLite`);
+                    console.log(`Migration: moved ${oldIndex.files.length} search entry/entries from localStorage to Json`);
                 }
                 if (typeof oldIndex.enabled === 'boolean') {
                     localStorage.setItem('searchEnabled', oldIndex.enabled.toString());
@@ -213,11 +213,11 @@ window.addEventListener('DOMContentLoaded', async () => {
                 localStorage.removeItem('pdfSearchIndex');
             }
         } catch (err) {
-            console.error('migrateLocalStorageToSQLite error:', err);
+            console.error('migrateLocalStorageToJson error:', err);
         }
     }
 
-    await migrateLocalStorageToSQLite();
+    await migrateLocalStorageToJson();
     await restoreTabs(tabManager);
     updateEmptyState();
 
