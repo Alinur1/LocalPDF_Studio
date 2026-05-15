@@ -33,13 +33,13 @@
     "pdf-to-markdown": "PDF 转 Markdown"
   },
   "error": {
-    "empty-message": "未打开PDF。点击\"打开PDF阅读器\"开始使用！"
+    "empty-message": "没有打开的文件。点击“打开PDF阅读器”或“打开Markdown”开始使用!"
   },
   "settings": {
     "settings-title": "设置",
     "startup-behavior": "启动行为",
     "restore-session": "恢复会话",
-    "restore-session-desc": "自动重新打开上次会话中的所有PDF",
+    "restore-session-desc": "自动重新打开上次会话中的所有文件",
     "fresh-start": "全新开始",
     "fresh-start-desc": "每次都从头开始",
     "sidebar-note": "侧边栏布局和大小首选项始终被记住",
@@ -48,11 +48,11 @@
     "interface-language-desc": "选择应用程序的首选语言",
     "interface-section": "界面",
     "show-clock": "显示时钟",
-    "show-clock-desc": "未打开PDF时显示时间和日期",
+    "show-clock-desc": "没有打开文件时显示时间和日期",
     "search-history": "搜索和历史",
     "enable-search": "启用搜索栏",
-    "enable-search-desc": "快速查找并重新打开以前打开的PDF文件",
-    "search-note": "仅索引您在LocalPDF Studio中打开的PDF文件",
+    "enable-search-desc": "快速查找并重新打开之前打开过的文件",
+    "search-note": "仅索引您在 LocalPDF Studio 中打开过的文件",
     "clear-history-btn": "清除搜索历史",
     "auto-updates": "自动更新",
     "update-status": "正在检查更新...",
@@ -66,7 +66,7 @@
     "theme-system": "系统（自动）"
   },
   "search": {
-    "placeholder": "搜索已打开的 PDF...",
+    "placeholder": "搜索已打开的文件...",
     "noResults": "未找到匹配的 PDF",
     "fileNotFound": "文件未找到",
     "opened": "已打开",

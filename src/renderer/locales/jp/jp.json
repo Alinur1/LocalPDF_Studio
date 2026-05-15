@@ -33,13 +33,13 @@
     "pdf-to-markdown": "PDF から Markdown へ変換"
   },
   "error": {
-    "empty-message": "PDFが開かれていません。「PDFリーダーを開く」をクリックして開始してください！"
+    "empty-message": "開いているファイルはありません。 「PDFリーダーを開く」または「マークダウンを開く」をクリックして開始してください !"
   },
   "settings": {
     "settings-title": "設定",
     "startup-behavior": "起動時の動作",
     "restore-session": "セッションを復元",
-    "restore-session-desc": "前回のセッションからすべてのPDFを自動的に再度開く",
+    "restore-session-desc": "前回のセッションからすべてのファイルを自動的に再度開く",
     "fresh-start": "新規起動",
     "fresh-start-desc": "毎回クリーンな状態で開始",
     "sidebar-note": "サイドバーのレイアウトとサイズの設定は常に記憶されます",
@@ -48,11 +48,11 @@
     "interface-language-desc": "アプリケーションの優先言語を選択",
     "interface-section": "インターフェース",
     "show-clock": "時計を表示",
-    "show-clock-desc": "PDFが開かれていないときに時刻と日付を表示",
+    "show-clock-desc": "ファイルが開かれていないときに日時を表示する",
     "search-history": "検索と履歴",
     "enable-search": "検索バーを有効にする",
-    "enable-search-desc": "以前に開いたPDFファイルをすばやく検索して再度開く",
-    "search-note": "LocalPDF Studioで開いたPDFファイルのみをインデックス化",
+    "enable-search-desc": "以前に開いたファイルをすばやく見つけて再度開く",
+    "search-note": "LocalPDF Studio で開いたファイルのみをインデックスします",
     "clear-history-btn": "検索履歴をクリア",
     "auto-updates": "自動更新",
     "update-status": "更新を確認中...",
@@ -66,7 +66,7 @@
     "theme-system": "システム（自動）"
   },
   "search": {
-    "placeholder": "開いたPDFを検索...",
+    "placeholder": "開いているファイルを検索...",
     "noResults": "一致するPDFが見つかりません",
     "fileNotFound": "ファイルが見つかりません",
     "opened": "開いた",

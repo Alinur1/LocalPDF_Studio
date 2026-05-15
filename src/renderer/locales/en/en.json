@@ -33,13 +33,13 @@
     "pdf-to-markdown": "PDF to Markdown"
   },
   "error": {
-    "empty-message": "No PDFs open. Click \"Open PDF Reader\" to get started!"
+    "empty-message": "No files are open. Click \"Open PDF Reader\" or \"Open Markdown\" to get started!"
   },
   "settings": {
     "settings-title": "Settings",
     "startup-behavior": "Startup Behavior",
     "restore-session": "Restore Session",
-    "restore-session-desc": "Automatically reopen all PDFs from your last session",
+    "restore-session-desc": "Automatically reopen all files from your last session",
     "fresh-start": "Fresh Start",
     "fresh-start-desc": "Start with a clean slate every time",
     "sidebar-note": "Sidebar layout and size preferences are always remembered",
@@ -48,11 +48,11 @@
     "interface-language-desc": "Select your preferred language for the application",
     "interface-section": "Interface",
     "show-clock": "Show Clock",
-    "show-clock-desc": "Display time and date when no PDFs are open",
+    "show-clock-desc": "Display time and date when no files are open",
     "search-history": "Search & History",
     "enable-search": "Enable Search Bar",
-    "enable-search-desc": "Quickly find and reopen previously opened PDF files",
-    "search-note": "Only indexes PDF files you've opened in LocalPDF Studio",
+    "enable-search-desc": "Quickly find and reopen previously opened files",
+    "search-note": "Only indexes the files that you've opened in LocalPDF Studio",
     "clear-history-btn": "Clear Search History",
     "auto-updates": "Auto-updates",
     "update-status": "Checking for updates...",
@@ -66,7 +66,7 @@
     "theme-system": "System (Auto)"
   },
   "search": {
-    "placeholder": "Search opened PDFs...",
+    "placeholder": "Search opened files...",
     "noResults": "No matching PDFs found",
     "fileNotFound": "File not found",
     "opened": "Opened",
