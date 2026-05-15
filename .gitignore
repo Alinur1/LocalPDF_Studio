@@ -594,3 +594,4 @@ FodyWeavers.xsd
 /assets/backend_win
 /assets/backend_linux
 /assets/backend_mac
+*.lscache
