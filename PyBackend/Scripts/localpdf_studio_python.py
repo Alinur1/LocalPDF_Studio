@@ -935,11 +935,17 @@ def _convert(input_path, output_folder, pdf_stem, options):
         if include_images:
             # Create a temp dir
             tmp_image_dir = tempfile.mkdtemp(prefix="localpdf_md_images_")
-            # Add trailing separator for pymupdf4llm
+            # Resolve symlinks so pymupdf4llm and the regex both use the same real path
+            tmp_image_dir  = os.path.realpath(tmp_image_dir)
             image_path_arg = tmp_image_dir.rstrip("/\\") + os.sep
         else:
             image_path_arg = None
 
+        # note:
+        # kwargs should be built dynamically — older pymupdf4llm versions running in
+        # "legacy mode" do not support header/footer/char_margin/show_warning
+        # and print a warning to stdout if they are passed, which breaks JSON
+        # parsing on the C# side. probe the API and only pass what's supported.
         import inspect as _inspect
         _supported = set(_inspect.signature(pymupdf4llm.to_markdown).parameters.keys())
 
@@ -965,9 +971,6 @@ def _convert(input_path, output_folder, pdf_stem, options):
         if include_images and tmp_image_dir and os.path.isdir(tmp_image_dir):
             image_extensions = (".png", ".jpg", ".jpeg", ".webp")
 
-            # Move every extracted image from temp dir to output_folder
-            normalised_tmp = os.path.normpath(tmp_image_dir).replace("\\", "/")
-            
             for fname in os.listdir(tmp_image_dir):
                 if not fname.lower().endswith(image_extensions):
                     continue
@@ -976,6 +979,7 @@ def _convert(input_path, output_folder, pdf_stem, options):
                 shutil.move(src, dest)
                 asset_count += 1
 
+            normalised_tmp = os.path.realpath(tmp_image_dir).replace("\\", "/").rstrip("/")
             md_text = md_text.replace("\\", "/")
             md_text = re.sub(
                 re.escape(normalised_tmp) + r"[/\\]?",
