@@ -60,6 +60,7 @@ parts:
       - gcc
       - g++
       - make
+      - dotnet-sdk-8.0
     source: .
     plugin: nil
     override-build: |
@@ -70,11 +71,12 @@ parts:
       hash -r
       echo "Node version: $(node -v)"
       echo "NPM version: $(npm -v)"
+      echo "Dotnet version: $(dotnet --version)"
       mkdir -p $SNAPCRAFT_PART_INSTALL/meta/gui
       cp localpdf-studio.desktop $SNAPCRAFT_PART_INSTALL/meta/gui/
       cp assets/icons/app_icon_linux.png $SNAPCRAFT_PART_INSTALL/meta/gui/
       npm install
-      npx electron-builder --dir --linux
+      npm run pack
       UNPACKED_DIR=$(ls -d build/*-unpacked | head -1)
       cp -rv $UNPACKED_DIR/* $SNAPCRAFT_PART_INSTALL/
       GS_TARGET=$SNAPCRAFT_PART_INSTALL/resources/assets/backend_linux/compiled-ghostscript

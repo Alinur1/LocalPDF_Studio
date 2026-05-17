@@ -80,7 +80,7 @@ async function setup() {
             }
 
             console.log("Installing Python packages...");
-            execSync(`"${pythonExe}" -m pip install -r "${requirements}" --target "${vendorDir}"`);
+            execSync(`"${pythonExe}" -E -m pip install -r "${requirements}" --target "${vendorDir}"`);
         } catch (err) {
             console.error("Python Engine setup failed:", err.message);
             process.exit(1);

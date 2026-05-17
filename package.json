@@ -53,7 +53,7 @@
     },
     "files": [
       "src/**/*",
-      "assets/icons/**/*",
+      "assets/**/*",
       "package.json"
     ],
     "extraResources": [
