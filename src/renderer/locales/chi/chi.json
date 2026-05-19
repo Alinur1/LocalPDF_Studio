@@ -1105,7 +1105,7 @@
     "split-btn": "拆分 PDF (垂直)"
   },
   "pdfToMarkdown": {
-    "page-title": "PDF 转 Markdown",
+    "page-title": "PDF 转 Markdown (实验性) ",
     "options-title": "转换选项",
     "include-images": "提取并包含图片",
     "include-images-help": "图片将保存到与 Markdown 文件相同的位置。",

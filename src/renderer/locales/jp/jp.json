@@ -1105,7 +1105,7 @@
     "split-btn": "PDF を分割（垂直）"
   },
   "pdfToMarkdown": {
-    "page-title": "PDF から Markdown へ変換",
+    "page-title": "PDF から Markdown へ変換（実験的）",
     "options-title": "変換オプション",
     "include-images": "画像を抽出して含める",
     "include-images-help": "画像は Markdown ファイルと同じ場所に保存されます。",

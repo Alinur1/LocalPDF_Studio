@@ -1105,7 +1105,7 @@
     "split-btn": "PDF বিভক্ত করুন (উল্লম্বভাবে)"
   },
   "pdfToMarkdown": {
-    "page-title": "PDF থেকে Markdown",
+    "page-title": "PDF থেকে Markdown (পরীক্ষামূলক)",
     "options-title": "কনভার্শন অপশন",
     "include-images": "ইমেজ এক্সট্রাক্ট ও অন্তর্ভুক্ত করুন",
     "include-images-help": "ইমেজ মার্কডাউন ফাইলের সাথে একই অবস্থানে সংরক্ষিত হবে।",

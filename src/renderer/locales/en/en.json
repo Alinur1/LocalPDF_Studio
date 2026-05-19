@@ -1105,7 +1105,7 @@
     "split-btn": "Split PDF (Vertical)"
   },
   "pdfToMarkdown": {
-    "page-title": "PDF to Markdown",
+    "page-title": "PDF to Markdown (Experimental)",
     "options-title": "Conversion Options",
     "include-images": "Extract and include images",
     "include-images-help": "Images are saved to the same location with the markdown file.",
