@@ -702,8 +702,22 @@ ipcMain.handle('save-zip-file', async (event, { filename, buffer }) => {
 });
 
 ipcMain.handle('save-pdf-file', async (event, { filename, buffer }) => {
+    let cleanFileName = filename;
+    if (filename.includes('/') || filename.includes('\\')) {
+        cleanFileName = filename.split(/[/\\]/).pop();
+    }
+    if (!cleanFileName) {
+        cleanFileName = 'untitled_document.pdf';
+    }
+    let safeDefaultPath;
+    try {
+        safeDefaultPath = path.join(app.getPath('documents'), cleanFileName);
+    } catch (e) {
+        safeDefaultPath = path.join(app.getPath('downloads'), cleanFileName);
+    }
+
     const { filePath, canceled } = await dialog.showSaveDialog({
-        defaultPath: filename,
+        defaultPath: safeDefaultPath,
         filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
     });
 
@@ -726,7 +740,7 @@ ipcMain.handle('save-pdf-file', async (event, { filename, buffer }) => {
         fs.writeFileSync(filePath, nodeBuffer);
         return filePath;
     } catch (err) {
-        console.error("Failed to save file:", err);
+        console.error("Failed to save file across platform:", err);
         return null;
     }
 });
