@@ -195,7 +195,7 @@ export default function createPdfTab(filePath, tabManager, existingId = null) {
             }
 
             // Forward Ctrl/Cmd+Tab and Ctrl/Cmd+Shift+Tab
-            if (ctrlOrCmd && e.key === 'Tab') {
+            if (e.ctrlKey && e.key === 'Tab') {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 window.dispatchEvent(new KeyboardEvent('keydown', {

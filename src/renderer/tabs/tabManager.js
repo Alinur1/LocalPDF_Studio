@@ -45,15 +45,14 @@ export default class TabManager {
             }
 
             // Ctrl/Cmd+Tab = Next tab
-            if (ctrlOrCmd && e.key === 'Tab' && !e.shiftKey) {
-                e.preventDefault();
-                this.switchToNextTab();
-            }
-
             // Ctrl/Cmd+Shift+Tab = Previous tab
-            if (ctrlOrCmd && e.key === 'Tab' && e.shiftKey) {
+            if (e.ctrlKey && e.key === 'Tab') {
                 e.preventDefault();
-                this.switchToPreviousTab();
+                if (e.shiftKey) {
+                    this.switchToPreviousTab();
+                } else {
+                    this.switchToNextTab();
+                }
             }
         });
     }
