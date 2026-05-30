@@ -135,23 +135,187 @@ def _watermark_add_tiled_high_quality(page, text, font_size, text_color, opacity
     pix = None
 
 
+_WATERMARK_DEFAULT_CJK_RANGES = [
+    (0x3000, 0x303F),  # CJK Symbols and Punctuation
+    (0x3040, 0x309F),  # Hiragana
+    (0x30A0, 0x30FF),  # Katakana
+    (0x3400, 0x4DBF),  # CJK Unified Ideographs Extension A
+    (0x4E00, 0x9FFF),  # CJK Unified Ideographs
+    (0xAC00, 0xD7AF),  # Hangul Syllables
+    (0xFF00, 0xFFEF),  # Halfwidth and Fullwidth Forms
+]
+
+_WATERMARK_DEFAULT_LATIN_FONTS = [
+    "arial.ttf", "Arial.ttf",
+    "C:/Windows/Fonts/arial.ttf",
+    "C:/Windows/Fonts/tahoma.ttf",
+    "C:/Windows/Fonts/verdana.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+    "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+    "/Library/Fonts/Arial.ttf",
+    "/Library/Fonts/Verdana.ttf",
+    "/System/Library/Fonts/Helvetica.ttc",
+    "/System/Library/Fonts/Arial.ttf",
+]
+
+
+def _watermark_default_cjk_fonts():
+    # Computed at call time so that paths resolve against this script's
+    # actual location (which differs between dev source, packaged app,
+    # and after scripts/setup-backend.js syncs the script).
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    return [
+        # Bundled with the app — packaged layout (extraResources) and
+        # dev layout after scripts/setup-backend.js syncs the script.
+        # script_dir = .../assets/backend_<os>/PyBackend/Scripts
+        # font       = .../assets/fonts/GoNotoCJKCore.ttf
+        os.path.join(script_dir, "..", "..", "..", "fonts", "GoNotoCJKCore.ttf"),
+        # Repo source layout (running the script from PyBackend/Scripts directly).
+        os.path.join(script_dir, "..", "..", "assets", "fonts", "GoNotoCJKCore.ttf"),
+        # If anyone later places a font alongside PyBackend.
+        os.path.join(script_dir, "..", "Fonts", "GoNotoCJKCore.ttf"),
+        # macOS system CJK fonts.
+        "/System/Library/Fonts/PingFang.ttc",
+        "/System/Library/Fonts/STHeiti Medium.ttc",
+        "/System/Library/Fonts/STHeiti Light.ttc",
+        "/System/Library/Fonts/Hiragino Sans GB.ttc",
+        "/Library/Fonts/Arial Unicode.ttf",
+        # Windows system CJK fonts.
+        "C:/Windows/Fonts/msyh.ttc",      # Microsoft YaHei
+        "C:/Windows/Fonts/msyhbd.ttc",
+        "C:/Windows/Fonts/simsun.ttc",    # SimSun
+        "C:/Windows/Fonts/simhei.ttf",    # SimHei
+        "C:/Windows/Fonts/yugothm.ttc",   # Yu Gothic Medium (JP)
+        "C:/Windows/Fonts/msgothic.ttc",  # MS Gothic (JP)
+        "C:/Windows/Fonts/malgun.ttf",    # Malgun Gothic (KR)
+        # Linux distributions.
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.otf",
+        "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+        "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
+        "/usr/share/fonts/truetype/arphic/uming.ttc",
+    ]
+
+
+# Cache filled lazily on first call. Sentinel `False` means "not yet loaded";
+# resolved value (dict or None) replaces it on first read.
+_WATERMARK_FONT_CONFIG_CACHE = False
+
+
+def _watermark_load_font_config():
+    """Load watermark font configuration from a JSON file (each key optional).
+
+    Search order:
+      1. $LOCALPDF_WATERMARK_FONTS_CONFIG (absolute path to a JSON file)
+      2. <script_dir>/watermark_fonts.json
+
+    Schema (any subset; missing keys fall back to hardcoded defaults; the
+    file itself is also optional):
+
+        {
+          "cjk_font_paths":     ["/abs/path.ttf", "../relative/to/config.ttf"],
+          "latin_font_paths":   ["..."],
+          "cjk_unicode_ranges": [["4E00", "9FFF"], ["3040", "309F"]]
+        }
+
+    Relative `*_font_paths` are resolved against the config file's directory.
+    Range bounds may be hex strings ("4E00") or ints (20000).
+    Any parse error → fall back to defaults silently.
+    """
+    global _WATERMARK_FONT_CONFIG_CACHE
+    if _WATERMARK_FONT_CONFIG_CACHE is not False:
+        return _WATERMARK_FONT_CONFIG_CACHE
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = []
+    env = os.environ.get("LOCALPDF_WATERMARK_FONTS_CONFIG", "")
+    if env:
+        candidates.append(env)
+    candidates.append(os.path.join(script_dir, "watermark_fonts.json"))
+
+    for path in candidates:
+        if not path or not os.path.isfile(path):
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+            base = os.path.dirname(os.path.abspath(path))
+            _WATERMARK_FONT_CONFIG_CACHE = {
+                "cjk_fonts":   _watermark_normalize_paths(cfg.get("cjk_font_paths"), base),
+                "latin_fonts": _watermark_normalize_paths(cfg.get("latin_font_paths"), base),
+                "cjk_ranges":  _watermark_normalize_ranges(cfg.get("cjk_unicode_ranges")),
+                "_source":     path,
+            }
+            return _WATERMARK_FONT_CONFIG_CACHE
+        except Exception:
+            continue
+
+    _WATERMARK_FONT_CONFIG_CACHE = None
+    return None
+
+
+def _watermark_normalize_paths(paths, base):
+    if not isinstance(paths, list):
+        return None
+    out = []
+    for p in paths:
+        if not isinstance(p, str) or not p:
+            continue
+        out.append(p if os.path.isabs(p) else os.path.normpath(os.path.join(base, p)))
+    return out or None
+
+
+def _watermark_normalize_ranges(ranges):
+    if not isinstance(ranges, list):
+        return None
+    out = []
+    for r in ranges:
+        if not isinstance(r, (list, tuple)) or len(r) != 2:
+            continue
+        try:
+            lo = int(r[0], 16) if isinstance(r[0], str) else int(r[0])
+            hi = int(r[1], 16) if isinstance(r[1], str) else int(r[1])
+        except (ValueError, TypeError):
+            continue
+        if lo <= hi:
+            out.append((lo, hi))
+    return out or None
+
+
+def _watermark_has_cjk(text):
+    # True if `text` contains Chinese / Japanese / Korean characters.
+    # Latin fonts (Arial, Helvetica, DejaVu, ...) lack these glyphs and
+    # render them as .notdef boxes ("tofu"), so we need a CJK-capable font.
+    cfg = _watermark_load_font_config()
+    ranges = (cfg or {}).get("cjk_ranges") or _WATERMARK_DEFAULT_CJK_RANGES
+    for ch in text or "":
+        cp = ord(ch)
+        for lo, hi in ranges:
+            if lo <= cp <= hi:
+                return True
+    return False
+
+
+def _watermark_cjk_font_paths():
+    cfg = _watermark_load_font_config()
+    return (cfg or {}).get("cjk_fonts") or _watermark_default_cjk_fonts()
+
+
+def _watermark_latin_font_paths():
+    cfg = _watermark_load_font_config()
+    return (cfg or {}).get("latin_fonts") or _WATERMARK_DEFAULT_LATIN_FONTS
+
+
 def _watermark_create_high_quality_image(text, font_size, text_color, opacity, rotation):
     dpi = 300
     scale_factor = dpi / 72.0
-    font_paths = [
-        "arial.ttf", "Arial.ttf",
-        "C:/Windows/Fonts/arial.ttf",
-        "C:/Windows/Fonts/tahoma.ttf",
-        "C:/Windows/Fonts/verdana.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
-        "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
-        "/Library/Fonts/Arial.ttf",
-        "/Library/Fonts/Verdana.ttf",
-        "/System/Library/Fonts/Helvetica.ttc",
-        "/System/Library/Fonts/Arial.ttf"
-    ]
+    if _watermark_has_cjk(text):
+        font_paths = _watermark_cjk_font_paths() + _watermark_latin_font_paths()
+    else:
+        font_paths = _watermark_latin_font_paths()
     font = None
     for font_path in font_paths:
         try:
