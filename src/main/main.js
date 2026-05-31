@@ -1475,3 +1475,13 @@ ipcMain.handle('search-get-all', () => {
 ipcMain.handle('search-clear', () => {
     return pdfTabsService.clearSearchIndex();
 });
+
+ipcMain.handle('select-pdf-and-markdown-files', async () => {
+    const result = await dialog.showOpenDialog({
+        properties: ['openFile', 'multiSelections'],
+        filters: [
+            { name: 'PDF & Markdown', extensions: ['pdf', 'md'] }
+        ]
+    });
+    return result.canceled ? [] : result.filePaths;
+});

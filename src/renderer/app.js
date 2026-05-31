@@ -38,8 +38,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const searchIndexManager = new SearchIndexManager();
     const searchBar = new SearchBar(searchIndexManager, tabManager);
     const emptyState = document.getElementById('empty-state');
-    const openPdfBtn = document.getElementById('open-pdf-btn');
-    const openMarkdownBtn = document.getElementById('open-markdown-btn');
+    const openFilesBtn = document.getElementById('open-files-btn');
     const settingsBtn = document.getElementById('settings-btn');
     const donateBtn = document.getElementById('donate-btn');
     const modal = document.getElementById('settings-modal');
@@ -234,57 +233,33 @@ window.addEventListener('DOMContentLoaded', async () => {
         await saveTabs(tabManager);
     }
 
-    openPdfBtn.addEventListener('click', async () => {
+    openFilesBtn.addEventListener('click', async () => {
         if (isDialogOpen) return;
 
         isDialogOpen = true;
-        openPdfBtn.disabled = true;
-        // openPdfBtn.textContent = 'Selecting...';
-        openPdfBtn.textContent = i18n.t('nav.selecting');
+        openFilesBtn.disabled = true;
+        openFilesBtn.textContent = i18n.t('nav.selecting');
 
         try {
-            const files = await window.electronAPI.selectPdfs();
+            const files = await window.electronAPI.selectPdfAndMarkdown();
 
             if (files && files.length > 0) {
                 for (const filePath of files) {
-                    createPdfTab(filePath, tabManager);
+                    if (/\.md$/i.test(filePath)) {
+                        await createMarkdownTab(filePath, tabManager);
+                    } else {
+                        createPdfTab(filePath, tabManager);
+                    }
                     searchIndexManager.addFile(filePath);
                 }
                 await saveTabs(tabManager);
             }
         } catch (error) {
-            console.error('Error opening PDFs:', error);
+            console.error('Error opening files:', error);
         } finally {
             isDialogOpen = false;
-            openPdfBtn.disabled = false;
-            // openPdfBtn.textContent = 'Open PDF Reader';
-            openPdfBtn.textContent = i18n.t('nav.open-pdf-btn');
-        }
-    });
-
-    openMarkdownBtn.addEventListener('click', async () => {
-        if (isDialogOpen) return;
-
-        isDialogOpen = true;
-        openMarkdownBtn.disabled = true;
-        openMarkdownBtn.textContent = i18n.t('nav.selecting');
-
-        try {
-            const files = await window.electronAPI.selectMarkdownFiles();
-
-            if (files && files.length > 0) {
-                for (const filePath of files) {
-                    await createMarkdownTab(filePath, tabManager);
-                    searchIndexManager.addFile(filePath);
-                }
-                await saveTabs(tabManager);
-            }
-        } catch (error) {
-            console.error('Error opening markdown files:', error);
-        } finally {
-            isDialogOpen = false;
-            openMarkdownBtn.disabled = false;
-            openMarkdownBtn.textContent = i18n.t('nav.open-markdown-btn');
+            openFilesBtn.disabled = false;
+            openFilesBtn.textContent = 'Open PDF/Markdown viewer';
         }
     });
 

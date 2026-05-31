@@ -25,6 +25,7 @@ const path = require('path');
 contextBridge.exposeInMainWorld('electronAPI', {
     selectPdfs: () => ipcRenderer.invoke('select-pdf-files'),
     selectPdfsAndImages: () => ipcRenderer.invoke('select-pdf-and-image-files'),
+    selectPdfAndMarkdown: () => ipcRenderer.invoke('select-pdf-and-markdown-files'),
     openExternal: (url) => ipcRenderer.send('open-external-link', url),
     getFileInfo: (path) => {
         try {
