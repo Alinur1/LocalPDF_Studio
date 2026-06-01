@@ -338,12 +338,48 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     const tabBar = document.getElementById('tab-bar');
     const resizer = document.getElementById('resizer');
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
 
     tabBar.style.width = '220px';
     const savedWidth = localStorage.getItem('sidebarWidth');
     if (savedWidth) {
         tabBar.style.width = savedWidth;
     }
+
+    // Sidebar visibility toggle
+    const sidebarVisible = localStorage.getItem('sidebarVisible') !== 'false';
+    
+    function updateSidebarState(visible) {
+        if (visible) {
+            tabBar.classList.remove('sidebar-hidden');
+            resizer.classList.remove('sidebar-hidden');
+            tabBar.style.display = 'flex';
+            localStorage.setItem('sidebarVisible', 'true');
+        } else {
+            tabBar.classList.add('sidebar-hidden');
+            resizer.classList.add('sidebar-hidden');
+            tabBar.style.display = 'none';
+            localStorage.setItem('sidebarVisible', 'false');
+        }
+    }
+
+    // Initialize sidebar visibility
+    updateSidebarState(sidebarVisible);
+
+    // Toggle sidebar on button click
+    sidebarToggleBtn.addEventListener('click', () => {
+        const isVisible = tabBar.style.display !== 'none';
+        updateSidebarState(!isVisible);
+    });
+
+    // Toggle sidebar with Ctrl+B
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+            e.preventDefault();
+            const isVisible = tabBar.style.display !== 'none';
+            updateSidebarState(!isVisible);
+        }
+    });
 
     resizer.addEventListener('mousedown', (e) => {
         e.preventDefault();

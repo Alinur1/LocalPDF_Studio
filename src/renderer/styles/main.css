@@ -129,6 +129,13 @@ html {
   transform: none !important;
 }
 
+#sidebar-toggle-btn {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .tools-dropdown {
   position: relative;
   display: inline-block;
@@ -207,10 +214,21 @@ html {
   padding-top: 5px;
 }
 
+#tab-bar.sidebar-hidden {
+  width: 0 !important;
+  overflow: hidden;
+}
+
 .resizer {
   width: 5px;
   cursor: col-resize;
   background: var(--border-color);
+}
+
+.resizer.sidebar-hidden {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .resizer:hover {
