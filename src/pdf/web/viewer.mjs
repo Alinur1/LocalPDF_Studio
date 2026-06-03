@@ -19392,7 +19392,7 @@ window.addEventListener('keydown', function (e) {
     }
   }
 
-  // Forward Ctrl/Cmd+Tab and Ctrl/Cmd+Shift+Tab for tab switching
+  // Forward Ctrl+Tab and Ctrl+Shift+Tab for tab switching
   if (e.ctrlKey && e.key === 'Tab') {
     e.preventDefault();
     e.stopImmediatePropagation();

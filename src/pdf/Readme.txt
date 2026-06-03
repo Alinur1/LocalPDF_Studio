@@ -151,8 +151,8 @@ window.addEventListener('keydown', function (e) {
     }
   }
 
-  // Forward Ctrl/Cmd+Tab and Ctrl/Cmd+Shift+Tab for tab switching
-  if (ctrlOrCmd && e.key === 'Tab') {
+  // Forward Ctrl+Tab and Ctrl+Shift+Tab for tab switching
+  if (e.ctrlKey && e.key === 'Tab') {
     e.preventDefault();
     e.stopImmediatePropagation();
     if (window.parent && window.parent !== window) {
@@ -160,6 +160,15 @@ window.addEventListener('keydown', function (e) {
         type: 'switch-tab',
         direction: e.shiftKey ? 'previous' : 'next'
       }, '*');
+    }
+  }
+
+  // Forward Ctrl/Cmd+B to toggle sidebar
+  if (ctrlOrCmd && e.key.toLowerCase() === 'b') {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'toggle-sidebar' }, '*');
     }
   }
 }, true);
