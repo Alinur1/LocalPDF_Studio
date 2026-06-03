@@ -334,6 +334,12 @@ window.addEventListener('DOMContentLoaded', async () => {
                 tabManager.switchToPreviousTab();
             }
         }
+
+        // Toggle sidebar = Ctrl/Cmd+B
+        if (event.data?.type === 'toggle-sidebar') {
+            const isVisible = tabBar.style.display !== 'none';
+            updateSidebarState(!isVisible);
+        }
     });
 
     const tabBar = document.getElementById('tab-bar');
@@ -372,9 +378,12 @@ window.addEventListener('DOMContentLoaded', async () => {
         updateSidebarState(!isVisible);
     });
 
-    // Toggle sidebar with Ctrl+B
+    // Toggle sidebar with Ctrl+B (Windows/Linux) or Cmd+B (macOS)
     document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        const isMac = navigator.platform.toUpperCase().includes('MAC');
+        const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+        if (ctrlOrCmd && e.key.toLowerCase() === 'b') {
             e.preventDefault();
             const isVisible = tabBar.style.display !== 'none';
             updateSidebarState(!isVisible);

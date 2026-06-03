@@ -19403,6 +19403,15 @@ window.addEventListener('keydown', function (e) {
       }, '*');
     }
   }
+
+  // Forward Ctrl/Cmd+B to toggle sidebar
+  if (ctrlOrCmd && e.key.toLowerCase() === 'b') {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'toggle-sidebar' }, '*');
+    }
+  }
 }, true);
 
 // LocalPDF Studio — handle save, print, find, and zoom reset commands from parent
