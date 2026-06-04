@@ -32,7 +32,7 @@
     "pdf-to-markdown": "PDF to Markdown"
   },
   "error": {
-    "empty-message": "No files are open. Click \"Open PDF Reader\" or \"Open Markdown\" to get started!"
+    "empty-message": "No files are open. Click \"Open PDF/Markdown viewer\" to get started!"
   },
   "settings": {
     "settings-title": "Settings",

@@ -32,7 +32,7 @@
     "pdf-to-markdown": "PDF 转 Markdown"
   },
   "error": {
-    "empty-message": "没有打开的文件。点击“打开PDF阅读器”或“打开Markdown”开始使用!"
+    "empty-message": "没有打开的文件。点击“打开 PDF/Markdown 查看器”开始使用!"
   },
   "settings": {
     "settings-title": "设置",

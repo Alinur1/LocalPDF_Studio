@@ -32,7 +32,7 @@
     "pdf-to-markdown": "PDF から Markdown へ変換"
   },
   "error": {
-    "empty-message": "開いているファイルはありません。 「PDFリーダーを開く」または「マークダウンを開く」をクリックして開始してください !"
+    "empty-message": "開いているファイルはありません。 「PDF/Markdown ビューアを開く」をクリックして開始してください!"
   },
   "settings": {
     "settings-title": "設定",
