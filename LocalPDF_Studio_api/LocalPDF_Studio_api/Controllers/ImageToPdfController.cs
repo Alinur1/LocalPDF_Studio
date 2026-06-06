@@ -38,6 +38,7 @@ namespace LocalPDF_Studio_api.Controllers
         }
 
         [HttpPost("convert")]
+        [DisableRequestSizeLimit]
         public async Task<IActionResult> ConvertImagesToPdf()
         {
             try
