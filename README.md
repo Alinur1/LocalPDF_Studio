@@ -105,7 +105,6 @@ If this tool protects your data, replaces something you never fully trusted, or 
 
 ## Download
 
-**Version 4.0.1 is out — and this is just the beginning.**
 
 **[⬇️ Download LocalPDF Studio](https://lnkd.in/gNA4rd9Y)**
 
@@ -206,7 +205,7 @@ If LocalPDF Studio is useful to you, the best thing you can do is **pass it on**
 
 ⭐ Leave a review on [AlternativeTo](https://alternativeto.net/software/localpdf-studio/about/)
 
-📣 [Facebook Page](https://lnkd.in/gRDG9jHq)
+📣 [Facebook Page](https://web.facebook.com/profile.php?id=61587042059878)
 
 The only thing that keeps a project like this alive is people who believe in what it stands for.
 
