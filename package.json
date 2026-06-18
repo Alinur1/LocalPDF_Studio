@@ -174,5 +174,6 @@
         "role": "Editor"
       }
     ]
-  }
+  },
+  "packageManager": "yarn@4.17.0"
 }
