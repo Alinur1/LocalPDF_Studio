@@ -123,7 +123,7 @@ Supported on **Windows**, **Linux**, and **macOS** (x86_64).
 | **Python** | 3.8.10+ *(optional)* |
 | **Architecture** | x86_64 (Intel/AMD) |
 
-> **ARM64 users:** See the [ARM64 build guide](#arm64-custom-build) below.
+> **ARM64 users:** See the ***ARM64 build guide*** below.
 
 ---
 
@@ -191,7 +191,7 @@ LocalPDF Studio currently bundles **x86_64** binaries only. ARM64 is unsupported
 
 Or browse all builds: [python-build-standalone releases](https://github.com/astral-sh/python-build-standalone/releases/tag/20260414)
 
-> ⚠️ Custom ARM builds are unsupported. Ensure .NET 8 SDK is installed before building.
+> ⚠️ Ensure .NET 8 SDK is installed before building.
 
 ---
 
