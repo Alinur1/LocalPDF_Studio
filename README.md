@@ -106,7 +106,7 @@ If this tool protects your data, replaces something you never fully trusted, or 
 ## Download
 
 
-**[⬇️ Download LocalPDF Studio](https://lnkd.in/gNA4rd9Y)**
+**[⬇️ Download LocalPDF Studio](https://github.com/Alinur1/LocalPDF_Studio/releases)**
 
 Supported on **Windows**, **Linux**, and **macOS** (x86_64).
 
