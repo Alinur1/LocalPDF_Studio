@@ -259,7 +259,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         } finally {
             isDialogOpen = false;
             openFilesBtn.disabled = false;
-            openFilesBtn.textContent = 'Open PDF/Markdown viewer';
+            openFilesBtn.textContent = i18n.t('nav.open-files-btn');
         }
     });
 
