@@ -146,7 +146,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     const statusIndicator = document.createElement('span');
     statusIndicator.style.cssText = `margin-left: auto; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;`;
 
-    toolbar.append(saveBtn, toggleEditorBtn, layoutBtn, insertImageBtn, zoomContainer, statusIndicator);
+    toolbar.append(saveBtn, toggleEditorBtn, layoutBtn, zoomContainer, statusIndicator);
 
     // Content Area
     const contentArea = document.createElement('div');
