@@ -389,7 +389,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     function updateZoom() {
         zoomLevel.textContent = Math.round(editorZoom) + '%';
         editor.style.fontSize = (14 * editorZoom / 100) + 'px';
-        preview.style.fontSize = (14 * previewZoom / 100) + 'px';
+        preview.style.fontSize = (16 * previewZoom / 100) + 'px';
     }
 
     zoomInBtn.addEventListener('click', () => {
