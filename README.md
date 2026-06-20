@@ -106,7 +106,7 @@ If this tool protects your data, replaces something you never fully trusted, or 
 ## Download
 
 
-**[⬇️ Download LocalPDF Studio](https://lnkd.in/gNA4rd9Y)**
+**[⬇️ Download LocalPDF Studio](https://github.com/Alinur1/LocalPDF_Studio/releases)**
 
 Supported on **Windows**, **Linux**, and **macOS** (x86_64).
 
@@ -117,13 +117,12 @@ Supported on **Windows**, **Linux**, and **macOS** (x86_64).
 | Component | Requirement |
 |---|---|
 | **Node.js** | v24 or later |
-| **yarn** | Latest version |
 | **Git** | Any recent version |
 | **.NET SDK** | 8 (recommended) |
 | **Python** | 3.8.10+ *(optional)* |
 | **Architecture** | x86_64 (Intel/AMD) |
 
-> **ARM64 users:** See the [ARM64 build guide](#arm64-custom-build) below.
+> **ARM64 users:** See the ***ARM64 build guide*** below.
 
 ---
 
@@ -133,38 +132,24 @@ LocalPDF Studio is built with modern web technologies and follows open-source pr
 
 ### Run Locally
 
-
-1. Clone the repository
 ```bash
+# Clone the repository
 git clone https://github.com/Alinur1/LocalPDF_Studio.git
-```
-2. Enter the project folder
-```bash
+
+# Enter the project folder
 cd LocalPDF_Studio
+
+# Install dependencies
+npm install
+
+# Start the app
+npm run start
 ```
-3. Install yarn if not installed
+
+### Build a Distribution
+
 ```bash
-npm install yarn --global
-```
-4. Upgrade the yarn locally for your project
-```bash
-yarn set version stable
-```
-5. Force Yarn to use a traditional node_modules folder structure to ensure maximum compatibility with Electron and electron-builder.
-```bash
-yarn config set nodeLinker node-modules
-```
-6. Install Dependencies
-```bash
-yarn install
-```
-7. Start the app
-```bash
-node scripts/setup-backend.js && yarn run start
-```
-### Build the app
-```bash
-node scripts/setup-backend.js && yarn run dist
+npm run dist
 ```
 
 ---
@@ -191,7 +176,7 @@ LocalPDF Studio currently bundles **x86_64** binaries only. ARM64 is unsupported
 
 Or browse all builds: [python-build-standalone releases](https://github.com/astral-sh/python-build-standalone/releases/tag/20260414)
 
-> ⚠️ Custom ARM builds are unsupported. Ensure .NET 8 SDK is installed before building.
+> ⚠️ Ensure .NET 8 SDK is installed before building.
 
 ---
 

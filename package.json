@@ -28,8 +28,8 @@
     "build:mac": "node scripts/setup-backend.js && electron-builder --mac --x64"
   },
   "devDependencies": {
-    "electron": "^42.3.3",
-    "electron-builder": "^26.15.2"
+    "electron": "^42.4.1",
+    "electron-builder": "^26.15.3"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
@@ -174,6 +174,5 @@
         "role": "Editor"
       }
     ]
-  },
-  "packageManager": "yarn@4.17.0"
+  }
 }
