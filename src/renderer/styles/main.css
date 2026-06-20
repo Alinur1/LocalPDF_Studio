@@ -679,8 +679,18 @@ body.dark .search-result-item:hover .search-result-meta {
   color: white;
 }
 
+.pdf-control-btn[data-tooltip],
+.markdown-btn[data-tooltip],
+.top-btn[data-tooltip],
+.markdown-toolbar [data-tooltip] {
+  position: relative;
+}
+
 /* Tooltip styling */
-.pdf-control-btn[data-tooltip]::after {
+.pdf-control-btn[data-tooltip]::after,
+.markdown-btn[data-tooltip]::after,
+.top-btn[data-tooltip]::after,
+.markdown-toolbar [data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: 100%;
@@ -698,12 +708,18 @@ body.dark .search-result-item:hover .search-result-meta {
   z-index: 1001;
 }
 
-.pdf-control-btn[data-tooltip]:hover::after {
+.pdf-control-btn[data-tooltip]:hover::after,
+.markdown-btn[data-tooltip]:hover::after,
+.top-btn[data-tooltip]:hover::after,
+.markdown-toolbar [data-tooltip]:hover::after {
   opacity: 1;
 }
 
 /* Tooltip arrow */
-.pdf-control-btn[data-tooltip]::before {
+.pdf-control-btn[data-tooltip]::before,
+.markdown-btn[data-tooltip]::before,
+.top-btn[data-tooltip]::before,
+.markdown-toolbar [data-tooltip]::before {
   content: '';
   position: absolute;
   bottom: 100%;
@@ -719,8 +735,22 @@ body.dark .search-result-item:hover .search-result-meta {
   z-index: 1001;
 }
 
-.pdf-control-btn[data-tooltip]:hover::before {
+.pdf-control-btn[data-tooltip]:hover::before,
+.markdown-btn[data-tooltip]:hover::before,
+.top-btn[data-tooltip]:hover::before,
+.markdown-toolbar [data-tooltip]:hover::before {
   opacity: 1;
+}
+
+/* Tooltip Left Alignment Override */
+.tooltip-left[data-tooltip]::after {
+  right: auto !important;
+  left: 0 !important;
+}
+
+.tooltip-left[data-tooltip]::before {
+  right: auto !important;
+  left: 8px !important;
 }
 
 .donate-btn {
