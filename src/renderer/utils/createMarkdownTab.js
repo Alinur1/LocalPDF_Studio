@@ -99,37 +99,37 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     const saveBtn = document.createElement('button');
     saveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
     saveBtn.setAttribute('data-tooltip', 'Save file');
-    saveBtn.className = 'markdown-btn';
+    saveBtn.className = 'markdown-btn tooltip-left';
 
     // Export PDF button
     const exportPdfBtn = document.createElement('button');
     exportPdfBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
     exportPdfBtn.setAttribute('data-tooltip', 'Export to PDF');
-    exportPdfBtn.className = 'markdown-btn';
+    exportPdfBtn.className = 'markdown-btn tooltip-left';
     toolbar.appendChild(exportPdfBtn); // ← Place after saveBtn
 
     // Toggle Editor button (replaces Toggle Preview)
     const toggleEditorBtn = document.createElement('button');
     toggleEditorBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
     toggleEditorBtn.setAttribute('data-tooltip', 'Toggle Editor');
-    toggleEditorBtn.className = 'markdown-btn';
+    toggleEditorBtn.className = 'markdown-btn tooltip-left';
 
     const layoutBtn = document.createElement('button');
     layoutBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>';
-    layoutBtn.setAttribute('data-tooltip', 'Toggle layout (Ctrl+Shift+L)');
-    layoutBtn.className = 'markdown-btn';
+    layoutBtn.setAttribute('data-tooltip', 'Toggle layout');
+    layoutBtn.className = 'markdown-btn tooltip-left';
 
     const insertImageBtn = document.createElement('button');
     insertImageBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
     insertImageBtn.setAttribute('data-tooltip', 'Insert image (Ctrl+I)');
-    insertImageBtn.className = 'markdown-btn';
+    insertImageBtn.className = 'markdown-btn tooltip-left';
 
     const zoomContainer = document.createElement('div');
     zoomContainer.style.cssText = `display: flex; gap: 4px; align-items: center; margin-left: 12px; border-left: 1px solid var(--border-color); padding-left: 12px;`;
 
     const zoomOutBtn = document.createElement('button');
     zoomOutBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6"/></svg>';
-    zoomOutBtn.setAttribute('data-tooltip', 'Zoom out (Ctrl+-)');
+    zoomOutBtn.setAttribute('data-tooltip', 'Zoom out');
     zoomOutBtn.className = 'markdown-btn';
 
     const zoomLevel = document.createElement('span');
@@ -138,13 +138,14 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     const zoomInBtn = document.createElement('button');
     zoomInBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>';
-    zoomInBtn.setAttribute('data-tooltip', 'Zoom in (Ctrl++)');
+    zoomInBtn.setAttribute('data-tooltip', 'Zoom in');
     zoomInBtn.className = 'markdown-btn';
 
     zoomContainer.append(zoomOutBtn, zoomLevel, zoomInBtn);
 
     const statusIndicator = document.createElement('span');
-    statusIndicator.style.cssText = `margin-left: auto; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;`;
+    statusIndicator.style.cssText = `margin-left: auto; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: help;`;
+    statusIndicator.setAttribute('data-tooltip', 'File Status');
 
     toolbar.append(saveBtn, toggleEditorBtn, layoutBtn, zoomContainer, statusIndicator);
 
