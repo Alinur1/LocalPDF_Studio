@@ -119,11 +119,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     layoutBtn.setAttribute('data-tooltip', 'Toggle layout');
     layoutBtn.className = 'markdown-btn tooltip-left';
 
-    const insertImageBtn = document.createElement('button');
-    insertImageBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
-    insertImageBtn.setAttribute('data-tooltip', 'Insert image (Ctrl+I)');
-    insertImageBtn.className = 'markdown-btn tooltip-left';
-
     const zoomContainer = document.createElement('div');
     zoomContainer.style.cssText = `display: flex; gap: 4px; align-items: center; margin-left: 12px; border-left: 1px solid var(--border-color); padding-left: 12px;`;
 
@@ -319,10 +314,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             e.preventDefault();
             saveFile();
         }
-        if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
-            e.preventDefault();
-            insertImageBtn.click();
-        }
     });
 
     let previewVisible = true;
@@ -346,26 +337,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         contentArea.style.flexDirection = isHorizontalLayout ? 'row' : 'column';
         layoutBtn.style.background = isHorizontalLayout ? 'var(--bg-secondary)' : 'var(--accent-color)';
         layoutBtn.style.color = isHorizontalLayout ? 'var(--text-primary)' : 'white';
-    });
-
-    insertImageBtn.addEventListener('click', async () => {
-        try {
-            const files = await window.electronAPI.selectPdfsAndImages();
-            if (files?.length > 0) {
-                const imagePath = files[0];
-                const altText = imagePath.split(/[\\/]/).pop().replace(/\.[^.]+$/, '');
-                const mdImg = `![${altText}](${imagePath})`;
-                const start = editor.selectionStart;
-                const end = editor.selectionEnd;
-                editor.value = editor.value.substring(0, start) + mdImg + editor.value.substring(end);
-                editor.selectionStart = editor.selectionEnd = start + mdImg.length;
-                isDirty = true;
-                updateStatusIndicator();
-                updatePreview();
-            }
-        } catch (err) {
-            console.error('Error inserting image:', err);
-        }
     });
 
     function resolveImagePaths(html, mdFilePath) {
