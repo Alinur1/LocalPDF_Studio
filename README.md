@@ -190,10 +190,13 @@ See the `docs/` folder for detailed build instructions.
 
 1. Fork the repository
 2. Clone your fork locally
-3. Make your changes
-4. **Test thoroughly** *(required)*
-5. Commit with clear messages
-6. Push and open a Pull Request
+3. Select branch **"dev-test"** *(required)*
+4. Make your changes
+5. **Test thoroughly** *(required)*
+6. Commit with clear messages
+7. Push and open a Pull Request in **"dev-test"** branch
+
+*Note: You should open Pull Request in **"dev-test"** branch. NOT the **"main"** branch.*
 
 ---
 
