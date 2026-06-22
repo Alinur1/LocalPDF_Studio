@@ -420,12 +420,14 @@ window.addEventListener('DOMContentLoaded', async () => {
                 let filePath = '';
                 let type = 'pdf'; // default filetype
 
-                // Markdown tabs
-                if (tab.type === 'markdown' && tab.filePath) {
+                if (tab.filePath) {
+                    filePath = tab.filePath;
+                    type = tab.type || 'pdf';
+                } else if (tab.type === 'markdown' && tab.filePath) {
                     filePath = tab.filePath;
                     type = 'markdown';
                 } else {
-                    // PDF tabs
+                    // PDF tabs fallback
                     const rawSrc = tab.content.querySelector('iframe')?.src || '';
                     filePath = decodeURIComponent(
                         rawSrc.replace(/^.*file:\/\//, '').replace(/\?.*$/, '')
