@@ -45,7 +45,7 @@ namespace LocalPDF_Studio_api.Controllers
                 return BadRequest(new { error = "File path is required." });
 
             if (string.IsNullOrWhiteSpace(request.OutputFolder))
-                return BadRequest(new { error = "Output folder is required." });
+                request.OutputFolder = System.IO.Path.GetTempPath();
 
             if (!System.IO.File.Exists(request.FilePath))
                 return NotFound(new { error = $"File not found: {request.FilePath}" });
@@ -85,16 +85,21 @@ namespace LocalPDF_Studio_api.Controllers
                     return StatusCode(500, new { error = result.Error });
                 }
 
-                return Ok(new
+                // After successful conversion, zip the output folder and return the zip file
+                var outputFolderPath = result.OutputFolder; // folder containing markdown and assets
+                if (!System.IO.Directory.Exists(outputFolderPath))
                 {
-                    success = true,
-                    outputMdPath = result.OutputMdPath,
-                    outputFolder = result.OutputFolder,
-                    pageCount = result.Meta?.PageCount ?? 0,
-                    assetCount = result.Meta?.AssetCount ?? 0,
-                    engine = result.Engine,
-                    missingDependencies = result.MissingDependencies,
-                });
+                    _logger.LogError("Output folder not found for zipping: {Folder}", outputFolderPath);
+                    return StatusCode(500, new { error = "Conversion succeeded but output folder missing." });
+                }
+                // Create a temporary zip file
+                var zipTempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".zip");
+                System.IO.Compression.ZipFile.CreateFromDirectory(outputFolderPath, zipTempPath);
+                var zipBytes = await System.IO.File.ReadAllBytesAsync(zipTempPath);
+                // Clean up temp zip after reading
+                System.IO.File.Delete(zipTempPath);
+                var fileName = Path.GetFileNameWithoutExtension(request.FilePath) + "_markdown.zip";
+                return File(zipBytes, "application/zip", fileName);
             }
             catch (FileNotFoundException ex)
             {

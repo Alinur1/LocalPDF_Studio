@@ -51,26 +51,18 @@ namespace LocalPDF_Studio_api.BLL.Services
                 if (!File.Exists(request.FilePath))
                     throw new FileNotFoundException($"File not found: {request.FilePath}");
 
-                if (string.IsNullOrWhiteSpace(request.OutputFolder))
-                    throw new ArgumentException("Output folder must be provided.");
+
 
                 // Derive the PDF's name - PDF Steam (filename without extension)
                 var pdfStem = Path.GetFileNameWithoutExtension(request.FilePath);
 
-                // Create the output subfolder: <OutputFolder>/<pdfName>/
-                var outputSubFolder = Path.Combine(request.OutputFolder, pdfStem);
-
-                // Check for existing folder
-                if (Directory.Exists(outputSubFolder))
-                {
-                    return new PythonMarkdownResult
-                    {
-                        Success = false,
-                        Error = $"FOLDER_EXISTS:{outputSubFolder}",
-                    };
-                }
-
+                // Use a temporary folder for conversion output instead of user-specified folder
+                var tempRoot = Path.Combine(Path.GetTempPath(), "LocalPDF_Studio", Guid.NewGuid().ToString());
+                var outputSubFolder = Path.Combine(tempRoot, pdfStem);
+                // Ensure the temporary output directory exists
                 Directory.CreateDirectory(outputSubFolder);
+                // No folder-exists conflict check needed for temporary locations
+
 
                 _logger.LogInformation(
                     "Starting PDF to Markdown conversion: {FilePath} → {Folder}",

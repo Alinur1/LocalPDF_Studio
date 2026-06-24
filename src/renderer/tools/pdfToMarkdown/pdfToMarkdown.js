@@ -184,16 +184,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Ask the user where to save BEFORE starting the conversion
-        const outputFolder = await window.electronAPI.selectOutputFolder();
-        if (!outputFolder) {
-            // User cancelled the folder picker — ignore
-            return;
-        }
-
         const requestBody = {
             filePath: selectedFile.path,
-            outputFolder: outputFolder,
             includeImages: includeImagesChk.checked,
             stripHeader: stripHeaderChk.checked,
             stripFooter: stripFooterChk.checked,
@@ -205,21 +197,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             convertBtn.textContent = i18n.t('pdfToMarkdownJS.converting');
 
             const endpoint = await API.pdf.pdfToMarkdown;
-            const json = await API.request.post(endpoint, requestBody);
-
-            let successMsg = i18n.t('pdfToMarkdownJS.successMessage');
-
-            if (json.missingDependencies?.length) {
-                successMsg += '\n\n' +
-                    i18n.t('pdfToMarkdownJS.missingDepsWarning') +
-                    json.missingDependencies.join(', ');
+            const result = await API.request.post(endpoint, requestBody);
+            if (result instanceof Blob) {
+                const arrayBuffer = await result.arrayBuffer();
+                const defaultName = `${selectedFile.name.replace('.pdf', '')}_markdown.zip`;
+                const savedPath = await window.electronAPI.saveZipFile(defaultName, arrayBuffer);
+                if (savedPath) {
+                    await customAlert.alert(
+                        i18n.t('alerts.success'),
+                        i18n.t('pdfToMarkdownJS.successMessage') + '\n' + savedPath,
+                        [i18n.t('common.ok')]
+                    );
+                } else {
+                    await customAlert.alert(
+                        i18n.t('alerts.warning'),
+                        i18n.t('pdfToMarkdownJS.warningMsg'),
+                        [i18n.t('common.ok')]
+                    );
+                }
+            } else {
+                // Fallback: handle JSON response (e.g., errors or unexpected data)
+                let errorMsg = i18n.t('pdfToMarkdownJS.conversionFailed');
+                if (result?.missingDependencies?.length) {
+                    errorMsg = i18n.t('pdfToMarkdownJS.missingDeps') +
+                        result.missingDependencies.join(', ');
+                }
+                await customAlert.alert(i18n.t('alerts.error'), errorMsg, [i18n.t('common.ok')]);
             }
-
-            await customAlert.alert(
-                i18n.t('alerts.success'),
-                successMsg,
-                [i18n.t('common.ok')]
-            );
 
         } catch (error) {
             console.error('Conversion error:', error);
