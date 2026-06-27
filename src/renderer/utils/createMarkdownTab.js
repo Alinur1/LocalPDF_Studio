@@ -276,6 +276,8 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
                 // Resolve relative image paths before rendering
                 htmlContent = resolveImagePaths(htmlContent, currentFilePath);
                 preview.innerHTML = htmlContent;
+                invalidateBlockCache();        
+                scheduleReinjectSentinels();
             } catch (err) {
                 preview.innerHTML = `<p style="color: #e74c3c;">Error parsing markdown: ${err.message}</p>`;
             }
@@ -478,7 +480,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     // Synchronized Scrolling
     let syncEnabled = true;
     let syncSource = null;
-    let smoothScrollTimer = null;
+    // let smoothScrollTimer = null;
 
     // Cached measurements (invalidated on zoom or resize)
     let _cachedLineHeight = null;
@@ -496,7 +498,27 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     // Invalidate when zoom changes (zoom buttons call updateZoom)
     const _origUpdateZoom = updateZoom;
     const _zoomBtns = [zoomInBtn, zoomOutBtn];
-    _zoomBtns.forEach(btn => btn.addEventListener('click', invalidateMeasureCache));
+    _zoomBtns.forEach(btn => btn.addEventListener('click', () => {
+    invalidateMeasureCache();
+    invalidateBlockCache(); 
+}));
+
+
+    let _blockPositionCache = null;
+
+function getBlockPositions() {
+    if (_blockPositionCache) return _blockPositionCache;
+    const blocks = Array.from(preview.querySelectorAll('[data-sync-line]'));
+    _blockPositionCache = blocks.map(block => ({
+        line: parseInt(block.dataset.syncLine, 10),
+        top: blockScrollTop(block)
+    }));
+    return _blockPositionCache;
+}
+
+function invalidateBlockCache() {
+    _blockPositionCache = null;
+}
 
     // Sentinel injection
     function injectSentinels() {
@@ -531,11 +553,17 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     let _sentinelReinjectTimer = null;
     function scheduleReinjectSentinels() {
         clearTimeout(_sentinelReinjectTimer);
-        _sentinelReinjectTimer = setTimeout(injectSentinels, 250);
+        _sentinelReinjectTimer = setTimeout(()=>{
+            injectSentinels();
+            invalidateBlockCache();
+        }, 250);
     }
 
     editor.addEventListener('input', scheduleReinjectSentinels);
-    setTimeout(injectSentinels, 400); // initial injection after first render
+    setTimeout(() => {
+    injectSentinels();
+    invalidateBlockCache();
+}, 400); // initial injection after first render
 
     // Coordinate helpers
 
@@ -553,92 +581,79 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     }
 
     function lineToPreviewScrollTop(targetLine) {
-        const blocks = Array.from(preview.querySelectorAll('[data-sync-line]'));
+    const positions = getBlockPositions();
 
-        if (blocks.length === 0) {
-            // Pure-proportional fallback
-            const editorMax = editor.scrollHeight - editor.clientHeight;
-            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-            return editorMax > 0 ? (editor.scrollTop / editorMax) * previewMax : 0;
-        }
-
-        const totalLines = editor.value.split('\n').length;
-        let before = null, after = null;
-
-        for (const block of blocks) {
-            const blockLine = parseInt(block.dataset.syncLine, 10);
-            if (blockLine <= targetLine) before = block;
-            else { after = block; break; }
-        }
-
-        if (!before) {
-            const firstLine = parseInt(blocks[0].dataset.syncLine, 10);
-            const fraction = firstLine > 0 ? Math.min(targetLine / firstLine, 1) : 0;
-            return fraction * blockScrollTop(blocks[0]);
-        }
-
-        if (!after) {
-            const lastLine = parseInt(before.dataset.syncLine, 10);
-            const lastTop = blockScrollTop(before);
-            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-            const tail = totalLines > lastLine
-                ? (targetLine - lastLine) / (totalLines - lastLine)
-                : 0;
-            return lastTop + tail * (previewMax - lastTop);
-        }
-
-        const beforeLine = parseInt(before.dataset.syncLine, 10);
-        const afterLine = parseInt(after.dataset.syncLine, 10);
-        const fraction = afterLine > beforeLine
-            ? (targetLine - beforeLine) / (afterLine - beforeLine)
-            : 0;
-        return blockScrollTop(before) + fraction * (blockScrollTop(after) - blockScrollTop(before));
+    if (positions.length === 0) {
+        const editorMax = editor.scrollHeight - editor.clientHeight;
+        const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
+        return editorMax > 0 ? (editor.scrollTop / editorMax) * previewMax : 0;
     }
+
+    const totalLines = editor.value.split('\n').length;
+    let before = null, after = null;
+
+    for (const pos of positions) {
+        if (pos.line <= targetLine) before = pos;
+        else { after = pos; break; }
+    }
+
+    if (!before) {
+        const first = positions[0];
+        const fraction = first.line > 0 ? Math.min(targetLine / first.line, 1) : 0;
+        return fraction * first.top;
+    }
+
+    if (!after) {
+        const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
+        const tail = totalLines > before.line
+            ? (targetLine - before.line) / (totalLines - before.line)
+            : 0;
+        return before.top + tail * (previewMax - before.top);
+    }
+
+    const fraction = after.line > before.line
+        ? (targetLine - before.line) / (after.line - before.line)
+        : 0;
+    return before.top + fraction * (after.top - before.top);
+}
 
     function previewScrollToEditorScrollTop(previewScrollTop) {
-        const blocks = Array.from(preview.querySelectorAll('[data-sync-line]'));
+    const positions = getBlockPositions();
 
-        if (blocks.length === 0) {
-            const editorMax = editor.scrollHeight - editor.clientHeight;
-            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-            return previewMax > 0 ? (previewScrollTop / previewMax) * editorMax : 0;
-        }
-
-        const lineHeight = getLineHeight();
-        const totalLines = editor.value.split('\n').length;
-        let before = null, after = null;
-
-        for (const block of blocks) {
-            if (blockScrollTop(block) <= previewScrollTop) before = block;
-            else { after = block; break; }
-        }
-
-        let targetLine;
-        if (!before) {
-            const firstTop = blockScrollTop(blocks[0]);
-            const firstLine = parseInt(blocks[0].dataset.syncLine, 10);
-            targetLine = firstTop > 0 ? (previewScrollTop / firstTop) * firstLine : 0;
-        } else if (!after) {
-            const lastLine = parseInt(before.dataset.syncLine, 10);
-            const lastTop = blockScrollTop(before);
-            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-            const tail = previewMax > lastTop
-                ? (previewScrollTop - lastTop) / (previewMax - lastTop)
-                : 0;
-            targetLine = lastLine + tail * (totalLines - lastLine);
-        } else {
-            const beforeTop = blockScrollTop(before);
-            const afterTop = blockScrollTop(after);
-            const beforeLine = parseInt(before.dataset.syncLine, 10);
-            const afterLine = parseInt(after.dataset.syncLine, 10);
-            const fraction = afterTop > beforeTop
-                ? (previewScrollTop - beforeTop) / (afterTop - beforeTop)
-                : 0;
-            targetLine = beforeLine + fraction * (afterLine - beforeLine);
-        }
-
-        return Math.max(0, targetLine * lineHeight);
+    if (positions.length === 0) {
+        const editorMax = editor.scrollHeight - editor.clientHeight;
+        const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
+        return previewMax > 0 ? (previewScrollTop / previewMax) * editorMax : 0;
     }
+
+    const lineHeight = getLineHeight();
+    const totalLines = editor.value.split('\n').length;
+    let before = null, after = null;
+
+    for (const pos of positions) {
+        if (pos.top <= previewScrollTop) before = pos;
+        else { after = pos; break; }
+    }
+
+    let targetLine;
+    if (!before) {
+        const first = positions[0];
+        targetLine = first.top > 0 ? (previewScrollTop / first.top) * first.line : 0;
+    } else if (!after) {
+        const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
+        const tail = previewMax > before.top
+            ? (previewScrollTop - before.top) / (previewMax - before.top)
+            : 0;
+        targetLine = before.line + tail * (totalLines - before.line);
+    } else {
+        const fraction = after.top > before.top
+            ? (previewScrollTop - before.top) / (after.top - before.top)
+            : 0;
+        targetLine = before.line + fraction * (after.line - before.line);
+    }
+
+    return Math.max(0, targetLine * lineHeight);
+}
 
     // Scroll event handlers
 
@@ -655,25 +670,16 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         });
     });
 
-    previewPane.addEventListener('scroll', () => {
-        if (!syncEnabled || syncSource === 'editor') return;
+   previewPane.addEventListener('scroll', () => {
+    if (!syncEnabled || syncSource === 'editor') return;
 
-        syncSource = 'preview';
+    syncSource = 'preview';
+    editor.scrollTop = previewScrollToEditorScrollTop(previewPane.scrollTop);
 
-        clearTimeout(smoothScrollTimer);
-        setTimeout(() => {
-            const targetScrollTop = previewScrollToEditorScrollTop(previewPane.scrollTop);
-
-            // Smooth scroll produces a stream of scroll events — hold the lock
-            // until the animation is expected to have finished (~300 ms is enough
-            // for a typical smooth-scroll over a few hundred pixels).
-            editor.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
-
-            smoothScrollTimer = setTimeout(() => {
-                if (syncSource === 'preview') syncSource = null;
-            }, 300);
-        }, 150); // Preview drives, editor follows 150 ms later
+    requestAnimationFrame(() => {
+        if (syncSource === 'preview') syncSource = null;
     });
+});
 
     syncToggleBtn.addEventListener('click', () => {
         syncEnabled = !syncEnabled;
