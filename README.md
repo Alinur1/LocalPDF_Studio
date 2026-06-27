@@ -132,21 +132,27 @@ LocalPDF Studio is built with modern web technologies and follows open-source pr
 
 ### Run Locally
 
+1. Clone the repository
 ```bash
-# Clone the repository
 git clone https://github.com/Alinur1/LocalPDF_Studio.git
+```
 
-# Enter the project folder
+2. Enter the project folder
+```bash
 cd LocalPDF_Studio
+```
 
-# Install dependencies
+3. Install dependencies
+```bash
 npm install
+```
 
-# Start the app
+4. Start the app
+```bash
 npm run start
 ```
 
-### Build a Distribution
+### Build an installer for distribution
 
 ```bash
 npm run dist
@@ -190,13 +196,10 @@ See the `docs/` folder for detailed build instructions.
 
 1. Fork the repository
 2. Clone your fork locally
-3. Select branch **"dev-test"** *(required)*
-4. Make your changes
-5. **Test thoroughly** *(required)*
-6. Commit with clear messages
-7. Push and open a Pull Request in **"dev-test"** branch
-
-*Note: You should open Pull Request in **"dev-test"** branch. NOT the **"main"** branch.*
+3. Make your changes
+4. **Test thoroughly** *(required)*
+5. Commit with clear messages
+6. Push and open a Pull Request
 
 ---
 
