@@ -106,7 +106,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     exportPdfBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
     exportPdfBtn.setAttribute('data-tooltip', 'Export to PDF');
     exportPdfBtn.className = 'markdown-btn tooltip-left';
-    toolbar.appendChild(exportPdfBtn); // ← Place after saveBtn
 
     // Toggle Editor button (replaces Toggle Preview)
     const toggleEditorBtn = document.createElement('button');
@@ -125,7 +124,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     syncToggleBtn.className = 'markdown-btn tooltip-left';
     syncToggleBtn.style.background = 'var(--accent-color)';
     syncToggleBtn.style.color = 'white';
-    toolbar.appendChild(syncToggleBtn);
 
     const zoomContainer = document.createElement('div');
     zoomContainer.style.cssText = `display: flex; gap: 4px; align-items: center; margin-left: 12px; border-left: 1px solid var(--border-color); padding-left: 12px;`;
@@ -146,11 +144,62 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     zoomContainer.append(zoomOutBtn, zoomLevel, zoomInBtn);
 
+    // Inline search bar
+    // Hidden by default; shown only when editor is visible and Ctrl+F is pressed.
+    const searchContainer = document.createElement('div');
+    searchContainer.style.cssText = `
+        display: none; align-items: center; gap: 4px;
+        margin-left: 12px; border-left: 1px solid var(--border-color); padding-left: 12px;
+    `;
+
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.placeholder = 'Find in editor…';
+    searchInput.style.cssText = `
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 3px 8px;
+        font-size: 13px;
+        outline: none;
+        width: 180px;
+    `;
+
+    const searchCaseSensitiveBtn = document.createElement('button');
+    searchCaseSensitiveBtn.textContent = 'Aa';
+    searchCaseSensitiveBtn.setAttribute('data-tooltip', 'Case sensitive');
+    searchCaseSensitiveBtn.className = 'markdown-btn';
+    searchCaseSensitiveBtn.style.cssText = `font-size: 11px; font-weight: bold; padding: 3px 6px; min-width: 26px;`;
+    let searchCaseSensitive = false;
+
+    const searchMatchCount = document.createElement('span');
+    searchMatchCount.style.cssText = `font-size: 12px; color: var(--text-secondary); white-space: nowrap; min-width: 54px; text-align: center;`;
+    searchMatchCount.textContent = 'No results';
+
+    const searchPrevBtn = document.createElement('button');
+    searchPrevBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`;
+    searchPrevBtn.setAttribute('data-tooltip', 'Previous (Shift+Enter)');
+    searchPrevBtn.className = 'markdown-btn';
+
+    const searchNextBtn = document.createElement('button');
+    searchNextBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+    searchNextBtn.setAttribute('data-tooltip', 'Next (Enter)');
+    searchNextBtn.className = 'markdown-btn';
+
+    const searchCloseBtn = document.createElement('button');
+    searchCloseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+    searchCloseBtn.setAttribute('data-tooltip', 'Close (Esc)');
+    searchCloseBtn.className = 'markdown-btn';
+
+    searchContainer.append(searchInput, searchCaseSensitiveBtn, searchMatchCount, searchPrevBtn, searchNextBtn, searchCloseBtn);
+
+    // Status indicator
     const statusIndicator = document.createElement('span');
     statusIndicator.style.cssText = `margin-left: auto; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: help;`;
     statusIndicator.setAttribute('data-tooltip', 'File Status');
 
-    toolbar.append(saveBtn, toggleEditorBtn, layoutBtn, zoomContainer, statusIndicator);
+    toolbar.append(saveBtn, exportPdfBtn, toggleEditorBtn, layoutBtn, syncToggleBtn, zoomContainer, searchContainer, statusIndicator);
 
     // Content Area
     const contentArea = document.createElement('div');
@@ -330,6 +379,9 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         editorPane.style.display = editorVisible ? 'flex' : 'none';
         toggleEditorBtn.style.background = editorVisible ? 'var(--accent-color)' : 'var(--bg-secondary)';
         toggleEditorBtn.style.color = editorVisible ? 'white' : 'var(--text-primary)';
+
+        // Hide search bar when editor is hidden
+        if (!editorVisible) closeSearch();
 
         if (editorVisible) {
             editor.scrollTop = 0;
@@ -628,6 +680,162 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         syncToggleBtn.style.background = syncEnabled ? 'var(--accent-color)' : 'var(--bg-secondary)';
         syncToggleBtn.style.color = syncEnabled ? 'white' : 'var(--text-primary)';
         syncToggleBtn.setAttribute('data-tooltip', syncEnabled ? 'Sync scroll ON' : 'Sync scroll OFF');
+    });
+
+    // Editor Search
+    let searchMatches = [];
+    let searchCurrent = -1;
+    let searchActive = false;
+
+    function runSearch() {
+        const query = searchInput.value;
+        searchMatches = [];
+        searchCurrent = -1;
+
+        if (!query) { updateSearchCount(); return; }
+
+        const text = editor.value;
+        const flags = searchCaseSensitive ? 'g' : 'gi';
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escaped, flags);
+
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            searchMatches.push({ start: match.index, end: match.index + match[0].length });
+            if (match[0].length === 0) regex.lastIndex++;
+        }
+
+        if (searchMatches.length > 0) {
+            // Jump to the match nearest the current cursor — but keep focus on searchInput
+            const cursorPos = editor.selectionStart;
+            let nearest = 0, nearestDist = Infinity;
+            searchMatches.forEach((m, i) => {
+                const dist = Math.abs(m.start - cursorPos);
+                if (dist < nearestDist) { nearestDist = dist; nearest = i; }
+            });
+            goToMatch(nearest, /* keepFocus */ true);
+        } else {
+            updateSearchCount();
+        }
+    }
+
+    // keepFocus=true means we select the match in the editor but leave keyboard
+    // focus on the search input. keepFocus=false (arrow buttons / Enter) moves
+    // focus to the editor so the user can start editing immediately.
+    function goToMatch(index, keepFocus = false) {
+        if (searchMatches.length === 0) return;
+        searchCurrent = ((index % searchMatches.length) + searchMatches.length) % searchMatches.length;
+        const match = searchMatches[searchCurrent];
+
+        // Scroll the editor to the match line without moving keyboard focus
+        const textBefore = editor.value.slice(0, match.start);
+        const linesBefore = textBefore.split('\n').length - 1;
+        const lineHeight = getLineHeight();
+        const targetScroll = linesBefore * lineHeight;
+        const visibleLines = editor.clientHeight / lineHeight;
+
+        if (
+            targetScroll < editor.scrollTop ||
+            targetScroll > editor.scrollTop + editor.clientHeight - lineHeight * 2
+        ) {
+            editor.scrollTop = Math.max(0, targetScroll - (visibleLines / 2) * lineHeight);
+        }
+
+        // Select the match — use setSelectionRange on the editor element directly,
+        // then immediately restore focus to the search input if keepFocus is set.
+        editor.setSelectionRange(match.start, match.end);
+
+        if (keepFocus) {
+            // Return focus to the search bar so the user can keep typing
+            searchInput.focus();
+        } else {
+            editor.focus();
+        }
+
+        updateSearchCount();
+    }
+
+    function updateSearchCount() {
+        const total = searchMatches.length;
+        if (!searchInput.value) {
+            searchMatchCount.textContent = 'No results';
+            searchMatchCount.style.color = 'var(--text-secondary)';
+        } else if (total === 0) {
+            searchMatchCount.textContent = 'No results';
+            searchMatchCount.style.color = '#e74c3c';
+        } else {
+            searchMatchCount.textContent = `${searchCurrent + 1} / ${total}`;
+            searchMatchCount.style.color = 'var(--text-secondary)';
+        }
+    }
+
+    function openSearch() {
+        searchActive = true;
+        searchContainer.style.display = 'flex';
+
+        // Pre-fill with selected text if any (like VS Code)
+        const sel = editor.value.slice(editor.selectionStart, editor.selectionEnd).trim();
+        if (sel && !sel.includes('\n') && sel.length < 200) {
+            searchInput.value = sel;
+        }
+
+        searchInput.focus();
+        searchInput.select();
+        runSearch();
+    }
+
+    function closeSearch() {
+        searchActive = false;
+        searchContainer.style.display = 'none';
+        searchMatches = [];
+        searchCurrent = -1;
+        // Only restore focus to editor if it's visible
+        if (editorVisible) editor.focus();
+    }
+
+    searchInput.addEventListener('input', runSearch);
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            // Arrow buttons and Enter navigate — move focus to editor after jump
+            e.shiftKey ? goToMatch(searchCurrent - 1, false) : goToMatch(searchCurrent + 1, false);
+        }
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            closeSearch();
+        }
+    });
+
+    searchNextBtn.addEventListener('click', () => goToMatch(searchCurrent + 1, false));
+    searchPrevBtn.addEventListener('click', () => goToMatch(searchCurrent - 1, false));
+    searchCloseBtn.addEventListener('click', closeSearch);
+
+    searchCaseSensitiveBtn.addEventListener('click', () => {
+        searchCaseSensitive = !searchCaseSensitive;
+        searchCaseSensitiveBtn.style.background = searchCaseSensitive ? 'var(--accent-color)' : '';
+        searchCaseSensitiveBtn.style.color = searchCaseSensitive ? 'white' : '';
+        runSearch();
+    });
+
+    // Ctrl+F — only when the editor pane is visible
+    document.addEventListener('keydown', (e) => {
+        const isMac = navigator.platform.toUpperCase().includes('MAC');
+        const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+        if (ctrlOrCmd && e.key === 'f' && editorVisible) {
+            e.preventDefault();
+            e.stopPropagation();
+            searchActive ? closeSearch() : openSearch();
+        }
+    });
+
+    // Re-run search when editor content changes so positions stay accurate.
+    // Do NOT call editor.focus() here — that's what was stealing the cursor.
+    editor.addEventListener('input', () => {
+        if (searchActive && searchInput.value) {
+            runSearch(); // runSearch calls goToMatch with keepFocus=true
+        }
     });
 
     // Register tab
