@@ -276,7 +276,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
                 // Resolve relative image paths before rendering
                 htmlContent = resolveImagePaths(htmlContent, currentFilePath);
                 preview.innerHTML = htmlContent;
-                invalidateBlockCache();        
+                invalidateBlockCache();
                 scheduleReinjectSentinels();
             } catch (err) {
                 preview.innerHTML = `<p style="color: #e74c3c;">Error parsing markdown: ${err.message}</p>`;
@@ -499,26 +499,26 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     const _origUpdateZoom = updateZoom;
     const _zoomBtns = [zoomInBtn, zoomOutBtn];
     _zoomBtns.forEach(btn => btn.addEventListener('click', () => {
-    invalidateMeasureCache();
-    invalidateBlockCache(); 
-}));
+        invalidateMeasureCache();
+        invalidateBlockCache();
+    }));
 
 
     let _blockPositionCache = null;
 
-function getBlockPositions() {
-    if (_blockPositionCache) return _blockPositionCache;
-    const blocks = Array.from(preview.querySelectorAll('[data-sync-line]'));
-    _blockPositionCache = blocks.map(block => ({
-        line: parseInt(block.dataset.syncLine, 10),
-        top: blockScrollTop(block)
-    }));
-    return _blockPositionCache;
-}
+    function getBlockPositions() {
+        if (_blockPositionCache) return _blockPositionCache;
+        const blocks = Array.from(preview.querySelectorAll('[data-sync-line]'));
+        _blockPositionCache = blocks.map(block => ({
+            line: parseInt(block.dataset.syncLine, 10),
+            top: blockScrollTop(block)
+        }));
+        return _blockPositionCache;
+    }
 
-function invalidateBlockCache() {
-    _blockPositionCache = null;
-}
+    function invalidateBlockCache() {
+        _blockPositionCache = null;
+    }
 
     // Sentinel injection
     function injectSentinels() {
@@ -553,7 +553,7 @@ function invalidateBlockCache() {
     let _sentinelReinjectTimer = null;
     function scheduleReinjectSentinels() {
         clearTimeout(_sentinelReinjectTimer);
-        _sentinelReinjectTimer = setTimeout(()=>{
+        _sentinelReinjectTimer = setTimeout(() => {
             injectSentinels();
             invalidateBlockCache();
         }, 250);
@@ -561,9 +561,9 @@ function invalidateBlockCache() {
 
     editor.addEventListener('input', scheduleReinjectSentinels);
     setTimeout(() => {
-    injectSentinels();
-    invalidateBlockCache();
-}, 400); // initial injection after first render
+        injectSentinels();
+        invalidateBlockCache();
+    }, 400); // initial injection after first render
 
     // Coordinate helpers
 
@@ -581,79 +581,79 @@ function invalidateBlockCache() {
     }
 
     function lineToPreviewScrollTop(targetLine) {
-    const positions = getBlockPositions();
+        const positions = getBlockPositions();
 
-    if (positions.length === 0) {
-        const editorMax = editor.scrollHeight - editor.clientHeight;
-        const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-        return editorMax > 0 ? (editor.scrollTop / editorMax) * previewMax : 0;
-    }
+        if (positions.length === 0) {
+            const editorMax = editor.scrollHeight - editor.clientHeight;
+            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
+            return editorMax > 0 ? (editor.scrollTop / editorMax) * previewMax : 0;
+        }
 
-    const totalLines = editor.value.split('\n').length;
-    let before = null, after = null;
+        const totalLines = editor.value.split('\n').length;
+        let before = null, after = null;
 
-    for (const pos of positions) {
-        if (pos.line <= targetLine) before = pos;
-        else { after = pos; break; }
-    }
+        for (const pos of positions) {
+            if (pos.line <= targetLine) before = pos;
+            else { after = pos; break; }
+        }
 
-    if (!before) {
-        const first = positions[0];
-        const fraction = first.line > 0 ? Math.min(targetLine / first.line, 1) : 0;
-        return fraction * first.top;
-    }
+        if (!before) {
+            const first = positions[0];
+            const fraction = first.line > 0 ? Math.min(targetLine / first.line, 1) : 0;
+            return fraction * first.top;
+        }
 
-    if (!after) {
-        const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-        const tail = totalLines > before.line
-            ? (targetLine - before.line) / (totalLines - before.line)
+        if (!after) {
+            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
+            const tail = totalLines > before.line
+                ? (targetLine - before.line) / (totalLines - before.line)
+                : 0;
+            return before.top + tail * (previewMax - before.top);
+        }
+
+        const fraction = after.line > before.line
+            ? (targetLine - before.line) / (after.line - before.line)
             : 0;
-        return before.top + tail * (previewMax - before.top);
+        return before.top + fraction * (after.top - before.top);
     }
-
-    const fraction = after.line > before.line
-        ? (targetLine - before.line) / (after.line - before.line)
-        : 0;
-    return before.top + fraction * (after.top - before.top);
-}
 
     function previewScrollToEditorScrollTop(previewScrollTop) {
-    const positions = getBlockPositions();
+        const positions = getBlockPositions();
 
-    if (positions.length === 0) {
-        const editorMax = editor.scrollHeight - editor.clientHeight;
-        const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-        return previewMax > 0 ? (previewScrollTop / previewMax) * editorMax : 0;
+        if (positions.length === 0) {
+            const editorMax = editor.scrollHeight - editor.clientHeight;
+            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
+            return previewMax > 0 ? (previewScrollTop / previewMax) * editorMax : 0;
+        }
+
+        const lineHeight = getLineHeight();
+        const totalLines = editor.value.split('\n').length;
+        let before = null, after = null;
+
+        for (const pos of positions) {
+            if (pos.top <= previewScrollTop) before = pos;
+            else { after = pos; break; }
+        }
+
+        let targetLine;
+        if (!before) {
+            const first = positions[0];
+            targetLine = first.top > 0 ? (previewScrollTop / first.top) * first.line : 0;
+        } else if (!after) {
+            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
+            const tail = previewMax > before.top
+                ? (previewScrollTop - before.top) / (previewMax - before.top)
+                : 0;
+            targetLine = before.line + tail * (totalLines - before.line);
+        } else {
+            const fraction = after.top > before.top
+                ? (previewScrollTop - before.top) / (after.top - before.top)
+                : 0;
+            targetLine = before.line + fraction * (after.line - before.line);
+        }
+
+        return Math.max(0, targetLine * lineHeight);
     }
-
-    const lineHeight = getLineHeight();
-    const totalLines = editor.value.split('\n').length;
-    let before = null, after = null;
-
-    for (const pos of positions) {
-        if (pos.top <= previewScrollTop) before = pos;
-        else { after = pos; break; }
-    }
-
-    let targetLine;
-    if (!before) {
-        const first = positions[0];
-        targetLine = first.top > 0 ? (previewScrollTop / first.top) * first.line : 0;
-    } else if (!after) {
-        const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-        const tail = previewMax > before.top
-            ? (previewScrollTop - before.top) / (previewMax - before.top)
-            : 0;
-        targetLine = before.line + tail * (totalLines - before.line);
-    } else {
-        const fraction = after.top > before.top
-            ? (previewScrollTop - before.top) / (after.top - before.top)
-            : 0;
-        targetLine = before.line + fraction * (after.line - before.line);
-    }
-
-    return Math.max(0, targetLine * lineHeight);
-}
 
     // Scroll event handlers
 
@@ -670,16 +670,16 @@ function invalidateBlockCache() {
         });
     });
 
-   previewPane.addEventListener('scroll', () => {
-    if (!syncEnabled || syncSource === 'editor') return;
+    previewPane.addEventListener('scroll', () => {
+        if (!syncEnabled || syncSource === 'editor') return;
 
-    syncSource = 'preview';
-    editor.scrollTop = previewScrollToEditorScrollTop(previewPane.scrollTop);
+        syncSource = 'preview';
+        editor.scrollTop = previewScrollToEditorScrollTop(previewPane.scrollTop);
 
-    requestAnimationFrame(() => {
-        if (syncSource === 'preview') syncSource = null;
+        requestAnimationFrame(() => {
+            if (syncSource === 'preview') syncSource = null;
+        });
     });
-});
 
     syncToggleBtn.addEventListener('click', () => {
         syncEnabled = !syncEnabled;
