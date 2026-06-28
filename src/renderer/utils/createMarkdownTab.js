@@ -308,10 +308,239 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     });
 
     function updateStatusIndicator() {
-        statusIndicator.innerHTML = isDirty
-            ? '<span style="color: #f39c12;">●</span> Modified'
-            : '<span style="color: #2ecc71;">●</span> Saved';
+    const text = editor.value;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const chars = text.length;
+    
+    const statusText = isDirty ? 'Modified' : 'Saved';
+    const statusColor = isDirty ? '#f39c12' : '#2ecc71';
+    
+    statusIndicator.innerHTML = `
+        <span style="color: var(--text-secondary); font-size: 11px; margin-right: 8px;">
+            ${words} words &middot; ${chars} chars
+        </span>
+        <span style="color: ${statusColor};">● ${statusText}</span>
+    `;
+}
+
+function wrapSelection(prefix, suffix) {
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const text = editor.value;
+    const selectedText = text.slice(start, end);
+    
+    // Trim whitespace from selection for cleaner formatting
+    const trimmedText = selectedText.trim();
+    const leadingSpace = selectedText.match(/^\s*/)[0];
+    const trailingSpace = selectedText.match(/\s*$/)[0];
+    
+    // If selection is only whitespace, don't apply formatting
+    if (!trimmedText) {
+        editor.focus();
+        return;
     }
+    
+    // Check if already wrapped (to toggle off)
+    const before = text.slice(Math.max(0, start - prefix.length), start);
+    const after = text.slice(end, end + suffix.length);
+    
+    if (before === prefix && after === suffix) {
+        // Remove wrapper - keep the trimmed text only
+        editor.value = text.slice(0, start - prefix.length) + trimmedText + text.slice(end + suffix.length);
+        editor.selectionStart = start - prefix.length + leadingSpace.length;
+        editor.selectionEnd = end - prefix.length - trailingSpace.length;
+    } else {
+        // Add wrapper around trimmed text, preserving spaces outside
+        const newText = text.slice(0, start) + leadingSpace + prefix + trimmedText + suffix + trailingSpace + text.slice(end);
+        editor.value = newText;
+        
+        // Position cursor after the formatted text
+        const newStart = start + leadingSpace.length + prefix.length;
+        const newEnd = newStart + trimmedText.length;
+        editor.selectionStart = newStart;
+        editor.selectionEnd = newEnd;
+    }
+    editor.dispatchEvent(new Event('input')); // Trigger preview update
+    editor.focus();
+}
+
+function insertMarkdownLink() {
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const text = editor.value;
+    const selectedText = text.slice(start, end);
+    
+    const linkText = selectedText || 'link text';
+    const insertion = `[${linkText}](url)`;
+    
+    editor.value = text.slice(0, start) + insertion + text.slice(end);
+    
+    // Automatically select the 'url' part so the user can start typing immediately
+    const urlStart = start + linkText.length + 3; 
+    editor.selectionStart = urlStart;
+    editor.selectionEnd = urlStart + 3;
+    editor.focus();
+    editor.dispatchEvent(new Event('input'));
+}
+
+    // ─── Formatting Toolbar (Visual Buttons) ─────────────────────────────────
+    // Helper to handle multi-line prefixes (like Lists and Blockquotes)
+    function prefixLines(prefix) {
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const text = editor.value;
+        
+        const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+        let lineEnd = text.indexOf('\n', end);
+        if (lineEnd === -1) lineEnd = text.length;
+        
+        const lines = text.slice(lineStart, lineEnd).split('\n');
+        const allPrefixed = lines.filter(l => l.trim()).every(line => line.startsWith(prefix));
+        
+        const newLines = allPrefixed 
+            ? lines.map(line => line.startsWith(prefix) ? line.slice(prefix.length) : line).join('\n')
+            : lines.map(line => line.trim() ? prefix + line : line).join('\n');
+            
+        editor.value = text.slice(0, lineStart) + newLines + text.slice(lineEnd);
+        editor.selectionStart = lineStart;
+        editor.selectionEnd = lineStart + newLines.length;
+        editor.dispatchEvent(new Event('input'));
+        editor.focus();
+    }
+
+    // Create the toolbar container
+    const formattingToolbar = document.createElement('div');
+    formattingToolbar.className = 'markdown-formatting-toolbar';
+    formattingToolbar.style.cssText = `
+        display: flex; gap: 4px; padding: 6px 12px; 
+        background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color);
+        flex-wrap: wrap; align-items: center;
+    `;
+
+    // Helper to generate buttons
+    function createFormatBtn(tooltip, iconSvg, onClick) {
+        const btn = document.createElement('button');
+        btn.innerHTML = iconSvg;
+        btn.setAttribute('data-tooltip', tooltip);
+        btn.className = 'markdown-btn';
+        btn.style.cssText = `padding: 4px 8px; min-width: 28px;`;
+        btn.addEventListener('mousedown', (e) => e.preventDefault()); // Prevents editor from losing focus
+        btn.addEventListener('click', () => { onClick(); editor.focus(); });
+        return btn;
+    }
+
+    // SVG Icons (Feather style)
+    // const icons = {
+    //     bold: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>',
+    //     italic: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>',
+    //     code: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+    //     link: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+    //     quote: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/></svg>',
+    //     list: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>'
+    // };
+
+    // ─── Advanced Formatting Helpers ─────────────────────────────────────────
+    
+    // Helper for Headings (Toggles between H1, H2, H3, or plain text)
+    function insertHeading(level) {
+        const start = editor.selectionStart;
+        const text = editor.value;
+        const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+        const lineEnd = text.indexOf('\n', start);
+        const actualEnd = lineEnd === -1 ? text.length : lineEnd;
+        
+        const lineText = text.slice(lineStart, actualEnd);
+        const cleanLine = lineText.replace(/^#{1,6}\s*/, ''); // Remove existing headings
+        const prefix = '#'.repeat(level) + ' ';
+        
+        editor.value = text.slice(0, lineStart) + prefix + cleanLine + text.slice(actualEnd);
+        editor.selectionStart = editor.selectionEnd = lineStart + prefix.length + cleanLine.length;
+        editor.dispatchEvent(new Event('input'));
+        editor.focus();
+    }
+
+    // Helper for inserting a Markdown Table
+    function insertTable() {
+        const start = editor.selectionStart;
+        const text = editor.value;
+        const tableMarkdown = `\n| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |\n| Cell 4   | Cell 5   | Cell 6   |\n`;
+        editor.value = text.slice(0, start) + tableMarkdown + text.slice(start);
+        editor.selectionStart = editor.selectionEnd = start + tableMarkdown.length;
+        editor.dispatchEvent(new Event('input'));
+        editor.focus();
+    }
+
+    // Helper to create visual dividers in the toolbar
+    function createDivider() {
+        const span = document.createElement('span');
+        span.style.cssText = 'width: 1px; height: 20px; background: var(--border-color); margin: 0 4px; display: inline-block;';
+        return span;
+    }
+
+    // Helper to create Heading buttons (Text looks cleaner than SVGs for H1/H2/H3)
+    function createHeadingBtn(level) {
+        const btn = document.createElement('button');
+        btn.innerHTML = `H${level}`;
+        btn.setAttribute('data-tooltip', `Heading ${level}`);
+        btn.className = 'markdown-btn';
+        btn.style.cssText = `padding: 4px 8px; min-width: 28px; font-weight: bold; font-size: 12px;`;
+        btn.addEventListener('mousedown', (e) => e.preventDefault());
+        btn.addEventListener('click', () => { insertHeading(level); editor.focus(); });
+        return btn;
+    }
+
+    // Add new icons
+    const icons = {
+        bold: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>',
+        italic: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>',
+        strikethrough: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 4M14 12a4 4 0 0 1 0 8H6"/><line x1="4" y1="12" x2="20" y2="12"/></svg>',
+        code: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+        link: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+        quote: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/></svg>',
+        list: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
+        table: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>'
+    };
+
+    // Wire up the fully upgraded toolbar
+    formattingToolbar.append(
+        createHeadingBtn(1),
+        createHeadingBtn(2),
+        createHeadingBtn(3),
+        createDivider(),
+        createFormatBtn('Bold (Ctrl+B)', icons.bold, () => wrapSelection('**', '**')),
+        createFormatBtn('Italic (Ctrl+I)', icons.italic, () => wrapSelection('*', '*')),
+        createFormatBtn('Strikethrough', icons.strikethrough, () => wrapSelection('~~', '~~')),
+        createFormatBtn('Inline Code (Ctrl+`)', icons.code, () => wrapSelection('`', '`')),
+        createDivider(),
+        createFormatBtn('Link (Ctrl+K)', icons.link, insertMarkdownLink),
+        createFormatBtn('Blockquote', icons.quote, () => prefixLines('> ')),
+        createFormatBtn('Bullet List', icons.list, () => prefixLines('- ')),
+        createFormatBtn('Insert Table', icons.table, insertTable)
+    );
+
+    // Inject the toolbar at the very top of the editor pane
+    editorPane.prepend(formattingToolbar);
+
+// Update your existing editor keydown listener to include these:
+editor.addEventListener('keydown', (e) => {
+    const isMac = navigator.platform.toUpperCase().includes('MAC');
+    const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+    
+    if (ctrlOrCmd) {
+        if (e.key === 's') { e.preventDefault(); saveFile(); return; }
+        
+        let prefix = '', suffix = '';
+        if (e.key === 'b') { prefix = '**'; suffix = '**'; }         // Bold
+        else if (e.key === 'i') { prefix = '*'; suffix = '*'; }      // Italic
+        else if (e.key === 'k') { e.preventDefault(); insertMarkdownLink(); return; } // Link
+        else if (e.code === 'Backquote') { prefix = '`'; suffix = '`'; } // Inline Code (Ctrl + `)
+        
+        if (prefix) {
+            e.preventDefault();
+            wrapSelection(prefix, suffix);
+        }
+    }
+});
 
     async function saveFile() {
         try {
@@ -364,12 +593,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         }
     });
 
-    editor.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-            e.preventDefault();
-            saveFile();
-        }
-    });
 
     let previewVisible = true;
     toggleEditorBtn.addEventListener('click', () => {
@@ -415,14 +638,17 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         preview.style.fontSize = (16 * previewZoom / 100) + 'px';
     }
 
-    zoomInBtn.addEventListener('click', () => {
+        zoomInBtn.addEventListener('click', () => {
+        // Limit maximum zoom to 150%
         editorZoom = Math.min(200, editorZoom + 10);
         previewZoom = Math.min(200, previewZoom + 10);
         updateZoom();
     });
+    
     zoomOutBtn.addEventListener('click', () => {
-        editorZoom = Math.max(50, editorZoom - 10);
-        previewZoom = Math.max(50, previewZoom - 10);
+        // Limit minimum zoom to 100%
+        editorZoom = Math.max(100, editorZoom - 10);
+        previewZoom = Math.max(100, previewZoom - 10);
         updateZoom();
     });
 
@@ -798,6 +1024,10 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             runSearch();
         }
     });
+
+    document.addEventListener('wheel', (e) => {
+    if (e.ctrlKey) e.preventDefault();
+}, { passive: false });
 
     // ─── Register tab ─────────────────────────────────────────────────────────
     tabManager.openTab({

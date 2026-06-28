@@ -200,6 +200,18 @@ const createWindow = () => {
         }
     });
 
+    // ─── DISABLE NATIVE ELECTRON ZOOM ─────────────────────────────────
+    // 1. Hard limit native pinch-to-zoom (trackpads)
+    mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
+
+     // 2. Intercept native keyboard shortcuts (Ctrl +/-) before they trigger native zoom
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+        if (input.control || input.meta) {
+            if (input.key === '+' || input.key === '=' || input.key === '-' || input.key === '_') {
+                event.preventDefault(); // Blocks the native Chromium zoom
+            }
+        }
+    });
     mainWindow.webContents.on('will-navigate', (event, navigationUrl) => {
         const parsedUrl = new URL(navigationUrl);
         if (parsedUrl.protocol === 'file:') return;
