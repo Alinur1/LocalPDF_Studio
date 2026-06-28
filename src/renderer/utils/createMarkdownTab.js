@@ -30,29 +30,18 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         if (window.electronAPI?.resolveAsset) {
             return await window.electronAPI.resolveAsset(relativePath);
         }
-        // Fallback for dev environment
         const base = window.location.origin.replace(/\/$/, '');
         return `${base}/assets/${relativePath}`;
     };
 
-    // Load marked.umd.js locally
     const loadMarked = async () => {
-        if (window.marked) {
-            markedReady = true;
-            return;
-        }
+        if (window.marked) { markedReady = true; return; }
         const scriptUrl = await getAssetPath('js/marked.umd.js');
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = scriptUrl;
             script.onload = () => {
-                // Configure GFM options once
-                window.marked.setOptions({
-                    gfm: true,
-                    breaks: true,
-                    headerIds: true,
-                    mangle: false
-                });
+                window.marked.setOptions({ gfm: true, breaks: true, headerIds: true, mangle: false });
                 markedReady = true;
                 resolve();
             };
@@ -61,15 +50,12 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         });
     };
 
-    // Load github-markdown-css with theme switching
     let activeCssLink = null;
     const loadGithubCss = async (theme) => {
         if (activeCssLink?.parentNode) activeCssLink.parentNode.removeChild(activeCssLink);
-
-        let cssFile = 'github-markdown.css'; // auto-switching
+        let cssFile = 'github-markdown.css';
         if (theme === 'light') cssFile = 'github-markdown-light.css';
         else if (theme === 'dark') cssFile = 'github-markdown-dark.css';
-
         const cssUrl = await getAssetPath(`css/${cssFile}`);
         activeCssLink = document.createElement('link');
         activeCssLink.rel = 'stylesheet';
@@ -77,37 +63,28 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         document.head.appendChild(activeCssLink);
     };
 
-    // Wait for marked to load before proceeding
     await loadMarked();
 
-    // UI Creation
+    // ─── Container ───────────────────────────────────────────────────────────
     const container = document.createElement('div');
     container.className = 'markdown-container';
-    container.style.cssText = `
-        width: 100%; height: 100%; display: flex; flex-direction: column;
-        background: var(--bg-secondary);
-    `;
+    container.style.cssText = `width: 100%; height: 100%; display: flex; flex-direction: column; background: var(--bg-secondary);`;
 
-    // Toolbar
+    // ─── Toolbar ─────────────────────────────────────────────────────────────
     const toolbar = document.createElement('div');
     toolbar.className = 'markdown-toolbar';
-    toolbar.style.cssText = `
-        display: flex; gap: 8px; padding: 12px; background: var(--bg-tertiary);
-        border-bottom: 1px solid var(--border-color); flex-wrap: wrap; align-items: center;
-    `;
+    toolbar.style.cssText = `display: flex; gap: 8px; padding: 12px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); flex-wrap: wrap; align-items: center;`;
 
     const saveBtn = document.createElement('button');
     saveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
     saveBtn.setAttribute('data-tooltip', 'Save file');
     saveBtn.className = 'markdown-btn tooltip-left';
 
-    // Export PDF button
     const exportPdfBtn = document.createElement('button');
     exportPdfBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
     exportPdfBtn.setAttribute('data-tooltip', 'Export to PDF');
     exportPdfBtn.className = 'markdown-btn tooltip-left';
 
-    // Toggle Editor button (replaces Toggle Preview)
     const toggleEditorBtn = document.createElement('button');
     toggleEditorBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
     toggleEditorBtn.setAttribute('data-tooltip', 'Toggle Editor');
@@ -144,27 +121,14 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     zoomContainer.append(zoomOutBtn, zoomLevel, zoomInBtn);
 
-    // Inline search bar
-    // Hidden by default; shown only when editor is visible and Ctrl+F is pressed.
+    // ─── Search bar ──────────────────────────────────────────────────────────
     const searchContainer = document.createElement('div');
-    searchContainer.style.cssText = `
-        display: none; align-items: center; gap: 4px;
-        margin-left: 12px; border-left: 1px solid var(--border-color); padding-left: 12px;
-    `;
+    searchContainer.style.cssText = `display: none; align-items: center; gap: 4px; margin-left: 12px; border-left: 1px solid var(--border-color); padding-left: 12px;`;
 
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
     searchInput.placeholder = 'Find in editor…';
-    searchInput.style.cssText = `
-        background: var(--bg-secondary);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        padding: 3px 8px;
-        font-size: 13px;
-        outline: none;
-        width: 180px;
-    `;
+    searchInput.style.cssText = `background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px; padding: 3px 8px; font-size: 13px; outline: none; width: 180px;`;
 
     const searchCaseSensitiveBtn = document.createElement('button');
     searchCaseSensitiveBtn.textContent = 'Aa';
@@ -194,28 +158,71 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     searchContainer.append(searchInput, searchCaseSensitiveBtn, searchMatchCount, searchPrevBtn, searchNextBtn, searchCloseBtn);
 
-    // Status indicator
     const statusIndicator = document.createElement('span');
     statusIndicator.style.cssText = `margin-left: auto; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: help;`;
     statusIndicator.setAttribute('data-tooltip', 'File Status');
 
     toolbar.append(saveBtn, exportPdfBtn, toggleEditorBtn, layoutBtn, syncToggleBtn, zoomContainer, searchContainer, statusIndicator);
 
-    // Content Area
+    // ─── Content area ────────────────────────────────────────────────────────
     const contentArea = document.createElement('div');
     contentArea.className = 'markdown-content';
     contentArea.style.cssText = `display: flex; flex: 1; overflow: hidden; gap: 1px; background: var(--border-color);`;
 
+    // ── Editor pane: wrapper holds the overlay + textarea stacked ────────────
     const editorPane = document.createElement('div');
     editorPane.className = 'markdown-editor-pane';
     editorPane.style.cssText = `flex: 1; display: flex; flex-direction: column; background: var(--bg-secondary); min-width: 300px;`;
 
+    // The editorWrapper is the positioning context for the overlay
+    const editorWrapper = document.createElement('div');
+    editorWrapper.style.cssText = `position: relative; flex: 1; display: flex; overflow: hidden;`;
+
+    // ── Highlight overlay (sits BEHIND the textarea) ─────────────────────────
+    // Must share identical font/padding/sizing with the textarea so characters
+    // land in exactly the same pixel positions.
+    const highlightOverlay = document.createElement('div');
+    highlightOverlay.setAttribute('aria-hidden', 'true');
+    highlightOverlay.style.cssText = `
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        padding: 16px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow: hidden;
+        pointer-events: none;
+        color: transparent;
+        background: transparent;
+        box-sizing: border-box;
+        z-index: 0;
+    `;
+
+    // ── Textarea sits on top, fully transparent background so overlay shows ──
     const editor = document.createElement('textarea');
     editor.className = 'markdown-editor';
-    editor.style.cssText = `flex: 1; padding: 16px; background: var(--bg-secondary); color: var(--text-primary); border: none; outline: none; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.5; resize: none;`;
+    editor.style.cssText = `
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        padding: 16px;
+        background: transparent;
+        color: var(--text-primary);
+        caret-color: var(--text-primary);
+        border: none; outline: none;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        line-height: 1.5;
+        resize: none;
+        width: 100%; height: 100%;
+        box-sizing: border-box;
+        z-index: 1;
+    `;
     editor.spellcheck = true;
-    editorPane.appendChild(editor);
 
+    editorWrapper.append(highlightOverlay, editor);
+    editorPane.appendChild(editorWrapper);
+
+    // ── Preview pane ─────────────────────────────────────────────────────────
     const previewPane = document.createElement('div');
     previewPane.className = 'markdown-preview-pane';
     previewPane.style.cssText = `flex: 1; overflow-y: auto; background: var(--bg-secondary); min-width: 300px; display: flex;`;
@@ -235,7 +242,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         const link = e.target.closest('a[href]');
         if (link) {
             const href = link.getAttribute('href');
-            // Only intercept external HTTP/HTTPS URLs
             if (href && /^https?:\/\//i.test(href)) {
                 e.preventDefault();
                 if (window.electronAPI?.openExternal) {
@@ -258,7 +264,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     }
     editor.value = initialContent;
 
-    // Marked renderer
+    // ─── Preview renderer ─────────────────────────────────────────────────────
     let previewTimeout;
     function updatePreview() {
         clearTimeout(previewTimeout);
@@ -268,12 +274,10 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
                 if (window.marked) {
                     htmlContent = window.marked.parse(editor.value, { gfm: true, breaks: true });
                 } else {
-                    // Fallback to the simple parser if marked isn't loaded yet
                     htmlContent = typeof simpleMarkdownParser === 'function'
                         ? simpleMarkdownParser(editor.value)
                         : `<pre><code>${editor.value}</code></pre>`;
                 }
-                // Resolve relative image paths before rendering
                 htmlContent = resolveImagePaths(htmlContent, currentFilePath);
                 preview.innerHTML = htmlContent;
                 invalidateBlockCache();
@@ -284,7 +288,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         }, 150);
     }
 
-    // Theme sync
     const applyThemeToPreview = () => {
         const savedTheme = localStorage.getItem('theme') || 'system';
         let activeTheme = savedTheme;
@@ -334,23 +337,16 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             exportPdfBtn.disabled = true;
             exportPdfBtn.setAttribute('data-tooltip', 'Exporting...');
             exportPdfBtn.style.opacity = '0.6';
-
-            // Generate HTML using marked (if loaded) or fallback parser
             let htmlContent;
             if (window.marked) {
                 htmlContent = window.marked.parse(editor.value, { gfm: true, breaks: true });
             } else {
                 htmlContent = markdownParser(editor.value);
             }
-
-            const result = await window.electronAPI.exportMarkdownToPdf(htmlContent, title, {
-                mdFilePath: currentFilePath
-            });
-
+            const result = await window.electronAPI.exportMarkdownToPdf(htmlContent, title, { mdFilePath: currentFilePath });
             if (result?.success) {
                 const defaultName = title.replace(/\.md$/i, '') + '.pdf';
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, new Uint8Array(result.data));
-
                 if (savedPath) {
                     statusIndicator.innerHTML = '<span style="color: #2ecc71;">●</span> PDF Exported';
                     setTimeout(() => updateStatusIndicator(), 2500);
@@ -381,10 +377,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         editorPane.style.display = editorVisible ? 'flex' : 'none';
         toggleEditorBtn.style.background = editorVisible ? 'var(--accent-color)' : 'var(--bg-secondary)';
         toggleEditorBtn.style.color = editorVisible ? 'white' : 'var(--text-primary)';
-
-        // Hide search bar when editor is hidden
         if (!editorVisible) closeSearch();
-
         if (editorVisible) {
             editor.scrollTop = 0;
             editor.selectionStart = 0;
@@ -405,23 +398,20 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         const normPath = mdFilePath.replace(/\\/g, '/');
         const dirPath = normPath.slice(0, normPath.lastIndexOf('/') + 1);
         const baseUrl = `file:///${dirPath.replace(/^\/+/, '')}`;
-
         return html.replace(/(<img[^>]+src=["'])([^"']+)(["'][^>]*>)/gi, (match, prefix, src, suffix) => {
-            // Skip absolute URLs & data URIs
             if (/^(https?:|data:|file:)/i.test(src)) return match;
             try {
                 const absoluteUrl = new URL(src, baseUrl).href;
                 return `${prefix}${absoluteUrl}${suffix}`;
-            } catch {
-                return match;
-            }
+            } catch { return match; }
         });
     }
 
-
     function updateZoom() {
         zoomLevel.textContent = Math.round(editorZoom) + '%';
-        editor.style.fontSize = (14 * editorZoom / 100) + 'px';
+        const editorFontSize = (14 * editorZoom / 100) + 'px';
+        editor.style.fontSize = editorFontSize;
+        highlightOverlay.style.fontSize = editorFontSize; // keep overlay in sync
         preview.style.fontSize = (16 * previewZoom / 100) + 'px';
     }
 
@@ -430,7 +420,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         previewZoom = Math.min(200, previewZoom + 10);
         updateZoom();
     });
-
     zoomOutBtn.addEventListener('click', () => {
         editorZoom = Math.max(50, editorZoom - 10);
         previewZoom = Math.max(50, previewZoom - 10);
@@ -440,49 +429,27 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     document.addEventListener('keydown', (e) => {
         const isMac = navigator.platform.toUpperCase().includes('MAC');
         const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
-
-        // Zoom shortcuts (Ctrl/Cmd + + / - / 0)
         if (ctrlOrCmd) {
-            if (e.key === '+' || e.key === '=') {
-                e.preventDefault();
-                zoomInBtn.click();
-            }
-            else if (e.key === '-') {
-                e.preventDefault();
-                zoomOutBtn.click();
-            }
-            else if (e.key === '0') {
-                e.preventDefault();
-                editorZoom = previewZoom = 100;
-                updateZoom();
-            }
+            if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomInBtn.click(); }
+            else if (e.key === '-') { e.preventDefault(); zoomOutBtn.click(); }
+            else if (e.key === '0') { e.preventDefault(); editorZoom = previewZoom = 100; updateZoom(); }
         }
     });
 
     editor.addEventListener('wheel', (e) => {
-        if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            e.deltaY < 0 ? zoomInBtn.click() : zoomOutBtn.click();
-        }
+        if (e.ctrlKey || e.metaKey) { e.preventDefault(); e.deltaY < 0 ? zoomInBtn.click() : zoomOutBtn.click(); }
     });
-
     previewPane.addEventListener('wheel', (e) => {
-        if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            e.deltaY < 0 ? zoomInBtn.click() : zoomOutBtn.click();
-        }
+        if (e.ctrlKey || e.metaKey) { e.preventDefault(); e.deltaY < 0 ? zoomInBtn.click() : zoomOutBtn.click(); }
     });
 
-    // Initial render
     updatePreview();
     updateStatusIndicator();
 
-    // Synchronized Scrolling
+    // ─── Synchronized Scrolling ───────────────────────────────────────────────
     let syncEnabled = true;
     let syncSource = null;
-    // let smoothScrollTimer = null;
 
-    // Cached measurements (invalidated on zoom or resize)
     let _cachedLineHeight = null;
     function getLineHeight() {
         if (_cachedLineHeight === null) {
@@ -495,17 +462,13 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         scheduleReinjectSentinels();
     }
 
-    // Invalidate when zoom changes (zoom buttons call updateZoom)
-    const _origUpdateZoom = updateZoom;
     const _zoomBtns = [zoomInBtn, zoomOutBtn];
     _zoomBtns.forEach(btn => btn.addEventListener('click', () => {
         invalidateMeasureCache();
         invalidateBlockCache();
     }));
 
-
     let _blockPositionCache = null;
-
     function getBlockPositions() {
         if (_blockPositionCache) return _blockPositionCache;
         const blocks = Array.from(preview.querySelectorAll('[data-sync-line]'));
@@ -515,35 +478,19 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         }));
         return _blockPositionCache;
     }
+    function invalidateBlockCache() { _blockPositionCache = null; }
 
-    function invalidateBlockCache() {
-        _blockPositionCache = null;
-    }
-
-    // Sentinel injection
     function injectSentinels() {
         const lines = editor.value.split('\n');
-        const blocks = preview.querySelectorAll(
-            'h1, h2, h3, h4, h5, h6, p, pre, blockquote, ul, ol, table, hr'
-        );
-
+        const blocks = preview.querySelectorAll('h1, h2, h3, h4, h5, h6, p, pre, blockquote, ul, ol, table, hr');
         let lineIndex = 0;
         blocks.forEach(block => {
             const blockText = block.textContent.trim().slice(0, 60);
             let found = lineIndex;
-
             for (let i = lineIndex; i < lines.length; i++) {
-                const stripped = lines[i]
-                    .replace(/^#{1,6}\s*/, '')
-                    .replace(/[*_`~[\]]/g, '')
-                    .trim();
-                if (
-                    stripped.length > 4 &&
-                    blockText.startsWith(stripped.slice(0, Math.min(stripped.length, 40)))
-                ) {
-                    found = i;
-                    lineIndex = i;
-                    break;
+                const stripped = lines[i].replace(/^#{1,6}\s*/, '').replace(/[*_`~[\]]/g, '').trim();
+                if (stripped.length > 4 && blockText.startsWith(stripped.slice(0, Math.min(stripped.length, 40)))) {
+                    found = i; lineIndex = i; break;
                 }
             }
             block.dataset.syncLine = found;
@@ -553,132 +500,90 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     let _sentinelReinjectTimer = null;
     function scheduleReinjectSentinels() {
         clearTimeout(_sentinelReinjectTimer);
-        _sentinelReinjectTimer = setTimeout(() => {
-            injectSentinels();
-            invalidateBlockCache();
-        }, 250);
+        _sentinelReinjectTimer = setTimeout(() => { injectSentinels(); invalidateBlockCache(); }, 250);
     }
 
     editor.addEventListener('input', scheduleReinjectSentinels);
-    setTimeout(() => {
-        injectSentinels();
-        invalidateBlockCache();
-    }, 400); // initial injection after first render
+    setTimeout(() => { injectSentinels(); invalidateBlockCache(); }, 400);
 
-    // Coordinate helpers
-
-    // Returns each block's scrollTop-relative position inside previewPane.
-    // getBoundingClientRect() is viewport-relative, so we subtract the pane's top
-    // and add back the current scrollTop to get the content-space position.
     function blockScrollTop(block) {
         const paneRect = previewPane.getBoundingClientRect();
         const blockRect = block.getBoundingClientRect();
         return blockRect.top - paneRect.top + previewPane.scrollTop;
     }
-
-    function editorScrollToLine() {
-        return editor.scrollTop / getLineHeight();
-    }
+    function editorScrollToLine() { return editor.scrollTop / getLineHeight(); }
 
     function lineToPreviewScrollTop(targetLine) {
         const positions = getBlockPositions();
-
         if (positions.length === 0) {
             const editorMax = editor.scrollHeight - editor.clientHeight;
             const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
             return editorMax > 0 ? (editor.scrollTop / editorMax) * previewMax : 0;
         }
-
         const totalLines = editor.value.split('\n').length;
         let before = null, after = null;
-
         for (const pos of positions) {
             if (pos.line <= targetLine) before = pos;
             else { after = pos; break; }
         }
-
         if (!before) {
             const first = positions[0];
-            const fraction = first.line > 0 ? Math.min(targetLine / first.line, 1) : 0;
-            return fraction * first.top;
+            return first.line > 0 ? Math.min(targetLine / first.line, 1) * first.top : 0;
         }
-
         if (!after) {
             const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-            const tail = totalLines > before.line
-                ? (targetLine - before.line) / (totalLines - before.line)
-                : 0;
+            const tail = totalLines > before.line ? (targetLine - before.line) / (totalLines - before.line) : 0;
             return before.top + tail * (previewMax - before.top);
         }
-
-        const fraction = after.line > before.line
-            ? (targetLine - before.line) / (after.line - before.line)
-            : 0;
+        const fraction = after.line > before.line ? (targetLine - before.line) / (after.line - before.line) : 0;
         return before.top + fraction * (after.top - before.top);
     }
 
     function previewScrollToEditorScrollTop(previewScrollTop) {
         const positions = getBlockPositions();
-
         if (positions.length === 0) {
             const editorMax = editor.scrollHeight - editor.clientHeight;
             const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
             return previewMax > 0 ? (previewScrollTop / previewMax) * editorMax : 0;
         }
-
         const lineHeight = getLineHeight();
         const totalLines = editor.value.split('\n').length;
         let before = null, after = null;
-
         for (const pos of positions) {
             if (pos.top <= previewScrollTop) before = pos;
             else { after = pos; break; }
         }
-
         let targetLine;
         if (!before) {
             const first = positions[0];
             targetLine = first.top > 0 ? (previewScrollTop / first.top) * first.line : 0;
         } else if (!after) {
             const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-            const tail = previewMax > before.top
-                ? (previewScrollTop - before.top) / (previewMax - before.top)
-                : 0;
+            const tail = previewMax > before.top ? (previewScrollTop - before.top) / (previewMax - before.top) : 0;
             targetLine = before.line + tail * (totalLines - before.line);
         } else {
-            const fraction = after.top > before.top
-                ? (previewScrollTop - before.top) / (after.top - before.top)
-                : 0;
+            const fraction = after.top > before.top ? (previewScrollTop - before.top) / (after.top - before.top) : 0;
             targetLine = before.line + fraction * (after.line - before.line);
         }
-
         return Math.max(0, targetLine * lineHeight);
     }
 
-    // Scroll event handlers
-
+    // Keep overlay scrolled in sync with textarea
     editor.addEventListener('scroll', () => {
-        if (!syncEnabled || syncSource === 'preview') return;
+        highlightOverlay.scrollTop = editor.scrollTop;
+        highlightOverlay.scrollLeft = editor.scrollLeft;
 
+        if (!syncEnabled || syncSource === 'preview') return;
         syncSource = 'editor';
         previewPane.scrollTop = lineToPreviewScrollTop(editorScrollToLine());
-
-        // Release the lock after one animation frame — the preview's echoed scroll
-        // event fires in the same frame and is suppressed by the lock check above.
-        requestAnimationFrame(() => {
-            if (syncSource === 'editor') syncSource = null;
-        });
+        requestAnimationFrame(() => { if (syncSource === 'editor') syncSource = null; });
     });
 
     previewPane.addEventListener('scroll', () => {
         if (!syncEnabled || syncSource === 'editor') return;
-
         syncSource = 'preview';
         editor.scrollTop = previewScrollToEditorScrollTop(previewPane.scrollTop);
-
-        requestAnimationFrame(() => {
-            if (syncSource === 'preview') syncSource = null;
-        });
+        requestAnimationFrame(() => { if (syncSource === 'preview') syncSource = null; });
     });
 
     syncToggleBtn.addEventListener('click', () => {
@@ -688,17 +593,78 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         syncToggleBtn.setAttribute('data-tooltip', syncEnabled ? 'Sync scroll ON' : 'Sync scroll OFF');
     });
 
-    // Editor Search
+    // ─── Search — overlay-based highlighting ──────────────────────────────────
+    // How it works:
+    //   1. The highlightOverlay <div> mirrors the textarea's text as plain text
+    //      nodes, with identical font/padding so characters align pixel-perfect.
+    //   2. When a search runs, we rebuild the overlay content: plain text outside
+    //      matches, <mark> spans for every match, and a special .search-current
+    //      class on the active match.
+    //   3. The textarea sits on top with a transparent background so the coloured
+    //      <mark> spans show through — the user types normally, highlights appear.
+    //   4. We never call editor.focus() during navigation so the cursor stays in
+    //      the search input and keystrokes never accidentally edit matched text.
+
     let searchMatches = [];
     let searchCurrent = -1;
     let searchActive = false;
+
+    // Escape text for insertion into the overlay div
+    function escapeHtml(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    // Rebuild the overlay with all matches highlighted.
+    // currentIdx = which match gets the "active" highlight colour.
+    function renderHighlightOverlay(text, matches, currentIdx) {
+        if (!matches || matches.length === 0) {
+            // No search active — just keep overlay clear (invisible)
+            highlightOverlay.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+        let pos = 0;
+        matches.forEach((m, i) => {
+            // Text before this match
+            if (m.start > pos) {
+                html += escapeHtml(text.slice(pos, m.start));
+            }
+            const isCurrent = i === currentIdx;
+            // All matches: yellow. Active match: orange + slightly darker so it stands out.
+            const bg = isCurrent
+                ? 'background:#f97316; color:#fff; border-radius:2px; outline:2px solid #ea580c;'
+                : 'background:#fde68a; color:#1e1e1e; border-radius:2px;';
+            html += `<mark style="${bg}">${escapeHtml(text.slice(m.start, m.end))}</mark>`;
+            pos = m.end;
+        });
+        // Remaining text after last match
+        if (pos < text.length) {
+            html += escapeHtml(text.slice(pos));
+        }
+
+        highlightOverlay.innerHTML = html;
+        // Keep overlay scroll in sync
+        highlightOverlay.scrollTop = editor.scrollTop;
+    }
+
+    function clearHighlightOverlay() {
+        highlightOverlay.innerHTML = '';
+    }
 
     function runSearch() {
         const query = searchInput.value;
         searchMatches = [];
         searchCurrent = -1;
 
-        if (!query) { updateSearchCount(); return; }
+        if (!query) {
+            clearHighlightOverlay();
+            updateSearchCount();
+            return;
+        }
 
         const text = editor.value;
         const flags = searchCaseSensitive ? 'g' : 'gi';
@@ -712,28 +678,26 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         }
 
         if (searchMatches.length > 0) {
-            // Jump to the match nearest the current cursor — but keep focus on searchInput
+            // Jump to the nearest match to the current cursor position
             const cursorPos = editor.selectionStart;
             let nearest = 0, nearestDist = Infinity;
             searchMatches.forEach((m, i) => {
                 const dist = Math.abs(m.start - cursorPos);
                 if (dist < nearestDist) { nearestDist = dist; nearest = i; }
             });
-            goToMatch(nearest, /* keepFocus */ true);
+            goToMatch(nearest);
         } else {
+            clearHighlightOverlay();
             updateSearchCount();
         }
     }
 
-    // keepFocus=true means we select the match in the editor but leave keyboard
-    // focus on the search input. keepFocus=false (arrow buttons / Enter) moves
-    // focus to the editor so the user can start editing immediately.
-    function goToMatch(index, keepFocus = false) {
+    function goToMatch(index) {
         if (searchMatches.length === 0) return;
         searchCurrent = ((index % searchMatches.length) + searchMatches.length) % searchMatches.length;
         const match = searchMatches[searchCurrent];
 
-        // Scroll the editor to the match line without moving keyboard focus
+        // Scroll the editor so the active match is vertically centred
         const textBefore = editor.value.slice(0, match.start);
         const linesBefore = textBefore.split('\n').length - 1;
         const lineHeight = getLineHeight();
@@ -747,16 +711,11 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             editor.scrollTop = Math.max(0, targetScroll - (visibleLines / 2) * lineHeight);
         }
 
-        // Select the match — use setSelectionRange on the editor element directly,
-        // then immediately restore focus to the search input if keepFocus is set.
-        editor.setSelectionRange(match.start, match.end);
+        // Draw all highlights; active match gets a different colour
+        renderHighlightOverlay(editor.value, searchMatches, searchCurrent);
 
-        if (keepFocus) {
-            // Return focus to the search bar so the user can keep typing
-            searchInput.focus();
-        } else {
-            editor.focus();
-        }
+        // Keep focus in the search bar — NEVER move it to the editor
+        searchInput.focus();
 
         updateSearchCount();
     }
@@ -778,13 +737,11 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     function openSearch() {
         searchActive = true;
         searchContainer.style.display = 'flex';
-
-        // Pre-fill with selected text if any (like VS Code)
+        // Pre-fill with any selected text (VS Code style)
         const sel = editor.value.slice(editor.selectionStart, editor.selectionEnd).trim();
         if (sel && !sel.includes('\n') && sel.length < 200) {
             searchInput.value = sel;
         }
-
         searchInput.focus();
         searchInput.select();
         runSearch();
@@ -795,7 +752,8 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         searchContainer.style.display = 'none';
         searchMatches = [];
         searchCurrent = -1;
-        // Only restore focus to editor if it's visible
+        clearHighlightOverlay();
+        updateSearchCount();
         if (editorVisible) editor.focus();
     }
 
@@ -804,8 +762,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            // Arrow buttons and Enter navigate — move focus to editor after jump
-            e.shiftKey ? goToMatch(searchCurrent - 1, false) : goToMatch(searchCurrent + 1, false);
+            e.shiftKey ? goToMatch(searchCurrent - 1) : goToMatch(searchCurrent + 1);
         }
         if (e.key === 'Escape') {
             e.preventDefault();
@@ -813,8 +770,8 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         }
     });
 
-    searchNextBtn.addEventListener('click', () => goToMatch(searchCurrent + 1, false));
-    searchPrevBtn.addEventListener('click', () => goToMatch(searchCurrent - 1, false));
+    searchNextBtn.addEventListener('click', () => goToMatch(searchCurrent + 1));
+    searchPrevBtn.addEventListener('click', () => goToMatch(searchCurrent - 1));
     searchCloseBtn.addEventListener('click', closeSearch);
 
     searchCaseSensitiveBtn.addEventListener('click', () => {
@@ -828,7 +785,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     document.addEventListener('keydown', (e) => {
         const isMac = navigator.platform.toUpperCase().includes('MAC');
         const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
-
         if (ctrlOrCmd && e.key === 'f' && editorVisible) {
             e.preventDefault();
             e.stopPropagation();
@@ -836,39 +792,29 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         }
     });
 
-    // Re-run search when editor content changes so positions stay accurate.
-    // Do NOT call editor.focus() here — that's what was stealing the cursor.
+    // Re-run search on editor changes so highlights stay accurate
     editor.addEventListener('input', () => {
         if (searchActive && searchInput.value) {
-            runSearch(); // runSearch calls goToMatch with keepFocus=true
+            runSearch();
         }
     });
 
-    // Register tab
+    // ─── Register tab ─────────────────────────────────────────────────────────
     tabManager.openTab({
         id: tabId,
         title: title,
         content: container,
         onClose: () => {
-            if (forceClose) {
-                themeObserver.disconnect();
-                return true; // Allow close on second attempt
-            }
-
+            if (forceClose) { themeObserver.disconnect(); return true; }
             if (isDirty) {
-                // Block the current close attempt immediately
                 window.customAlert.confirm(
                     'Unsaved Changes',
                     'You have unsaved changes. Are you sure you want to close this tab?'
                 ).then(choice => {
-                    if (choice === 1) { // User clicked "Yes"
-                        forceClose = true;
-                        tabManager.closeTab(tabId); // Re-trigger close, will pass the check
-                    }
+                    if (choice === 1) { forceClose = true; tabManager.closeTab(tabId); }
                 });
-                return false; // Cancel current close
+                return false;
             }
-
             themeObserver.disconnect();
             return true;
         },
