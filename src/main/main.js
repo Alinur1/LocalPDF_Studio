@@ -613,33 +613,33 @@ ipcMain.handle('export-markdown-to-pdf', async (event, { html, title, options = 
         const appPath = app.isPackaged ? process.resourcesPath : app.getAppPath();
         const cssPath = `file://${path.join(appPath, 'assets', 'css', 'github-markdown.css')}`;
 
+        // Dynamic CSS based on margin selection
+        let dynamicCss = `
+            body { padding: 0; margin: 0; background: #fff !important; }
+            .markdown-body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; }
+            a { color: inherit; text-decoration: none; }
+            pre, code { white-space: pre-wrap; word-break: break-word; }
+        `;
+        if (options.margins === 'narrow') dynamicCss += `.markdown-body { padding: 10mm; }`;
+        else if (options.margins === 'none') dynamicCss += `.markdown-body { padding: 0mm; max-width: 100%; }`;
+        else dynamicCss += `.markdown-body { padding: 20mm; }`;
+
         const fullHtml = `<!doctype html>
             <html lang="en">
             <head>
             <meta charset="utf-8">
             <title>${title || 'Document'}</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel="stylesheet" href="${cssPath}">
-            <style>
-                body { padding: 0; margin: 0; background: #fff !important; }
-                .markdown-body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; padding: 45px; }
-                @media print {
-                .markdown-body { padding: 20mm; max-width: 100%; }
-                a { color: inherit; text-decoration: none; }
-                pre, code { white-space: pre-wrap; word-break: break-word; }
-                }
-            </style>
+            <style>${dynamicCss}</style>
             </head>
             <body>
             <article class="markdown-body">${html}</article>
             </body>
             </html>`;
 
-        // Write temp HTML (fallback to os.tmpdir() if directory is read-only)
         try {
             fs.writeFileSync(tempHtmlPath, fullHtml, 'utf-8');
         } catch (writeErr) {
-            console.warn('Could not write to markdown directory, falling back to temp folder:', writeErr.message);
             tempHtmlPath = path.join(os.tmpdir(), `.localpdf-export-${Date.now()}.html`);
             fs.writeFileSync(tempHtmlPath, fullHtml, 'utf-8');
         }
@@ -648,13 +648,37 @@ ipcMain.handle('export-markdown-to-pdf', async (event, { html, title, options = 
         await printWindow.webContents.insertCSS(`body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }`);
         await new Promise(resolve => setTimeout(resolve, 800));
 
-        const pdfBuffer = await printWindow.webContents.printToPDF({
+        // ─── Calculate Margins and Headers/Footers ───────────────────────
+        let pdfMargins = { top: 10000, bottom: 10000, left: 10000, right: 10000 }; // Default 1cm
+        if (options.margins === 'narrow') {
+            pdfMargins = { top: 5000, bottom: 5000, left: 5000, right: 5000 }; // 0.5cm
+        } else if (options.margins === 'none') {
+            pdfMargins = { marginType: 'none' };
+        }
+
+        const printOptions = {
             printBackground: true,
             pageSize: options.pageSize || 'A4',
-            margins: { marginType: 'default' },
+            margins: pdfMargins,
             preferCSSPageSize: true
-        });
+        };
 
+        // Inject Title Header if requested
+        if (options.titleHeader && pdfMargins.marginType !== 'none') {
+            printOptions.headerTemplate = `<div style="font-size: 9px; text-align: center; width: 100%; color: #666;">${title || 'Document'}</div>`;
+            pdfMargins.top += 6000; // Add 6mm space for the header
+            printOptions.margins = pdfMargins;
+        }
+
+        // Inject Page Numbers if requested
+        if (options.pageNumbers && pdfMargins.marginType !== 'none') {
+            printOptions.footerTemplate = `<div style="font-size: 9px; text-align: center; width: 100%; color: #666;">Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>`;
+            pdfMargins.bottom += 6000; // Add 6mm space for the footer
+            printOptions.margins = pdfMargins;
+        }
+        // ─────────────────────────────────────────────────────────────────
+
+        const pdfBuffer = await printWindow.webContents.printToPDF(printOptions);
         printWindow.close();
         return { success: true, data: Array.from(pdfBuffer) };
     } catch (err) {

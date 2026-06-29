@@ -311,13 +311,14 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     const text = editor.value;
     const words = text.trim() ? text.trim().split(/\s+/).length : 0;
     const chars = text.length;
+    const readTime = Math.max(1, Math.ceil(words / 200)); // Average 200 words per minute
     
     const statusText = isDirty ? 'Modified' : 'Saved';
     const statusColor = isDirty ? '#f39c12' : '#2ecc71';
     
     statusIndicator.innerHTML = `
         <span style="color: var(--text-secondary); font-size: 11px; margin-right: 8px;">
-            ${words} words &middot; ${chars} chars
+            ${words} words &middot; ${chars} chars &middot; ${readTime} min read
         </span>
         <span style="color: ${statusColor};">● ${statusText}</span>
     `;
@@ -422,6 +423,7 @@ function insertMarkdownLink() {
         const btn = document.createElement('button');
         btn.innerHTML = iconSvg;
         btn.setAttribute('data-tooltip', tooltip);
+        btn.setAttribute('title', tooltip); //  Native browser tooltip fallback
         btn.className = 'markdown-btn';
         btn.style.cssText = `padding: 4px 8px; min-width: 28px;`;
         btn.addEventListener('mousedown', (e) => e.preventDefault()); // Prevents editor from losing focus
@@ -429,15 +431,6 @@ function insertMarkdownLink() {
         return btn;
     }
 
-    // SVG Icons (Feather style)
-    // const icons = {
-    //     bold: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>',
-    //     italic: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>',
-    //     code: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
-    //     link: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
-    //     quote: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/></svg>',
-    //     list: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>'
-    // };
 
     // ─── Advanced Formatting Helpers ─────────────────────────────────────────
     
@@ -482,6 +475,7 @@ function insertMarkdownLink() {
         const btn = document.createElement('button');
         btn.innerHTML = `H${level}`;
         btn.setAttribute('data-tooltip', `Heading ${level}`);
+        btn.setAttribute('title', `Heading ${level}`); // <── ADD THIS: Native browser tooltip fallback
         btn.className = 'markdown-btn';
         btn.style.cssText = `padding: 4px 8px; min-width: 28px; font-weight: bold; font-size: 12px;`;
         btn.addEventListener('mousedown', (e) => e.preventDefault());
@@ -498,25 +492,98 @@ function insertMarkdownLink() {
         link: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
         quote: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/></svg>',
         list: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
-        table: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>'
+        table: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>',
+        image: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+        numbered: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>',
+        codeBlock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
     };
 
-    // Wire up the fully upgraded toolbar
+        //toolbar
     formattingToolbar.append(
         createHeadingBtn(1),
         createHeadingBtn(2),
         createHeadingBtn(3),
+        createHeadingBtn(4),
+        createHeadingBtn(5),
+        createHeadingBtn(6),
         createDivider(),
         createFormatBtn('Bold (Ctrl+B)', icons.bold, () => wrapSelection('**', '**')),
         createFormatBtn('Italic (Ctrl+I)', icons.italic, () => wrapSelection('*', '*')),
         createFormatBtn('Strikethrough', icons.strikethrough, () => wrapSelection('~~', '~~')),
         createFormatBtn('Inline Code (Ctrl+`)', icons.code, () => wrapSelection('`', '`')),
+        createFormatBtn('Code Block (Ctrl+Shift+C)', icons.codeBlock, insertCodeBlock),
         createDivider(),
         createFormatBtn('Link (Ctrl+K)', icons.link, insertMarkdownLink),
+        createFormatBtn('Image', icons.image, insertImage),
         createFormatBtn('Blockquote', icons.quote, () => prefixLines('> ')),
         createFormatBtn('Bullet List', icons.list, () => prefixLines('- ')),
+        createFormatBtn('Numbered List', icons.numbered, insertNumberedList),
         createFormatBtn('Insert Table', icons.table, insertTable)
     );
+
+        // ─── Additional Formatting Helpers ───────────────────────────────────────
+
+    // Helper for Numbered Lists (Smart incrementing and toggle-off)
+    function insertNumberedList() {
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const text = editor.value;
+        
+        const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+        let lineEnd = text.indexOf('\n', end);
+        if (lineEnd === -1) lineEnd = text.length;
+        
+        const lines = text.slice(lineStart, lineEnd).split('\n');
+        // Check if already a numbered list to toggle off
+        const isNumbered = lines.filter(l => l.trim()).every(line => /^\d+\.\s/.test(line));
+        
+        let newLines;
+        if (isNumbered) {
+            newLines = lines.map(line => line.replace(/^\d+\.\s/, '')).join('\n');
+        } else {
+            let num = 1;
+            newLines = lines.map(line => line.trim() ? `${num++}. ${line}` : line).join('\n');
+        }
+        
+        editor.value = text.slice(0, lineStart) + newLines + text.slice(lineEnd);
+        editor.selectionStart = lineStart;
+        editor.selectionEnd = lineStart + newLines.length;
+        editor.dispatchEvent(new Event('input'));
+        editor.focus();
+    }
+
+    // Helper for inserting an Image
+    function insertImage() {
+        const start = editor.selectionStart;
+        const text = editor.value;
+        const insertion = `![alt text](image_url)`;
+        editor.value = text.slice(0, start) + insertion + text.slice(start);
+        
+        // Automatically select the 'image_url' part so the user can paste/type immediately
+        const urlStart = start + 11; 
+        editor.selectionStart = urlStart;
+        editor.selectionEnd = urlStart + 9;
+        editor.focus();
+        editor.dispatchEvent(new Event('input'));
+    }
+
+    // Helper for inserting a Multi-line Code Block
+    function insertCodeBlock() {
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const text = editor.value;
+        const selectedText = text.slice(start, end);
+        
+        const insertion = `\n\`\`\`\n${selectedText || 'code here'}\n\`\`\`\n`;
+        editor.value = text.slice(0, start) + insertion + text.slice(end);
+        
+        // Select the code content inside the block
+        const codeStart = start + 4;
+        editor.selectionStart = codeStart;
+        editor.selectionEnd = codeStart + (selectedText ? selectedText.length : 9);
+        editor.focus();
+        editor.dispatchEvent(new Event('input'));
+    }
 
     // Inject the toolbar at the very top of the editor pane
     editorPane.prepend(formattingToolbar);
@@ -527,13 +594,26 @@ editor.addEventListener('keydown', (e) => {
     const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
     
     if (ctrlOrCmd) {
-        if (e.key === 's') { e.preventDefault(); saveFile(); return; }
+        // Save File
+        if (e.code === 'KeyS') { e.preventDefault(); saveFile(); return; }
         
+        // Code Block
+        if (e.code === 'KeyC' && e.shiftKey) { e.preventDefault(); insertCodeBlock(); return; } 
+        
+        // ─── UNDO & REDO SHORTCUTS ────────────────────────────────────────
+        // FIX: Do NOT preventDefault() here. Let the native Chromium engine 
+        // handle Undo/Redo natively for the textarea.
+        if (e.code === 'KeyZ' || e.code === 'KeyY') {
+            return; // Let it pass through to the browser natively
+        }
+        // ────────────────────────────────────────────────────────────────
+
+        // Formatting Shortcuts
         let prefix = '', suffix = '';
-        if (e.key === 'b') { prefix = '**'; suffix = '**'; }         // Bold
-        else if (e.key === 'i') { prefix = '*'; suffix = '*'; }      // Italic
-        else if (e.key === 'k') { e.preventDefault(); insertMarkdownLink(); return; } // Link
-        else if (e.code === 'Backquote') { prefix = '`'; suffix = '`'; } // Inline Code (Ctrl + `)
+        if (e.code === 'KeyB') { prefix = '**'; suffix = '**'; }         // Ctrl+B (Bold)
+        else if (e.code === 'KeyI') { prefix = '*'; suffix = '*'; }      // Ctrl+I (Italic)
+        else if (e.code === 'KeyK') { e.preventDefault(); insertMarkdownLink(); return; } // Ctrl+K (Link)
+        else if (e.code === 'Backquote') { prefix = '`'; suffix = '`'; } // Ctrl+` (Inline Code)
         
         if (prefix) {
             e.preventDefault();
@@ -561,18 +641,94 @@ editor.addEventListener('keydown', (e) => {
 
     saveBtn.addEventListener('click', saveFile);
 
-    exportPdfBtn.addEventListener('click', async () => {
+
+        // ─── PDF Export Settings Modal ───────────────────────────────────────────
+    function showExportModal() {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        `;
+
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            background: var(--bg-secondary); padding: 24px; border-radius: 8px; 
+            width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+        `;
+        modal.innerHTML = `
+            <h3 style="margin: 0 0 16px 0; color: var(--text-primary); font-size: 16px;">Export PDF Settings</h3>
+            
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Page Size</label>
+                <select id="pdf-page-size" style="width: 100%; padding: 6px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px;">
+                    <option value="A4" selected>A4</option>
+                    <option value="Letter">Letter</option>
+                    <option value="Legal">Legal</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Margins</label>
+                <select id="pdf-margins" style="width: 100%; padding: 6px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px;">
+                    <option value="default" selected>Default</option>
+                    <option value="narrow">Narrow</option>
+                    <option value="none">None</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); cursor: pointer;">
+                    <input type="checkbox" id="pdf-page-numbers" style="cursor: pointer;"> Include Page Numbers
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); cursor: pointer;">
+                    <input type="checkbox" id="pdf-title-header" checked style="cursor: pointer;"> Include Document Title
+                </label>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button id="pdf-cancel-btn" style="padding: 6px 12px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">Cancel</button>
+                <button id="pdf-export-btn" style="padding: 6px 12px; background: var(--accent-color); color: white; border: none; border-radius: 4px; cursor: pointer;">Export</button>
+            </div>
+        `;
+
+        overlay.appendChild(modal);
+        container.appendChild(overlay);
+
+        // Event Listeners
+        overlay.querySelector('#pdf-cancel-btn').onclick = () => overlay.remove();
+        overlay.querySelector('#pdf-export-btn').onclick = () => {
+            const options = {
+                pageSize: overlay.querySelector('#pdf-page-size').value,
+                margins: overlay.querySelector('#pdf-margins').value,
+                pageNumbers: overlay.querySelector('#pdf-page-numbers').checked,
+                titleHeader: overlay.querySelector('#pdf-title-header').checked
+            };
+            overlay.remove();
+            executePdfExport(options);
+        };
+    }
+
+    async function executePdfExport(options) {
         try {
             exportPdfBtn.disabled = true;
             exportPdfBtn.setAttribute('data-tooltip', 'Exporting...');
             exportPdfBtn.style.opacity = '0.6';
+            
             let htmlContent;
             if (window.marked) {
                 htmlContent = window.marked.parse(editor.value, { gfm: true, breaks: true });
             } else {
-                htmlContent = markdownParser(editor.value);
+                htmlContent = typeof simpleMarkdownParser === 'function' ? simpleMarkdownParser(editor.value) : `<pre><code>${editor.value}</code></pre>`;
             }
-            const result = await window.electronAPI.exportMarkdownToPdf(htmlContent, title, { mdFilePath: currentFilePath });
+            
+            // Pass options to main process
+            const result = await window.electronAPI.exportMarkdownToPdf(htmlContent, title, { 
+                mdFilePath: currentFilePath,
+                ...options 
+            });
+            
             if (result?.success) {
                 const defaultName = title.replace(/\.md$/i, '') + '.pdf';
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, new Uint8Array(result.data));
@@ -591,7 +747,10 @@ editor.addEventListener('keydown', (e) => {
             exportPdfBtn.setAttribute('data-tooltip', 'Export to PDF');
             exportPdfBtn.style.opacity = '1';
         }
-    });
+    }
+
+    // Wire the button to show the modal instead of exporting immediately
+    exportPdfBtn.addEventListener('click', showExportModal);
 
 
     let previewVisible = true;
@@ -1059,7 +1218,7 @@ editor.addEventListener('keydown', (e) => {
                 });
                 return false;
             }
-            tthemeObserver.disconnect();
+            themeObserver.disconnect();
             _visibilityObserver.disconnect();
             return true;
         },
