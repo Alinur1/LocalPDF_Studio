@@ -1029,13 +1029,27 @@ editor.addEventListener('keydown', (e) => {
     if (e.ctrlKey) e.preventDefault();
 }, { passive: false });
 
+
+    // ─── Notify main process when this markdown tab is active ────────────────
+    // Uses IntersectionObserver on the container so we track actual visibility
+    // (tab switching shows/hides the container). This tells main.js to stop
+    // blocking Ctrl+/- so our renderer zoom handler can fire.
+    const _visibilityObserver = new IntersectionObserver((entries) => {
+        const isVisible = entries.some(e => e.isIntersecting && e.intersectionRatio > 0);
+        if (window.electronAPI?.send) {
+            window.electronAPI.send('markdown-tab-active', isVisible);
+        }
+    }, { threshold: 0.01 });
+    _visibilityObserver.observe(container);
+
+
     // ─── Register tab ─────────────────────────────────────────────────────────
     tabManager.openTab({
         id: tabId,
         title: title,
         content: container,
         onClose: () => {
-            if (forceClose) { themeObserver.disconnect(); return true; }
+            if (forceClose) { themeObserver.disconnect(); _visibilityObserver.disconnect(); return true; }
             if (isDirty) {
                 window.customAlert.confirm(
                     'Unsaved Changes',
@@ -1045,7 +1059,8 @@ editor.addEventListener('keydown', (e) => {
                 });
                 return false;
             }
-            themeObserver.disconnect();
+            tthemeObserver.disconnect();
+            _visibilityObserver.disconnect();
             return true;
         },
         type: 'markdown'

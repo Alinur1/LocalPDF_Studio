@@ -61,7 +61,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     onUpdateStatus: (callback) => ipcRenderer.on('update-status', (event, ...args) => callback(...args)),
     checkForUpdates: () => ipcRenderer.send('check-for-updates'),
-    getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
+    getUpdateStatus: () => ipcRenderer.npinvoke('get-update-status'),
     onOpenFile: (callback) => ipcRenderer.on('open-file', (event, filePath) => callback(filePath)),
     getQueuedFiles: () => ipcRenderer.invoke('get-queued-files'),
     saveDroppedFile: (fileInfo) => ipcRenderer.invoke('save-dropped-file', fileInfo),
@@ -72,6 +72,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onTesseractProgress: (callback) => ipcRenderer.on('tesseract-progress', (event, progress) => callback(progress)),
     saveImageFile: (filename, buffer) => ipcRenderer.invoke('save-image-file', { filename, buffer }),
     buildFillablePdf: (options) => ipcRenderer.invoke('build-fillable-pdf', options),
+    send: (channel, data) => {
+        const allowedChannels = ['markdown-tab-active'];
+        if (allowedChannels.includes(channel)) ipcRenderer.send(channel, data);
+    },
     selectMarkdownFiles: () => ipcRenderer.invoke('select-markdown-files'),
     readMarkdownFile: (filePath) => ipcRenderer.invoke('read-markdown-file', filePath),
     saveMarkdownFile: (filePath, content) => ipcRenderer.invoke('save-markdown-file-direct', filePath, content),

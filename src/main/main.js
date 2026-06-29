@@ -186,7 +186,7 @@ const getIcon = () => {
 };
 
 const createWindow = () => {
-    Menu.setApplicationMenu(null);
+    // Menu.setApplicationMenu(null);
     mainWindow = new BrowserWindow({
         minWidth: 700,
         minHeight: 600,
@@ -204,11 +204,19 @@ const createWindow = () => {
     // 1. Hard limit native pinch-to-zoom (trackpads)
     mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
 
-     // 2. Intercept native keyboard shortcuts (Ctrl +/-) before they trigger native zoom
+// 2. Intercept native keyboard shortcuts (Ctrl +/-) before they trigger native zoom.
+    // We allow them through when a markdown tab is active so the renderer's
+    // zoom logic can handle them. In all other cases we block native Chromium zoom.
+    let markdownTabActive = false;
+    ipcMain.on('markdown-tab-active', (event, isActive) => {
+        markdownTabActive = isActive;
+    });
+
     mainWindow.webContents.on('before-input-event', (event, input) => {
         if (input.control || input.meta) {
             if (input.key === '+' || input.key === '=' || input.key === '-' || input.key === '_') {
-                event.preventDefault(); // Blocks the native Chromium zoom
+                if (markdownTabActive) return; // Let renderer handle zoom
+                event.preventDefault();        // Block native Chromium zoom elsewhere
             }
         }
     });
