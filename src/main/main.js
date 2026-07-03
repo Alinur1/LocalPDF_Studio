@@ -186,7 +186,7 @@ const getIcon = () => {
 };
 
 const createWindow = () => {
-    // Menu.setApplicationMenu(null);
+    Menu.setApplicationMenu(null);
     mainWindow = new BrowserWindow({
         minWidth: 700,
         minHeight: 600,
