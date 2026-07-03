@@ -16,6 +16,8 @@
 **/
 
 // src/renderer/utils/createMarkdownTab.js
+import i18n from './i18n.js';
+
 export default async function createMarkdownTab(filePath, tabManager, existingId = null, initialContent = null) {
     const tabId = existingId || `markdown:${filePath}:${Date.now()}`;
     const title = filePath.split(/[\\/]/).pop();
@@ -25,6 +27,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     let previewZoom = 100;
     let markedReady = false;
     let forceClose = false;
+    const t = (key) => i18n.t(`markdownEditor.${key}`);
 
     const getAssetPath = async (relativePath) => {
         if (window.electronAPI?.resolveAsset) {
@@ -77,27 +80,27 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     const saveBtn = document.createElement('button');
     saveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
-    saveBtn.setAttribute('data-tooltip', 'Save file');
+    saveBtn.setAttribute('data-tooltip', t('saveTooltip'));
     saveBtn.className = 'markdown-btn tooltip-left';
 
     const exportPdfBtn = document.createElement('button');
     exportPdfBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
-    exportPdfBtn.setAttribute('data-tooltip', 'Export to PDF');
+    exportPdfBtn.setAttribute('data-tooltip', t('exportTooltip'));
     exportPdfBtn.className = 'markdown-btn tooltip-left';
 
     const toggleEditorBtn = document.createElement('button');
     toggleEditorBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
-    toggleEditorBtn.setAttribute('data-tooltip', 'Toggle Editor');
+    toggleEditorBtn.setAttribute('data-tooltip', t('toggleEditorTooltip'));
     toggleEditorBtn.className = 'markdown-btn tooltip-left';
 
     const layoutBtn = document.createElement('button');
     layoutBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>';
-    layoutBtn.setAttribute('data-tooltip', 'Toggle layout');
+    layoutBtn.setAttribute('data-tooltip', t('toggleLayoutTooltip'));
     layoutBtn.className = 'markdown-btn tooltip-left';
 
     const syncToggleBtn = document.createElement('button');
     syncToggleBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>';
-    syncToggleBtn.setAttribute('data-tooltip', 'Toggle sync scroll');
+    syncToggleBtn.setAttribute('data-tooltip', t('syncScrollTooltip'));
     syncToggleBtn.className = 'markdown-btn tooltip-left';
     syncToggleBtn.style.background = 'var(--accent-color)';
     syncToggleBtn.style.color = 'white';
@@ -107,7 +110,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     const zoomOutBtn = document.createElement('button');
     zoomOutBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6"/></svg>';
-    zoomOutBtn.setAttribute('data-tooltip', 'Zoom out');
+    zoomOutBtn.setAttribute('data-tooltip', t('zoomOutTooltip'));
     zoomOutBtn.className = 'markdown-btn';
 
     const zoomLevel = document.createElement('span');
@@ -116,7 +119,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     const zoomInBtn = document.createElement('button');
     zoomInBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>';
-    zoomInBtn.setAttribute('data-tooltip', 'Zoom in');
+    zoomInBtn.setAttribute('data-tooltip', t('zoomInTooltip'));
     zoomInBtn.className = 'markdown-btn';
 
     zoomContainer.append(zoomOutBtn, zoomLevel, zoomInBtn);
@@ -127,40 +130,40 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
-    searchInput.placeholder = 'Find in editor…';
+    searchInput.placeholder = t('searchPlaceholder');
     searchInput.style.cssText = `background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px; padding: 3px 8px; font-size: 13px; outline: none; width: 180px;`;
 
     const searchCaseSensitiveBtn = document.createElement('button');
     searchCaseSensitiveBtn.textContent = 'Aa';
-    searchCaseSensitiveBtn.setAttribute('data-tooltip', 'Case sensitive');
+    searchCaseSensitiveBtn.setAttribute('data-tooltip', t('caseSensitiveTooltip'));
     searchCaseSensitiveBtn.className = 'markdown-btn';
     searchCaseSensitiveBtn.style.cssText = `font-size: 11px; font-weight: bold; padding: 3px 6px; min-width: 26px;`;
     let searchCaseSensitive = false;
 
     const searchMatchCount = document.createElement('span');
     searchMatchCount.style.cssText = `font-size: 12px; color: var(--text-secondary); white-space: nowrap; min-width: 54px; text-align: center;`;
-    searchMatchCount.textContent = 'No results';
+    searchMatchCount.textContent = t('noResults');
 
     const searchPrevBtn = document.createElement('button');
     searchPrevBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`;
-    searchPrevBtn.setAttribute('data-tooltip', 'Previous (Shift+Enter)');
+    searchPrevBtn.setAttribute('data-tooltip', t('previousTooltip'));
     searchPrevBtn.className = 'markdown-btn';
 
     const searchNextBtn = document.createElement('button');
     searchNextBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
-    searchNextBtn.setAttribute('data-tooltip', 'Next (Enter)');
+    searchNextBtn.setAttribute('data-tooltip', t('nextTooltip'));
     searchNextBtn.className = 'markdown-btn';
 
     const searchCloseBtn = document.createElement('button');
     searchCloseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
-    searchCloseBtn.setAttribute('data-tooltip', 'Close (Esc)');
+    searchCloseBtn.setAttribute('data-tooltip', t('closeTooltip'));
     searchCloseBtn.className = 'markdown-btn';
 
     searchContainer.append(searchInput, searchCaseSensitiveBtn, searchMatchCount, searchPrevBtn, searchNextBtn, searchCloseBtn);
 
     const statusIndicator = document.createElement('span');
     statusIndicator.style.cssText = `margin-left: auto; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: help;`;
-    statusIndicator.setAttribute('data-tooltip', 'File Status');
+    statusIndicator.setAttribute('data-tooltip', t('fileStatusTooltip'));
 
     toolbar.append(saveBtn, exportPdfBtn, toggleEditorBtn, layoutBtn, syncToggleBtn, zoomContainer, searchContainer, statusIndicator);
 
@@ -283,7 +286,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
                 invalidateBlockCache();
                 scheduleReinjectSentinels();
             } catch (err) {
-                preview.innerHTML = `<p style="color: #e74c3c;">Error parsing markdown: ${err.message}</p>`;
+                preview.innerHTML = `<p style="color: #e74c3c;">${t('errorParsingMarkdown')} ${err.message}</p>`;
             }
         }, 150);
     }
@@ -313,12 +316,12 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         const chars = text.length;
         const readTime = Math.max(1, Math.ceil(words / 200)); // Average 200 words per minute
 
-        const statusText = isDirty ? 'Modified' : 'Saved';
+        const statusText = isDirty ? t('modified') : t('saved');
         const statusColor = isDirty ? '#f39c12' : '#2ecc71';
 
         statusIndicator.innerHTML = `
         <span style="color: var(--text-secondary); font-size: 11px; margin-right: 8px;">
-            ${words} words &middot; ${chars} chars &middot; ${readTime} min read
+            ${words} ${t('statusWords')} &middot; ${chars} ${t('statusChars')} &middot; ${readTime} ${t('statusReadTime')}
         </span>
         <span style="color: ${statusColor};">● ${statusText}</span>
     `;
@@ -471,8 +474,9 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     function createHeadingBtn(level) {
         const btn = document.createElement('button');
         btn.innerHTML = `H${level}`;
-        btn.setAttribute('data-tooltip', `Heading ${level}`);
-        btn.setAttribute('title', `Heading ${level}`); // Native browser tooltip fallback
+        const headingLabel = t('headingTooltip').replace('{level}', level);
+        btn.setAttribute('data-tooltip', headingLabel);
+        btn.setAttribute('title', headingLabel); // Native browser tooltip fallback
         btn.className = 'markdown-btn';
         btn.style.cssText = `padding: 4px 8px; min-width: 28px; font-weight: bold; font-size: 12px;`;
         btn.addEventListener('mousedown', (e) => e.preventDefault());
@@ -504,18 +508,18 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         createHeadingBtn(5),
         createHeadingBtn(6),
         createDivider(),
-        createFormatBtn('Bold (Ctrl+B)', icons.bold, () => wrapSelection('**', '**')),
-        createFormatBtn('Italic (Ctrl+I)', icons.italic, () => wrapSelection('*', '*')),
-        createFormatBtn('Strikethrough', icons.strikethrough, () => wrapSelection('~~', '~~')),
-        createFormatBtn('Inline Code (Ctrl+`)', icons.code, () => wrapSelection('`', '`')),
-        createFormatBtn('Code Block (Ctrl+Shift+C)', icons.codeBlock, insertCodeBlock),
+        createFormatBtn(t('boldTooltip'), icons.bold, () => wrapSelection('**', '**')),
+        createFormatBtn(t('italicTooltip'), icons.italic, () => wrapSelection('*', '*')),
+        createFormatBtn(t('strikethroughTooltip'), icons.strikethrough, () => wrapSelection('~~', '~~')),
+        createFormatBtn(t('inlineCodeTooltip'), icons.code, () => wrapSelection('`', '`')),
+        createFormatBtn(t('codeBlockTooltip'), icons.codeBlock, insertCodeBlock),
         createDivider(),
-        createFormatBtn('Link (Ctrl+K)', icons.link, insertMarkdownLink),
-        createFormatBtn('Image', icons.image, insertImage),
-        createFormatBtn('Blockquote', icons.quote, () => prefixLines('> ')),
-        createFormatBtn('Bullet List', icons.list, () => prefixLines('- ')),
-        createFormatBtn('Numbered List', icons.numbered, insertNumberedList),
-        createFormatBtn('Insert Table', icons.table, insertTable)
+        createFormatBtn(t('linkTooltip'), icons.link, insertMarkdownLink),
+        createFormatBtn(t('imageTooltip'), icons.image, insertImage),
+        createFormatBtn(t('blockquoteTooltip'), icons.quote, () => prefixLines('> ')),
+        createFormatBtn(t('bulletListTooltip'), icons.list, () => prefixLines('- ')),
+        createFormatBtn(t('numberedListTooltip'), icons.numbered, insertNumberedList),
+        createFormatBtn(t('insertTableTooltip'), icons.table, insertTable)
     );
 
     // Helper for Numbered Lists (Smart incrementing and toggle-off)
@@ -627,7 +631,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             }
         } catch (err) {
             console.error('Error saving markdown file:', err);
-            window.customAlert.error('Save Error', `Failed to save file: ${err.message}`);
+            window.customAlert.error(t('saveErrorTitle'), `${t('saveErrorMessage')} ${err.message}`);
         }
     }
 
@@ -650,38 +654,38 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             border: 1px solid var(--border-color);
         `;
         modal.innerHTML = `
-            <h3 style="margin: 0 0 16px 0; color: var(--text-primary); font-size: 16px;">Export PDF Settings</h3>
+            <h3 style="margin: 0 0 16px 0; color: var(--text-primary); font-size: 16px;">${t('exportPdfSettingsTitle')}</h3>
             
             <div style="margin-bottom: 12px;">
-                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Page Size</label>
+                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">${t('pageSizeLabel')}</label>
                 <select id="pdf-page-size" style="width: 100%; padding: 6px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px;">
                     <option value="A4" selected>A4</option>
-                    <option value="Letter">Letter</option>
-                    <option value="Legal">Legal</option>
+                    <option value="Letter">${t('pageSizeLetter')}</option>
+                    <option value="Legal">${t('pageSizeLegal')}</option>
                 </select>
             </div>
 
             <div style="margin-bottom: 12px;">
-                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Margins</label>
+                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">${t('marginsLabel')}</label>
                 <select id="pdf-margins" style="width: 100%; padding: 6px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px;">
-                    <option value="default" selected>Default</option>
-                    <option value="narrow">Narrow</option>
-                    <option value="none">None</option>
+                    <option value="default" selected>${t('marginsDefault')}</option>
+                    <option value="narrow">${t('marginsNarrow')}</option>
+                    <option value="none">${t('marginsNone')}</option>
                 </select>
             </div>
 
             <div style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px;">
                 <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); cursor: pointer;">
-                    <input type="checkbox" id="pdf-page-numbers" style="cursor: pointer;"> Include Page Numbers
+                    <input type="checkbox" id="pdf-page-numbers" style="cursor: pointer;"> ${t('includePageNumbers')}
                 </label>
                 <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); cursor: pointer;">
-                    <input type="checkbox" id="pdf-title-header" checked style="cursor: pointer;"> Include Document Title
+                    <input type="checkbox" id="pdf-title-header" checked style="cursor: pointer;"> ${t('includeDocumentTitle')}
                 </label>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                <button id="pdf-cancel-btn" style="padding: 6px 12px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">Cancel</button>
-                <button id="pdf-export-btn" style="padding: 6px 12px; background: var(--accent-color); color: white; border: none; border-radius: 4px; cursor: pointer;">Export</button>
+                <button id="pdf-cancel-btn" style="padding: 6px 12px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">${t('cancel')}</button>
+                <button id="pdf-export-btn" style="padding: 6px 12px; background: var(--accent-color); color: white; border: none; border-radius: 4px; cursor: pointer;">${t('exportBtn')}</button>
             </div>
         `;
 
@@ -705,7 +709,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     async function executePdfExport(options) {
         try {
             exportPdfBtn.disabled = true;
-            exportPdfBtn.setAttribute('data-tooltip', 'Exporting...');
+            exportPdfBtn.setAttribute('data-tooltip', t('exportingTooltip'));
             exportPdfBtn.style.opacity = '0.6';
 
             let htmlContent;
@@ -725,18 +729,18 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
                 const defaultName = title.replace(/\.md$/i, '') + '.pdf';
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, new Uint8Array(result.data));
                 if (savedPath) {
-                    statusIndicator.innerHTML = '<span style="color: #2ecc71;">●</span> PDF Exported';
+                    statusIndicator.innerHTML = `<span style="color: #2ecc71;">●</span> ${t('pdfExportedStatus')}`;
                     setTimeout(() => updateStatusIndicator(), 2500);
                 }
             } else {
-                window.customAlert.error('Export Failed', `Export failed: ${result?.error || 'Unknown error'}`);
+                window.customAlert.error(t('exportFailedTitle'), `${t('exportFailedMessage')} ${result?.error || t('unknownError')}`);
             }
         } catch (err) {
             console.error('Export PDF error:', err);
-            window.customAlert.error('Export Failed', `Export failed: ${err.message}`);
+            window.customAlert.error(t('exportFailedTitle'), `${t('exportFailedMessage')} ${err.message}`);
         } finally {
             exportPdfBtn.disabled = false;
-            exportPdfBtn.setAttribute('data-tooltip', 'Export to PDF');
+            exportPdfBtn.setAttribute('data-tooltip', t('exportTooltip'));
             exportPdfBtn.style.opacity = '1';
         }
     }
@@ -967,7 +971,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         syncEnabled = !syncEnabled;
         syncToggleBtn.style.background = syncEnabled ? 'var(--accent-color)' : 'var(--bg-secondary)';
         syncToggleBtn.style.color = syncEnabled ? 'white' : 'var(--text-primary)';
-        syncToggleBtn.setAttribute('data-tooltip', syncEnabled ? 'Sync scroll ON' : 'Sync scroll OFF');
+        syncToggleBtn.setAttribute('data-tooltip', syncEnabled ? t('syncScrollOnTooltip') : t('syncScrollOffTooltip'));
     });
 
     // Search — overlay-based highlighting
@@ -1101,10 +1105,10 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     function updateSearchCount() {
         const total = searchMatches.length;
         if (!searchInput.value) {
-            searchMatchCount.textContent = 'No results';
+            searchMatchCount.textContent = t('noResults');
             searchMatchCount.style.color = 'var(--text-secondary)';
         } else if (total === 0) {
-            searchMatchCount.textContent = 'No results';
+            searchMatchCount.textContent = t('noResults');
             searchMatchCount.style.color = '#e74c3c';
         } else {
             searchMatchCount.textContent = `${searchCurrent + 1} / ${total}`;
@@ -1204,8 +1208,8 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             if (forceClose) { themeObserver.disconnect(); _visibilityObserver.disconnect(); return true; }
             if (isDirty) {
                 window.customAlert.confirm(
-                    'Unsaved Changes',
-                    'You have unsaved changes. Are you sure you want to close this tab?'
+                    t('unsavedChangesTitle'),
+                    t('unsavedChangesMessage')
                 ).then(choice => {
                     if (choice === 1) { forceClose = true; tabManager.closeTab(tabId); }
                 });
