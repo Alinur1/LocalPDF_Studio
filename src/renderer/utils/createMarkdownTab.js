@@ -308,100 +308,100 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     });
 
     function updateStatusIndicator() {
-    const text = editor.value;
-    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-    const chars = text.length;
-    const readTime = Math.max(1, Math.ceil(words / 200)); // Average 200 words per minute
-    
-    const statusText = isDirty ? 'Modified' : 'Saved';
-    const statusColor = isDirty ? '#f39c12' : '#2ecc71';
-    
-    statusIndicator.innerHTML = `
+        const text = editor.value;
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const chars = text.length;
+        const readTime = Math.max(1, Math.ceil(words / 200)); // Average 200 words per minute
+
+        const statusText = isDirty ? 'Modified' : 'Saved';
+        const statusColor = isDirty ? '#f39c12' : '#2ecc71';
+
+        statusIndicator.innerHTML = `
         <span style="color: var(--text-secondary); font-size: 11px; margin-right: 8px;">
             ${words} words &middot; ${chars} chars &middot; ${readTime} min read
         </span>
         <span style="color: ${statusColor};">● ${statusText}</span>
     `;
-}
+    }
 
-function wrapSelection(prefix, suffix) {
-    const start = editor.selectionStart;
-    const end = editor.selectionEnd;
-    const text = editor.value;
-    const selectedText = text.slice(start, end);
-    
-    // Trim whitespace from selection for cleaner formatting
-    const trimmedText = selectedText.trim();
-    const leadingSpace = selectedText.match(/^\s*/)[0];
-    const trailingSpace = selectedText.match(/\s*$/)[0];
-    
-    // If selection is only whitespace, don't apply formatting
-    if (!trimmedText) {
+    function wrapSelection(prefix, suffix) {
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const text = editor.value;
+        const selectedText = text.slice(start, end);
+
+        // Trim whitespace from selection for cleaner formatting
+        const trimmedText = selectedText.trim();
+        const leadingSpace = selectedText.match(/^\s*/)[0];
+        const trailingSpace = selectedText.match(/\s*$/)[0];
+
+        // If selection is only whitespace, don't apply formatting
+        if (!trimmedText) {
+            editor.focus();
+            return;
+        }
+
+        // Check if already wrapped (to toggle off)
+        const before = text.slice(Math.max(0, start - prefix.length), start);
+        const after = text.slice(end, end + suffix.length);
+
+        if (before === prefix && after === suffix) {
+            // Remove wrapper - keep the trimmed text only
+            editor.value = text.slice(0, start - prefix.length) + trimmedText + text.slice(end + suffix.length);
+            editor.selectionStart = start - prefix.length + leadingSpace.length;
+            editor.selectionEnd = end - prefix.length - trailingSpace.length;
+        } else {
+            // Add wrapper around trimmed text, preserving spaces outside
+            const newText = text.slice(0, start) + leadingSpace + prefix + trimmedText + suffix + trailingSpace + text.slice(end);
+            editor.value = newText;
+
+            // Position cursor after the formatted text
+            const newStart = start + leadingSpace.length + prefix.length;
+            const newEnd = newStart + trimmedText.length;
+            editor.selectionStart = newStart;
+            editor.selectionEnd = newEnd;
+        }
+        editor.dispatchEvent(new Event('input')); // Trigger preview update
         editor.focus();
-        return;
     }
-    
-    // Check if already wrapped (to toggle off)
-    const before = text.slice(Math.max(0, start - prefix.length), start);
-    const after = text.slice(end, end + suffix.length);
-    
-    if (before === prefix && after === suffix) {
-        // Remove wrapper - keep the trimmed text only
-        editor.value = text.slice(0, start - prefix.length) + trimmedText + text.slice(end + suffix.length);
-        editor.selectionStart = start - prefix.length + leadingSpace.length;
-        editor.selectionEnd = end - prefix.length - trailingSpace.length;
-    } else {
-        // Add wrapper around trimmed text, preserving spaces outside
-        const newText = text.slice(0, start) + leadingSpace + prefix + trimmedText + suffix + trailingSpace + text.slice(end);
-        editor.value = newText;
-        
-        // Position cursor after the formatted text
-        const newStart = start + leadingSpace.length + prefix.length;
-        const newEnd = newStart + trimmedText.length;
-        editor.selectionStart = newStart;
-        editor.selectionEnd = newEnd;
+
+    function insertMarkdownLink() {
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const text = editor.value;
+        const selectedText = text.slice(start, end);
+
+        const linkText = selectedText || 'link text';
+        const insertion = `[${linkText}](url)`;
+
+        editor.value = text.slice(0, start) + insertion + text.slice(end);
+
+        // Automatically select the 'url' part so the user can start typing immediately
+        const urlStart = start + linkText.length + 3;
+        editor.selectionStart = urlStart;
+        editor.selectionEnd = urlStart + 3;
+        editor.focus();
+        editor.dispatchEvent(new Event('input'));
     }
-    editor.dispatchEvent(new Event('input')); // Trigger preview update
-    editor.focus();
-}
 
-function insertMarkdownLink() {
-    const start = editor.selectionStart;
-    const end = editor.selectionEnd;
-    const text = editor.value;
-    const selectedText = text.slice(start, end);
-    
-    const linkText = selectedText || 'link text';
-    const insertion = `[${linkText}](url)`;
-    
-    editor.value = text.slice(0, start) + insertion + text.slice(end);
-    
-    // Automatically select the 'url' part so the user can start typing immediately
-    const urlStart = start + linkText.length + 3; 
-    editor.selectionStart = urlStart;
-    editor.selectionEnd = urlStart + 3;
-    editor.focus();
-    editor.dispatchEvent(new Event('input'));
-}
-
-    // ─── Formatting Toolbar (Visual Buttons) ─────────────────────────────────
+    // Formatting toolbar for visual buttons
     // Helper to handle multi-line prefixes (like Lists and Blockquotes)
     function prefixLines(prefix) {
         const start = editor.selectionStart;
         const end = editor.selectionEnd;
         const text = editor.value;
-        
+
         const lineStart = text.lastIndexOf('\n', start - 1) + 1;
         let lineEnd = text.indexOf('\n', end);
         if (lineEnd === -1) lineEnd = text.length;
-        
+
         const lines = text.slice(lineStart, lineEnd).split('\n');
         const allPrefixed = lines.filter(l => l.trim()).every(line => line.startsWith(prefix));
-        
-        const newLines = allPrefixed 
+
+        const newLines = allPrefixed
             ? lines.map(line => line.startsWith(prefix) ? line.slice(prefix.length) : line).join('\n')
             : lines.map(line => line.trim() ? prefix + line : line).join('\n');
-            
+
         editor.value = text.slice(0, lineStart) + newLines + text.slice(lineEnd);
         editor.selectionStart = lineStart;
         editor.selectionEnd = lineStart + newLines.length;
@@ -431,9 +431,6 @@ function insertMarkdownLink() {
         return btn;
     }
 
-
-    // ─── Advanced Formatting Helpers ─────────────────────────────────────────
-    
     // Helper for Headings (Toggles between H1, H2, H3, or plain text)
     function insertHeading(level) {
         const start = editor.selectionStart;
@@ -441,11 +438,11 @@ function insertMarkdownLink() {
         const lineStart = text.lastIndexOf('\n', start - 1) + 1;
         const lineEnd = text.indexOf('\n', start);
         const actualEnd = lineEnd === -1 ? text.length : lineEnd;
-        
+
         const lineText = text.slice(lineStart, actualEnd);
         const cleanLine = lineText.replace(/^#{1,6}\s*/, ''); // Remove existing headings
         const prefix = '#'.repeat(level) + ' ';
-        
+
         editor.value = text.slice(0, lineStart) + prefix + cleanLine + text.slice(actualEnd);
         editor.selectionStart = editor.selectionEnd = lineStart + prefix.length + cleanLine.length;
         editor.dispatchEvent(new Event('input'));
@@ -475,7 +472,7 @@ function insertMarkdownLink() {
         const btn = document.createElement('button');
         btn.innerHTML = `H${level}`;
         btn.setAttribute('data-tooltip', `Heading ${level}`);
-        btn.setAttribute('title', `Heading ${level}`); // <── ADD THIS: Native browser tooltip fallback
+        btn.setAttribute('title', `Heading ${level}`); // Native browser tooltip fallback
         btn.className = 'markdown-btn';
         btn.style.cssText = `padding: 4px 8px; min-width: 28px; font-weight: bold; font-size: 12px;`;
         btn.addEventListener('mousedown', (e) => e.preventDefault());
@@ -498,7 +495,7 @@ function insertMarkdownLink() {
         codeBlock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
     };
 
-        //toolbar
+    //toolbar
     formattingToolbar.append(
         createHeadingBtn(1),
         createHeadingBtn(2),
@@ -521,22 +518,20 @@ function insertMarkdownLink() {
         createFormatBtn('Insert Table', icons.table, insertTable)
     );
 
-        // ─── Additional Formatting Helpers ───────────────────────────────────────
-
     // Helper for Numbered Lists (Smart incrementing and toggle-off)
     function insertNumberedList() {
         const start = editor.selectionStart;
         const end = editor.selectionEnd;
         const text = editor.value;
-        
+
         const lineStart = text.lastIndexOf('\n', start - 1) + 1;
         let lineEnd = text.indexOf('\n', end);
         if (lineEnd === -1) lineEnd = text.length;
-        
+
         const lines = text.slice(lineStart, lineEnd).split('\n');
         // Check if already a numbered list to toggle off
         const isNumbered = lines.filter(l => l.trim()).every(line => /^\d+\.\s/.test(line));
-        
+
         let newLines;
         if (isNumbered) {
             newLines = lines.map(line => line.replace(/^\d+\.\s/, '')).join('\n');
@@ -544,7 +539,7 @@ function insertMarkdownLink() {
             let num = 1;
             newLines = lines.map(line => line.trim() ? `${num++}. ${line}` : line).join('\n');
         }
-        
+
         editor.value = text.slice(0, lineStart) + newLines + text.slice(lineEnd);
         editor.selectionStart = lineStart;
         editor.selectionEnd = lineStart + newLines.length;
@@ -558,9 +553,9 @@ function insertMarkdownLink() {
         const text = editor.value;
         const insertion = `![alt text](image_url)`;
         editor.value = text.slice(0, start) + insertion + text.slice(start);
-        
+
         // Automatically select the 'image_url' part so the user can paste/type immediately
-        const urlStart = start + 11; 
+        const urlStart = start + 11;
         editor.selectionStart = urlStart;
         editor.selectionEnd = urlStart + 9;
         editor.focus();
@@ -573,10 +568,10 @@ function insertMarkdownLink() {
         const end = editor.selectionEnd;
         const text = editor.value;
         const selectedText = text.slice(start, end);
-        
+
         const insertion = `\n\`\`\`\n${selectedText || 'code here'}\n\`\`\`\n`;
         editor.value = text.slice(0, start) + insertion + text.slice(end);
-        
+
         // Select the code content inside the block
         const codeStart = start + 4;
         editor.selectionStart = codeStart;
@@ -588,39 +583,36 @@ function insertMarkdownLink() {
     // Inject the toolbar at the very top of the editor pane
     editorPane.prepend(formattingToolbar);
 
-// Update your existing editor keydown listener to include these:
-editor.addEventListener('keydown', (e) => {
-    const isMac = navigator.platform.toUpperCase().includes('MAC');
-    const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
-    
-    if (ctrlOrCmd) {
-        // Save File
-        if (e.code === 'KeyS') { e.preventDefault(); saveFile(); return; }
-        
-        // Code Block
-        if (e.code === 'KeyC' && e.shiftKey) { e.preventDefault(); insertCodeBlock(); return; } 
-        
-        // ─── UNDO & REDO SHORTCUTS ────────────────────────────────────────
-        // FIX: Do NOT preventDefault() here. Let the native Chromium engine 
-        // handle Undo/Redo natively for the textarea.
-        if (e.code === 'KeyZ' || e.code === 'KeyY') {
-            return; // Let it pass through to the browser natively
-        }
-        // ────────────────────────────────────────────────────────────────
+    // Update your existing editor keydown listener to include these:
+    editor.addEventListener('keydown', (e) => {
+        const isMac = navigator.platform.toUpperCase().includes('MAC');
+        const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
 
-        // Formatting Shortcuts
-        let prefix = '', suffix = '';
-        if (e.code === 'KeyB') { prefix = '**'; suffix = '**'; }         // Ctrl+B (Bold)
-        else if (e.code === 'KeyI') { prefix = '*'; suffix = '*'; }      // Ctrl+I (Italic)
-        else if (e.code === 'KeyK') { e.preventDefault(); insertMarkdownLink(); return; } // Ctrl+K (Link)
-        else if (e.code === 'Backquote') { prefix = '`'; suffix = '`'; } // Ctrl+` (Inline Code)
-        
-        if (prefix) {
-            e.preventDefault();
-            wrapSelection(prefix, suffix);
+        if (ctrlOrCmd) {
+            // Save File
+            if (e.code === 'KeyS') { e.preventDefault(); saveFile(); return; }
+
+            // Code Block
+            if (e.code === 'KeyC' && e.shiftKey) { e.preventDefault(); insertCodeBlock(); return; }
+
+            //  UNDO & REDO SHORTCUTS
+            if (e.code === 'KeyZ' || e.code === 'KeyY') {
+                return;
+            }
+
+            // Formatting Shortcuts
+            let prefix = '', suffix = '';
+            if (e.code === 'KeyB') { prefix = '**'; suffix = '**'; } // Ctrl+B (Bold)
+            else if (e.code === 'KeyI') { prefix = '*'; suffix = '*'; } // Ctrl+I (Italic)
+            else if (e.code === 'KeyK') { e.preventDefault(); insertMarkdownLink(); return; } // Ctrl+K (Link)
+            else if (e.code === 'Backquote') { prefix = '`'; suffix = '`'; } // Ctrl+` (Inline Code)
+
+            if (prefix) {
+                e.preventDefault();
+                wrapSelection(prefix, suffix);
+            }
         }
-    }
-});
+    });
 
     async function saveFile() {
         try {
@@ -642,7 +634,7 @@ editor.addEventListener('keydown', (e) => {
     saveBtn.addEventListener('click', saveFile);
 
 
-        // ─── PDF Export Settings Modal ───────────────────────────────────────────
+    // PDF Export Settings Modal
     function showExportModal() {
         const overlay = document.createElement('div');
         overlay.style.cssText = `
@@ -715,20 +707,20 @@ editor.addEventListener('keydown', (e) => {
             exportPdfBtn.disabled = true;
             exportPdfBtn.setAttribute('data-tooltip', 'Exporting...');
             exportPdfBtn.style.opacity = '0.6';
-            
+
             let htmlContent;
             if (window.marked) {
                 htmlContent = window.marked.parse(editor.value, { gfm: true, breaks: true });
             } else {
                 htmlContent = typeof simpleMarkdownParser === 'function' ? simpleMarkdownParser(editor.value) : `<pre><code>${editor.value}</code></pre>`;
             }
-            
+
             // Pass options to main process
-            const result = await window.electronAPI.exportMarkdownToPdf(htmlContent, title, { 
+            const result = await window.electronAPI.exportMarkdownToPdf(htmlContent, title, {
                 mdFilePath: currentFilePath,
-                ...options 
+                ...options
             });
-            
+
             if (result?.success) {
                 const defaultName = title.replace(/\.md$/i, '') + '.pdf';
                 const savedPath = await window.electronAPI.savePdfFile(defaultName, new Uint8Array(result.data));
@@ -797,17 +789,17 @@ editor.addEventListener('keydown', (e) => {
         preview.style.fontSize = (16 * previewZoom / 100) + 'px';
     }
 
-        zoomInBtn.addEventListener('click', () => {
-        // Limit maximum zoom to 150%
+    zoomInBtn.addEventListener('click', () => {
+        // Limit maximum zoom to 200%
         editorZoom = Math.min(200, editorZoom + 10);
         previewZoom = Math.min(200, previewZoom + 10);
         updateZoom();
     });
-    
+
     zoomOutBtn.addEventListener('click', () => {
-        // Limit minimum zoom to 100%
-        editorZoom = Math.max(100, editorZoom - 10);
-        previewZoom = Math.max(100, previewZoom - 10);
+        // Limit minimum zoom to 50%
+        editorZoom = Math.max(50, editorZoom - 10);
+        previewZoom = Math.max(50, previewZoom - 10);
         updateZoom();
     });
 
@@ -831,7 +823,7 @@ editor.addEventListener('keydown', (e) => {
     updatePreview();
     updateStatusIndicator();
 
-    // ─── Synchronized Scrolling ───────────────────────────────────────────────
+    // Synchronized Scrolling
     let syncEnabled = true;
     let syncSource = null;
 
@@ -978,7 +970,8 @@ editor.addEventListener('keydown', (e) => {
         syncToggleBtn.setAttribute('data-tooltip', syncEnabled ? 'Sync scroll ON' : 'Sync scroll OFF');
     });
 
-    // ─── Search — overlay-based highlighting ──────────────────────────────────
+    // Search — overlay-based highlighting
+    // Don't delete this comment about how the search overlay works
     // How it works:
     //   1. The highlightOverlay <div> mirrors the textarea's text as plain text
     //      nodes, with identical font/padding so characters align pixel-perfect.
@@ -1122,7 +1115,7 @@ editor.addEventListener('keydown', (e) => {
     function openSearch() {
         searchActive = true;
         searchContainer.style.display = 'flex';
-        // Pre-fill with any selected text (VS Code style)
+        // Pre-fill with any selected text
         const sel = editor.value.slice(editor.selectionStart, editor.selectionEnd).trim();
         if (sel && !sel.includes('\n') && sel.length < 200) {
             searchInput.value = sel;
@@ -1185,11 +1178,11 @@ editor.addEventListener('keydown', (e) => {
     });
 
     document.addEventListener('wheel', (e) => {
-    if (e.ctrlKey) e.preventDefault();
-}, { passive: false });
+        if (e.ctrlKey) e.preventDefault();
+    }, { passive: false });
 
 
-    // ─── Notify main process when this markdown tab is active ────────────────
+    // Notify main process when this markdown tab is active
     // Uses IntersectionObserver on the container so we track actual visibility
     // (tab switching shows/hides the container). This tells main.js to stop
     // blocking Ctrl+/- so our renderer zoom handler can fire.
@@ -1202,7 +1195,7 @@ editor.addEventListener('keydown', (e) => {
     _visibilityObserver.observe(container);
 
 
-    // ─── Register tab ─────────────────────────────────────────────────────────
+    // Register tab
     tabManager.openTab({
         id: tabId,
         title: title,
