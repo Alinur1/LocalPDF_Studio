@@ -22,7 +22,7 @@ You're not paying with money. You're paying with your data.
 
 **LocalPDF Studio exists because your files should never have to leave your machine.**
 
-We're not a company. We're not monetizing anything. We're two students building for the community because we believe this tool should exist — and that privacy shouldn't be a premium feature.
+We're not a company. We're not monetizing anything. We're just building for the community because we believe this tool should exist — and that privacy shouldn't be a premium feature.
 
 ---
 
