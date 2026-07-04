@@ -200,13 +200,10 @@ const createWindow = () => {
         }
     });
 
-    // ─── DISABLE NATIVE ELECTRON ZOOM ─────────────────────────────────
-    // 1. Hard limit native pinch-to-zoom (trackpads)
+    // Hard limit native pinch-to-zoom (trackpads)
     mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
 
-// 2. Intercept native keyboard shortcuts (Ctrl +/-) before they trigger native zoom.
-    // We allow them through when a markdown tab is active so the renderer's
-    // zoom logic can handle them. In all other cases we block native Chromium zoom.
+    // Intercept native keyboard shortcuts (Ctrl +/-) before they trigger native zoom.
     let markdownTabActive = false;
     ipcMain.on('markdown-tab-active', (event, isActive) => {
         markdownTabActive = isActive;
