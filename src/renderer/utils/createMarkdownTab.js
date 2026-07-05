@@ -650,37 +650,19 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         const modal = document.createElement('div');
         modal.style.cssText = `
             background: var(--bg-secondary); padding: 24px; border-radius: 8px; 
-            width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             border: 1px solid var(--border-color);
         `;
         modal.innerHTML = `
             <h3 style="margin: 0 0 16px 0; color: var(--text-primary); font-size: 16px;">${t('exportPdfSettingsTitle')}</h3>
             
-            <div style="margin-bottom: 12px;">
+            <div style="margin-bottom: 20px;">
                 <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">${t('pageSizeLabel')}</label>
                 <select id="pdf-page-size" style="width: 100%; padding: 6px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px;">
                     <option value="A4" selected>A4</option>
                     <option value="Letter">${t('pageSizeLetter')}</option>
                     <option value="Legal">${t('pageSizeLegal')}</option>
                 </select>
-            </div>
-
-            <div style="margin-bottom: 12px;">
-                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">${t('marginsLabel')}</label>
-                <select id="pdf-margins" style="width: 100%; padding: 6px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px;">
-                    <option value="default" selected>${t('marginsDefault')}</option>
-                    <option value="narrow">${t('marginsNarrow')}</option>
-                    <option value="none">${t('marginsNone')}</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px;">
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); cursor: pointer;">
-                    <input type="checkbox" id="pdf-page-numbers" style="cursor: pointer;"> ${t('includePageNumbers')}
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); cursor: pointer;">
-                    <input type="checkbox" id="pdf-title-header" checked style="cursor: pointer;"> ${t('includeDocumentTitle')}
-                </label>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 8px;">
@@ -697,9 +679,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         overlay.querySelector('#pdf-export-btn').onclick = () => {
             const options = {
                 pageSize: overlay.querySelector('#pdf-page-size').value,
-                margins: overlay.querySelector('#pdf-margins').value,
-                pageNumbers: overlay.querySelector('#pdf-page-numbers').checked,
-                titleHeader: overlay.querySelector('#pdf-title-header').checked
+                margins: 0  // Explicitly set to 0 (means "none" in PDF engines)
             };
             overlay.remove();
             executePdfExport(options);
@@ -719,10 +699,11 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
                 htmlContent = typeof simpleMarkdownParser === 'function' ? simpleMarkdownParser(editor.value) : `<pre><code>${editor.value}</code></pre>`;
             }
 
-            // Pass options to main process
+            // Pass ONLY validated options to the backend
             const result = await window.electronAPI.exportMarkdownToPdf(htmlContent, title, {
                 mdFilePath: currentFilePath,
-                ...options
+                pageSize: options.pageSize,
+                margins: options.margins // Explicitly passed to bypass backend validation
             });
 
             if (result?.success) {
