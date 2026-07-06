@@ -209,14 +209,15 @@ const createWindow = () => {
         markdownTabActive = isActive;
     });
 
-    mainWindow.webContents.on('before-input-event', (event, input) => {
-        if (input.control || input.meta) {
-            if (input.key === '+' || input.key === '=' || input.key === '-' || input.key === '_') {
-                if (markdownTabActive) return; // Let renderer handle zoom
-                event.preventDefault();        // Block native Chromium zoom elsewhere
-            }
-        }
-    });
+    // mainWindow.webContents.on('before-input-event', (event, input) => {
+    //     if (input.control || input.meta) {
+    //         if (input.key === '+' || input.key === '=' || input.key === '-' || input.key === '_') {
+    //             if (markdownTabActive) return; // Let renderer handle zoom
+    //             event.preventDefault();        // Block native Chromium zoom elsewhere
+    //         }
+    //     }
+    // });
+    
     mainWindow.webContents.on('will-navigate', (event, navigationUrl) => {
         const parsedUrl = new URL(navigationUrl);
         if (parsedUrl.protocol === 'file:') return;

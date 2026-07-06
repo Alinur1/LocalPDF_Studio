@@ -114,6 +114,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (zoomOutBtn) zoomOutBtn.addEventListener("click", zoomOut);
   if (resetZoomBtn) resetZoomBtn.addEventListener("click", resetZoom);
 
+  // KEYBOARD ZOOM SHORTCUTS (Ctrl/Cmd +, -, 0)
+  window.addEventListener('keydown', (e) => {
+    // Ignore if user is typing in margin/page inputs
+    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+    const isMac = navigator.platform.toUpperCase().includes('MAC');
+    const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+    if (ctrlOrCmd) {
+      if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        zoomIn();
+      } else if (e.key === '-') {
+        e.preventDefault();
+        zoomOut();
+      } else if (e.key === '0') {
+        e.preventDefault();
+        resetZoom();
+      }
+    }
+  });
+
   // View mode button listeners
   viewModeBtns.single.addEventListener("click", () => setViewMode('single'));
   viewModeBtns.double.addEventListener("click", () => setViewMode('double'));
@@ -121,6 +143,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   previewGrid.addEventListener('scroll', () => {
     updateCurrentPageDisplay();
   });
+
+  // Mouse Wheel Zoom (Ctrl/Cmd + Scroll)
+  previewGrid.addEventListener('wheel', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault(); // Block native scroll/zoom
+      // e.deltaY > 0 = scroll down (zoom out), < 0 = scroll up (zoom in)
+      const step = e.deltaY > 0 ? -0.1 : 0.1;
+      handleZoom(step);
+    }
+  }, { passive: false });
 
   closeModalBtn.addEventListener('click', () => {
     modal.style.display = 'none';
