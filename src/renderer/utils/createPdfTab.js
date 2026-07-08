@@ -18,17 +18,7 @@
 
 // src/renderer/utils/createPdfTab.js
 
-function pathToFileURL(filePath) {
-    const isWindows = filePath.includes('\\') || /^[a-zA-Z]:/.test(filePath);
-    let resolvedPath = filePath.replace(/\\/g, '/');
-    if (isWindows && /^[a-zA-Z]:/.test(resolvedPath)) {
-        resolvedPath = '/' + resolvedPath;
-    }
-    const encodedSegments = resolvedPath.split('/').map(segment => encodeURIComponent(segment));
-    let urlPath = encodedSegments.join('/');
-    urlPath = urlPath.replace(/^\/([a-zA-Z])%3A/, '/$1:');
-    return 'file://' + urlPath;
-}
+import { encodeFileUrlForQueryParam } from '../utils/fileUrl.js';
 
 export default function createPdfTab(filePath, tabManager, existingId = null) {
     const tabId = existingId || `pdf:${filePath}:${Date.now()}`;
@@ -44,8 +34,8 @@ export default function createPdfTab(filePath, tabManager, existingId = null) {
     };
 
     const iframe = document.createElement('iframe');
-    const fileUrl = pathToFileURL(filePath);
-    iframe.src = `../pdf/web/viewer.html?file=${encodeURIComponent(fileUrl)}`;
+    // const fileUrl = pathToFileURL(filePath);
+    iframe.src = `../pdf/web/viewer.html?file=${encodeFileUrlForQueryParam(filePath)}`;
     iframe.style.width = '90%';
     iframe.style.height = '100%';
     iframe.style.border = 'none';
