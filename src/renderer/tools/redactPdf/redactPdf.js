@@ -25,6 +25,7 @@ import { initializeGlobalDragDrop } from '../../utils/globalDragDrop.js';
 import i18n from '../../utils/i18n.js';
 import loadingUI from '../../utils/loading.js';
 import { ThemeManager } from '../../utils/themeManager.js';
+import { pathToFileURL } from '../../utils/fileUrl.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -296,7 +297,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await pdfDocument.destroy();
             }
 
-            pdfDocument = await pdfjsLib.getDocument(filePath).promise;
+            const fileUrl = pathToFileURL(filePath);
+            pdfDocument = await pdfjsLib.getDocument(fileUrl).promise;
             totalPages = pdfDocument.numPages;
             currentFilePath = filePath;
             currentPage = 1;

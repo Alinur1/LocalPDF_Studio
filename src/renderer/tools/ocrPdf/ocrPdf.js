@@ -25,6 +25,7 @@ import i18n from '../../utils/i18n.js';
 import loadingUI from '../../utils/loading.js';
 import tesseractOcr from '../../utils/tesseractOcr.js';
 import { ThemeManager } from '../../utils/themeManager.js';
+import { pathToFileURL } from '../../utils/fileUrl.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 window.pdfjsLib = pdfjsLib;
@@ -475,7 +476,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const imageWrapper = document.createElement('div');
                 imageWrapper.className = 'page-thumbnail';
                 const img = document.createElement('img');
-                img.src = `file://${filePath}`;
+                img.src = pathToFileURL(filePath);
                 img.style.width = '100%';
                 img.style.height = 'auto';
                 img.style.borderRadius = '4px';
@@ -485,7 +486,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 previewTitle.textContent = i18n.t('ocrPdfJS.pdfPreviewTitle');
                 pageOptionsContainer.style.display = 'block';
 
-                const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
+                const fileUrl = pathToFileURL(filePath);
+                const loadingTask = pdfjsLib.getDocument(fileUrl);
                 pdfDoc = await loadingTask.promise;
                 totalPages = pdfDoc.numPages;
                 pageCountEl.textContent = `${totalPages} page(s)`;
@@ -553,7 +555,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // NEW: Optimized batch processing function
     async function generateOcrCanvasesBatch(pdfPath, progressCallback = null) {
-        const loadingTask = pdfjsLib.getDocument(`file://${pdfPath}`);
+        const fileUrl = pathToFileURL(pdfPath);
+        const loadingTask = pdfjsLib.getDocument(fileUrl);
         const ocrPdfDoc = await loadingTask.promise;
 
         const pagesToProcess = selectedPages.size > 0

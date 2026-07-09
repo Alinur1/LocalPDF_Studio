@@ -24,7 +24,7 @@ import loadingUI from '../../utils/loading.js';
 import { initializeGlobalDragDrop } from '../../utils/globalDragDrop.js';
 import i18n from '../../utils/i18n.js'
 import { ThemeManager } from '../../utils/themeManager.js';
-
+import { pathToFileURL } from '../../utils/fileUrl.js';
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 window.pdfjsLib = pdfjsLib;
 
@@ -109,7 +109,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadingUI.show(i18n.t('extractImageJS.loadingPreview'));
             previewContainer.style.display = 'block';
             previewGrid.innerHTML = '';
-            const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
+            const fileUrl = pathToFileURL(filePath);
+            const loadingTask = pdfjsLib.getDocument(fileUrl);
             pdfDoc = await loadingTask.promise;
             totalPages = pdfDoc.numPages;
             pageCountEl.textContent = `Total Pages: ${totalPages}`;

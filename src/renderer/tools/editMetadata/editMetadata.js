@@ -24,7 +24,7 @@ import loadingUI from '../../utils/loading.js';
 import { initializeGlobalDragDrop } from '../../utils/globalDragDrop.js';
 import i18n from '../../utils/i18n.js'
 import { ThemeManager } from '../../utils/themeManager.js';
-
+import { pathToFileURL } from '../../utils/fileUrl.js';
  pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
  window.pdfjsLib = pdfjsLib;
 
@@ -172,8 +172,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error(i18n.t('editMetadataJS.pdfLibraryNotLoaded'));
             }
             
-            // Load PDF using pdf.js with file:// protocol
-            const loadingTask = pdfjsLib.getDocument(`file://${currentFilePath}`);
+            // Load PDF using pdf.js with the shared file URL helper
+            const fileUrl = pathToFileURL(currentFilePath);
+            const loadingTask = pdfjsLib.getDocument(fileUrl);
             const pdf = await loadingTask.promise;
             
             // Get metadata

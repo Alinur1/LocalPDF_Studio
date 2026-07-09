@@ -22,6 +22,7 @@ import loadingUI from '../../utils/loading.js';
 import { initializeGlobalDragDropForImages } from '../../utils/globalDragDrop.js';
 import { ThemeManager } from '../../utils/themeManager.js';
 import i18n from '../../utils/i18n.js';
+import { pathToFileURL } from '../../utils/fileUrl.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await i18n.init();
@@ -195,7 +196,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 customAlert.alert(i18n.t('alerts.error'), i18n.t('imageEditorJS.failed-load-image'), [i18n.t('common.ok')]);
                 reject(new Error('Image load failed'));
             };
-            img.src = `file://${filePath}`;
+            img.src = pathToFileURL(filePath);
         });
     }
 

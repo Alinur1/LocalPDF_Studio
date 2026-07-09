@@ -25,6 +25,7 @@ import { initializeGlobalDragDrop } from '../../utils/globalDragDrop.js';
 import i18n from "../../utils/i18n.js";
 import { ThemeManager } from "../../utils/themeManager.js";
 pdfjsLib.GlobalWorkerOptions.workerSrc = "../../../pdf/build/pdf.worker.mjs";
+import { pathToFileURL } from '../../utils/fileUrl.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
   await API.init();
@@ -274,7 +275,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         zoomDisplay.textContent = '100%';
       }
 
-      pdfDoc = await pdfjsLib.getDocument(`file://${path}`).promise;
+      const fileUrl = pathToFileURL(path);
+      pdfDoc = await pdfjsLib.getDocument(fileUrl).promise;
       pageCountEl.textContent = `Total Pages: ${pdfDoc.numPages}`;
       pageInputEl.max = pdfDoc.numPages;
 

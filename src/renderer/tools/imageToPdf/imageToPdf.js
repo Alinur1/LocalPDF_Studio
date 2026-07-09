@@ -24,6 +24,7 @@ import { initializeGlobalDragDropForOCR } from '../../utils/globalDragDrop.js';
 import i18n from '../../utils/i18n.js';
 import loadingUI from "../../utils/loading.js";
 import { ThemeManager } from "../../utils/themeManager.js";
+import { pathToFileURL } from '../../utils/fileUrl.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
     await API.init();
@@ -214,7 +215,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Image preview
         const imgPreview = document.createElement("img");
         imgPreview.className = "image-preview";
-        imgPreview.src = `file://${image.path}`;
+        imgPreview.src = pathToFileURL(image.path);
         imgPreview.alt = image.name;
         imgPreview.onerror = () => {
             imgPreview.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%231c2833' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23bdc3c7' font-size='14'%3ENo Preview%3C/text%3E%3C/svg%3E";

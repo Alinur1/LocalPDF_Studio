@@ -25,6 +25,7 @@ import loadingUI from '../../utils/loading.js';
 import { initializeGlobalDragDrop } from '../../utils/globalDragDrop.js';
 import i18n from '../../utils/i18n.js';
 import { ThemeManager } from '../../utils/themeManager.js';
+import { pathToFileURL } from '../../utils/fileUrl.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -290,7 +291,8 @@ async function renderThumbnail(path, canvas) {
     let page = null;
 
     try {
-        pdf = await pdfjsLib.getDocument(path).promise;
+        const fileUrl = pathToFileURL(path);
+        pdf = await pdfjsLib.getDocument(fileUrl).promise;
         page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 0.2 });
 

@@ -23,6 +23,7 @@ import loadingUI from '../../utils/loading.js';
 import { initializeGlobalDragDrop } from '../../utils/globalDragDrop.js';
 import { ThemeManager } from '../../utils/themeManager.js';
 import i18n from '../../utils/i18n.js';
+import { pathToFileURL } from '../../utils/fileUrl.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
@@ -215,7 +216,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!selectedPdfPath) return;
         loadingUI.show(i18n.t('fillablePdfBuilderJS.loadingPdf'));
         try {
-            const loadingTask = pdfjsLib.getDocument(`file://${selectedPdfPath}`);
+            const fileUrl = pathToFileURL(selectedPdfPath);
+            const loadingTask = pdfjsLib.getDocument(fileUrl);
             existingPdfDoc = await loadingTask.promise;
 
             mode = 'existing';

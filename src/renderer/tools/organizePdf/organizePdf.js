@@ -25,6 +25,7 @@ import { initializeGlobalDragDrop } from '../../utils/globalDragDrop.js';
 import i18n from '../../utils/i18n.js';
 import loadingUI from '../../utils/loading.js';
 import { ThemeManager } from '../../utils/themeManager.js';
+import { pathToFileURL } from '../../utils/fileUrl.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 window.pdfjsLib = pdfjsLib;
@@ -96,15 +97,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadPdfPages(filePath) {
         try {
             loadingUI.show(i18n.t('organizePdfJS.loadingPreview'));
-            let pdfPath = filePath;
-            if (navigator.platform.indexOf('Win') > -1) {
-                pdfPath = filePath.startsWith('file:///') ? filePath : `file:///${filePath.replace(/\\/g, '/')}`;
-            } else {
-                pdfPath = filePath.startsWith('file://') ? filePath : `file://${filePath}`;
-            }
+            const fileUrl = pathToFileURL(filePath);
 
-            console.log('Loading PDF from:', pdfPath);
-            const loadingTask = pdfjsLib.getDocument(pdfPath);
+            console.log('Loading PDF from:', fileUrl);
+            const loadingTask = pdfjsLib.getDocument(fileUrl);
             pdfDoc = await loadingTask.promise;
             console.log('PDF loaded successfully. Pages:', pdfDoc.numPages);
 
