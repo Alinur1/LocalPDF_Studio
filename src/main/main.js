@@ -37,6 +37,7 @@ let mainWindow = null;
 let isDownloading = false;
 let lastUpdateStatus = { status: 'No updates checked yet.', details: '' };
 let openFileQueue = [];
+let devToolsOpened = false;
 
 // Helper to send or queue file paths to renderer
 function queueOrSendOpenFile(filePath) {
@@ -186,7 +187,6 @@ const getIcon = () => {
 };
 
 const createWindow = () => {
-    Menu.setApplicationMenu(null);
     mainWindow = new BrowserWindow({
         minWidth: 700,
         minHeight: 600,
@@ -217,7 +217,7 @@ const createWindow = () => {
     //         }
     //     }
     // });
-    
+
     mainWindow.webContents.on('will-navigate', (event, navigationUrl) => {
         const parsedUrl = new URL(navigationUrl);
         if (parsedUrl.protocol === 'file:') return;
@@ -1506,4 +1506,30 @@ ipcMain.handle('select-pdf-and-markdown-files', async () => {
         ]
     });
     return result.canceled ? [] : result.filePaths;
+});
+
+// Dynamic Developer Mode Handler
+ipcMain.on('set-dev-mode', (event, isDevMode) => {
+    if (isDevMode) {
+        // Restore menu & close DevTools
+        const devTemplate = [
+            { role: 'fileMenu' },
+            { role: 'editMenu' },
+            { role: 'viewMenu' },
+            { role: 'windowMenu' },
+            { role: 'helpMenu' }
+        ];
+        Menu.setApplicationMenu(Menu.buildFromTemplate(devTemplate));
+        if (!devToolsOpened && mainWindow) {
+            mainWindow.webContents.openDevTools({ mode: 'detach' });
+            devToolsOpened = true;
+        }
+    } else {
+        // Hide menu & close DevTools
+        Menu.setApplicationMenu(null);
+        if (mainWindow && mainWindow.webContents.isDevToolsOpened()) {
+            mainWindow.webContents.closeDevTools();
+            devToolsOpened = false;
+        }
+    }
 });

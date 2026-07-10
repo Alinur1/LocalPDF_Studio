@@ -80,6 +80,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     readMarkdownFile: (filePath) => ipcRenderer.invoke('read-markdown-file', filePath),
     saveMarkdownFile: (filePath, content) => ipcRenderer.invoke('save-markdown-file-direct', filePath, content),
     exportMarkdownToPdf: (html, title, options) => ipcRenderer.invoke('export-markdown-to-pdf', { html, title, options }),
+    setDevMode: (isDevMode) => ipcRenderer.send('set-dev-mode', isDevMode),
 });
 
 contextBridge.exposeInMainWorld('pdfTabsAPI', {

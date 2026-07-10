@@ -62,7 +62,9 @@
     "theme-title": "Theme",
     "theme-dark": "Dark",
     "theme-light": "Light",
-    "theme-system": "System (Auto)"
+    "theme-system": "System (Auto)",
+    "dev-mode": "Developer Mode",
+    "dev-mode-desc": "Enable native menu & auto-open DevTools for debugging"
   },
   "search": {
     "placeholder": "Search opened files...",

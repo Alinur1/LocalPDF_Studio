@@ -52,6 +52,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const languageSelect = document.getElementById('language-select');
     const toolsBtn = document.getElementById('tools-btn');
     const toolsMenu = document.getElementById('tools-menu');
+    const devModeCheckbox = document.getElementById('dev-mode-enabled');
     let toolsMenuOpen = false;
 
     emptyState.classList.add('hidden');
@@ -217,6 +218,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 
     await migrateLocalStorageToJson();
+    const initialDevMode = localStorage.getItem('devMode') === 'true';
+    if (window.electronAPI?.setDevMode) {
+        window.electronAPI.setDevMode(initialDevMode);
+    }
     await restoreTabs(tabManager);
     updateEmptyState();
 
@@ -354,7 +359,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Sidebar visibility toggle
     const sidebarVisible = localStorage.getItem('sidebarVisible') !== 'false';
-    
+
     function updateSidebarState(visible) {
         if (visible) {
             tabBar.classList.remove('sidebar-hidden');
@@ -520,13 +525,15 @@ window.addEventListener('DOMContentLoaded', async () => {
             searchEnabled: searchIndexManager.isEnabled(),
             language: localStorage.getItem('language') || 'en',
             theme: localStorage.getItem('theme') || 'system',
-            wallpaper: localStorage.getItem('activeWallpaper') || 'none'
+            wallpaper: localStorage.getItem('activeWallpaper') || 'none',
+            devMode: localStorage.getItem('devMode') === 'true'
         };
         document.querySelector(`input[name="restore-tabs"][value="${originalSettings.restoreTabs}"]`).checked = true;
         document.querySelectorAll('.wallpaper-option').forEach(opt => { opt.classList.toggle('selected', opt.dataset.wallpaper === originalSettings.wallpaper); });
         document.getElementById('clock-enabled').checked = originalSettings.clockEnabled;
         document.getElementById('search-enabled').checked = originalSettings.searchEnabled;
         languageSelect.value = originalSettings.language;
+        devModeCheckbox.checked = originalSettings.devMode;
 
         updateStatusUI(); // Fetch current status when modal opens
 
@@ -595,16 +602,21 @@ window.addEventListener('DOMContentLoaded', async () => {
         const selectedLanguage = languageSelect.value;
         const selectedTheme = document.querySelector('input[name="theme-mode"]:checked')?.value || 'system';
         const selectedWallpaper = document.querySelector('.wallpaper-option.selected')?.dataset.wallpaper || 'none';
+        const devModeEnabled = devModeCheckbox.checked;
         localStorage.setItem('theme', selectedTheme);
         applyTheme(selectedTheme);
         localStorage.setItem('language', selectedLanguage);
         localStorage.setItem('restoreTabs', selectedRestore);
         localStorage.setItem('clockEnabled', clockEnabled.toString());
         localStorage.setItem('activeWallpaper', selectedWallpaper);
+        localStorage.setItem('devMode', devModeEnabled.toString());
         clockManager.setEnabled(clockEnabled);
         searchIndexManager.setEnabled(searchEnabled);
         searchBar.setVisible(searchEnabled);
 
+        if (window.electronAPI?.setDevMode) {
+            window.electronAPI.setDevMode(devModeEnabled);
+        }
 
         // Apply language change
         await i18n.setLanguage(selectedLanguage);
@@ -628,6 +640,12 @@ window.addEventListener('DOMContentLoaded', async () => {
         document.querySelector(`input[name="theme-mode"][value="${originalSettings.theme}"]`).checked = true;
         document.querySelectorAll('.wallpaper-option').forEach(opt => { opt.classList.toggle('selected', opt.dataset.wallpaper === originalSettings.wallpaper); });
         languageSelect.value = originalSettings.language;
+
+        devModeCheckbox.checked = originalSettings.devMode;
+        localStorage.setItem('devMode', originalSettings.devMode.toString());
+        if (window.electronAPI?.setDevMode) {
+            window.electronAPI.setDevMode(originalSettings.devMode);
+        }
 
         await i18n.setLanguage(originalSettings.language);
     }

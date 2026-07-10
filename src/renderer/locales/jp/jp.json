@@ -62,7 +62,9 @@
     "theme-title": "テーマ",
     "theme-dark": "ダーク",
     "theme-light": "ライト",
-    "theme-system": "システム（自動）"
+    "theme-system": "システム（自動）",
+    "dev-mode": "デベロッパーモード",
+    "dev-mode-desc": "ネイティブメニューを有効にし、デバッグ用に DevTools を自動的に開く"
   },
   "search": {
     "placeholder": "開いているファイルを検索...",
