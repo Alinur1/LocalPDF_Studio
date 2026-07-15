@@ -1031,6 +1031,9 @@ import re
 import shutil
 import sys
 import tempfile
+import urllib.parse
+import importlib
+import inspect
 
 
 def _progress(stage, value, page=None, total_pages=None):
@@ -1041,12 +1044,55 @@ def _progress(stage, value, page=None, total_pages=None):
     sys.stderr.flush()
 
 
+def _sanitize_ocr_artifacts(md_text: str) -> str:
+    """Remove HTML <br> tags and OCR picture-text blocks that break markdown renderers."""
+    # Replace HTML line breaks with proper markdown newlines
+    md_text = re.sub(r'<br\s*/?>', '\n', md_text)
+    # Remove OCR markers and garbage text
+    md_text = re.sub(
+        r'-----\s*Start of picture text\s*-----[\s\S]*?-----\s*End of picture text\s*-----',
+        '',
+        md_text,
+        flags=re.IGNORECASE
+    )
+    return md_text.strip()
+
+
+def markdown_image_paths(md_text: str, tmp_dir: str, output_dir: str) -> str:
+    """Safely convert absolute temp paths to relative filenames in markdown image syntax."""
+    tmp_real = os.path.realpath(tmp_dir).replace("\\", "/")
+    output_real = os.path.realpath(output_dir).replace("\\", "/")
+
+    def _relativize(match):
+        alt = match.group(1)
+        raw_path = match.group(2).strip()
+
+        # If already relative, leave it alone
+        if not os.path.isabs(raw_path):
+            return match.group(0)
+
+        # Resolve symlinks (fixes macOS /var vs /private/var mismatch)
+        real_path = os.path.realpath(raw_path).replace("\\", "/")
+
+        # If it points to our temp dir, extract just the filename
+        if real_path.startswith(tmp_real + "/") or real_path == tmp_real:
+            filename = os.path.basename(raw_path)
+            # URL-encode spaces/special chars for markdown compliance
+            safe_name = urllib.parse.quote(filename, safe="")
+            return f"![{alt}]({safe_name})"
+        
+        # Fallback: keep original if path doesn't match
+        return match.group(0)
+
+    # Replace ALL markdown image links safely
+    return re.sub(r'!\[([^\]]*)\]\(([^)]+)\)', _relativize, md_text)
+
+
 def _load_dependencies():
     missing = []
     modules = {}
     for pkg in ["fitz", "pymupdf4llm"]:
         try:
-            import importlib
             modules[pkg] = importlib.import_module(pkg)
         except Exception:
             missing.append(pkg)
@@ -1110,21 +1156,21 @@ def _convert(input_path, output_folder, pdf_stem, options):
         # "legacy mode" do not support header/footer/char_margin/show_warning
         # and print a warning to stdout if they are passed, which breaks JSON
         # parsing on the C# side. probe the API and only pass what's supported.
-        import inspect as _inspect
-        _supported = set(_inspect.signature(pymupdf4llm.to_markdown).parameters.keys())
+        _supported = set(inspect.signature(pymupdf4llm.to_markdown).parameters.keys())
 
         _kwargs = dict(
             doc          = input_path,
             write_images = include_images,
             image_path   = image_path_arg,
             image_format = "png",
-            dpi          = 150,
+            dpi          = 300,
             show_warning = False
         )
         if "show_warning"  in _supported: _kwargs["show_warning"]  = False
         if "header"        in _supported: _kwargs["header"]        = not strip_header
         if "footer"        in _supported: _kwargs["footer"]        = not strip_footer
         if "char_margin"   in _supported: _kwargs["char_margin"]   = char_margin
+        if "ocr"           in _supported: _kwargs["ocr"]           = "off" # Disabled OCR to prevent <br> artifacts and picture text blocks
 
         md_text = pymupdf4llm.to_markdown(**_kwargs)
 
@@ -1143,13 +1189,11 @@ def _convert(input_path, output_folder, pdf_stem, options):
                 shutil.move(src, dest)
                 asset_count += 1
 
-            normalised_tmp = os.path.realpath(tmp_image_dir).replace("\\", "/").rstrip("/")
-            md_text = md_text.replace("\\", "/")
-            md_text = re.sub(
-                re.escape(normalised_tmp) + r"[/\\]?",
-                "",
-                md_text
-            )
+            # Handles macOS symlinks & spaces
+            md_text = markdown_image_paths(md_text, tmp_image_dir, output_folder)
+
+        # Sanitize OCR artifacts and HTML line breaks
+        md_text = _sanitize_ocr_artifacts(md_text)
 
         # Write the markdown file into the output folder
         with open(output_md_path, "w", encoding="utf-8") as f:
