@@ -10,6 +10,20 @@
 
 ---
 
+## Support the Project
+
+If LocalPDF Studio is useful to you, the best thing you can do is **pass it on**.
+
+💖 [Support on Patreon](https://www.patreon.com/cw/MdAlinurHossain?vanity=MdAlinurHossain)
+
+⭐ Leave a review on [AlternativeTo](https://alternativeto.net/software/localpdf-studio/about/)
+
+📣 [Facebook Page](https://web.facebook.com/profile.php?id=61587042059878)
+
+The only thing that keeps a project like this alive is people who believe in what it stands for.
+
+---
+
 ## The Real Cost of Free Tools
 
 Most online PDF tools are free. That's never been the problem.
@@ -200,20 +214,6 @@ See the `docs/` folder for detailed build instructions.
 4. **Test thoroughly** *(required)*
 5. Commit with clear messages
 6. Push and open a Pull Request
-
----
-
-## Support the Project
-
-If LocalPDF Studio is useful to you, the best thing you can do is **pass it on**.
-
-💖 [Support on Patreon](https://www.patreon.com/cw/MdAlinurHossain?vanity=MdAlinurHossain)
-
-⭐ Leave a review on [AlternativeTo](https://alternativeto.net/software/localpdf-studio/about/)
-
-📣 [Facebook Page](https://web.facebook.com/profile.php?id=61587042059878)
-
-The only thing that keeps a project like this alive is people who believe in what it stands for.
 
 ---
 
