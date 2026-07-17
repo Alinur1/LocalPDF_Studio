@@ -61,7 +61,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     onUpdateStatus: (callback) => ipcRenderer.on('update-status', (event, ...args) => callback(...args)),
     checkForUpdates: () => ipcRenderer.send('check-for-updates'),
-    getUpdateStatus: () => ipcRenderer.npinvoke('get-update-status'),
+    getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
     onOpenFile: (callback) => ipcRenderer.on('open-file', (event, filePath) => callback(filePath)),
     getQueuedFiles: () => ipcRenderer.invoke('get-queued-files'),
     saveDroppedFile: (fileInfo) => ipcRenderer.invoke('save-dropped-file', fileInfo),
