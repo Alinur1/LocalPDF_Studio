@@ -1,6 +1,6 @@
 {
   "name": "localpdf-studio",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Offline, open-source, privacy-first PDF toolkit.",
   "main": "src/main/main.js",
   "author": {
