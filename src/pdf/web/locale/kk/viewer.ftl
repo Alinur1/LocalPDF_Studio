@@ -201,6 +201,15 @@ pdfjs-thumb-page-title =
 #   $page (Number) - the page number
 pdfjs-thumb-page-canvas =
     .aria-label = { $page } парағы үшін кіші көрінісі
+# Variables:
+#   $page (Number) - the page number
+pdfjs-thumb-page-checkbox1 =
+    .title = { $page } бетін таңдау
+# Variables:
+#   $page (Number) - the page number
+#   $total (Number) - the number of pages
+pdfjs-thumb-page-title1 =
+    .title = Бет { $page }/{ $total }
 
 ## Find panel button title and messages
 
@@ -534,6 +543,7 @@ pdfjs-editor-undo-bar-message-freetext = Мәтін өшірілді
 pdfjs-editor-undo-bar-message-ink = Сызба өшірілді
 pdfjs-editor-undo-bar-message-stamp = Сурет өшірілді
 pdfjs-editor-undo-bar-message-signature = Қолтаңба өшірілді
+pdfjs-editor-undo-bar-message-comment = Түсіндірме өшірілді
 # Variables:
 #   $count (Number) - the number of removed annotations.
 pdfjs-editor-undo-bar-message-multiple =
@@ -632,6 +642,95 @@ pdfjs-editor-edit-comment-dialog-cancel-button = Бас тарту
 
 pdfjs-editor-add-comment-button =
     .title = Пікір қосу
+
+## The view manager is a sidebar displaying different views:
+##  - thumbnails;
+##  - outline;
+##  - attachments;
+##  - layers.
+## The thumbnails view is used to edit the pdf: remove/insert pages, ...
+
+pdfjs-toggle-views-manager-notification-button =
+    .title = Бүйір панелін көрсету/жасыру (құжатта кіші көріністер/құрылымы/салынымдар/қабаттар бар)
+pdfjs-toggle-views-manager-button1-label = Беттерді басқару
+pdfjs-views-manager-sidebar =
+    .aria-label = Бүйір панелі
+pdfjs-views-manager-sidebar-resizer =
+    .aria-label = Бүйір панелінің өлшемін өзгертуші
+pdfjs-views-manager-view-selector-button =
+    .title = Көріністер
+pdfjs-views-manager-view-selector-button-label = Көріністер
+pdfjs-views-manager-pages-title = Беттер
+pdfjs-views-manager-outlines-title1 = Құжат құрылымы
+    .title = Құжат құрылымы (барлық нәрселерді жаю/жию үшін қос шерту)
+pdfjs-views-manager-attachments-title = Салынымдар
+pdfjs-views-manager-layers-title1 = Қабаттар
+    .title = Қабаттар (барлық нәрселерді жаю/жию үшін қос шерту)
+pdfjs-views-manager-pages-option-label = Беттер
+pdfjs-views-manager-outlines-option-label = Құжаттың құрылымы
+pdfjs-views-manager-attachments-option-label = Салынымдар
+pdfjs-views-manager-layers-option-label = Қабаттар
+pdfjs-views-manager-add-file-button =
+    .title = Файлды қосу
+pdfjs-views-manager-add-file-button-label = Файлды қосу
+# Variables:
+#   $count (Number) - the number of selected pages.
+pdfjs-views-manager-pages-status-action-label =
+    { $count ->
+        [one] { $count } таңдалды
+       *[other] { $count } таңдалды
+    }
+pdfjs-views-manager-pages-status-none-action-label = Беттерді таңдау
+pdfjs-views-manager-pages-status-action-button-label = Басқару
+pdfjs-views-manager-pages-status-copy-button-label = Көшіріп алу
+pdfjs-views-manager-pages-status-cut-button-label = Қиып алу
+pdfjs-views-manager-pages-status-delete-button-label = Өшіру
+pdfjs-views-manager-pages-status-export-selected-button-label = Таңдалғанды экспорттау…
+# Variables:
+#   $count (Number) - the number of selected pages to be cut.
+pdfjs-views-manager-status-undo-cut-label =
+    { $count ->
+        [one] 1 бет қиып алынды
+       *[other] { $count } қиып алынды
+    }
+# Variables:
+#   $count (Number) - the number of selected pages to be copied.
+pdfjs-views-manager-pages-status-undo-copy-label =
+    { $count ->
+        [one] 1 бет көшірілді
+       *[other] { $count } бет көшірілді
+    }
+# Variables:
+#   $count (Number) - the number of selected pages to be deleted.
+pdfjs-views-manager-pages-status-undo-delete-label =
+    { $count ->
+        [one] 1 бет өшірілді
+       *[other] { $count } бет өшірілді
+    }
+pdfjs-views-manager-pages-status-waiting-ready-label = Файлыңыз дайындалуда…
+pdfjs-views-manager-pages-status-waiting-uploading-label = Файл жүктеп салынуда…
+pdfjs-views-manager-status-warning-cut-label = Қиып алу мүмкін болмады. Бетті жаңартып, қайталап көріңіз.
+pdfjs-views-manager-status-warning-copy-label = Көшіру мүмкін болмады. Бетті жаңартып, қайталап көріңіз.
+pdfjs-views-manager-status-warning-delete-label = Өшіру мүмкін болмады. Бетті жаңартып, қайталап көріңіз.
+pdfjs-views-manager-status-warning-save-label = Сақтау мүмкін болмады. Бетті жаңартып, қайталап көріңіз.
+pdfjs-views-manager-status-undo-button-label = Болдырмау
+pdfjs-views-manager-status-done-button-label = Дайын
+pdfjs-views-manager-status-close-button =
+    .title = Жабу
+pdfjs-views-manager-status-close-button-label = Жабу
+pdfjs-views-manager-paste-button-label = Кірістіру
+pdfjs-views-manager-paste-button-before =
+    .title = Бірінші беттің алдына кірістіру
+# Variables:
+#   $page (Number) - the page number after which the paste button is.
+pdfjs-views-manager-paste-button-after =
+    .title = { $page } бетінен кейін кірістіру
+# Badge used to promote a new feature in the UI, keep it as short as possible.
+# It's spelled uppercase for English, but it can be translated as usual.
+pdfjs-new-badge-content = ЖАҢА
+pdfjs-views-manager-waiting-for-file = Файл жүктеп салынуда…
+pdfjs-toggle-views-manager-button1 =
+    .title = Беттерді басқару
 
 ## Main menu for adding/removing signatures
 

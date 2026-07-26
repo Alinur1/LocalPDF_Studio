@@ -292,10 +292,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function checkPdfSecurity(filePath) {
         try {
-            const loadingTask = pdfjsLib.getDocument(`file://${filePath}`);
+            const loadingTask = pdfjsLib.getDocument({url: `file://${filePath}`});
             const pdfDoc = await loadingTask.promise;
             const isEncrypted = pdfDoc.isEncrypted;
-            pdfDoc.destroy();
+            await pdfDoc.cleanup();
             return {
                 isEncrypted: isEncrypted,
                 canBeProcessed: true

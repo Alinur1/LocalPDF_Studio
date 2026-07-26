@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function handleFileSelected(file) {
         if (pdfDoc) {
-            pdfDoc.destroy();
+            await pdfDoc.cleanup();
             pdfDoc = null;
         }
         renderedPages.forEach(c => {
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             previewContainer.style.display = 'block';
             previewGrid.innerHTML = '';
             const fileUrl = pathToFileURL(filePath);
-            const loadingTask = pdfjsLib.getDocument(fileUrl);
+            const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
             pdfDoc = await loadingTask.promise;
             pageCountEl.textContent = i18n.t('addWatermarkJS.totalPages') + pdfDoc.numPages;
             previewGrid.innerHTML = '';
@@ -248,9 +248,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderedPages.push(canvas);
     }
 
-    removePdfBtn.addEventListener('click', () => {
+    removePdfBtn.addEventListener('click', async () => {
         if (pdfDoc) {
-            pdfDoc.destroy();
+            await pdfDoc.cleanup();
             pdfDoc = null;
         }
         renderedPages.forEach(c => {
@@ -268,9 +268,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         imageFile.value = '';
     });
 
-    function clearAll(preserveDroppedFilePath = false) {
+    async function clearAll(preserveDroppedFilePath = false) {
         if (pdfDoc) {
-            pdfDoc.destroy();
+            await pdfDoc.cleanup();
             pdfDoc = null;
         }
         renderedPages.forEach(c => {

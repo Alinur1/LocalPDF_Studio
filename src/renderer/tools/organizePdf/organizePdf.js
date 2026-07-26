@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileUrl = pathToFileURL(filePath);
 
             console.log('Loading PDF from:', fileUrl);
-            const loadingTask = pdfjsLib.getDocument(fileUrl);
+            const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
             pdfDoc = await loadingTask.promise;
             console.log('PDF loaded successfully. Pages:', pdfDoc.numPages);
 
@@ -417,9 +417,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    function clearAll(preserveDroppedFilePath = false) {
+    async function clearAll(preserveDroppedFilePath = false) {
         if (pdfDoc) {
-            pdfDoc.destroy();
+            await pdfDoc.cleanup();
             pdfDoc = null;
         }
         pages = [];

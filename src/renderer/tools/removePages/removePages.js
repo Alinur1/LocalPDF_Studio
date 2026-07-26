@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             previewContainer.style.display = 'block';
             previewGrid.innerHTML = '';
             const fileUrl = pathToFileURL(filePath);
-            const loadingTask = pdfjsLib.getDocument(fileUrl);
+            const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
             pdfDoc = await loadingTask.promise;
             totalPages = pdfDoc.numPages;
             pageCountEl.textContent = `Total Pages: ${totalPages}`;
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function clearAll(preserveDroppedFilePath = false) {
         if (pdfDoc) {
-            pdfDoc.destroy();
+            pdfDoc.cleanup();
             pdfDoc = null;
         }
         renderedPages.forEach(c => {

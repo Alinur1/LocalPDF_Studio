@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Load PDF using pdf.js with the shared file URL helper
             const fileUrl = pathToFileURL(currentFilePath);
-            const loadingTask = pdfjsLib.getDocument(fileUrl);
+            const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
             const pdf = await loadingTask.promise;
             
             // Get metadata

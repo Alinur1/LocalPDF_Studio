@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 pageOptionsContainer.style.display = 'block';
 
                 const fileUrl = pathToFileURL(filePath);
-                const loadingTask = pdfjsLib.getDocument(fileUrl);
+                const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
                 pdfDoc = await loadingTask.promise;
                 totalPages = pdfDoc.numPages;
                 pageCountEl.textContent = `${totalPages} page(s)`;
@@ -556,7 +556,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // NEW: Optimized batch processing function
     async function generateOcrCanvasesBatch(pdfPath, progressCallback = null) {
         const fileUrl = pathToFileURL(pdfPath);
-        const loadingTask = pdfjsLib.getDocument(fileUrl);
+        const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
         const ocrPdfDoc = await loadingTask.promise;
 
         const pagesToProcess = selectedPages.size > 0
@@ -596,7 +596,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await new Promise(resolve => setTimeout(resolve, 100));
         }
 
-        await ocrPdfDoc.destroy();
+        await ocrPdfDoc.cleanup();
         return ocrCanvases;
     }
 
@@ -658,9 +658,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function clearAll(preserveDroppedFilePath = false) {
+    async function clearAll(preserveDroppedFilePath = false) {
         if (pdfDoc) {
-            pdfDoc.destroy();
+            await pdfDoc.cleanup();
             pdfDoc = null;
         }
         renderedPages.forEach(c => {

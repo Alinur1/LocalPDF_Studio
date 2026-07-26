@@ -294,11 +294,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadingUI.show(i18n.t('redactPdfJS.loadingPdf'));
 
             if (pdfDocument) {
-                await pdfDocument.destroy();
+                await pdfDocument.cleanup();
             }
 
             const fileUrl = pathToFileURL(filePath);
-            pdfDocument = await pdfjsLib.getDocument(fileUrl).promise;
+            pdfDocument = await pdfjsLib.getDocument({ url: fileUrl }).promise;
             totalPages = pdfDocument.numPages;
             currentFilePath = filePath;
             currentPage = 1;
@@ -795,7 +795,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await window.electronAPI.deleteFile(droppedFilePath);
             }
             if (pdfDocument) {
-                await pdfDocument.destroy();
+                await pdfDocument.cleanup();
             }
             window.location.href = '../../index.html';
         });
@@ -806,7 +806,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await window.electronAPI.deleteFile(droppedFilePath);
         }
         if (pdfDocument) {
-            await pdfDocument.destroy();
+            await pdfDocument.cleanup();
         }
     });
 });

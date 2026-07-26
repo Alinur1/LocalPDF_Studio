@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadingUI.show(i18n.t('fillablePdfBuilderJS.loadingPdf'));
         try {
             const fileUrl = pathToFileURL(selectedPdfPath);
-            const loadingTask = pdfjsLib.getDocument(fileUrl);
+            const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
             existingPdfDoc = await loadingTask.promise;
 
             mode = 'existing';

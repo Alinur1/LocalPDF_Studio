@@ -276,7 +276,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       const fileUrl = pathToFileURL(path);
-      pdfDoc = await pdfjsLib.getDocument(fileUrl).promise;
+      pdfDoc = await pdfjsLib.getDocument({ url: fileUrl }).promise;
       pageCountEl.textContent = `Total Pages: ${pdfDoc.numPages}`;
       pageInputEl.max = pdfDoc.numPages;
 

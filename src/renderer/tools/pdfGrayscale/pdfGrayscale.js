@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             previewContainer.style.display = 'block';
             previewGrid.innerHTML = '';
             const fileUrl = pathToFileURL(filePath);
-            const loadingTask = pdfjsLib.getDocument(fileUrl);
+            const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
             pdfDoc = await loadingTask.promise;
             pageCountEl.textContent = (i18n.t('pdfGrayscaleJS.totalPages') || 'Total Pages: ') + pdfDoc.numPages;
 
@@ -201,8 +201,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function clearAll(preserveDroppedFilePath = false) {
-        if (pdfDoc) { pdfDoc.destroy(); pdfDoc = null; }
+    async function clearAll(preserveDroppedFilePath = false) {
+        if (pdfDoc) {
+            await pdfDoc.cleanup(); pdfDoc = null;
+        }
         renderedPages.forEach(c => c.getContext('2d').clearRect(0, 0, c.width, c.height));
         renderedPages = [];
         previewGrid.innerHTML = '';

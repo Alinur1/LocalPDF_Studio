@@ -29,7 +29,7 @@ import { pathToFileURL } from '../../utils/fileUrl.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../pdf/build/pdf.worker.mjs';
 
-document.addEventListener('DOMContentLoaded', async() => {
+document.addEventListener('DOMContentLoaded', async () => {
     await i18n.init();
     ThemeManager.init();
 
@@ -292,7 +292,7 @@ async function renderThumbnail(path, canvas) {
 
     try {
         const fileUrl = pathToFileURL(path);
-        pdf = await pdfjsLib.getDocument(fileUrl).promise;
+        pdf = await pdfjsLib.getDocument({ url: fileUrl }).promise;
         page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 0.2 });
 
@@ -310,7 +310,6 @@ async function renderThumbnail(path, canvas) {
         }
         if (pdf) {
             await pdf.cleanup();
-            await pdf.destroy();
         }
     }
 }
