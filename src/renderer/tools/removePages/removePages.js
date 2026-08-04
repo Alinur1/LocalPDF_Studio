@@ -50,8 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const selectEvenBtn = document.getElementById('select-even-pages');
     const selectOddBtn = document.getElementById('select-odd-pages');
     const invertSelectionBtn = document.getElementById('invert-selection');
-    const manualPagesInput = document.getElementById('manual-pages');
-    const pageRangesInput = document.getElementById('page-ranges');
+    const pagesInput = document.getElementById('pages-input');
     const removeEvenCheckbox = document.getElementById('remove-even-pages');
     const removeOddCheckbox = document.getElementById('remove-odd-pages');
     const everyNthInput = document.getElementById('every-nth-page');
@@ -249,8 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         totalPages = 0;
         selectedFileInfo.style.display = 'none';
         selectPdfBtn.style.display = 'block';
-        manualPagesInput.value = '';
-        pageRangesInput.value = '';
+        pagesInput.value = '';
         removeEvenCheckbox.checked = false;
         removeOddCheckbox.checked = false;
         everyNthInput.value = '';
@@ -286,8 +284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updateButtonStates() {
         const hasFile = selectedFile !== null;
         const hasSelection = selectedPages.size > 0 ||
-            manualPagesInput.value.trim() !== '' ||
-            pageRangesInput.value.trim() !== '' ||
+            pagesInput.value.trim() !== '' ||
             removeEvenCheckbox.checked ||
             removeOddCheckbox.checked ||
             everyNthInput.value.trim() !== '';
@@ -296,7 +293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         previewBtn.disabled = !hasFile || !hasSelection;
     }
 
-    [manualPagesInput, pageRangesInput, removeEvenCheckbox, removeOddCheckbox, everyNthInput, startFromInput].forEach(input => {
+    [pagesInput, removeEvenCheckbox, removeOddCheckbox, everyNthInput, startFromInput].forEach(input => {
         input.addEventListener('input', updateButtonStates);
         input.addEventListener('change', updateButtonStates);
     });
@@ -408,23 +405,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function collectPagesToRemove() {
         const pagesToRemove = new Set(selectedPages);
-        const manualPages = manualPagesInput.value.trim();
-        if (manualPages) {
-            const pages = manualPages.split(',').map(p => parseInt(p.trim())).filter(p => !isNaN(p) && p >= 1 && p <= totalPages);
-            pages.forEach(p => pagesToRemove.add(p));
-        }
-        const ranges = pageRangesInput.value.trim();
-        if (ranges) {
-            const rangeList = ranges.split(',').map(r => r.trim());
-            rangeList.forEach(range => {
-                const parts = range.split('-');
-                if (parts.length === 2) {
-                    const start = parseInt(parts[0].trim());
-                    const end = parseInt(parts[1].trim());
-                    if (!isNaN(start) && !isNaN(end) && start >= 1 && end <= totalPages && start <= end) {
-                        for (let i = start; i <= end; i++) {
-                            pagesToRemove.add(i);
+        const input = pagesInput.value.trim();
+        if (input) {
+            const parts = input.split(',').map(p => p.trim()).filter(p => p.length > 0);
+            parts.forEach(part => {
+                if (part.includes('-')) {
+                    const rangeParts = part.split('-').map(p => p.trim());
+                    if (rangeParts.length === 2) {
+                        const start = parseInt(rangeParts[0]);
+                        const end = parseInt(rangeParts[1]);
+                        if (!isNaN(start) && !isNaN(end)) {
+                            const s = Math.min(start, end);
+                            const e = Math.max(start, end);
+                            for (let i = s; i <= e; i++) {
+                                if (i >= 1 && i <= totalPages) pagesToRemove.add(i);
+                            }
                         }
+                    }
+                } else {
+                    const page = parseInt(part);
+                    if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                        pagesToRemove.add(page);
                     }
                 }
             });
