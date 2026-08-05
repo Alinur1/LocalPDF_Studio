@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const pageSizeSelect = document.getElementById("page-size");
     const mergeImagesCheckbox = document.getElementById("merge-images");
     const imageQualitySlider = document.getElementById("image-quality");
-    const qualityValueDisplay = document.getElementById("quality-value");
+    const qualityNumberInput = document.getElementById("image-quality-number");
 
     let selectedImages = [];
     let droppedFilePaths = [];
@@ -63,8 +63,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     convertBtn.addEventListener("click", convertToPdf);
 
-    imageQualitySlider.addEventListener("input", (e) => {
-        qualityValueDisplay.textContent = `${e.target.value}%`;
+    imageQualitySlider.addEventListener("input", () => {
+        qualityNumberInput.value = imageQualitySlider.value;
+    });
+
+    qualityNumberInput.addEventListener('input', () => {
+        let val = parseInt(qualityNumberInput.value, 10);
+        if (!isNaN(val) && val >= 50 && val <= 100) {
+            imageQualitySlider.value = val;
+        }
+    });
+
+    qualityNumberInput.addEventListener('blur', () => {
+        let val = parseInt(qualityNumberInput.value, 10);
+        if (isNaN(val)) val = parseInt(imageQualitySlider.value, 10);
+        val = Math.min(100, Math.max(50, val));
+        qualityNumberInput.value = val;
+        imageQualitySlider.value = val;
     });
 
     closeModalBtn.addEventListener('click', () => {

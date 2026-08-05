@@ -106,8 +106,12 @@
                         </label>
                     </div>
                     <div id="custom-quality-section" class="custom-quality-section" style="display: none;">
-                        <label for="custom-quality-slider"><span data-i18n="compressPdf.quality-percent">Quality: </span><span id="quality-value">75</span>%</label>
-                        <input type="range" id="custom-quality-slider" min="1" max="100" value="75">
+                        <label for="custom-quality-slider"><span data-i18n="compressPdf.quality-percent">Quality: </span></label>
+                        <div class="slider-row">
+                            <input type="range" id="custom-quality-slider" min="1" max="100" value="75" style="flex: 1;">
+                            <input type="number" id="quality-percentage" class="percentage-input" min="1" max="100" value="75">
+                            <span class="percentage-symbol">%</span>
+                        </div>
                         <div class="slider-labels">
                             <span data-i18n="compressPdf.small-file">Smaller file</span>
                             <span data-i18n="compressPdf.better-file">Better quality</span>

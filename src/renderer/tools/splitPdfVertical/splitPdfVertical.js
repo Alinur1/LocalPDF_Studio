@@ -79,8 +79,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     percentageInput.addEventListener('input', () => {
         let val = parseInt(percentageInput.value, 10);
-        if (isNaN(val)) return;
+        if (!isNaN(val) && val >= 1 && val <= 99) {
+            slider.value = val;
+            updateVisualPreview(val);
+        }
+    });
+    
+    percentageInput.addEventListener('blur', () => {
+        let val = parseInt(percentageInput.value, 10);
+        if (isNaN(val)) val = parseInt(slider.value, 10);
         val = Math.min(99, Math.max(1, val));
+        percentageInput.value = val;
         slider.value = val;
         updateVisualPreview(val);
     });

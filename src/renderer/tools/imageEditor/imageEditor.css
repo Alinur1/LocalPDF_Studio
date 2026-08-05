@@ -463,23 +463,9 @@ body.light {
     letter-spacing: 0.04em;
 }
 
-.range-input-group {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
 .range-input {
     flex: 1;
     accent-color: var(--tab-btn-active-bg);
-}
-
-.range-value {
-    min-width: 38px;
-    text-align: right;
-    color: var(--range-value-color);
-    font-size: 0.82rem;
-    font-variant-numeric: tabular-nums;
 }
 
 .options-select,
@@ -748,4 +734,34 @@ body.light {
     opacity: 0.5;
     cursor: not-allowed;
     background: var(--disabled-btn-bg);
+}
+
+.slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.percentage-input {
+    width: 64px;
+    padding: 0.4rem 0.5rem;
+    background: var(--options-input-bg);
+    border: 1px solid var(--options-input-border);
+    border-radius: 4px;
+    color: var(--options-input-color);
+    font-size: 0.88rem;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.percentage-input:focus {
+    outline: none;
+    border-color: var(--options-input-focus-border);
+}
+
+.percentage-symbol {
+    color: var(--option-label-color);
+    font-size: 0.88rem;
+    flex-shrink: 0;
+    min-width: 20px;
 }

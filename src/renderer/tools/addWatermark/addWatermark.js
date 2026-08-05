@@ -48,22 +48,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const imageOptions = document.getElementById('image-options');
     const watermarkText = document.getElementById('watermark-text');
     const fontSize = document.getElementById('font-size');
-    const fontSizeValue = document.getElementById('font-size-value');
     const textColor = document.getElementById('text-color');
     const colorPreview = document.getElementById('color-preview');
     const opacity = document.getElementById('opacity');
-    const opacityValue = document.getElementById('opacity-value');
     const imageFile = document.getElementById('image-file');
     const imageScale = document.getElementById('image-scale');
-    const imageScaleValue = document.getElementById('image-scale-value');
     const position = document.getElementById('position');
     const rotation = document.getElementById('rotation');
-    const rotationValue = document.getElementById('rotation-value');
     const pagesRange = document.getElementById('pages-range');
     const customPagesGroup = document.getElementById('custom-pages-group');
     const customPages = document.getElementById('custom-pages');
     const watermarkPreviewText = document.getElementById('watermark-preview-text');
     const watermarkPreviewImage = document.getElementById('watermark-preview-image');
+    const fontSizeNumber = document.getElementById('font-size-number');
+    const opacityNumber = document.getElementById('opacity-number');
+    const imageScaleNumber = document.getElementById('image-scale-number');
+    const rotationNumber = document.getElementById('rotation-number');
 
     let selectedFile = null;
     let droppedFilePath = null;
@@ -102,22 +102,83 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     fontSize.addEventListener('input', () => {
-        fontSizeValue.textContent = fontSize.value;
+        fontSizeNumber.value = fontSize.value;
+        updateWatermarkPreview();
+    });
+    fontSizeNumber.addEventListener('input', () => {
+        let val = parseInt(fontSizeNumber.value, 10);
+        // Only update slider if the value is currently valid
+        if (!isNaN(val) && val >= 12 && val <= 72) {
+            fontSize.value = val;
+            updateWatermarkPreview();
+        }
+    });
+    fontSizeNumber.addEventListener('blur', () => {
+        let val = parseInt(fontSizeNumber.value, 10);
+        if (isNaN(val)) val = parseInt(fontSize.value, 10); // Fallback to slider's current value
+        val = Math.min(72, Math.max(12, val));
+        fontSizeNumber.value = val;
+        fontSize.value = val;
         updateWatermarkPreview();
     });
 
     opacity.addEventListener('input', () => {
-        opacityValue.textContent = `${opacity.value}%`;
+        opacityNumber.value = opacity.value;
+        updateWatermarkPreview();
+    });
+    opacityNumber.addEventListener('input', () => {
+        let val = parseInt(opacityNumber.value, 10);
+        if (!isNaN(val) && val >= 10 && val <= 100) {
+            opacity.value = val;
+            updateWatermarkPreview();
+        }
+    });
+    opacityNumber.addEventListener('blur', () => {
+        let val = parseInt(opacityNumber.value, 10);
+        if (isNaN(val)) val = parseInt(opacity.value, 10);
+        val = Math.min(100, Math.max(10, val));
+        opacityNumber.value = val;
+        opacity.value = val;
         updateWatermarkPreview();
     });
 
     imageScale.addEventListener('input', () => {
-        imageScaleValue.textContent = `${imageScale.value}%`;
+        imageScaleNumber.value = imageScale.value;
+        updateWatermarkPreview();
+    });
+    imageScaleNumber.addEventListener('input', () => {
+        let val = parseInt(imageScaleNumber.value, 10);
+        if (!isNaN(val) && val >= 10 && val <= 100) {
+            imageScale.value = val;
+            updateWatermarkPreview();
+        }
+    });
+    imageScaleNumber.addEventListener('blur', () => {
+        let val = parseInt(imageScaleNumber.value, 10);
+        if (isNaN(val)) val = parseInt(imageScale.value, 10);
+        val = Math.min(100, Math.max(10, val));
+        imageScaleNumber.value = val;
+        imageScale.value = val;
         updateWatermarkPreview();
     });
 
     rotation.addEventListener('input', () => {
-        rotationValue.textContent = `${rotation.value}°`;
+        rotationNumber.value = rotation.value;
+        updateWatermarkPreview();
+    });
+    rotationNumber.addEventListener('input', () => {
+        let val = parseInt(rotationNumber.value, 10);
+        if (!isNaN(val) && val >= 0 && val <= 360) {
+            rotation.value = val;
+            updateWatermarkPreview();
+        }
+    });
+    rotationNumber.addEventListener('blur', () => {
+        let val = parseInt(rotationNumber.value, 10);
+        if (isNaN(val)) val = parseInt(rotation.value, 10);
+        val = Math.min(360, Math.max(0, val));
+        rotationNumber.value = val;
+        rotation.value = val;
         updateWatermarkPreview();
     });
 

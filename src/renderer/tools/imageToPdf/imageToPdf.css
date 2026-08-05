@@ -542,12 +542,6 @@ body.light {
     margin-top: 0.3rem;
 }
 
-/* --- Quality Slider --- */
-.quality-slider-container {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
 
 .quality-slider {
     flex: 1;
@@ -589,15 +583,6 @@ body.light {
     /* background: #2980b9; */
      background: var(--radio-accent-color);
     transform: scale(1.1);
-}
-
-.quality-value {
-    min-width: 45px;
-    text-align: right;
-    /* color: #ecf0f1; */
-     color: var(--quality-value-color);
-    font-weight: 500;
-    font-size: 0.9rem;
 }
 
 /* --- Buttons --- */
@@ -770,13 +755,33 @@ body.light {
     .images-grid {
         grid-template-columns: 1fr;
     }
+}
 
-    .quality-slider-container {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+.slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
 
-    .quality-value {
-        align-self: flex-end;
-    }
+.percentage-input {
+    width: 64px;
+    padding: 0.4rem 0.5rem;
+    background: var(--custom-quality-bg);
+    border: 1px solid var(--custom-quality-border);
+    border-radius: 4px;
+    color: var(--custom-quality-label-color);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.percentage-input:focus {
+    outline: none;
+    border-color: var(--slider-accent);
+}
+
+.percentage-symbol {
+    color: var(--custom-quality-label-color);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    min-width: 20px;
 }

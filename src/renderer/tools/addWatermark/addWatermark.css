@@ -431,3 +431,32 @@ body.light {
 .action-buttons .top-btn:disabled:hover {
     background: var(--disabled-btn-bg);
 }
+
+.slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.percentage-input {
+    width: 64px;
+    padding: 0.4rem 0.5rem;
+    background: var(--options-input-bg);
+    border: 1px solid var(--options-input-border);
+    border-radius: 4px;
+    color: var(--options-input-color);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.percentage-input:focus {
+    outline: none;
+    border-color: var(--options-input-focus-border);
+}
+
+.percentage-symbol {
+    color: var(--option-label-color);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    min-width: 20px;
+}

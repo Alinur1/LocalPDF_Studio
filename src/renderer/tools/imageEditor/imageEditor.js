@@ -54,6 +54,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let rafPending = false;
     let pixelDebounceTimer = null;
     const PIXEL_DEBOUNCE_MS = 80; // ms to wait after last slider move
+    const textSizeSlider = document.getElementById('text-size');
+    const textSizeNumber = document.getElementById('text-size-number');
 
     // Transform state
     let rotation90 = 0;
@@ -475,11 +477,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ─── Slider bindings ──────────────────────────────────────────────────
 
-    function bindSlider(id, stateKey, displayId, suffix = '', usePixelDebounce = false) {
+    function bindSlider(id, stateKey, numberInputId, min, max, usePixelDebounce = false) {
         const slider = document.getElementById(id);
-        const display = document.getElementById(displayId);
-        slider.addEventListener('input', () => {
-            const val = parseInt(slider.value);
+        const numberInput = document.getElementById(numberInputId);
+
+        const updateState = (val) => {
             switch (stateKey) {
                 case 'brightness': brightness = val; break;
                 case 'contrast': contrast = val; break;
@@ -490,26 +492,51 @@ document.addEventListener('DOMContentLoaded', async () => {
                 case 'opacity': opacityAdj = val; break;
                 case 'fineRotation': fineRotation = val; break;
             }
-            display.textContent = suffix ? `${val}${suffix}` : `${val}`;
-            if (usePixelDebounce) {
-                schedulePixelRender();
-            } else {
-                scheduleRender();
+        };
+
+        const render = () => {
+            if (usePixelDebounce) schedulePixelRender();
+            else scheduleRender();
+        };
+
+        slider.addEventListener('input', () => {
+            const val = parseInt(slider.value);
+            updateState(val);
+            numberInput.value = val;
+            render();
+        });
+
+        numberInput.addEventListener('input', () => {
+            let val = parseInt(numberInput.value, 10);
+            if (!isNaN(val) && val >= min && val <= max) {
+                slider.value = val;
+                updateState(val);
+                render();
             }
+        });
+
+        numberInput.addEventListener('blur', () => {
+            let val = parseInt(numberInput.value, 10);
+            if (isNaN(val)) val = parseInt(slider.value, 10);
+            val = Math.min(max, Math.max(min, val));
+            numberInput.value = val;
+            slider.value = val;
+            updateState(val);
+            render();
         });
     }
 
     // CSS-filter-only sliders → fast, no debounce needed
-    bindSlider('brightness', 'brightness', 'brightness-value');
-    bindSlider('contrast', 'contrast', 'contrast-value');
-    bindSlider('exposure', 'exposure', 'exposure-value');
-    bindSlider('blur', 'blur', 'blur-value');
-    bindSlider('opacity-adj', 'opacity', 'opacity-value', '%');
-    bindSlider('fine-rotation', 'fineRotation', 'fine-rotation-value', '°');
+    bindSlider('brightness', 'brightness', 'brightness-number', -100, 100);
+    bindSlider('contrast', 'contrast', 'contrast-number', -100, 100);
+    bindSlider('exposure', 'exposure', 'exposure-number', -100, 100);
+    bindSlider('blur', 'blur', 'blur-number', 0, 20);
+    bindSlider('opacity-adj', 'opacity', 'opacity-number', 0, 100);
+    bindSlider('fine-rotation', 'fineRotation', 'fine-rotation-number', 0, 360);
 
     // Pixel-pass sliders → debounce
-    bindSlider('saturation', 'saturation', 'saturation-value', '', true);
-    bindSlider('sharpness', 'sharpness', 'sharpness-value', '', true);
+    bindSlider('saturation', 'saturation', 'saturation-number', -100, 100, true);
+    bindSlider('sharpness', 'sharpness', 'sharpness-number', 0, 10, true);
 
     document.getElementById('rotate-cw').addEventListener('click', () => {
         rotation90 = (rotation90 + 90) % 360;
@@ -586,10 +613,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    document.getElementById('text-size').addEventListener('input', (e) => {
-        document.getElementById('text-size-value').textContent = `${e.target.value}px`;
-    });
-
     document.getElementById('apply-text').addEventListener('click', () => {
         const text = document.getElementById('text-content').value.trim();
         if (!text) {
@@ -611,6 +634,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('clear-text').addEventListener('click', () => {
         textOverlay = null;
         scheduleRender();
+    });
+
+    const syncTextSize = (val) => {
+        if (textOverlay) {
+            textOverlay.size = val;
+            scheduleRender();
+        }
+    };
+
+    textSizeSlider.addEventListener('input', () => {
+        const val = parseInt(textSizeSlider.value);
+        textSizeNumber.value = val;
+        syncTextSize(val);
+    });
+
+    textSizeNumber.addEventListener('input', () => {
+        let val = parseInt(textSizeNumber.value, 10);
+        if (!isNaN(val) && val >= 8 && val <= 120) {
+            textSizeSlider.value = val;
+            syncTextSize(val);
+        }
+    });
+
+    textSizeNumber.addEventListener('blur', () => {
+        let val = parseInt(textSizeNumber.value, 10);
+        if (isNaN(val)) val = parseInt(textSizeSlider.value, 10);
+        val = Math.min(120, Math.max(8, val));
+        textSizeNumber.value = val;
+        textSizeSlider.value = val;
+        syncTextSize(val);
     });
 
     // ─── Crop ─────────────────────────────────────────────────────────────
@@ -759,7 +812,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('resize-width').value = w;
             document.getElementById('resize-height').value = h;
             document.getElementById('fine-rotation').value = 0;
-            document.getElementById('fine-rotation-value').textContent = '0°';
+            document.getElementById('fine-rotation-number').value = 0;
             exitCropMode();
             resetAdjustmentState();
             renderCanvas();
@@ -795,14 +848,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         activeFilter = 'none';
         textOverlay = null;
 
-        ['brightness', 'contrast', 'saturation', 'exposure', 'sharpness', 'blur'].forEach(id => {
-            document.getElementById(id).value = 0;
-            document.getElementById(`${id}-value`).textContent = '0';
+        const resetPairs = [
+            ['brightness', 'brightness-number'],
+            ['contrast', 'contrast-number'],
+            ['saturation', 'saturation-number'],
+            ['exposure', 'exposure-number'],
+            ['sharpness', 'sharpness-number'],
+            ['blur', 'blur-number']
+        ];
+
+        resetPairs.forEach(([sliderId, numId]) => {
+            document.getElementById(sliderId).value = 0;
+            document.getElementById(numId).value = 0;
         });
+
         document.getElementById('opacity-adj').value = 100;
-        document.getElementById('opacity-value').textContent = '100%';
+        document.getElementById('opacity-number').value = 100;
+
         document.getElementById('fine-rotation').value = 0;
-        document.getElementById('fine-rotation-value').textContent = '0°';
+        document.getElementById('fine-rotation-number').value = 0;
+
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         document.querySelector('.filter-btn[data-filter="none"]').classList.add('active');
     }

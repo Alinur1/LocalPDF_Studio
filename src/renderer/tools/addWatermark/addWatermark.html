@@ -78,9 +78,10 @@
                     </div>
                     <div class="option-group">
                         <label data-i18n="addWatermark.wm-fontSize-label">Font Size:</label>
-                        <div class="range-input-group">
-                            <input type="range" id="font-size" class="range-input" min="12" max="72" value="36">
-                            <span id="font-size-value" class="range-value">36</span>
+                        <div class="slider-row">
+                            <input type="range" id="font-size" class="range-input" min="12" max="72" value="36" style="flex: 1;">
+                            <input type="number" id="font-size-number" class="percentage-input" min="12" max="72" value="36">
+                            <span class="percentage-symbol">px</span>
                         </div>
                     </div>
                     <div class="option-group">
@@ -98,19 +99,21 @@
                         <small class="help-text" data-i18n="addWatermark.wm-slctImage-helpTxt">Supported formats: PNG,
                             JPG, JPEG, GIF, BMP</small>
                     </div>
-                    <div class="option-group">
-                        <label data-i18n="addWatermark.wm-imgScale-label">Image Scale:</label>
-                        <div class="range-input-group">
-                            <input type="range" id="image-scale" class="range-input" min="10" max="100" value="50">
-                            <span id="image-scale-value" class="range-value">50%</span>
-                        </div>
+                <div class="option-group">
+                    <label data-i18n="addWatermark.wm-imgScale-label">Image Scale:</label>
+                    <div class="slider-row">
+                        <input type="range" id="image-scale" class="range-input" min="10" max="100" value="50" style="flex: 1;">
+                        <input type="number" id="image-scale-number" class="percentage-input" min="10" max="100" value="50">
+                        <span class="percentage-symbol">%</span>
                     </div>
+                </div>
                 </div>
                 <div class="option-group">
                     <label data-i18n="addWatermark.wm-opacity-label">Opacity:</label>
-                    <div class="range-input-group">
-                        <input type="range" id="opacity" class="range-input" min="10" max="100" value="60">
-                        <span id="opacity-value" class="range-value">60%</span>
+                    <div class="slider-row">
+                        <input type="range" id="opacity" class="range-input" min="10" max="100" value="60" style="flex: 1;">
+                        <input type="number" id="opacity-number" class="percentage-input" min="10" max="100" value="60">
+                        <span class="percentage-symbol">%</span>
                     </div>
                 </div>
                 <div class="option-group">
@@ -126,9 +129,10 @@
                 </div>
                 <div class="option-group">
                     <label data-i18n="addWatermark.wm-rotation-label">Rotation:</label>
-                    <div class="range-input-group">
-                        <input type="range" id="rotation" class="range-input" min="0" max="360" value="45">
-                        <span id="rotation-value" class="range-value">45°</span>
+                    <div class="slider-row">
+                        <input type="range" id="rotation" class="range-input" min="0" max="360" value="45" style="flex: 1;">
+                        <input type="number" id="rotation-number" class="percentage-input" min="0" max="360" value="45">
+                        <span class="percentage-symbol">°</span>
                     </div>
                 </div>
                 <div class="option-group">

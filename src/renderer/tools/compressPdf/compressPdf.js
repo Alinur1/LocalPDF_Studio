@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const qualityRadios = document.querySelectorAll('input[name="quality"]');
     const customQualitySection = document.getElementById('custom-quality-section');
     const customQualitySlider = document.getElementById('custom-quality-slider');
-    const qualityValue = document.getElementById('quality-value');
+    const qualityPercentage = document.getElementById('quality-percentage');
     let selectedFile = null;
     let droppedFilePath = null;
 
@@ -152,7 +152,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     customQualitySlider.addEventListener('input', () => {
-        qualityValue.textContent = customQualitySlider.value;
+        qualityPercentage.value = customQualitySlider.value;
+    });
+
+    qualityPercentage.addEventListener('input', () => {
+        let val = parseInt(qualityPercentage.value, 10);
+        if (!isNaN(val) && val >= 1 && val <= 100) {
+            customQualitySlider.value = val;
+        }
+    });
+
+    qualityPercentage.addEventListener('blur', () => {
+        let val = parseInt(qualityPercentage.value, 10);
+        if (isNaN(val)) val = parseInt(customQualitySlider.value, 10);
+        val = Math.min(100, Math.max(1, val));
+        qualityPercentage.value = val;
+        customQualitySlider.value = val;
     });
 
     function getSelectedQuality() {

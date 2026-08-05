@@ -97,51 +97,52 @@
                     <div class="tab-content active" id="tab-adjustments">
                         <div class="option-group">
                             <label data-i18n="imageEditor.brightness">Brightness</label>
-                            <div class="range-input-group">
-                                <input type="range" id="brightness" class="range-input" min="-100" max="100" value="0">
-                                <span class="range-value" id="brightness-value">0</span>
+                            <div class="slider-row">
+                                <input type="range" id="brightness" class="range-input" min="-100" max="100" value="0" style="flex: 1;">
+                                <input type="number" id="brightness-number" class="percentage-input" min="-100" max="100" value="0">
                             </div>
                         </div>
                         <div class="option-group">
                             <label data-i18n="imageEditor.contrast">Contrast</label>
-                            <div class="range-input-group">
-                                <input type="range" id="contrast" class="range-input" min="-100" max="100" value="0">
-                                <span class="range-value" id="contrast-value">0</span>
+                            <div class="slider-row">
+                                <input type="range" id="contrast" class="range-input" min="-100" max="100" value="0" style="flex: 1;">
+                                <input type="number" id="contrast-number" class="percentage-input" min="-100" max="100" value="0">
                             </div>
                         </div>
                         <div class="option-group">
                             <label data-i18n="imageEditor.saturation">Saturation</label>
-                            <div class="range-input-group">
-                                <input type="range" id="saturation" class="range-input" min="-100" max="100" value="0">
-                                <span class="range-value" id="saturation-value">0</span>
+                            <div class="slider-row">
+                                <input type="range" id="saturation" class="range-input" min="-100" max="100" value="0" style="flex: 1;">
+                                <input type="number" id="saturation-number" class="percentage-input" min="-100" max="100" value="0">
                             </div>
                         </div>
                         <div class="option-group">
                             <label data-i18n="imageEditor.exposure">Exposure</label>
-                            <div class="range-input-group">
-                                <input type="range" id="exposure" class="range-input" min="-100" max="100" value="0">
-                                <span class="range-value" id="exposure-value">0</span>
+                            <div class="slider-row">
+                                <input type="range" id="exposure" class="range-input" min="-100" max="100" value="0" style="flex: 1;">
+                                <input type="number" id="exposure-number" class="percentage-input" min="-100" max="100" value="0">
                             </div>
                         </div>
                         <div class="option-group">
                             <label data-i18n="imageEditor.sharpness">Sharpness</label>
-                            <div class="range-input-group">
-                                <input type="range" id="sharpness" class="range-input" min="0" max="10" value="0">
-                                <span class="range-value" id="sharpness-value">0</span>
+                            <div class="slider-row">
+                                <input type="range" id="sharpness" class="range-input" min="0" max="10" value="0" style="flex: 1;">
+                                <input type="number" id="sharpness-number" class="percentage-input" min="0" max="10" value="0">
                             </div>
                         </div>
                         <div class="option-group">
                             <label data-i18n="imageEditor.blur">Blur</label>
-                            <div class="range-input-group">
-                                <input type="range" id="blur" class="range-input" min="0" max="20" value="0">
-                                <span class="range-value" id="blur-value">0</span>
+                            <div class="slider-row">
+                                <input type="range" id="blur" class="range-input" min="0" max="20" value="0" style="flex: 1;">
+                                <input type="number" id="blur-number" class="percentage-input" min="0" max="20" value="0">
                             </div>
                         </div>
                         <div class="option-group">
                             <label data-i18n="imageEditor.opacity">Opacity</label>
-                            <div class="range-input-group">
-                                <input type="range" id="opacity-adj" class="range-input" min="0" max="100" value="100">
-                                <span class="range-value" id="opacity-value">100%</span>
+                            <div class="slider-row">
+                                <input type="range" id="opacity-adj" class="range-input" min="0" max="100" value="100" style="flex: 1;">
+                                <input type="number" id="opacity-number" class="percentage-input" min="0" max="100" value="100">
+                                <span class="percentage-symbol">%</span>
                             </div>
                         </div>
                     </div>
@@ -164,9 +165,10 @@
                         </div>
                         <div class="option-group">
                             <label data-i18n="imageEditor.fine-rotation">Fine Rotation (°)</label>
-                            <div class="range-input-group">
-                                <input type="range" id="fine-rotation" class="range-input" min="-45" max="45" value="0">
-                                <span class="range-value" id="fine-rotation-value">0°</span>
+                            <div class="slider-row">
+                                <input type="range" id="fine-rotation" class="range-input" min="0" max="360" value="0" style="flex: 1;">
+                                <input type="number" id="fine-rotation-number" class="percentage-input" min="0" max="360" value="0">
+                                <span class="percentage-symbol">°</span>
                             </div>
                         </div>
                         <div class="option-group">
@@ -231,9 +233,10 @@
                         </div>
                         <div class="option-group">
                             <label data-i18n="imageEditor.text-size">Font Size</label>
-                            <div class="range-input-group">
-                                <input type="range" id="text-size" class="range-input" min="8" max="120" value="32">
-                                <span class="range-value" id="text-size-value">32px</span>
+                            <div class="slider-row">
+                                <input type="range" id="text-size" class="range-input" min="8" max="120" value="32" style="flex: 1;">
+                                <input type="number" id="text-size-number" class="percentage-input" min="8" max="120" value="32">
+                                <span class="percentage-symbol">px</span>
                             </div>
                         </div>
                         <div class="option-group">
