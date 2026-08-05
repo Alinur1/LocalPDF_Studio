@@ -366,7 +366,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             // Add all image files
             for (const image of selectedImages) {
-                const response = await fetch(`file://${image.path}`);
+                const fileUrl = pathToFileURL(image.path);
+                const response = await fetch(fileUrl);
                 const blob = await response.blob();
                 formData.append('images', blob, image.name);
             }
