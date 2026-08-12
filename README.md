@@ -24,6 +24,14 @@ The only thing that keeps a project like this alive is people who believe in wha
 
 ---
 
+## Main author
+
+[Md. Alinur Hossain](https://www.linkedin.com/in/md-alinur-hossain-368240250/)
+
+[Md Shahzad Hussain Rayied](https://www.linkedin.com/in/rayied/)
+
+---
+
 ## The Real Cost of Free Tools
 
 Most online PDF tools are free. That's never been the problem.
