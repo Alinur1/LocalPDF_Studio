@@ -123,14 +123,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const filePath = files[0];
             const fileName = filePath.split(/[\\/]/).pop();
             const fileSize = await getFileSize(filePath);
-            handleFileSelected({ path: filePath, name: fileName, size: fileSize });
+            await handleFileSelected({ path: filePath, name: fileName, size: fileSize });
         }
         loadingUI.hide();
     });
 
     removePdfBtn.addEventListener('click', async () => {
         await cleanupDroppedFile();
-        clearAll();
+        await clearAll();
     });
 
     const backBtn = document.querySelector('a[href="../../index.html"]');
@@ -138,13 +138,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         backBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             await cleanupDroppedFile();
-            clearAll();
+            await clearAll();
             window.location.href = '../../index.html';
         });
     }
 
     async function handleFileSelected(file) {
-        clearAll(true);
+        await clearAll(true);
         selectedFile = file;
         pdfNameEl.textContent = file.name;
         pdfSizeEl.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
@@ -217,7 +217,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function clearAll(preserveDroppedFilePath = false) {
         if (pdfDoc) {
-            await pdfDoc.cleanup(); pdfDoc = null;
+            try {
+                await pdfDoc.cleanup();
+            } catch (e) {
+                console.warn('Error cleaning up PDF doc:', e);
+            }
+            pdfDoc = null;
         }
         renderedPages.forEach(c => {
             const ctx = c.getContext('2d');
@@ -267,7 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (result.success) {
                 droppedFilePath = result.filePath;
-                handleFileSelected({ path: result.filePath, name: file.name, size: file.size || 0 });
+                await handleFileSelected({ path: result.filePath, name: file.name, size: file.size || 0 });
             } else {
                 console.log('Failed to save dropped file: ' + result.error);
                 await customAlert.alert(i18n.t('alerts.error'), i18n.t('splitPdfVerticalJS.pdf-drop-failed'), [i18n.t('common.ok')]);
