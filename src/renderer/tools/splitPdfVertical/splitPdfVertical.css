@@ -210,7 +210,7 @@ body.light {
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid var(--preview-container-border);
-    max-height: 500px;
+    max-height: min(650px, 70vh);
     display: flex;
     flex-direction: column;
 }
@@ -240,11 +240,12 @@ body.light {
 
 .preview-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
-    padding: 0.5rem;
-    max-height: 400px;
+    padding: 1rem;
 }
 
 .preview-grid::-webkit-scrollbar {
@@ -270,8 +271,8 @@ body.light {
     flex-direction: column;
     align-items: center;
     background: var(--page-thumbnail-bg);
-    border-radius: 6px;
-    padding: 0.5rem;
+    border-radius: 8px;
+    padding: 0.8rem;
     border: 2px solid var(--page-thumbnail-border);
     cursor: pointer;
 }
@@ -286,6 +287,71 @@ body.light {
     height: auto;
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.page-canvas-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.split-overlay {
+    --split-x: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.split-overlay-left {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--split-x);
+    background: var(--split-label-left-bg);
+}
+
+.split-overlay-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--split-x);
+    right: 0;
+    background: var(--split-label-right-bg);
+}
+
+.split-overlay-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--split-x);
+    width: 0;
+    border-left: 2px dashed var(--split-line-color);
+    transform: translateX(-1px);
+}
+
+.split-badge {
+    position: absolute;
+    bottom: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: var(--percentage-badge-bg);
+    color: var(--percentage-badge-color);
+    white-space: nowrap;
+}
+
+.split-badge-left {
+    left: 4px;
+}
+
+.split-badge-right {
+    right: 4px;
 }
 
 .page-label {
@@ -487,4 +553,31 @@ body.light {
 
 .action-buttons .top-btn:disabled:hover {
     background: var(--disabled-btn-bg);
+}
+
+@media (max-width: 850px) {
+    .preview-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 1rem;
+    }
+
+    .preview-container {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 700px) {
+    .preview-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+}
+
+@media (max-width: 500px) {
+    .preview-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    .page-thumbnail {
+        padding: 0.5rem;
+    }
 }

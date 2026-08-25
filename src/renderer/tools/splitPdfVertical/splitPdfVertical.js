@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     splitModeRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             optionsCustom.style.display = radio.value === 'custom' ? 'block' : 'none';
+            updateSplitOverlay();
         });
     });
 
@@ -71,10 +72,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         labelRight.textContent = `Right — ${right}%`;
     }
 
+    function updateSplitOverlay() {
+        const checkedMode = document.querySelector('input[name="splitMode"]:checked');
+        const mode = checkedMode ? checkedMode.value : 'half';
+        let pct = 50;
+        if (mode === 'custom') {
+            const raw = parseInt(percentageInput.value, 10);
+            pct = isNaN(raw) ? 50 : Math.min(99, Math.max(1, raw));
+        }
+
+        previewGrid.querySelectorAll('.split-overlay').forEach(overlay => {
+            overlay.style.setProperty('--split-x', `${pct}%`);
+            overlay.querySelector('.split-badge-left').textContent = `L ${pct}%`;
+            overlay.querySelector('.split-badge-right').textContent = `R ${100 - pct}%`;
+        });
+    }
+
     slider.addEventListener('input', () => {
         const val = parseInt(slider.value, 10);
         percentageInput.value = val;
         updateVisualPreview(val);
+        updateSplitOverlay();
     });
 
     percentageInput.addEventListener('input', () => {
@@ -82,9 +100,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!isNaN(val) && val >= 1 && val <= 99) {
             slider.value = val;
             updateVisualPreview(val);
+            updateSplitOverlay();
         }
     });
-    
+
     percentageInput.addEventListener('blur', () => {
         let val = parseInt(percentageInput.value, 10);
         if (isNaN(val)) val = parseInt(slider.value, 10);
@@ -92,6 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         percentageInput.value = val;
         slider.value = val;
         updateVisualPreview(val);
+        updateSplitOverlay();
     });
 
     updateVisualPreview(50);
@@ -137,7 +157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadPdfPreview(filePath) {
         loadingUI.show(i18n.t('splitPdfVerticalJS.loading-preview'));
         try {
-            previewContainer.style.display = 'block';
+            previewContainer.style.display = 'flex';
             const fileUrl = pathToFileURL(filePath);
             const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
             pdfDoc = await loadingTask.promise;
@@ -146,6 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
                 await renderPageThumbnail(pageNum);
             }
+            updateSplitOverlay();
         } catch (error) {
             console.error('Error loading PDF:', error);
             previewGrid.innerHTML = `<p style="color: #e74c3c; text-align: center;">Failed to load preview.</p>`;
@@ -156,7 +177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function renderPageThumbnail(pageNum) {
         const page = await pdfDoc.getPage(pageNum);
-        const scale = 0.3;
+        const scale = 0.5;
         const viewport = page.getViewport({ scale });
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -168,11 +189,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         thumbWrapper.className = 'page-thumbnail';
         thumbWrapper.dataset.pageNum = pageNum;
 
+        const canvasWrap = document.createElement('div');
+        canvasWrap.className = 'page-canvas-wrap';
+
+        const overlay = document.createElement('div');
+        overlay.className = 'split-overlay';
+        overlay.innerHTML = `
+            <div class="split-overlay-left"></div>
+            <div class="split-overlay-line"></div>
+            <div class="split-overlay-right"></div>
+            <span class="split-badge split-badge-left"></span>
+            <span class="split-badge split-badge-right"></span>
+        `;
+
+        canvasWrap.appendChild(canvas);
+        canvasWrap.appendChild(overlay);
+
         const pageLabel = document.createElement('div');
         pageLabel.className = 'page-label';
         pageLabel.textContent = `Page ${pageNum}`;
 
-        thumbWrapper.appendChild(canvas);
+        thumbWrapper.appendChild(canvasWrap);
         thumbWrapper.appendChild(pageLabel);
         previewGrid.appendChild(thumbWrapper);
         renderedPages.push(canvas);
