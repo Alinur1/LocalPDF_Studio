@@ -513,6 +513,8 @@
     "encrypt-option3": "40-bit RC4 (最低限の保護）",
     "unlock-option-header": "復号化設定",
     "unlock-password": "PDF パスワード：",
+    "open-password-placeholder": "PDF を開くためのパスワードを入力",
+    "unlock-password-placeholder": "この PDF のロックを解除するためのパスワードを入力",
     "helpTxt": "このPDFを暗号化するために使用されたパスワードを入力してください",
     "lock-unlock-btn": "PDF をロック"
   },

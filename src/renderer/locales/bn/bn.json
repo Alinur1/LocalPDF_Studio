@@ -513,6 +513,8 @@
     "encrypt-option3": "৪০-বিট RC4 (সর্বনিম্ন সুরক্ষা)",
     "unlock-option-header": "ডিক্রিপশন সেটিংস",
     "unlock-password": "PDF পাসওয়ার্ড:",
+    "open-password-placeholder": "পিডিএফ খুলতে পাসওয়ার্ড লিখুন",
+    "unlock-password-placeholder": "এই PDF আনলক করতে পাসওয়ার্ড লিখুন",
     "helpTxt": "এই PDF এনক্রিপ্ট করতে ব্যবহৃত পাসওয়ার্ড লিখুন",
     "lock-unlock-btn": "PDF লক করুন"
   },

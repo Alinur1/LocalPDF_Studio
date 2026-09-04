@@ -513,6 +513,8 @@
     "encrypt-option3": "40-bit RC4 (Least protection)",
     "unlock-option-header": "Decryption Settings",
     "unlock-password": "PDF Password:",
+    "open-password-placeholder": "Enter password to open PDF",
+    "unlock-password-placeholder": "Enter PDF password to unlock",
     "helpTxt": "Enter the password used to encrypt this PDF",
     "lock-unlock-btn": "Lock PDF"
   },

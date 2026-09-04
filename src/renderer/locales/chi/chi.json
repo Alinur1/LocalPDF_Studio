@@ -513,6 +513,8 @@
     "encrypt-option3": "40 位 RC4 (最低保)",
     "unlock-option-header": "解密设置",
     "unlock-password": "PDF 密码：",
+    "open-password-placeholder": "输入密码以打开 PDF",
+    "unlock-password-placeholder": "输入用于解锁此 PDF 的密码",
     "helpTxt": "输入用于加密此 PDF 的密码",
     "lock-unlock-btn": "锁定 PDF"
   },
