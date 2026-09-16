@@ -128,8 +128,26 @@ namespace LocalPDF_Studio_api.BLL.Services
                 if (process.ExitCode != 0)
                     throw new Exception($"Python Process Failed (Code {process.ExitCode}): {stderr}");
 
-                return JsonSerializer.Deserialize<PythonImageResult>(stdout, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-                       ?? throw new Exception("Failed to parse Python JSON output");
+                // JSON PARSING FIX
+                // Find the first '{' or '[' to skip any C-level warnings (like PyMuPDF D3D12 warnings) that bypass Python's sys.stdout.
+                int jsonStartIndex = stdout.IndexOf('{');
+                if (jsonStartIndex == -1)
+                {
+                    jsonStartIndex = stdout.IndexOf('[');
+                }
+
+                if (jsonStartIndex >= 0)
+                {
+                    string cleanJson = stdout.Substring(jsonStartIndex);
+                    return JsonSerializer.Deserialize<PythonImageResult>(cleanJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? throw new Exception("Failed to parse Python JSON output");
+                }
+                else
+                {
+                    // If no JSON is found, throw a meaningful error to help with future debugging
+                    _logger.LogError("Python script did not return valid JSON. Stdout: {Stdout}, Stderr: {Stderr}", stdout, stderr);
+                    throw new Exception($"Python script did not return valid JSON. Stdout: {stdout}");
+                }
             }
             finally
             {
