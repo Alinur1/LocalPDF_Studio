@@ -129,10 +129,25 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             try
             {
-                return JsonSerializer.Deserialize<PythonPdfToImageResult>(stdout, new JsonSerializerOptions
+                //Json parsing fix
+                int jsonStartIndex = stdout.IndexOf('{');
+                if (jsonStartIndex == -1)
                 {
-                    PropertyNameCaseInsensitive = true
-                }) ?? throw new Exception("Empty result from Python");
+                    jsonStartIndex = stdout.IndexOf('[');
+                }
+
+                if (jsonStartIndex >= 0)
+                {
+                    string cleanJson = stdout.Substring(jsonStartIndex);
+                    return JsonSerializer.Deserialize<PythonPdfToImageResult>(cleanJson, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }) ?? throw new Exception("Empty result from Python");
+                }
+                else
+                {
+                    return new PythonPdfToImageResult { Success = false, Error = $"Python script did not return valid JSON. Raw: {stdout}" };
+                }
             }
             catch (Exception ex)
             {
