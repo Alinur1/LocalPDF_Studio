@@ -57,25 +57,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             const filePath = files[0];
             const fileName = filePath.split(/[\\/]/).pop();
             const fileSize = await getFileSize(filePath);
-            handleFileSelected({ path: filePath, name: fileName, size: fileSize });
+            await handleFileSelected({ path: filePath, name: fileName, size: fileSize });
         }
         loadingUI.hide();
     });
 
     removePdfBtn.addEventListener('click', async () => {
         await cleanupDroppedFile();
-        clearAll();
+        await clearAll();
     });
 
     document.querySelector('a[href="../../index.html"]')?.addEventListener('click', async (e) => {
         e.preventDefault();
         await cleanupDroppedFile();
-        clearAll();
+        await clearAll();
         window.location.href = '../../index.html';
     });
 
     async function handleFileSelected(file) {
-        clearAll(true); // true = preserve droppedFilePath
+        await clearAll(true); // true = preserve droppedFilePath
         selectedFile = file;
         pdfNameEl.textContent = file.name;
         pdfSizeEl.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
@@ -149,7 +149,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function clearAll(preserveDroppedFilePath = false) {
         if (pdfDoc) {
-            await pdfDoc.cleanup(); pdfDoc = null;
+            try {
+                await pdfDoc.cleanup();
+            } catch (e) {
+                console.warn('Error cleaning up PDF doc:', e);
+            }
+            pdfDoc = null;
         }
         renderedPages.forEach(c => c.getContext('2d').clearRect(0, 0, c.width, c.height));
         renderedPages = [];
@@ -245,7 +250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const fileSize = file.size || 0;
                 droppedFilePath = result.filePath; // Track the dropped file for cleanup
                 console.log(`New file dropped and saved: ${droppedFilePath}`);
-                handleFileSelected({
+                await handleFileSelected({
                     path: result.filePath,
                     name: file.name,
                     size: fileSize
