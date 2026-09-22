@@ -17,6 +17,7 @@
 
 
 using LocalPDF_Studio_api.BLL.Interfaces;
+using LocalPDF_Studio_api.BLL.Utils;
 using LocalPDF_Studio_api.DAL.Models.PDFGrayscale;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -147,8 +148,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             try
             {
-                return JsonSerializer.Deserialize<PythonGrayscaleResult>(stdout, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-                       ?? throw new Exception("Empty result from Python");
+                return PythonJsonParser.CleanAndDeserialize<PythonGrayscaleResult>(stdout);
             }
             catch (Exception ex)
             {

@@ -18,9 +18,9 @@
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 using LocalPDF_Studio_api.BLL.Interfaces;
 using LocalPDF_Studio_api.DAL.Models.WatermarkModel;
+using LocalPDF_Studio_api.BLL.Utils;
 
 namespace LocalPDF_Studio_api.BLL.Services
 {
@@ -140,22 +140,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             try
             {
-                int jsonStartIndex = stdout.IndexOf('{');
-                if (jsonStartIndex == -1)
-                {
-                    jsonStartIndex = stdout.IndexOf('[');
-                }
-                
-                if (jsonStartIndex >= 0)
-                {
-                    string cleanJson = stdout.Substring(jsonStartIndex);
-                    return JsonSerializer.Deserialize<PythonWatermarkResult>(cleanJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-                           ?? new PythonWatermarkResult { Success = false, Error = "Empty JSON output" };
-                }
-                else
-                {
-                    return new PythonWatermarkResult { Success = false, Error = $"No JSON found in output. Raw: {stdout}" };
-                }
+                return PythonJsonParser.CleanAndDeserialize<PythonWatermarkResult>(stdout);
             }
             catch (Exception ex)
             {

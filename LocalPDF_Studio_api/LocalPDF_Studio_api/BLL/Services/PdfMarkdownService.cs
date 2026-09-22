@@ -17,6 +17,7 @@
 
 
 using LocalPDF_Studio_api.BLL.Interfaces;
+using LocalPDF_Studio_api.BLL.Utils;
 using LocalPDF_Studio_api.DAL.Models.PDFMarkdown;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -169,17 +170,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             try
             {
-                var lines = stdout.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                var jsonLine = lines.FirstOrDefault(line => line.TrimStart().StartsWith('{'));
-
-                if (string.IsNullOrEmpty(jsonLine))
-                {
-                    return Failure("Python output did not contain a valid JSON result.");
-                }
-
-                return JsonSerializer.Deserialize<PythonMarkdownResult>(jsonLine,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-                    ?? Failure("Failed to deserialize Python response.");
+                return PythonJsonParser.CleanAndDeserialize<PythonMarkdownResult>(stdout);
             }
             catch (JsonException ex)
             {

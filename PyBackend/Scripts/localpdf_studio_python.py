@@ -53,7 +53,7 @@ def main():
 # add_watermark
 # ============================================================
 import argparse
-import fitz  # PyMuPDF
+import pymupdf as fitz  # PyMuPDF
 import os
 import io
 import zipfile

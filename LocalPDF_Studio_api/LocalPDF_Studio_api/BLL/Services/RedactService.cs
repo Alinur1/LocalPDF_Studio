@@ -17,6 +17,7 @@
 
 
 using LocalPDF_Studio_api.BLL.Interfaces;
+using LocalPDF_Studio_api.BLL.Utils;
 using LocalPDF_Studio_api.DAL.Models.RedactPdf;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -130,17 +131,7 @@ namespace LocalPDF_Studio_api.BLL.Services
                 if (process.ExitCode != 0)
                     throw new Exception($"Redaction Failed (Code {process.ExitCode}): {stderr}");
 
-                // Extract valid JSON from stdout (handles possible MuPDF xref warnings)
-                string jsonPart = stdout;
-                if (stdout.Contains("{") && stdout.Contains("}"))
-                {
-                    int startIndex = stdout.IndexOf('{');
-                    int endIndex = stdout.LastIndexOf('}');
-                    jsonPart = stdout.Substring(startIndex, (endIndex - startIndex) + 1);
-                }
-
-                return JsonSerializer.Deserialize<PythonRedactResult>(jsonPart, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-                       ?? throw new Exception("Failed to parse redaction result");
+                return PythonJsonParser.CleanAndDeserialize<PythonRedactResult>(stdout);
             }
             finally
             {

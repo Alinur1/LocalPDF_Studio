@@ -18,7 +18,7 @@
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text.Json;
+using LocalPDF_Studio_api.BLL.Utils;
 using LocalPDF_Studio_api.BLL.Interfaces;
 using LocalPDF_Studio_api.DAL.Models.PdfToImageModel;
 
@@ -129,25 +129,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             try
             {
-                //Json parsing fix
-                int jsonStartIndex = stdout.IndexOf('{');
-                if (jsonStartIndex == -1)
-                {
-                    jsonStartIndex = stdout.IndexOf('[');
-                }
-
-                if (jsonStartIndex >= 0)
-                {
-                    string cleanJson = stdout.Substring(jsonStartIndex);
-                    return JsonSerializer.Deserialize<PythonPdfToImageResult>(cleanJson, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    }) ?? throw new Exception("Empty result from Python");
-                }
-                else
-                {
-                    return new PythonPdfToImageResult { Success = false, Error = $"Python script did not return valid JSON. Raw: {stdout}" };
-                }
+                return PythonJsonParser.CleanAndDeserialize<PythonPdfToImageResult>(stdout);
             }
             catch (Exception ex)
             {
