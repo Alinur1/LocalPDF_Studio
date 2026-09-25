@@ -42,38 +42,120 @@
             <button class="top-btn" id="sidebar-toggle-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panel-left-icon lucide-panel-left"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
             </button>
-            <button class="top-btn" id="open-files-btn" data-i18n="nav.open-files-btn">Open PDF/Markdown viewer</button>
+            <button class="top-btn" id="open-files-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-open preview-icon"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>
+                <span id="open-files-span" data-i18n="nav.open-files-btn">Open PDF/Markdown viewer</span>
+            </button>
             <div class="tools-dropdown">
-                <button class="top-btn" id="tools-btn" data-i18n="nav.tools-btn">Tools</button>
+                <button class="top-btn" id="tools-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wrench preview-icon"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></svg>
+                    <span data-i18n="nav.tools-btn">Tools</span>
+                </button>
                 <div class="tools-menu" id="tools-menu">
                     <div id="tools-grid">
-                        <a href="./tools/mergePdf/mergePdf.html" data-i18n="tools.tool-merge">Merge PDF</a>
-                        <a href="./tools/splitPdf/splitPdf.html" data-i18n="tools.tool-split">Split PDF</a>
-                        <a href="./tools/removePages/removePages.html" data-i18n="tools.tool-remove">Remove Pages</a>
-                        <a href="./tools/organizePdf/organizePdf.html" data-i18n="tools.tool-organize">Organize/Re-Arrange PDF</a>
-                        <a href="./tools/compressPdf/compressPdf.html" data-i18n="tools.tool-compress">Compress PDF</a>
-                        <a href="./tools/pdfToImage/pdfToImage.html" data-i18n="tools.tool-pdf-to-image">PDF to Image</a>
-                        <a href="./tools/addPageNumbers/addPageNumbers.html" data-i18n="tools.tool-page-numbers">Add Page Numbers</a>
-                        <a href="./tools/addWatermark/addWatermark.html" data-i18n="tools.tool-watermark">Add Watermark</a>
-                        <a href="./tools/cropPdf/cropPdf.html" data-i18n="tools.tool-crop">Crop PDF</a>
-                        <a href="./tools/lockUnlockPdf/lockUnlockPdf.html" data-i18n="tools.tool-lock-unlock" >Lock/Unlock PDF</a>
-                        <a href="./tools/editMetadata/editMetadata.html" data-i18n="tools.tool-metadata">View and Edit Metadata</a>
-                        <a href="./tools/extractImages/extractImages.html"  data-i18n="tools.tool-extract-images">Extract Images</a>
-                        <a href="./tools/ocrPdf/ocrPdf.html" data-i18n="tools.tool-OCR">OCR PDF or Image</a>
-                        <a href="./tools/imageToPdf/imageToPdf.html" data-i18n="tools.tool-image-to-pdf">Image to PDF</a>
-                        <a href="./tools/redactPdf/redactPdf.html" data-i18n="tools.tool-redact-pdf">Redact PDF Content</a>
-                        <a href="./tools/pdfGrayscale/pdfGrayscale.html" data-i18n="tools.pdf-grayscale">PDF Grayscale Converter</a>
-                        <a href="./tools/fillablePdfBuilder/fillablePdfBuilder.html" data-i18n="tools.fillable-pdf-builder">Fillable PDF Builder</a>
-                        <a href="./tools/pdfToPdfa/pdfToPdfa.html" data-i18n="tools.pdf-to-pdfa">PDF to PDF/A Converter</a>
-                        <a href="./tools/splitPdfVertical/splitPdfVertical.html" data-i18n="tools.split-pdf-vertical">Split PDF (Vertical)</a>
-                        <a href="./tools/pdfToMarkdown/pdfToMarkdown.html" data-i18n="tools.pdf-to-markdown">PDF to Markdown</a>
-                        <a href="./tools/imageEditor/imageEditor.html" data-i18n="tools.image-editor">Image Editor</a>
+                        <a href="./tools/mergePdf/mergePdf.html">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text-icon lucide-file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+                            <span data-i18n="tools.tool-merge">Merge PDF</span>
+                        </a>
+                        <a href="./tools/splitPdf/splitPdf.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scissors-icon lucide-scissors"><circle cx="6" cy="6" r="3"></circle><path d="M8.12 8.12 12 12"></path><path d="M20 4 8.12 15.88"></path><circle cx="6" cy="18" r="3"></circle><path d="M14.8 14.8 20 20"></path></svg>
+                            <span data-i18n="tools.tool-split"> Split PDF </span>
+                        </a>
+                        <a href="./tools/removePages/removePages.html">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            <span data-i18n="tools.tool-remove"> Remove Pages </span>
+                        </a>
+                        <a href="./tools/organizePdf/organizePdf.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-heart-icon lucide-book-heart"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"></path><path d="M8.62 9.8A2.25 2.25 0 1 1 12 6.836a2.25 2.25 0 1 1 3.38 2.966l-2.626 2.856a.998.998 0 0 1-1.507 0z"></path></svg>
+                            <span data-i18n="tools.tool-organize"> Organize/Re-Arrange PDF </span>
+                        </a>
+                        <a href="./tools/compressPdf/compressPdf.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-microscope-icon lucide-microscope"><path d="M6 18h8"></path><path d="M3 22h18"></path><path d="M14 22a7 7 0 1 0 0-14h-1"></path><path d="M9 14h2"></path><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"></path><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"></path></svg>
+                            <span data-i18n="tools.tool-compress"> Compress PDF </span>
+                        </a>
+                        <a href="./tools/pdfToImage/pdfToImage.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text-icon lucide-file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-image-icon lucide-file-image"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><circle cx="10" cy="12" r="2"></circle><path d="m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22"></path></svg>
+                            <span data-i18n="tools.tool-pdf-to-image"> PDF to Image </span>
+                        </a>
+                        <a href="./tools/addPageNumbers/addPageNumbers.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-digit-icon lucide-file-digit"><path d="M4 12V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 16h2v6"></path><path d="M10 22h4"></path><rect x="2" y="16" width="4" height="6" rx="2"></rect></svg>
+                            <span data-i18n="tools.tool-page-numbers"> Add Page Numbers </span>
+                        </a>
+                        <a href="./tools/addWatermark/addWatermark.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-droplet-icon lucide-droplet"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path></svg>
+                            <span data-i18n="tools.tool-watermark"> Add Water mark</span>
+                        </a>
+                        <a href="./tools/cropPdf/cropPdf.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-crop-icon lucide-crop"><path d="M6 2v14a2 2 0 0 0 2 2h14"></path><path d="M18 22V8a2 2 0 0 0-2-2H2"></path></svg>
+                            <span data-i18n="tools.tool-crop"> Crop PDF </span>
+                        </a>
+                        <a href="./tools/lockUnlockPdf/lockUnlockPdf.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-key-icon lucide-file-key"><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M4 12v6"></path><path d="M4 14h2"></path><path d="M9.65 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v4"></path><circle cx="4" cy="20" r="2"></circle></svg>
+                            <span data-i18n="tools.tool-lock-unlock" > Lock/Unlock PDF </span>
+                        </a>
+                        <a href="./tools/editMetadata/editMetadata.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search-alert-icon lucide-search-alert"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path><path d="M11 7v4"></path><path d="M11 15h.01"></path></svg>
+                            <span data-i18n="tools.tool-metadata"> View and Edit Metadata </span>
+                        </a>
+                        <a href="./tools/extractImages/extractImages.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-down-icon lucide-image-down"><path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"></path><path d="m14 19 3 3v-5.5"></path><path d="m17 22 3-3"></path><circle cx="9" cy="9" r="2"></circle></svg>
+                            <span data-i18n="tools.tool-extract-images"> Extract Images </span>
+                        </a>
+                        <a href="./tools/ocrPdf/ocrPdf.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-text-icon lucide-scan-text"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 8h8"></path><path d="M7 12h10"></path><path d="M7 16h6"></path></svg>
+                            <span data-i18n="tools.tool-OCR"> OCR PDF or Image </span>
+                        </a>
+                        <a href="./tools/imageToPdf/imageToPdf.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-image-icon lucide-file-image"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><circle cx="10" cy="12" r="2"></circle><path d="m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text-icon lucide-file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+                            <span data-i18n="tools.tool-image-to-pdf"> Image to PDF </span>
+                        </a>
+                        <a href="./tools/redactPdf/redactPdf.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hat-glasses-icon lucide-hat-glasses"><path d="M14 18a2 2 0 0 0-4 0"></path><path d="m19 11-2.11-6.657a2 2 0 0 0-2.752-1.148l-1.276.61A2 2 0 0 1 12 4H8.5a2 2 0 0 0-1.925 1.456L5 11"></path><path d="M2 11h20"></path><circle cx="17" cy="18" r="3"></circle><circle cx="7" cy="18" r="3"></circle></svg>
+                            <span data-i18n="tools.tool-redact-pdf"> Redact PDF Content </span>
+                        </a>
+                        <a href="./tools/pdfGrayscale/pdfGrayscale.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer-check-icon lucide-printer-check"><path d="M13.5 22H7a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v.5"></path><path d="m16 19 2 2 4-4"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v2"></path><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"></path></svg>
+                            <span data-i18n="tools.pdf-grayscale"> PDF Grayscale Converter </span>
+                        </a>
+                        <a href="./tools/fillablePdfBuilder/fillablePdfBuilder.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil-line-icon lucide-pencil-line"><path d="M13 21h8"></path><path d="m15 5 4 4"></path><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg>
+                            <span data-i18n="tools.fillable-pdf-builder"> Fillable PDF Builder </span>
+                        </a>
+                        <a href="./tools/pdfToPdfa/pdfToPdfa.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text-icon lucide-file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-check-icon lucide-file-check"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="m9 15 2 2 4-4"></path></svg>
+                            <span data-i18n="tools.pdf-to-pdfa"> PDF to PDF/A Converter </span>
+                        </a>
+                        <a href="./tools/splitPdfVertical/splitPdfVertical.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scissors-line-dashed-icon lucide-scissors-line-dashed"><path d="M5.42 9.42 8 12"></path><circle cx="4" cy="8" r="2"></circle><path d="m14 6-8.58 8.58"></path><circle cx="4" cy="16" r="2"></circle><path d="M10.8 14.8 14 18"></path><path d="M16 12h-2"></path><path d="M22 12h-2"></path></svg>
+                            <span data-i18n="tools.split-pdf-vertical"> Split PDF (Vertical) </span>
+                         </a>
+                        <a href="./tools/pdfToMarkdown/pdfToMarkdown.html">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text-icon lucide-file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-diamond-minus-icon lucide-diamond-minus"><path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41L13.7 2.71a2.41 2.41 0 0 0-3.41 0z"></path><path d="M8 12h8"></path></svg>
+                            <span data-i18n="tools.pdf-to-markdown"> PDF to Markdown </span>
+                        </a>
+                        <a href="./tools/imageEditor/imageEditor.html" >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-image-icon lucide-file-image"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><circle cx="10" cy="12" r="2"></circle><path d="m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22"></path></svg>
+                            <span data-i18n="tools.image-editor"> Image Editor </span>
+                        </a>
                     </div>
                 </div>
             </div>
-            <button class="top-btn" id="settings-btn" data-i18n="nav.settings-btn">Settings</button>
-            <button class="top-btn" id="about-btn" data-i18n="nav.about-btn">About</button>
-            <button class="top-btn donate-btn" id="donate-btn" data-i18n="nav.donate-btn">Donate</button>
+            <button class="top-btn" id="settings-btn" >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <span data-i18n="nav.settings-btn">Settings</span>
+            </button>
+            <button class="top-btn" id="about-btn" >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info preview-icon"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <span data-i18n="nav.about-btn">About</span>
+            </button>
+            <button class="top-btn donate-btn" id="donate-btn" >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart preview-icon"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></svg>
+                <span data-i18n="nav.donate-btn">Donate</span>
+            </button>
         </div>
 
         <div id="main-content">

@@ -1,35 +1,35 @@
 {
   "_comment": "index.html part",
   "nav": {
-    "open-files-btn": "📁 Open PDF/Markdown viewer",
-    "tools-btn": "🔧 Tools",
-    "settings-btn": "⚙️ Settings",
-    "about-btn": "ℹ️ About",
-    "donate-btn": "❤️ Donate",
+    "open-files-btn": "Open PDF/Markdown viewer",
+    "tools-btn": "Tools",
+    "settings-btn": "Settings",
+    "about-btn": "About",
+    "donate-btn": "Donate",
     "selecting": "Selecting..."
   },
   "tools": {
-    "tool-merge": "🔀 Merge PDF",
-    "tool-split": "✂️ Split PDF",
-    "tool-remove": "✂️ Remove Pages",
-    "tool-organize": "🔢 Organize/Re-Arrange PDF",
-    "tool-compress": "📦 Compress PDF",
-    "tool-pdf-to-image": "🖼️ PDF to Image",
-    "tool-page-numbers": "🔢 Add Page Numbers",
-    "tool-watermark": "💧 Add Watermark",
-    "tool-crop": "✂️ Crop PDF",
-    "tool-lock-unlock": "🔒 Lock/Unlock PDF",
-    "tool-metadata": "🏷️ View and Edit Metadata",
-    "tool-extract-images": "🖼️ Extract Images",
-    "tool-OCR": "🔍 OCR PDF or Image",
-    "tool-image-to-pdf": "🖼️ Image to PDF",
-    "tool-redact-pdf": "⬛ Redact PDF Content",
-    "pdf-grayscale": "🖤 PDF Grayscale Converter",
-    "fillable-pdf-builder": "🏗️ Fillable PDF Builder",
-    "image-editor": "🖼️ Image Editor",
-    "pdf-to-pdfa": "📄 PDF to PDF/A Converter",
-    "split-pdf-vertical": "✂️ Split PDF (Vertical)",
-    "pdf-to-markdown": "📝 PDF to Markdown"
+    "tool-merge": "Merge PDF",
+    "tool-split": "Split PDF",
+    "tool-remove": "Remove Pages",
+    "tool-organize": "Organize/Re-Arrange PDF",
+    "tool-compress": "Compress PDF",
+    "tool-pdf-to-image": "PDF to Image",
+    "tool-page-numbers": "Add Page Numbers",
+    "tool-watermark": "Add Watermark",
+    "tool-crop": "Crop PDF",
+    "tool-lock-unlock": "Lock/Unlock PDF",
+    "tool-metadata": "View and Edit Metadata",
+    "tool-extract-images": "Extract Images",
+    "tool-OCR": "OCR PDF or Image",
+    "tool-image-to-pdf": "Image to PDF",
+    "tool-redact-pdf": "Redact PDF Content",
+    "pdf-grayscale": "PDF Grayscale Converter",
+    "fillable-pdf-builder": "Fillable PDF Builder",
+    "image-editor": "Image Editor",
+    "pdf-to-pdfa": "PDF to PDF/A Converter",
+    "split-pdf-vertical": "Split PDF (Vertical)",
+    "pdf-to-markdown": "PDF to Markdown"
   },
   "error": {
     "empty-message": "No files are open. Click \"Open PDF/Markdown viewer\" to get started!"
@@ -177,7 +177,7 @@
     "error": "LocalPDF Studio - ERROR"
   },
   "addPageNumbers": {
-    "page-title": "🔢 Add Page Numbers",
+    "page-title": "Add Page Numbers",
     "page-numbers": "Page Number Options",
     "position-label": "Position:",
     "position-option-1": "Bottom Center",
@@ -213,7 +213,7 @@
     "addPageNumbersBtn": "Add Page Numbers"
   },
   "addWatermark": {
-    "page-title": "💧 Add Watermark",
+    "page-title": "Add Watermark",
     "wm-options": "Watermark Options",
     "wm-type-label": "Watermark Type:",
     "wm-type-text": "Text Watermark",
@@ -268,7 +268,7 @@
     "failedToSave": "Failed to save dropped file: "
   },
   "compressPdf": {
-    "page-title": "📦 Compress PDF",
+    "page-title": "Compress PDF",
     "compress-settings": "Compression Settings",
     "quality-settings": "Quality Level",
     "high-quality": "High Quality",
@@ -308,7 +308,7 @@
     "dropPdfFile": "Please drop a PDF file."
   },
   "cropPdf": {
-    "page-title": "✂️ Crop PDF",
+    "page-title": "Crop PDF",
     "crop-options": "Crop Options",
     "page-option": "Pages to Crop:",
     "page-option1": " All Pages",
@@ -339,7 +339,7 @@
     "renderFailed": "Unable to render the PDF"
   },
   "editMetadata": {
-    "page-title": "🏷️ View and Edit Metadata",
+    "page-title": "View and Edit Metadata",
     "metadata-form": "PDF Metadata",
     "copy-metadata-btn": "Copy Metadata",
     "sanitize-metedata-btn": "Clean Metadata and Save",
@@ -406,7 +406,7 @@
     "removeAllMetadata": "Yes, Remove All Metadata"
   },
   "extractImage": {
-    "page-title": "🖼️ Extract or Remove Images from PDF",
+    "page-title": "Extract or Remove Images from PDF",
     "pdf-preview": "PDF Preview - Select Pages",
     "no-page-selected": "No pages selected",
     "clear-selection": "Clear Selection",
@@ -467,7 +467,7 @@
     "errorMsg": "An error occurred."
   },
   "imageToPdf": {
-    "page-title": "🖼️ Image to PDF",
+    "page-title": "Image to PDF",
     "clear-btn": "Clear All",
     "conversion-option": "Conversion Options",
     "page-orientation-label": "Page Orientation:",
@@ -501,7 +501,7 @@
     "selectImagesFirst": "Please select images first."
   },
   "lockUnlock": {
-    "page-title": "🔒 Lock/Unlock PDF",
+    "page-title": "Lock/Unlock PDF",
     "operation-header": "Operation",
     "operation-lock": " Lock PDF (Encrypt)",
     "operation-unlock": " Unlock PDF (Remove Protection)",
@@ -544,7 +544,7 @@
     "dropPdfFile": "Please drop a PDF file."
   },
   "merge": {
-    "page-title": "🔀 Merge PDF",
+    "page-title": "Merge PDF",
     "clear-btn": "Clear All",
     "merge-btn": "Merge PDFs"
   },
@@ -561,7 +561,7 @@
     "dropPdfFiles": "Please drop PDF files."
   },
   "ocr": {
-    "page-title": "🔍 OCR PDF",
+    "page-title": "OCR PDF",
     "pdf-preview-header": "PDF Preview - Select Pages",
     "no-page-selected": "No pages selected",
     "page-selection-header": "Page Selection Options",
@@ -615,7 +615,7 @@
     "ocrSaveCanceled": "Operation cancelled or failed."
   },
   "organizePDF": {
-    "page-title": "🔢 Organize/Re-Arrange PDF",
+    "page-title": "Organize/Re-Arrange PDF",
     "how-to-organize-title": "How to Organize:",
     "organize-drag-drop": "Drag & Drop pages to reorder them",
     "organize-rotate": "Click rotation buttons to rotate pages 90°",
@@ -644,7 +644,7 @@
     "dropPdfFile": "Please drop a PDF file."
   },
   "pdftoImg": {
-    "page-title": "🖼️ PDF to Image",
+    "page-title": "PDF to Image",
     "preview-title": "PDF Preview",
     "conversion-options-title": "Conversion Options",
     "image-quality-label": "Image Quality:",
@@ -677,7 +677,7 @@
     "convertToImage": "Convert to Image"
   },
   "removepages": {
-    "page-title": "✂️ Remove PDF Pages",
+    "page-title": "Remove PDF Pages",
     "preview-title": "PDF Preview - Select Pages to Remove",
     "preview-no-pages-selected": "No pages selected",
     "clear-selection": "Clear Selection",
@@ -726,7 +726,7 @@
     "removePages": "Remove Pages"
   },
   "split": {
-    "page-title": "✂️ Split PDF",
+    "page-title": "Split PDF",
     "preview-title": "PDF Preview",
     "split-options-title": "Split Options",
     "split-by-page-ranges": "Split by page ranges",
@@ -764,7 +764,7 @@
     "splitPdfBtn": "Split PDF"
   },
   "redact": {
-    "page-title": "⬛ Redact PDF",
+    "page-title": "Redact PDF",
     "select-pdf-btn": "Select PDF",
     "apply-redact-btn": "Apply Redactions",
     "clear-all-btn": "Clear All",
@@ -798,7 +798,7 @@
     "clearAll": "Clear All"
   },
   "pdfGrayscale": {
-    "page-title": "🖤 Convert to Grayscale",
+    "page-title": "Convert to Grayscale",
     "grayscale-options": "Grayscale Options",
     "page-range-title": "Page Selection",
     "all-pages": "All Pages",
@@ -832,7 +832,7 @@
     "dropPdfFile": "Please drop a valid PDF file."
   },
   "imageEditor": {
-    "page-title": "🖼️ Image Editor",
+    "page-title": "Image Editor",
     "select-hint": "Click to Select an Image or Drop it Here",
     "supported-formats": "Supports JPG, PNG, BMP, WebP",
     "canvas-label": "Preview",
@@ -928,7 +928,7 @@
     "closeAll": "Close all"
   },
   "fillablePdfBuilder": {
-    "page-title": "🏗️ Fillable PDF Builder",
+    "page-title": "Fillable PDF Builder",
     "subtitle": "Choose how you want to start building your form",
     "mode-blank-title": "Blank Template",
     "mode-blank-desc": "Start with a blank page and design your form from scratch",
@@ -1032,7 +1032,7 @@
     "loadingTemplate": "Loading template..."
   },
   "pdfToPdfA": {
-    "tool-title": "📄 PDF to PDF/A Converter",
+    "tool-title": "PDF to PDF/A Converter",
     "convert-options": "Conversion Settings",
     "conformance-level": "PDF/A Conformance Level",
     "option1": "PDF/A-1b",
@@ -1075,7 +1075,7 @@
     "drop-valid-pdf": "Please drop a valid PDF file."
   },
   "splitPdfVertical": {
-    "tool-title": "✂️ Split PDF (Vertical)",
+    "tool-title": "Split PDF (Vertical)",
     "pdf-preview": "PDF Preview",
     "split-options": "Split Options",
     "split-option1": "Split evenly (50 / 50)",
@@ -1102,7 +1102,7 @@
     "split-btn": "Split PDF (Vertical)"
   },
   "pdfToMarkdown": {
-    "page-title": "📝 PDF to Markdown (Experimental)",
+    "page-title": "PDF to Markdown (Experimental)",
     "options-title": "Conversion Options",
     "include-images": "Extract and include images",
     "include-images-help": "Images are saved to the same location with the markdown file.",

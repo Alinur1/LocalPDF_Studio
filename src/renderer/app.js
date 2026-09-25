@@ -39,6 +39,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const searchBar = new SearchBar(searchIndexManager, tabManager);
     const emptyState = document.getElementById('empty-state');
     const openFilesBtn = document.getElementById('open-files-btn');
+    const openFilesSpan = document.getElementById('open-files-span');
     const settingsBtn = document.getElementById('settings-btn');
     const donateBtn = document.getElementById('donate-btn');
     const modal = document.getElementById('settings-modal');
@@ -243,7 +244,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         isDialogOpen = true;
         openFilesBtn.disabled = true;
-        openFilesBtn.textContent = i18n.t('nav.selecting');
+        openFilesSpan.textContent = i18n.t('nav.selecting');
 
         try {
             const files = await window.electronAPI.selectPdfAndMarkdown();
@@ -264,7 +265,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         } finally {
             isDialogOpen = false;
             openFilesBtn.disabled = false;
-            openFilesBtn.textContent = i18n.t('nav.open-files-btn');
+            openFilesSpan.textContent = i18n.t('nav.open-files-btn');
         }
     });
 
