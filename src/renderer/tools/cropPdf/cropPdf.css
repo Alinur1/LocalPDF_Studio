@@ -155,7 +155,7 @@ body.light {
 
 .tool-title {
   font-size: 1.2rem;
-  margin: 0;
+  margin-left: 1rem;
   color: var(--tool-title-color);
 }
 
