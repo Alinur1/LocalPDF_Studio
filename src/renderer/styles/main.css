@@ -108,11 +108,15 @@ html {
   border: none;
   font-weight: 600;
   font-size: 14px;
-  padding: 10px 18px;
+  padding: 8px 12px;
   cursor: pointer;
   margin-right: 8px;
   border-radius: var(--border-radius);
   outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 .top-btn:hover {
@@ -146,16 +150,18 @@ html {
   display: none;
   position: absolute;
   top: 100%;
-  left: -70px;
+  left: 80%; /* Center relative to the Tools button */
+  transform: translateX(-35%);
   background-color: var(--bg-tertiary);
-  min-width: 480px;
+  min-width: 420px; /* Reduced from 480px to comfortably fit 700px screens */
+  max-width: calc(100vw - 20px); /* Guarantees it never overflows the viewport */
   max-height: calc(100vh - 120px);
   overflow-y: auto;
   overflow-x: hidden;
   box-shadow: 0px 8px 16px 0px var(--shadow-color);
   z-index: 1002;
   border-radius: var(--border-radius);
-  padding: 10px;
+  padding: 15px;
   border: 1px solid var(--border-color);
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
@@ -167,36 +173,47 @@ html {
 
 #tools-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 100px);
   gap: 10px;
   padding-bottom: 5px;
 }
 
 .tools-menu a {
   color: var(--text-primary);
-  padding: 12px 16px;
+  padding: 12px 8px;
   text-decoration: none;
-  display: block;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap; /* Allows SVGs to sit on line 1, and text to drop to line 2 */
+  justify-content: center;
   text-align: center;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--bg-secondary);
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
-  min-height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: 75px;
+  transition: all 0.2s ease;
 }
 
 .tools-menu a:hover {
   background-color: var(--accent-color);
   color: white;
+  transform: translateY(-2px);
 }
 
-/* .tools-dropdown:hover .tools-menu {
-  display: block;
-} */
+.tools-menu a svg {
+  width: 24px !important;
+  height: 24px !important;
+  flex-shrink: 0;
+}
+
+.tools-menu a span {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  margin-top: 4px;
+}
 
 #main-content {
   flex: 1;
