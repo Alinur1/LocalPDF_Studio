@@ -79,30 +79,29 @@ namespace LocalPDF_Studio_api.BLL.Services
             if (!File.Exists(_pythonExePath))
                 throw new FileNotFoundException($"Python Engine not found: {_pythonExePath}");
 
-            // Arguments list updated to include the script path and command
-            var arguments = new List<string>
-            {
-                $"\"{_scriptPath}\"",
-                "convert_pdf_images",
-                $"\"{request.FilePath}\"",
-                $"\"{outputZipPath}\"",
-                $"--dpi {request.Dpi}",
-                $"--format {request.Format.ToLower()}",
-                "--json"
-            };
-
-            if (request.IncludePageNumbers)
-                arguments.Add("--include-page-numbers");
-
             var startInfo = new ProcessStartInfo
             {
                 FileName = _pythonExePath,
-                Arguments = string.Join(" ", arguments),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
+
+            // Use ArgumentList so each value is passed as a discrete argument,
+            // preventing shell/argument injection via FilePath or other inputs.
+            startInfo.ArgumentList.Add(_scriptPath);
+            startInfo.ArgumentList.Add("convert_pdf_images");
+            startInfo.ArgumentList.Add(request.FilePath);
+            startInfo.ArgumentList.Add(outputZipPath);
+            startInfo.ArgumentList.Add("--dpi");
+            startInfo.ArgumentList.Add(request.Dpi.ToString());
+            startInfo.ArgumentList.Add("--format");
+            startInfo.ArgumentList.Add(request.Format.ToLower());
+            startInfo.ArgumentList.Add("--json");
+
+            if (request.IncludePageNumbers)
+                startInfo.ArgumentList.Add("--include-page-numbers");
 
             // Set PYTHONPATH so the engine can find the libraries in the vendor folder
             startInfo.EnvironmentVariables["PYTHONPATH"] = _vendorPath;
