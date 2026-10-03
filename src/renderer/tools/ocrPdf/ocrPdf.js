@@ -16,7 +16,7 @@
 **/
 
 
-// src/renderer/tools/ocrPdf/ocrPdf.js - FIXED VERSION
+// src/renderer/tools/ocrPdf/ocrPdf.js
 
 import * as pdfjsLib from '../../../pdf/build/pdf.mjs';
 import customAlert from '../../utils/customAlert.js';
@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const filePath = files[0];
             const fileName = filePath.split(/[\\/]/).pop();
             const fileSize = await getFileSize(filePath);
-            handleFileSelected({
+            await handleFileSelected({
                 path: filePath,
                 name: fileName,
                 size: fileSize,
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     removePdfBtn.addEventListener('click', async () => {
         await cleanupDroppedFile();
-        clearAll();
+        await clearAll();
     });
 
     const backBtn = document.querySelector('a[href="../../index.html"]');
@@ -440,12 +440,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         backBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             await cleanupDroppedFile();
+            await clearAll();
             window.location.href = '../../index.html';
         });
     }
 
     async function handleFileSelected(file) {
-        clearAll(true);
+        await clearAll(true);
         selectedFile = file;
         isImageFile = /\.(jpg|jpeg|png|bmp)$/i.test(file.path);
         pdfNameEl.textContent = file.name;
@@ -660,7 +661,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function clearAll(preserveDroppedFilePath = false) {
         if (pdfDoc) {
-            await pdfDoc.cleanup();
+            try {
+                await pdfDoc.cleanup();
+            } catch (e) {
+                console.warn('Error cleaning up PDF doc:', e);
+            }
             pdfDoc = null;
         }
         renderedPages.forEach(c => {
@@ -727,7 +732,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (result.success) {
                 const fileSize = file.size || 0;
                 droppedFilePath = result.filePath;
-                handleFileSelected({
+                await handleFileSelected({
                     path: result.filePath,
                     name: file.name,
                     size: fileSize,
