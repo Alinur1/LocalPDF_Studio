@@ -54,6 +54,32 @@
                     </button>
                 </div>
             </div>
+            <div id="metadata-tabs" class="mode-selection" style="display: none;" role="tablist">
+                <label class="mode-option">
+                    <input type="radio" name="metadata-tab" value="basic" id="tab-basic" checked>
+                    <div class="mode-card">
+                        <div class="mode-icon basic-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        </div>
+                        <div class="mode-details">
+                            <h3 data-i18n="editMetadata.tab-basic">Basic Metadata</h3>
+                            <p data-i18n="editMetadata.tab-basic-desc">View and edit Title, Author and other basic fields</p>
+                        </div>
+                    </div>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="metadata-tab" value="deep" id="tab-deep">
+                    <div class="mode-card">
+                        <div class="mode-icon deep-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check-icon lucide-shield-check"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                        </div>
+                        <div class="mode-details">
+                            <h3 data-i18n="editMetadata.tab-deep">Deep Clean</h3>
+                            <p data-i18n="editMetadata.tab-deep-desc">Scan and remove hidden scripts, files and history</p>
+                        </div>
+                    </div>
+                </label>
+            </div>
             <div id="metadata-container" class="metadata-container" style="display: none;">
                 <div class="metadata-header">
                     <h2 data-i18n="editMetadata.metadata-form">PDF Metadata</h2>
@@ -154,8 +180,31 @@
                     <button id="save-metadata-btn" class="secondary-btn" data-i18n="editMetadata.save-btn1">Save Metadata</button>
                 </div>
             </div>
+            <div id="deep-clean-container" class="metadata-container deep-clean-container" style="display: none;">
+                <div class="metadata-header deep-clean-header">
+                    <div>
+                        <h2 data-i18n="editMetadata.deep-clean-title">Deep Clean (Advanced)</h2>
+                        <p class="deep-clean-subtitle" data-i18n="editMetadata.deep-clean-subtitle">Find and remove hidden data: scripts, embedded files, hidden layers, edit history</p>
+                    </div>
+                </div>
+                <div id="deep-clean-body">
+                    <p class="deep-clean-desc" data-i18n="editMetadata.deep-clean-desc">The Basic tab only clears Title/Author-style fields. Deep Clean scans the full PDF structure and lets you pick what to remove. Nothing is changed until you scrub and save a new file.</p>
+                    <div class="deep-clean-actions">
+                        <button id="deep-scan-btn" class="secondary-btn" data-i18n="editMetadata.deep-scan-btn">Scan for hidden data</button>
+                    </div>
+                    <div id="deep-results" style="display: none;">
+                        <label class="deep-select-all">
+                            <input type="checkbox" id="deep-select-all" />
+                            <span data-i18n="editMetadata.deep-select-all">Select All</span>
+                        </label>
+                        <div id="deep-checklist" class="deep-checklist"></div>
+                        <div id="deep-warning" class="deep-warning" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
             <div class="action-buttons">
                 <button id="save-pdf-btn" class="top-btn" data-i18n="editMetadata.save-btn2" disabled>Save PDF with Updated Metadata</button>
+                <button id="deep-scrub-bottom-btn" class="top-btn" data-i18n="editMetadata.deep-scrub-save-btn" style="display: none;" disabled>Scrub selected and save</button>
             </div>
         </main>
     </div>

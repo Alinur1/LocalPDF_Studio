@@ -46,6 +46,7 @@ builder.Services.AddScoped<IPdfGrayscaleInterface, PdfGrayscaleService>();
 builder.Services.AddScoped<IPdfToPdfaInterface, PdfToPdfaService>();
 builder.Services.AddScoped<IPdfVerticalSplitInterface, PdfVerticalSplitService>();
 builder.Services.AddScoped<IPdfMarkdownInterface, PdfMarkdownService>();
+builder.Services.AddScoped<IMetadataScrubberInterface, MetadataScrubberService>();
 
 builder.Services.AddCors(options =>
 {
@@ -54,7 +55,8 @@ builder.Services.AddCors(options =>
         policy
             .AllowAnyOrigin()
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .WithExposedHeaders("X-MetadataScrub-Result");
     });
 });
 

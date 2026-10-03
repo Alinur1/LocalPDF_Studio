@@ -122,6 +122,8 @@ async function getEndpoints() {
         pdfToPdfa: `${base}/PdfToPdfa/convert`,
         verticalSplit: `${base}/PdfVerticalSplit/split`,
         pdfToMarkdown: `${base}/PdfMarkdown/convert`,
+        metadataScrubScan: `${base}/PdfMetadataScrubber/scan`,
+        metadataScrubScrub: `${base}/PdfMetadataScrubber/scrub`,
         // Add more as necessary
     };
 }
