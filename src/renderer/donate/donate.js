@@ -64,12 +64,24 @@ class DonationManager {
         this.setupDonationHandlers();
         this.setupSupportHandlers();
         this.setupQRModal();
-        this.setupDonationListLink();
     }
 
     setupDonationHandlers() {
-        const bkashBtn = document.getElementById('show-bkash-qr');
-        if (bkashBtn) bkashBtn.addEventListener('click', () => this.showBkashQR());
+        const supportKoriQrBtn = document.getElementById('show-supportkori-qr');
+        if (supportKoriQrBtn) supportKoriQrBtn.addEventListener('click', () => this.showSupportKoriQR());
+
+        const supportKoriBtn = document.getElementById('supportkori-donate');
+        if (supportKoriBtn) supportKoriBtn.addEventListener('click', () => this.openSupportKori());
+
+        const supportKoriOpenBtn = document.getElementById('supportkori-open');
+        if (supportKoriOpenBtn) supportKoriOpenBtn.addEventListener('click', () => this.openSupportKori());
+
+        const supportKoriLink = document.getElementById('supportkori-link');
+        if (supportKoriLink)
+            supportKoriLink.addEventListener('click', e => {
+                e.preventDefault();
+                this.openSupportKori();
+            });
 
         const patreonBtn = document.getElementById('patreon-donate');
         if (patreonBtn) patreonBtn.addEventListener('click', () => this.openPatreon());
@@ -91,38 +103,42 @@ class DonationManager {
     }
 
     setupQRModal() {
-        const qrModal = document.getElementById('bkash-qr-modal');
+        const qrModal = document.getElementById('supportkori-qr-modal');
         if (!qrModal) return;
 
         const closeHandlers = [
             document.getElementById('qr-close'),
-            document.getElementById('bkash-modal-close'),
-            document.getElementById('bkash-modal-overlay'),
+            document.getElementById('supportkori-modal-close'),
+            document.getElementById('supportkori-modal-overlay'),
         ];
 
         closeHandlers.forEach(handler => {
-            if (handler) handler.addEventListener('click', () => this.hideBkashQR());
+            if (handler) handler.addEventListener('click', () => this.hideSupportKoriQR());
         });
 
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape' && qrModal && !qrModal.classList.contains('hidden')) {
-                this.hideBkashQR();
+                this.hideSupportKoriQR();
             }
         });
     }
 
-    showBkashQR() {
-        const modal = document.getElementById('bkash-qr-modal');
+    showSupportKoriQR() {
+        const modal = document.getElementById('supportkori-qr-modal');
         if (modal) modal.classList.remove('hidden');
     }
 
-    hideBkashQR() {
-        const modal = document.getElementById('bkash-qr-modal');
+    hideSupportKoriQR() {
+        const modal = document.getElementById('supportkori-qr-modal');
         if (modal) modal.classList.add('hidden');
     }
 
+    openSupportKori() {
+        this.openExternal('https://www.supportkori.com/alinur2000');
+    }
+
     openPatreon() {
-        this.openExternal('https://www.patreon.com/cw/MdAlinurHossain?vanity=MdAlinurHossain');
+        this.openExternal('https://www.patreon.com/cw/MdAlinurHossain');
     }
 
     async shareApp() {

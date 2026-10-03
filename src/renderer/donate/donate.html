@@ -54,18 +54,21 @@
             <section class="donation-options-section">
                 <h2 class="section-title" data-i18n="donate.donation-method-header">Choose Your Donation Method</h2>
                 <div class="donation-options">
-                    <div class="donation-option" id="bkash-option">
+                    <div class="donation-option" id="supportkori-option">
                         <div class="option-header">
-                            <img data-local-asset="icons/donate/bKash.png" alt="bKash" class="option-icon" />
-                            <h3>bKash <span class="country-badge" data-i18n="donate.country-badge">Bangladesh Only</span></h3>
+                            <img data-local-asset="icons/donate/support-kori.png" alt="SupportKori" class="option-icon" />
+                            <h3>SupportKori</h3>
                         </div>
-                        <p class="option-description" data-i18n="donate.bkash-description">Mobile banking for Bangladeshi users. Fast and convenient local payments.</p>
-                        <button class="donate-btn secondary" id="show-bkash-qr" data-i18n="donate.qr-btn">Show QR Code</button>
+                        <p class="option-description" data-i18n="donate.supportkori-description">Support via SupportKori with mobile banking, cards, and more. Fast and convenient payments.</p>
+                        <div class="option-actions">
+                            <button class="donate-btn secondary" id="show-supportkori-qr" data-i18n="donate.qr-btn">Show QR Code</button>
+                            <button class="donate-btn primary" id="supportkori-donate" data-i18n="donate.supportkori-btn">Donate via SupportKori</button>
+                        </div>
                     </div>
                     <div class="donation-option" id="patreon-option">
                         <div class="option-header">
                             <img data-local-asset="icons/donate/patreon.png" alt="Patreon" class="option-icon" />
-                            <h3>Patreon <span class="country-badge" data-i18n="donate.country-badge2">Global</span></h3>
+                            <h3>Patreon</h3>
                         </div>
                         <p class="option-description" data-i18n="donate.patreon-description">Secure global payments with multiple tiers available.</p>
                         <button class="donate-btn primary" id="patreon-donate" data-i18n="donate.patreon-btn">Join my patreon</button> <br>
@@ -105,27 +108,28 @@
                     </div>
                 </div>
             </section>
-            <div id="bkash-qr-modal" class="modal hidden">
-                <div class="modal-overlay" id="bkash-modal-overlay"></div>
+            <div id="supportkori-qr-modal" class="modal hidden">
+                <div class="modal-overlay" id="supportkori-modal-overlay"></div>
                 <div class="modal-container">
                     <div class="modal-header">
-                        <h2 class="modal-title" data-i18n="donate.bkash-modal1">Donate via bKash</h2>
-                        <button class="modal-close" id="bkash-modal-close">
+                        <h2 class="modal-title" data-i18n="donate.supportkori-modal1">Donate via SupportKori</h2>
+                        <button class="modal-close" id="supportkori-modal-close">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                         </button>
                     </div>
                     <div class="modal-body">
                         <div class="qr-section">
-                            <p class="qr-note" data-i18n="donate.bkash-modal2">Scan the QR code to donate via bKash</p>
+                            <p class="qr-note" data-i18n="donate.supportkori-modal2">Scan the QR code to donate via SupportKori</p>
                             <div class="qr-code-container">
-                                <img data-local-asset="icons/donate/bkash-qr.png" alt="bKash QR Code" class="qr-code" />
+                                <img data-local-asset="icons/donate/alinur2000-qrcode.png" alt="SupportKori QR Code" class="qr-code" />
                             </div>
-                            <p class="qr-instruction" data-i18n="donate.bkash-modal3">Open bKash app → Scan QR → Enter amount</p>
-                            <p class="qr-instruction" style="color: #f39c12;" data-i18n="donate.bkash-modal4">If you want to enable recurring donation, you can use autopay system in bKash.</p>
+                            <p class="qr-instruction" data-i18n="donate.supportkori-modal3">Open your camera / banking app → Scan QR → Enter amount</p>
+                            <a class="qr-link" id="supportkori-link" href="#">https://www.supportkori.com/alinur2000</a>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <div class="footer-actions">
+                            <button id="supportkori-open" class="btn-primary" data-i18n="donate.supportkori-btn">Donate via SupportKori</button>
                             <button id="qr-close" class="btn-secondary">Close</button>
                         </div>
                     </div>
