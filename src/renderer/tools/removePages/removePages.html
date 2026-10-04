@@ -74,6 +74,33 @@
             </div>
             <div class="remove-options-container">
                 <h2 data-i18n="removepages.removal-options-title">Removal Options</h2>
+                <div class="mode-selection">
+                    <label class="mode-option">
+                        <input type="radio" name="removal-mode" value="manual" checked>
+                        <div class="mode-card">
+                            <div class="mode-icon manual-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </div>
+                            <div class="mode-details">
+                                <h3 data-i18n="removepages.mode-manual-title">Manual Remove</h3>
+                                <p data-i18n="removepages.mode-manual-desc">Pick pages yourself with thumbnails and page numbers</p>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="removal-mode" value="smart">
+                        <div class="mode-card">
+                            <div class="mode-icon smart-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-search-icon lucide-scan-search"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/><path d="m16 16 2 2"/></svg>
+                            </div>
+                            <div class="mode-details">
+                                <h3 data-i18n="removepages.mode-smart-title">Smart Cleanup</h3>
+                                <p data-i18n="removepages.mode-smart-desc">Auto-find blank and duplicate pages, then review</p>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+                <div id="manual-panel">
                 <div class="option-group">
                     <h3 data-i18n="removepages.quick-actions">Quick Actions</h3>
                     <div class="quick-actions">
@@ -110,6 +137,28 @@
                                 style="max-width: 100px;">
                         </div>
                         <small class="help-text" data-i18n="removepages.nth-page-example">Example: Every 3rd page starting from page 3 removes pages 3, 6, 9, etc.</small>
+                    </div>
+                </div>
+                </div>
+                <div id="smart-panel" style="display: none;">
+                    <div class="option-group">
+                        <h3 data-i18n="removepages.smart-scan-title">Blank & Duplicate Scan</h3>
+                        <div class="scan-controls">
+                            <label for="scan-preset" data-i18n="removepages.scan-preset-label">Sensitivity:</label>
+                            <select id="scan-preset" class="options-input" style="max-width: 260px;">
+                                <option value="strict" data-i18n="removepages.scan-preset-strict">Strict (fewer flags)</option>
+                                <option value="balanced" selected data-i18n="removepages.scan-preset-balanced">Balanced (recommended)</option>
+                                <option value="lenient" data-i18n="removepages.scan-preset-lenient">Lenient (more flags)</option>
+                            </select>
+                            <button id="scan-btn" class="action-btn" data-i18n="removepages.scan-btn">Scan Pages</button>
+                        </div>
+                        <div id="scan-summary" class="scan-summary" style="display: none;"></div>
+                        <div id="scan-results" class="scan-results" style="display: none;"></div>
+                        <div class="quick-actions" id="scan-quick-actions" style="display: none;">
+                            <button class="quick-action-btn" id="select-all-flagged" data-i18n="removepages.select-all-flagged">Select All Flagged</button>
+                            <button class="quick-action-btn" id="keep-first-per-group" data-i18n="removepages.keep-first-per-group">Keep First of Each Duplicate Group</button>
+                            <button class="quick-action-btn" id="clear-flags" data-i18n="removepages.clear-flags">Clear Flags</button>
+                        </div>
                     </div>
                 </div>
             </div>

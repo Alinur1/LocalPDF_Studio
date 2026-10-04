@@ -55,12 +55,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     const removeOddCheckbox = document.getElementById('remove-odd-pages');
     const everyNthInput = document.getElementById('every-nth-page');
     const startFromInput = document.getElementById('start-from-page');
+    const modeRadios = document.querySelectorAll('input[name="removal-mode"]');
+    const manualPanel = document.getElementById('manual-panel');
+    const smartPanel = document.getElementById('smart-panel');
+    const scanPreset = document.getElementById('scan-preset');
+    const scanBtn = document.getElementById('scan-btn');
+    const scanSummary = document.getElementById('scan-summary');
+    const scanResults = document.getElementById('scan-results');
+    const scanQuickActions = document.getElementById('scan-quick-actions');
+    const selectAllFlaggedBtn = document.getElementById('select-all-flagged');
+    const keepFirstPerGroupBtn = document.getElementById('keep-first-per-group');
+    const clearFlagsBtn = document.getElementById('clear-flags');
     let selectedFile = null;
     let droppedFilePath = null;
     let pdfDoc = null;
     let renderedPages = [];
     let selectedPages = new Set();
     let totalPages = 0;
+    let currentMode = 'manual';
+    let flaggedBlanks = new Map();
+    let dupGroups = [];
+    let dismissedPages = new Set();
 
     selectPdfBtn.addEventListener('click', async () => {
         loadingUI.show(i18n.t('removePagesJS.selectingPdfs'));
@@ -253,10 +268,263 @@ document.addEventListener('DOMContentLoaded', async () => {
         removeOddCheckbox.checked = false;
         everyNthInput.value = '';
         startFromInput.value = '';
+        clearScanState();
 
         updateButtonStates();
         updateSelectionInfo();
     }
+
+    // Blank & duplicate scan
+
+    modeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            currentMode = e.target.value;
+            const isSmart = currentMode === 'smart';
+            manualPanel.style.display = isSmart ? 'none' : 'block';
+            smartPanel.style.display = isSmart ? 'block' : 'none';
+        });
+    });
+
+    function setThumbSelected(pageNum, selected) {
+        const thumb = document.querySelector(`.page-thumbnail[data-page-num="${pageNum}"]`);
+        if (!thumb) return;
+        if (selected) {
+            selectedPages.add(pageNum);
+            thumb.classList.add('selected');
+        } else {
+            selectedPages.delete(pageNum);
+            thumb.classList.remove('selected');
+        }
+    }
+
+    function addFlagBadge(pageNum) {
+        const thumb = document.querySelector(`.page-thumbnail[data-page-num="${pageNum}"]`);
+        if (!thumb || thumb.querySelector('.flag-badge')) return;
+        const blank = flaggedBlanks.get(pageNum);
+        const group = dupGroups.find(g => g.pages.includes(pageNum));
+        if (!blank && !group) return;
+        const badge = document.createElement('div');
+        if (blank) {
+            badge.className = 'flag-badge flag-blank';
+            badge.textContent = 'BLANK';
+            badge.title = `Blank page (${Math.round(blank.confidence * 100)}% confidence)`;
+        } else {
+            const first = group.pages[0];
+            const pct = Math.round(group.similarity * 100);
+            badge.className = 'flag-badge flag-dup';
+            badge.textContent = group.kind === 'exact' ? 'DUP' : '~DUP';
+            badge.title = group.kind === 'exact'
+                ? `Identical to page ${pageNum === first ? group.pages[1] : first}`
+                : `Similar to page ${first} (${pct}%)`;
+        }
+        thumb.appendChild(badge);
+    }
+
+    function removeFlagBadge(pageNum) {
+        const thumb = document.querySelector(`.page-thumbnail[data-page-num="${pageNum}"]`);
+        const badge = thumb ? thumb.querySelector('.flag-badge') : null;
+        if (badge) badge.remove();
+    }
+
+    function clearScanState() {
+        flaggedBlanks.forEach((_, pageNum) => removeFlagBadge(pageNum));
+        dupGroups.forEach(g => g.pages.forEach(p => { if (!flaggedBlanks.has(p)) removeFlagBadge(p); }));
+        flaggedBlanks = new Map();
+        dupGroups = [];
+        dismissedPages = new Set();
+        scanSummary.style.display = 'none';
+        scanSummary.textContent = '';
+        scanResults.style.display = 'none';
+        scanResults.innerHTML = '';
+        scanQuickActions.style.display = 'none';
+    }
+
+    function dismissFlaggedPage(pageNum) {
+        dismissedPages.add(pageNum);
+        flaggedBlanks.delete(pageNum);
+        dupGroups.forEach(g => {
+            g.pages = g.pages.filter(p => p !== pageNum);
+        });
+        dupGroups = dupGroups.filter(g => g.pages.length > 1);
+        removeFlagBadge(pageNum);
+        setThumbSelected(pageNum, false);
+        renderScanResults();
+        updateSelectionInfo();
+        updateButtonStates();
+    }
+
+    function scanGroupTitle(group) {
+        const pct = Math.round(group.similarity * 100);
+        const kind = group.kind === 'exact' ? i18n.t('removePagesJS.scanKindExact') : i18n.t('removePagesJS.scanKindNear');
+        return `${group.pages.join(', ')} — ${kind} (${pct}%)`;
+    }
+
+    function makePageChip(pageNum, extra) {
+        const chip = document.createElement('div');
+        chip.className = 'scan-page-chip';
+        const label = document.createElement('span');
+        label.textContent = `p${pageNum}${extra ? ` ${extra}` : ''}`;
+        const keepBtn = document.createElement('button');
+        keepBtn.className = 'mini-btn';
+        keepBtn.textContent = i18n.t('removePagesJS.scanKeep');
+        keepBtn.addEventListener('click', () => {
+            setThumbSelected(pageNum, false);
+            updateSelectionInfo();
+            updateButtonStates();
+            renderScanResults();
+        });
+        const dismissBtn = document.createElement('button');
+        dismissBtn.className = 'mini-btn';
+        dismissBtn.textContent = i18n.t('removePagesJS.scanDismiss');
+        dismissBtn.addEventListener('click', () => dismissFlaggedPage(pageNum));
+        chip.appendChild(label);
+        chip.appendChild(keepBtn);
+        chip.appendChild(dismissBtn);
+        if (dismissedPages.has(pageNum)) chip.classList.add('dismissed');
+        return chip;
+    }
+
+    function renderScanResults() {
+        scanResults.innerHTML = '';
+        if (flaggedBlanks.size === 0 && dupGroups.length === 0) {
+            scanResults.style.display = 'none';
+            scanQuickActions.style.display = 'none';
+            return;
+        }
+        scanResults.style.display = 'flex';
+        scanQuickActions.style.display = 'flex';
+        if (flaggedBlanks.size > 0) {
+            const group = document.createElement('div');
+            group.className = 'scan-group';
+            const title = document.createElement('h4');
+            title.textContent = `${i18n.t('removePagesJS.scanBlanksTitle')} (${flaggedBlanks.size})`;
+            group.appendChild(title);
+            const pages = document.createElement('div');
+            pages.className = 'scan-pages';
+            Array.from(flaggedBlanks.entries()).sort((a, b) => a[0] - b[0]).forEach(([pageNum, info]) => {
+                pages.appendChild(makePageChip(pageNum, `${Math.round(info.confidence * 100)}%`));
+            });
+            group.appendChild(pages);
+            scanResults.appendChild(group);
+        }
+        if (dupGroups.length > 0) {
+            const title = document.createElement('h4');
+            title.textContent = `${i18n.t('removePagesJS.scanDuplicatesTitle')} (${dupGroups.length})`;
+            title.style.cssText = 'margin: 0.25rem 0 0; font-size: 0.85rem; color: var(--option-group-title-color);';
+            scanResults.appendChild(title);
+            dupGroups.forEach(group => {
+                const el = document.createElement('div');
+                el.className = 'scan-group';
+                const h = document.createElement('h4');
+                h.textContent = scanGroupTitle(group);
+                el.appendChild(h);
+                const pages = document.createElement('div');
+                pages.className = 'scan-pages';
+                group.pages.forEach(pageNum => {
+                    pages.appendChild(makePageChip(pageNum, selectedPages.has(pageNum) ? '✓' : ''));
+                });
+                el.appendChild(pages);
+                scanResults.appendChild(el);
+            });
+        }
+    }
+
+    function applyScanResults(result) {
+        clearScanState();
+        const blanks = Array.isArray(result.blanks) ? result.blanks : [];
+        const groups = Array.isArray(result.groups) ? result.groups : [];
+        blanks.forEach(b => {
+            if (b && Number.isInteger(b.page) && b.page >= 1 && b.page <= totalPages) {
+                flaggedBlanks.set(b.page, { confidence: b.confidence ?? 0.8 });
+            }
+        });
+        groups.forEach(g => {
+            const pages = Array.isArray(g.pages) ? g.pages.filter(p => Number.isInteger(p) && p >= 1 && p <= totalPages && !flaggedBlanks.has(p)) : [];
+            if (pages.length > 1) {
+                dupGroups.push({ pages: [...new Set(pages)].sort((a, b) => a - b), kind: g.kind === 'exact' ? 'exact' : 'near', similarity: g.similarity ?? 0.9 });
+            }
+        });
+        if (flaggedBlanks.size === 0 && dupGroups.length === 0) {
+            scanSummary.textContent = i18n.t('removePagesJS.scanNoIssues');
+            scanSummary.style.display = 'block';
+            updateSelectionInfo();
+            updateButtonStates();
+            return;
+        }
+        const parts = [];
+        if (flaggedBlanks.size > 0) parts.push(`${flaggedBlanks.size} ${i18n.t('removePagesJS.scanFoundBlanks')}`);
+        if (dupGroups.length > 0) parts.push(`${dupGroups.length} ${i18n.t('removePagesJS.scanFoundGroups')}`);
+        scanSummary.textContent = `${i18n.t('removePagesJS.scanFoundSummary')}${parts.join(', ')}. ${i18n.t('removePagesJS.scanReviewHint')}`;
+        scanSummary.style.display = 'block';
+        // Pre-select: all blanks + duplicates beyond the first per group (keep-first default).
+        flaggedBlanks.forEach((_, pageNum) => {
+            addFlagBadge(pageNum);
+            setThumbSelected(pageNum, true);
+        });
+        dupGroups.forEach(g => {
+            g.pages.forEach((pageNum, idx) => {
+                addFlagBadge(pageNum);
+                setThumbSelected(pageNum, idx !== 0);
+            });
+        });
+        renderScanResults();
+        updateSelectionInfo();
+        updateButtonStates();
+    }
+
+    scanBtn.addEventListener('click', async () => {
+        if (!selectedFile) {
+            await customAlert.alert(i18n.t('alerts.notice'), i18n.t('removePagesJS.scanSelectFileFirst'), [i18n.t('common.ok')]);
+            return;
+        }
+        const preset = scanPreset ? scanPreset.value : 'balanced';
+        const originalText = scanBtn.textContent;
+        try {
+            loadingUI.show(i18n.t('removePagesJS.loadingPreview'));
+            scanBtn.disabled = true;
+            scanBtn.textContent = i18n.t('removepages.scanning-btn');
+            const scanEndpoint = await API.pdf.blankDuplicateScan;
+            const result = await API.request.post(scanEndpoint, { filePath: selectedFile.path, preset });
+            if (result && result.success === true) {
+                applyScanResults(result);
+            } else {
+                const err = (result && result.error) ? result.error : JSON.stringify(result);
+                await customAlert.alert(i18n.t('alerts.error'), i18n.t('removePagesJS.scanFailed') + err, [i18n.t('common.ok')]);
+            }
+        } catch (error) {
+            console.error('Error scanning pages:', error);
+            await customAlert.alert(i18n.t('alerts.error'), i18n.t('removePagesJS.scanFailed') + error.message, [i18n.t('common.ok')]);
+        } finally {
+            loadingUI.hide();
+            scanBtn.disabled = false;
+            scanBtn.textContent = originalText;
+        }
+    });
+
+    selectAllFlaggedBtn.addEventListener('click', () => {
+        flaggedBlanks.forEach((_, pageNum) => setThumbSelected(pageNum, true));
+        dupGroups.forEach(g => g.pages.forEach(p => setThumbSelected(p, true)));
+        renderScanResults();
+        updateSelectionInfo();
+        updateButtonStates();
+    });
+
+    keepFirstPerGroupBtn.addEventListener('click', () => {
+        dupGroups.forEach(g => {
+            g.pages.forEach((pageNum, idx) => setThumbSelected(pageNum, idx !== 0));
+        });
+        renderScanResults();
+        updateSelectionInfo();
+        updateButtonStates();
+    });
+
+    clearFlagsBtn.addEventListener('click', () => {
+        flaggedBlanks.forEach((_, pageNum) => setThumbSelected(pageNum, false));
+        dupGroups.forEach(g => g.pages.forEach(p => setThumbSelected(p, false)));
+        clearScanState();
+        updateSelectionInfo();
+        updateButtonStates();
+    });
 
     async function getFileSize(filePath) {
         try {

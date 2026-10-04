@@ -124,6 +124,7 @@ async function getEndpoints() {
         pdfToMarkdown: `${base}/PdfMarkdown/convert`,
         metadataScrubScan: `${base}/PdfMetadataScrubber/scan`,
         metadataScrubScrub: `${base}/PdfMetadataScrubber/scrub`,
+        blankDuplicateScan: `${base}/PdfBlankDuplicate/scan`,
         // Add more as necessary
     };
 }

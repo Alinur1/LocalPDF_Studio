@@ -47,6 +47,7 @@ builder.Services.AddScoped<IPdfToPdfaInterface, PdfToPdfaService>();
 builder.Services.AddScoped<IPdfVerticalSplitInterface, PdfVerticalSplitService>();
 builder.Services.AddScoped<IPdfMarkdownInterface, PdfMarkdownService>();
 builder.Services.AddScoped<IMetadataScrubberInterface, MetadataScrubberService>();
+builder.Services.AddScoped<IPdfBlankDuplicateInterface, PdfBlankDuplicateService>();
 
 builder.Services.AddCors(options =>
 {
