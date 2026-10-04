@@ -174,6 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             selectedPages.add(pageNum);
             element.classList.add('selected');
         }
+        renderScanResults();
         updateSelectionInfo();
         updateButtonStates();
     }
@@ -199,6 +200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelectorAll('.page-thumbnail').forEach(thumb => {
             thumb.classList.remove('selected');
         });
+        renderScanResults();
         updateSelectionInfo();
         updateButtonStates();
     });
@@ -209,6 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const thumb = document.querySelector(`.page-thumbnail[data-page-num="${i}"]`);
             if (thumb) thumb.classList.add('selected');
         }
+        renderScanResults();
         updateSelectionInfo();
         updateButtonStates();
     });
@@ -219,6 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const thumb = document.querySelector(`.page-thumbnail[data-page-num="${i}"]`);
             if (thumb) thumb.classList.add('selected');
         }
+        renderScanResults();
         updateSelectionInfo();
         updateButtonStates();
     });
@@ -240,6 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 thumb.classList.remove('selected');
             }
         });
+        renderScanResults();
         updateSelectionInfo();
         updateButtonStates();
     });
