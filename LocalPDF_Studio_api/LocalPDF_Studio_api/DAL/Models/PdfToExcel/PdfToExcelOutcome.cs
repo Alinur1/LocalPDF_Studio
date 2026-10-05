@@ -22,6 +22,7 @@ namespace LocalPDF_Studio_api.DAL.Models.PdfToExcel
     {
         public byte[] FileBytes { get; set; } = Array.Empty<byte>();
         public string Format { get; set; } = "xlsx";
+        public string OutputKind { get; set; } = "xlsx"; // "xlsx", "zip" or "csv"
         public int TableCount { get; set; }
         public List<string> Notes { get; set; } = new();
     }

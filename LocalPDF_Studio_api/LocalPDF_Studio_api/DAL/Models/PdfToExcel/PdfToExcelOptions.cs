@@ -22,7 +22,9 @@ namespace LocalPDF_Studio_api.DAL.Models.PdfToExcel
     {
         public List<int>? Pages { get; set; }
         public List<string>? PageRanges { get; set; }
-        public string Flavor { get; set; } = "auto"; // "auto", "lattice" or "stream"
+        public string Flavor { get; set; } = "auto"; // "auto", "lattice", "stream" or "hybrid"
         public string Format { get; set; } = "xlsx"; // "xlsx" or "csv"
+        public bool CoerceNumbers { get; set; } = false;
+        public bool MergeContinuations { get; set; } = false;
     }
 }

@@ -2343,21 +2343,50 @@ class blank_duplicate_scan:
 # ============================================================
 # pdf_to_excel — table extraction to XLSX/CSV (direct export)
 # ============================================================
-# Offline, layout-aware extraction with pdfplumber + pandas + openpyxl.
-# Imports are local so this command degrades gracefully when the
-# optional table stack is missing (other commands keep working).
-# Input (temp JSON): { file_path, output_path, pages, page_ranges,
-#                      flavor: auto|lattice|stream, format: xlsx|csv }
-# Output (stdout JSON): { success, pageCount, tableCount, flavor,
-#                         format, notes[], output, error? }
+# REPLACE everything from this banner down to (but NOT including) the
+# "Module shims" banner. The shim line
+#     _make_module("pdf_to_excel", pdf_to_excel.main)
+# at the bottom of your file stays exactly as it is.
+#
+# Offline, layout-aware extraction with pdfplumber + openpyxl.
+# pandas is no longer required.
+#
+# Input (temp JSON):
+#   file_path, output_path, pages, page_ranges,
+#   flavor: auto|lattice|stream|hybrid        (default auto)
+#   format: xlsx|csv                          (default xlsx)
+#   coerce_numbers: bool         (opt-in, default false)
+#   merge_continuations: bool    (opt-in, default false)
+#
+# Output (stdout JSON):
+#   { success, pageCount, tableCount, sheetCount, flavor, strategiesUsed,
+#     format, outputKind, notes[], output, error? }
+#   "flavor" is the REQUESTED flavor; "strategiesUsed" reports how many
+#   pages were actually extracted with each strategy.
 
-_PDF_TO_EXCEL_FLAVORS = ("auto", "lattice", "stream")
+import re
+import time
+import unicodedata
+
+_PDF_TO_EXCEL_FLAVORS = ("auto", "lattice", "stream", "hybrid")
 _PDF_TO_EXCEL_FORMATS = ("xlsx", "csv")
+
 _PDF_TO_EXCEL_LATTICE_SETTINGS = {"vertical_strategy": "lines", "horizontal_strategy": "lines",
-                                   "text_x_tolerance": 3, "text_y_tolerance": 3}
+                                  "text_x_tolerance": 3, "text_y_tolerance": 3}
+# Ruled rows but no vertical lines (typical financial statements).
+_PDF_TO_EXCEL_HYBRID_SETTINGS = {"vertical_strategy": "text", "horizontal_strategy": "lines",
+                                 "text_x_tolerance": 6, "text_y_tolerance": 3}
 _PDF_TO_EXCEL_STREAM_SETTINGS = {"vertical_strategy": "text", "horizontal_strategy": "text",
                                  "text_x_tolerance": 6, "text_y_tolerance": 3}
 
+_PDF_TO_EXCEL_MAX_CELL_CHARS = 32767          # Excel hard limit per cell
+_PDF_TO_EXCEL_PAGE_TIME_BUDGET = 20.0         # soft budget (s): skip further fallbacks once exceeded
+_PDF_TO_EXCEL_SHREDDED_CELL_THRESHOLD = 3     # cells per page before warning
+
+
+# ------------------------------------------------------------
+# Page selection
+# ------------------------------------------------------------
 
 def _pdf_to_excel_page_list(total_pages, pages, page_ranges):
     selected = set()
@@ -2385,27 +2414,29 @@ def _pdf_to_excel_page_list(total_pages, pages, page_ranges):
     return sorted(selected)
 
 
+# ------------------------------------------------------------
+# Text cleaning
+# ------------------------------------------------------------
+
 # Control characters illegal in XML 1.0 (and therefore in XLSX cells).
-# openpyxl raises on these instead of stripping them, so we remove them
-# during cleaning. Plain Bengali/Latin/CJK text passes through untouched.
-_PDF_TO_EXCEL_ILLEGAL_CHARS_RE = None
+_PDF_TO_EXCEL_ILLEGAL_CHARS_RE = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f]")
 
+# NBSP-like spaces -> plain space; soft hyphen and zero-width space removed.
+# ZWJ (U+200D) and ZWNJ (U+200C) are deliberately KEPT: they are meaningful
+# in Bengali and other Indic scripts and in Persian.
+_PDF_TO_EXCEL_TEXT_TRANSLATE = {0x00A0: " ", 0x2007: " ", 0x202F: " ", 0x00AD: None, 0x200B: None}
 
-def _pdf_to_excel_sanitize(value):
-    global _PDF_TO_EXCEL_ILLEGAL_CHARS_RE
-    if not isinstance(value, str) or "\x00" not in value and not any(ord(c) < 32 for c in value):
-        return value
-    import re as _re
-    if _PDF_TO_EXCEL_ILLEGAL_CHARS_RE is None:
-        _PDF_TO_EXCEL_ILLEGAL_CHARS_RE = _re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f]")
-    return _PDF_TO_EXCEL_ILLEGAL_CHARS_RE.sub("", value)
-
+# Non-ASCII decimal digits -> ASCII (Arabic-Indic, Extended Arabic-Indic,
+# Devanagari, Bengali). Used only for number detection / coercion.
+_PDF_TO_EXCEL_DIGIT_MAP = {}
+for _base in (0x0660, 0x06F0, 0x0966, 0x09E6):
+    for _i in range(10):
+        _PDF_TO_EXCEL_DIGIT_MAP[_base + _i] = ord("0") + _i
 
 # Script ranges for complex-text handling, mirroring the watermark CJK
 # ranges. JOIN: scripts with no intra-word spaces, where a space between
 # single-cluster tokens inside a table cell is certainly a positioning
-# artifact (letterspacing-as-design doesn't happen in table cells).
-# NOTE: spaced languages — only detection + warning, never auto-join.
+# artifact. NOTE: spaced languages — only detection + warning, never auto-join.
 _PDF_TO_EXCEL_JOIN_RANGES = [
     (0x3000, 0x303F),  # CJK Symbols and Punctuation
     (0x3040, 0x309F),  # Hiragana
@@ -2424,17 +2455,16 @@ def _pdf_to_excel_in_ranges(cp, ranges):
     return any(lo <= cp <= hi for lo, hi in ranges)
 
 
-# Glyph-by-glyph emission (broken ToUnicode/positioning) cannot be safely re-joined post-hoc for spaced languages.
 def _pdf_to_excel_cluster_len(text):
-    import unicodedata as _ud
     n = 0
     for ch in text:
-        if n == 0 or (_ud.combining(ch) == 0 and _ud.category(ch) not in ("Mn", "Mc", "Me")):
+        if n == 0 or (unicodedata.combining(ch) == 0 and unicodedata.category(ch) not in ("Mn", "Mc", "Me")):
             n += 1
     return n
 
 
 def _pdf_to_excel_repair(value):
+    """Join CJK tokens that were split by positioning artifacts."""
     if not isinstance(value, str) or " " not in value:
         return value
     toks = [t for t in value.split(" ") if t != ""]
@@ -2447,23 +2477,44 @@ def _pdf_to_excel_repair(value):
     return value
 
 
-def _pdf_to_excel_shredded_hits(tables):
-    hits = 0
-    for table in tables:
-        for row in table:
-            for cell in row:
-                if not isinstance(cell, str):
-                    continue
-                for tok in cell.split(" "):
-                    if len(tok) >= 1 and _pdf_to_excel_cluster_len(tok) == 1 \
-                            and all(_pdf_to_excel_in_ranges(ord(c), _PDF_TO_EXCEL_NOTE_RANGES) for c in tok):
-                        hits += 1
-    return hits
+def _pdf_to_excel_clean_cell(value):
+    """Sanitize one cell: illegal chars, odd spaces, per-line trim, CJK repair, length cap."""
+    if not isinstance(value, str):
+        return "" if value is None else value
+    s = _PDF_TO_EXCEL_ILLEGAL_CHARS_RE.sub("", value).translate(_PDF_TO_EXCEL_TEXT_TRANSLATE)
+    lines = [_pdf_to_excel_repair(ln.strip()) for ln in s.splitlines()]
+    s = "\n".join(ln for ln in lines if ln != "")
+    if len(s) > _PDF_TO_EXCEL_MAX_CELL_CHARS:
+        s = s[:_PDF_TO_EXCEL_MAX_CELL_CHARS]
+    return s
+
+
+def _pdf_to_excel_looks_shredded(cell):
+    """True when ONE cell holds many spaced single-cluster letters
+    (glyph-by-glyph emission). Digits and legitimate single-character
+    cells (男/女, 원, serial numbers) do not trigger this."""
+    if not isinstance(cell, str):
+        return False
+    toks = cell.split()
+    if len(toks) < 3:
+        return False
+    singles = 0
+    for t in toks:
+        if (_pdf_to_excel_cluster_len(t) == 1
+                and unicodedata.category(t[0]) in ("Lo", "Mn", "Mc")
+                and _pdf_to_excel_in_ranges(ord(t[0]), _PDF_TO_EXCEL_NOTE_RANGES)):
+            singles += 1
+    return singles / len(toks) >= 0.6
+
+
+def _pdf_to_excel_shredded_cells(tables):
+    return sum(1 for table in tables for row in table for c in row if _pdf_to_excel_looks_shredded(c))
 
 
 def _pdf_to_excel_clean(raw):
-    """Normalize one pdfplumber table: pad ragged rows, strip text,
-    drop fully-empty rows/columns. Returns list-of-lists or None."""
+    """Normalize one pdfplumber table: pad ragged rows, clean text, drop
+    fully-empty rows/columns. Returns list-of-lists (all str) or None.
+    Pure Python (no pandas)."""
     if not raw:
         return None
     width = max(len(r) for r in raw)
@@ -2472,95 +2523,332 @@ def _pdf_to_excel_clean(raw):
     norm = []
     for row in raw:
         padded = list(row) + [None] * (width - len(row))
-        norm.append([_pdf_to_excel_repair(_pdf_to_excel_sanitize(c.strip())) if isinstance(c, str) else ("" if c is None else c) for c in padded])
-    try:
-        import pandas as pd
-        df = pd.DataFrame(norm)
-        # Blank strings are not NaN: normalize them first so empty
-        # rows/columns (common with text-strategy detection) are dropped.
-        df = df.replace(r"^\s*$", pd.NA, regex=True)
-        df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
-        if df.empty:
-            return None
-        return df.astype(object).where(pd.notnull(df), "").values.tolist()
-    except Exception:
-        # Fallback without pandas: drop rows/cols that are all empty strings.
-        kept_rows = [r for r in norm if any(c != "" for c in r)]
-        if not kept_rows:
-            return None
-        cols = [c for c in range(width) if any(r[c] != "" for r in kept_rows)]
-        if not cols:
-            return None
-        return [[r[c] for c in cols] for r in kept_rows]
+        norm.append([_pdf_to_excel_clean_cell(c) for c in padded])
+    rows = [r for r in norm if any(c != "" for c in r)]
+    if not rows:
+        return None
+    keep = [c for c in range(width) if any(r[c] != "" for r in rows)]
+    if not keep:
+        return None
+    return [[r[c] for c in keep] for r in rows]
 
 
-def _pdf_to_excel_write_xlsx(per_page, output_path):
-    try:
-        from openpyxl import Workbook
-        from openpyxl.styles import Font, PatternFill
-        from openpyxl.utils import get_column_letter
-        wb = Workbook()
-        wb.remove(wb.active)
-        header_font = Font(bold=True, color="FFFFFF")
-        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
-        for page_num, tables in per_page:
-            ws = wb.create_sheet(title=f"Page_{page_num}")
-            widths = {}
-            row = 1
-            for ti, table in enumerate(tables):
-                if ti > 0:
-                    row += 1
-                for ri, trow in enumerate(table):
-                    for ci, val in enumerate(trow):
-                        cell = ws.cell(row=row, column=ci + 1, value=val)
-                        if ri == 0:
-                            cell.font = header_font
-                            cell.fill = header_fill
-                        try:
-                            ln = len(str(val)) if val not in (None, "") else 0
-                        except Exception:
-                            ln = 0
-                        if ln > widths.get(ci, 0):
-                            widths[ci] = ln
-                    row += 1
-            for ci, w in widths.items():
-                ws.column_dimensions[get_column_letter(ci + 1)].width = min(max(w + 2, 10), 50)
+def _pdf_to_excel_is_plausible(table, min_rows=2, min_cols=2, min_fill=0.35,
+                               max_avg_len=60, min_multi=0.5):
+    """Reject prose pages and 1x1 callout boxes mis-detected as tables."""
+    if not table or len(table) < min_rows or len(table[0]) < min_cols:
+        return False
+    total = sum(len(r) for r in table)
+    filled = [c for r in table for c in r if str(c).strip()]
+    if not total or not filled or len(filled) / total < min_fill:
+        return False
+    if sum(len(str(c)) for c in filled) / len(filled) > max_avg_len:
+        return False
+    # Real tables have rows with several populated cells; paragraphs don't.
+    multi = sum(1 for r in table if sum(1 for c in r if str(c).strip()) >= 2)
+    return multi / len(table) >= min_multi
+
+
+# ------------------------------------------------------------
+# Numbers (opt-in) and header detection
+# ------------------------------------------------------------
+
+_PDF_TO_EXCEL_NUM_RE = re.compile(r"^[-+]?([0-9]{1,3}(,[0-9]{3})+|[0-9]+)(\.[0-9]+)?$")
+
+
+def _pdf_to_excel_numeric_text(s):
+    """Return (ascii_core, is_parenthesised_negative) if `s` looks like a
+    plain number, else None. Accepts Bengali/Devanagari/Arabic digits."""
+    t = s.strip().translate(_PDF_TO_EXCEL_DIGIT_MAP)
+    paren = t.startswith("(") and t.endswith(")")
+    if paren:
+        t = t[1:-1].strip()
+    elif t.startswith("(") or t.endswith(")"):
+        return None
+    if not _PDF_TO_EXCEL_NUM_RE.match(t):
+        return None
+    return t, paren
+
+
+def _pdf_to_excel_coerce(value):
+    """Conservative text -> number. Keeps leading-zero IDs, phone-like and
+    >15-digit values as text. US-style separators only (1,234.56)."""
+    if not isinstance(value, str) or "\n" in value:
+        return value
+    parsed = _pdf_to_excel_numeric_text(value)
+    if parsed is None:
+        return value
+    t, paren = parsed
+    digits = re.sub(r"[^0-9]", "", t)
+    if len(digits) > 15:
+        return value
+    int_part = t.lstrip("+-").split(".")[0].replace(",", "")
+    if len(int_part) > 1 and int_part[0] == "0":
+        return value
+    clean = t.replace(",", "")
+    n = float(clean) if "." in clean else int(clean)
+    return -abs(n) if paren else n
+
+
+def _pdf_to_excel_is_header(rows):
+    """Heuristic: first row is a header if the table has 2+ rows and at
+    least half of its non-empty cells are non-numeric text."""
+    if len(rows) < 2:
+        return False
+    cells = [c for c in rows[0] if isinstance(c, str) and c.strip()]
+    if not cells:
+        return False
+    textual = sum(1 for c in cells if _pdf_to_excel_numeric_text(c) is None)
+    return textual / len(cells) >= 0.5
+
+
+# ------------------------------------------------------------
+# Extraction
+# ------------------------------------------------------------
+
+def _pdf_to_excel_strategies(flavor):
+    if flavor == "lattice":
+        return [("lattice", _PDF_TO_EXCEL_LATTICE_SETTINGS)]
+    if flavor == "stream":
+        return [("stream", _PDF_TO_EXCEL_STREAM_SETTINGS)]
+    if flavor == "hybrid":
+        return [("hybrid", _PDF_TO_EXCEL_HYBRID_SETTINGS)]
+    return [("lattice", _PDF_TO_EXCEL_LATTICE_SETTINGS),
+            ("hybrid", _PDF_TO_EXCEL_HYBRID_SETTINGS),
+            ("stream", _PDF_TO_EXCEL_STREAM_SETTINGS)]
+
+
+def _pdf_to_excel_extract_page(page, flavor, page_num, errors, slow_pages):
+    """Try each strategy until one yields at least one PLAUSIBLE table.
+    A spurious lattice box therefore no longer blocks the fallbacks.
+    Returns (tables, strategy_name_or_None)."""
+    started = time.monotonic()
+    strategies = _pdf_to_excel_strategies(flavor)
+    for i, (name, settings) in enumerate(strategies):
+        if i > 0 and time.monotonic() - started > _PDF_TO_EXCEL_PAGE_TIME_BUDGET:
+            slow_pages.append(page_num)
+            break
+        try:
+            raw_tables = page.extract_tables(table_settings=dict(settings)) or []
+        except Exception as e:
+            errors.append((page_num, str(e)[:80]))
+            continue
+        good = []
+        for raw in raw_tables:
+            t = _pdf_to_excel_clean(raw)
+            if t and _pdf_to_excel_is_plausible(t):
+                good.append(t)
+        if good:
+            return good, name
+    return [], None
+
+
+def _pdf_to_excel_norm_row(row):
+    return [str(c).strip().lower() for c in row]
+
+
+def _pdf_to_excel_merge_continuations(sheets):
+    """Merge a table that starts a page into the table that ended the
+    previous page when the pages are consecutive and column counts match.
+    A repeated header row is dropped."""
+    merged = []
+    for sheet in sheets:
+        if merged:
+            prev_sheet = merged[-1]
+            prev = prev_sheet["tables"][-1]
+            first = sheet["tables"][0]
+            if (sheet["pages"][0] == prev_sheet["pages"][-1] + 1
+                    and prev["rows"] and first["rows"]
+                    and len(first["rows"][0]) == len(prev["rows"][0])):
+                rows = first["rows"]
+                if prev["header"] and _pdf_to_excel_norm_row(rows[0]) == _pdf_to_excel_norm_row(prev["rows"][0]):
+                    rows = rows[1:]
+                prev["rows"].extend(rows)
+                prev_sheet["tables"].extend(sheet["tables"][1:])
+                prev_sheet["pages"].append(sheet["pages"][0])
+                continue
+        merged.append({"pages": list(sheet["pages"]), "tables": list(sheet["tables"])})
+    return merged
+
+
+def _pdf_to_excel_label(pages):
+    return f"Page_{pages[0]}" if len(pages) == 1 else f"Page_{pages[0]}-{pages[-1]}"
+
+
+# ------------------------------------------------------------
+# Writers
+# ------------------------------------------------------------
+
+def _pdf_to_excel_display_width(val):
+    if val is None or val == "":
+        return 0
+    if not isinstance(val, str):
+        return len(str(val))
+    best = 0
+    for line in val.split("\n"):
+        w = sum(2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1 for ch in line)
+        if w > best:
+            best = w
+    return best
+
+
+def _pdf_to_excel_write_xlsx(sheets, fh):
+    """Write workbook to an open binary file handle. Returns the number of
+    cells that began with '=' and were stored as literal text."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.utils import get_column_letter
+
+    wb = Workbook()
+    wb.remove(wb.active)
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    wrap = Alignment(wrap_text=True, vertical="top")
+    escaped = 0
+
+    for sheet in sheets:
+        ws = wb.create_sheet(title=_pdf_to_excel_label(sheet["pages"]))
+        widths = {}
+        row = 1
+        for ti, table in enumerate(sheet["tables"]):
+            if ti > 0:
+                row += 1
+            for ri, trow in enumerate(table["rows"]):
+                for ci, val in enumerate(trow):
+                    cell = ws.cell(row=row, column=ci + 1, value=val)
+                    # openpyxl turns any string starting with "=" into a live
+                    # formula. Force literal text (formula-injection guard).
+                    if isinstance(val, str) and val.startswith("="):
+                        cell.data_type = "s"
+                        escaped += 1
+                    cell.alignment = wrap
+                    if table["header"] and ri == 0:
+                        cell.font = header_font
+                        cell.fill = header_fill
+                    w = _pdf_to_excel_display_width(val)
+                    if w > widths.get(ci, 0):
+                        widths[ci] = w
+                row += 1
+        for ci, w in widths.items():
+            ws.column_dimensions[get_column_letter(ci + 1)].width = min(max(w + 2, 10), 50)
+        if sheet["tables"] and sheet["tables"][0]["header"]:
             ws.freeze_panes = "A2"
-        wb.save(output_path)
-        return ""
-    except Exception as e:
-        return f"Could not write XLSX: {e}"
+    wb.save(fh)
+    return escaped
 
 
-def _pdf_to_excel_write_csv_zip(per_page, output_path):
+_PDF_TO_EXCEL_NUMERIC_LIKE_RE = re.compile(r"^[+-]?[\d.,]+$")
+
+
+def _pdf_to_excel_csv_safe(v):
+    """Neutralize spreadsheet formulas in CSV: prefix risky strings with '.
+    Genuine numeric strings (e.g. -5, +1,234.5) are left alone."""
+    if v is None:
+        return "", False
+    if isinstance(v, str) and v[:1] in ("=", "+", "-", "@", "\t", "\r") \
+            and not _PDF_TO_EXCEL_NUMERIC_LIKE_RE.match(v):
+        return "'" + v, True
+    return v, False
+
+
+def _pdf_to_excel_csv_text(rows):
     import csv as _csv
+    buf = io.StringIO(newline="")
+    writer = _csv.writer(buf)
+    escaped = 0
+    for row in rows:
+        out = []
+        for v in row:
+            safe, changed = _pdf_to_excel_csv_safe(v)
+            escaped += 1 if changed else 0
+            out.append(safe)
+        writer.writerow(out)
+    # UTF-8 BOM: without it Excel on Windows misdetects the encoding
+    # (Bengali/CJK shown as mojibake). LibreOffice and parsers handle it.
+    return "\ufeff" + buf.getvalue(), escaped
+
+
+def _pdf_to_excel_csv_entries(sheets):
+    """Yield (filename, rows) for every table."""
+    for sheet in sheets:
+        p = sheet["pages"]
+        stem = f"page_{p[0]:03d}" if len(p) == 1 else f"pages_{p[0]:03d}-{p[-1]:03d}"
+        many = len(sheet["tables"]) > 1
+        for ti, table in enumerate(sheet["tables"], 1):
+            yield (f"{stem}_table_{ti}.csv" if many else f"{stem}.csv"), table["rows"]
+
+
+def _pdf_to_excel_write_csv_zip(sheets, fh):
+    escaped = 0
+    with zipfile.ZipFile(fh, "w", zipfile.ZIP_DEFLATED) as zf:
+        for name, rows in _pdf_to_excel_csv_entries(sheets):
+            text, esc = _pdf_to_excel_csv_text(rows)
+            escaped += esc
+            zf.writestr(name, text)
+    return escaped
+
+
+def _pdf_to_excel_atomic_write(output_path, writer_fn):
+    """Write to <output>.part then os.replace(), so a failed write never
+    leaves a corrupt file at the destination. Returns (error, result)."""
+    tmp = output_path + ".part"
     try:
-        with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf:
-            for page_num, tables in per_page:
-                for ti, table in enumerate(tables, 1):
-                    buf = io.StringIO()
-                    writer = _csv.writer(buf)
-                    writer.writerows([("" if v is None else v) for v in row] for row in table)
-                    name = f"page_{page_num:03d}_table_{ti}.csv" if len(tables) > 1 else f"page_{page_num:03d}.csv"
-                    # UTF-8 BOM: without it Excel on Windows misdetects the
-                    # encoding (Bengali/CJK shown as mojibake). LibreOffice
-                    # and parsers handle the BOM transparently.
-                    zf.writestr(name, "\ufeff" + buf.getvalue())
-        return ""
+        with open(tmp, "wb") as fh:
+            result = writer_fn(fh)
+        os.replace(tmp, output_path)
+        return "", result
     except Exception as e:
-        return f"Could not write CSV archive: {e}"
+        try:
+            if os.path.exists(tmp):
+                os.remove(tmp)
+        except OSError:
+            pass
+        return str(e) or e.__class__.__name__, 0
 
 
-def _pdf_to_excel_convert(pdf_path, output_path, pages=None, page_ranges=None, flavor="auto", fmt="xlsx"):
+# ------------------------------------------------------------
+# Notes / errors
+# ------------------------------------------------------------
+
+def _pdf_to_excel_page_summary(pages, limit=8):
+    shown = ", ".join(str(p) for p in pages[:limit])
+    rest = len(pages) - limit
+    return shown + (f", +{rest} more" if rest > 0 else "")
+
+
+def _pdf_to_excel_is_password_error(exc):
+    name = type(exc).__name__.lower()
+    text = (repr(exc) + " " + str(exc)).lower()
+    return "password" in name or "password" in text or "encrypt" in text
+
+
+def _pdf_to_excel_is_locked(pdf_path):
+    """Cheap pre-check via PyMuPDF; pdfminer's password exception often has
+    an empty message, so message sniffing alone is unreliable."""
+    try:
+        d = fitz.open(pdf_path)
+        try:
+            return bool(d.needs_pass)
+        finally:
+            d.close()
+    except Exception:
+        return False
+
+
+_PDF_TO_EXCEL_ENCRYPTED_ERROR = "ENCRYPTED: This PDF is password-protected. Unlock it first."
+
+
+# ------------------------------------------------------------
+# Main conversion
+# ------------------------------------------------------------
+
+def _pdf_to_excel_convert(pdf_path, output_path, pages=None, page_ranges=None, flavor="auto", fmt="xlsx",
+                          coerce_numbers=False, merge_continuations=False):
     try:
         import pdfplumber
     except ImportError:
         return {"success": False, "error": "Table engine unavailable (pdfplumber missing).",
                 "missingDependencies": ["pdfplumber"]}
-    try:
-        import pandas  # noqa: F401  (cleaning step; fallback exists without it)
-    except ImportError:
-        pandas = None
     flavor = (flavor or "auto").lower()
     if flavor not in _PDF_TO_EXCEL_FLAVORS:
         flavor = "auto"
@@ -2573,63 +2861,114 @@ def _pdf_to_excel_convert(pdf_path, output_path, pages=None, page_ranges=None, f
         except ImportError:
             return {"success": False, "error": "XLSX engine unavailable (openpyxl missing).",
                     "missingDependencies": ["openpyxl"]}
+
+    if _pdf_to_excel_is_locked(pdf_path):
+        return {"success": False, "error": _PDF_TO_EXCEL_ENCRYPTED_ERROR}
     try:
         pdf = pdfplumber.open(pdf_path)
     except Exception as e:
-        if "password" in str(e).lower():
-            return {"success": False, "error": "ENCRYPTED: This PDF is password-protected. Unlock it first."}
-        return {"success": False, "error": f"Could not open PDF: {e}"}
+        if _pdf_to_excel_is_password_error(e):
+            return {"success": False, "error": _PDF_TO_EXCEL_ENCRYPTED_ERROR}
+        return {"success": False, "error": f"Could not open PDF: {e or e.__class__.__name__}"}
+
     try:
         total = len(pdf.pages)
         idx = _pdf_to_excel_page_list(total, pages, page_ranges)
         if not idx:
             return {"success": False, "error": "No valid pages selected."}
-        per_page = []
-        notes = []
-        table_total = 0
+
+        sheets = []
+        used = {}
+        errors = []
+        slow_pages = []
+        pg_scanned, pg_notables, pg_shredded = [], [], []
+
         for n, pi in enumerate(idx):
             page = pdf.pages[pi]
-            raw_tables = []
-            try:
-                if flavor in ("auto", "lattice"):
-                    raw_tables = page.extract_tables(table_settings=dict(_PDF_TO_EXCEL_LATTICE_SETTINGS)) or []
-                if not raw_tables and flavor in ("auto", "stream"):
-                    raw_tables = page.extract_tables(table_settings=dict(_PDF_TO_EXCEL_STREAM_SETTINGS)) or []
-            except Exception as e:
-                notes.append(f"page {pi + 1}: table detection failed ({e})")
-                continue
-            cleaned = []
-            for raw in raw_tables:
-                t = _pdf_to_excel_clean(raw)
-                if t:
-                    cleaned.append(t)
-            if not cleaned:
-                try:
-                    if (page.extract_text() or "").strip() == "":
-                        notes.append(f"page {pi + 1}: no extractable text (scanned? try the OCR tool first)")
-                except Exception:
-                    pass
+            page_num = pi + 1
+            tables, strategy = _pdf_to_excel_extract_page(page, flavor, page_num, errors, slow_pages)
+            if tables:
+                used[strategy] = used.get(strategy, 0) + 1
+                sheets.append({
+                    "pages": [page_num],
+                    "tables": [{"rows": t, "header": _pdf_to_excel_is_header(t)} for t in tables],
+                })
+                if _pdf_to_excel_shredded_cells(tables) >= _PDF_TO_EXCEL_SHREDDED_CELL_THRESHOLD:
+                    pg_shredded.append(page_num)
             else:
-                table_total += len(cleaned)
-                per_page.append((pi + 1, cleaned))
-                if _pdf_to_excel_shredded_hits(cleaned) >= 6:
-                    notes.append(f"page {pi + 1}: complex-script text is stored glyph-by-glyph in the source PDF; "
-                                 "words may show extra spaces (numbers and table structure are unaffected)")
+                try:
+                    has_text = bool((page.extract_text() or "").strip())
+                except Exception:
+                    has_text = True
+                (pg_notables if has_text else pg_scanned).append(page_num)
+            try:
+                page.flush_cache()   # keep memory flat on large PDFs
+            except Exception:
+                pass
             if len(idx) >= 5 and (n + 1) % 5 == 0:
                 sys.stderr.write(f"PROGRESS:{int(((n + 1) / len(idx)) * 80)}\n")
-        if table_total == 0:
+
+        # Aggregate notes (one line per category, not one per page).
+        notes = []
+        if pg_scanned:
+            notes.append(f"{len(pg_scanned)} page(s) have no extractable text (scanned? OCR them first): "
+                         f"{_pdf_to_excel_page_summary(pg_scanned)}")
+        if pg_notables:
+            notes.append(f"{len(pg_notables)} page(s) contain text but no table was detected: "
+                         f"{_pdf_to_excel_page_summary(pg_notables)}")
+        if pg_shredded:
+            notes.append(f"{len(pg_shredded)} page(s) store complex-script text glyph-by-glyph in the source PDF; "
+                         f"words may show extra spaces (numbers and table structure are unaffected): "
+                         f"{_pdf_to_excel_page_summary(pg_shredded)}")
+        if errors:
+            err_pages = sorted({p for p, _ in errors})
+            notes.append(f"table detection raised errors on {len(err_pages)} page(s) "
+                         f"({_pdf_to_excel_page_summary(err_pages)}); first error: {errors[0][1]}")
+        if slow_pages:
+            notes.append(f"slow pages skipped remaining fallback strategies: "
+                         f"{_pdf_to_excel_page_summary(sorted(set(slow_pages)))}")
+
+        if not sheets:
             return {"success": False, "error": "No extractable tables found in the selected pages.",
                     "notes": notes, "pageCount": total, "tableCount": 0}
+
+        if merge_continuations and len(sheets) > 1:
+            before = sum(len(s["tables"]) for s in sheets)
+            sheets = _pdf_to_excel_merge_continuations(sheets)
+            after = sum(len(s["tables"]) for s in sheets)
+            if after < before:
+                notes.append(f"merged {before - after} continuation table(s) across pages")
+
+        if coerce_numbers:
+            for sheet in sheets:
+                for table in sheet["tables"]:
+                    start = 1 if table["header"] else 0
+                    for r in range(start, len(table["rows"])):
+                        table["rows"][r] = [_pdf_to_excel_coerce(c) for c in table["rows"][r]]
+
+        table_total = sum(len(s["tables"]) for s in sheets)
+
+        out_path = output_path
+        output_kind = fmt
         if fmt == "xlsx":
-            write_err = _pdf_to_excel_write_xlsx(per_page, output_path)
+            write_err, escaped = _pdf_to_excel_atomic_write(
+                out_path, lambda fh: _pdf_to_excel_write_xlsx(sheets, fh))
         else:
-            write_err = _pdf_to_excel_write_csv_zip(per_page, output_path)
+            output_kind = "zip"
+            write_err, escaped = _pdf_to_excel_atomic_write(
+                out_path, lambda fh: _pdf_to_excel_write_csv_zip(sheets, fh))
+
         if write_err:
-            return {"success": False, "error": write_err, "notes": notes,
-                    "pageCount": total, "tableCount": table_total}
+            return {"success": False, "error": f"Could not write {fmt.upper()}: {write_err}",
+                    "notes": notes, "pageCount": total, "tableCount": table_total}
+        if escaped:
+            notes.append(f"{escaped} cell(s) starting with '=', '+', '-' or '@' were stored as literal text "
+                         "so they cannot run as spreadsheet formulas")
+
         sys.stderr.write("PROGRESS:100\n")
         return {"success": True, "pageCount": total, "tableCount": table_total,
-                "flavor": flavor, "format": fmt, "notes": notes, "output": output_path}
+                "sheetCount": len(sheets), "flavor": flavor, "strategiesUsed": used,
+                "format": fmt, "outputKind": output_kind, "notes": notes, "output": out_path}
     finally:
         try:
             pdf.close()
@@ -2661,6 +3000,8 @@ class pdf_to_excel:
                 page_ranges=request.get("page_ranges"),
                 flavor=request.get("flavor", "auto"),
                 fmt=request.get("format", "xlsx"),
+                coerce_numbers=bool(request.get("coerce_numbers", False)),
+                merge_continuations=bool(request.get("merge_continuations", False)),
             )
             print(json.dumps(result))
         except json.JSONDecodeError as e:

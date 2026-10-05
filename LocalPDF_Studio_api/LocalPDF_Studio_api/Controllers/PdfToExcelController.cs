@@ -55,7 +55,9 @@ namespace LocalPDF_Studio_api.Controllers
                 var outcome = await _toExcelService.ConvertAsync(request);
 
                 var fileName = Path.GetFileNameWithoutExtension(request.FilePath);
-                if (outcome.Format == "csv")
+                if (outcome.OutputKind == "csv")
+                    return File(outcome.FileBytes, "text/csv", $"{fileName}_tables.csv");
+                if (outcome.OutputKind == "zip")
                     return File(outcome.FileBytes, "application/zip", $"{fileName}_tables_csv.zip");
                 return File(outcome.FileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{fileName}_tables.xlsx");
             }

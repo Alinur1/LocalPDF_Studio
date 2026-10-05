@@ -32,6 +32,7 @@ namespace LocalPDF_Studio_api.BLL.Services
             "auto",
             "lattice",
             "stream",
+            "hybrid",
         };
 
         private static readonly HashSet<string> AllowedFormats = new(StringComparer.OrdinalIgnoreCase)
@@ -71,11 +72,13 @@ namespace LocalPDF_Studio_api.BLL.Services
 
             string extension = format == "csv" ? "zip" : "xlsx";
             string tempOutputPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_pdf_tables.{extension}");
+            // Python reports the real path it wrote; honor it (temp dir only).
+            string actualPath = tempOutputPath;
 
             try
             {
-                _logger.LogInformation("Starting PDF to Excel conversion: {FilePath} flavor={Flavor} format={Format}",
-                    request.FilePath, flavor, format);
+                _logger.LogInformation("Starting PDF to Excel conversion: {FilePath} flavor={Flavor} format={Format} coerce={Coerce} merge={Merge}",
+                    request.FilePath, flavor, format, options.CoerceNumbers, options.MergeContinuations);
 
                 var payload = new
                 {
@@ -84,7 +87,9 @@ namespace LocalPDF_Studio_api.BLL.Services
                     pages = options.Pages,
                     page_ranges = options.PageRanges,
                     flavor,
-                    format
+                    format,
+                    coerce_numbers = options.CoerceNumbers,
+                    merge_continuations = options.MergeContinuations
                 };
                 string stdout = await RunPythonAsync("pdf_to_excel", payload);
                 var result = PythonJsonParser.CleanAndDeserialize<PythonPdfToExcelResult>(stdout);
@@ -92,22 +97,40 @@ namespace LocalPDF_Studio_api.BLL.Services
                 if (!result.Success)
                     throw new Exception(result.Error ?? "Unknown table extraction error");
 
-                if (!File.Exists(tempOutputPath))
+                // Honor the path Python actually wrote (temp dir only).
+                if (!string.IsNullOrWhiteSpace(result.Output))
+                {
+                    try
+                    {
+                        var full = Path.GetFullPath(result.Output);
+                        if (full.StartsWith(Path.GetTempPath(), StringComparison.OrdinalIgnoreCase)
+                            && File.Exists(full))
+                            actualPath = full;
+                    }
+                    catch { /* fall through to tempOutputPath check */ }
+                }
+
+                if (!File.Exists(actualPath))
                     throw new Exception("Table extraction output was not produced.");
+
+                var outputKind = string.IsNullOrWhiteSpace(result.OutputKind)
+                    ? (format == "xlsx" ? "xlsx" : "zip")
+                    : result.OutputKind.ToLowerInvariant();
 
                 return new PdfToExcelOutcome
                 {
-                    FileBytes = await File.ReadAllBytesAsync(tempOutputPath),
+                    FileBytes = await File.ReadAllBytesAsync(actualPath),
                     Format = format,
+                    OutputKind = outputKind,
                     TableCount = result.TableCount,
                     Notes = result.Notes ?? new List<string>(),
                 };
             }
             finally
             {
-                if (File.Exists(tempOutputPath))
+                foreach (var candidate in new[] { tempOutputPath, actualPath })
                 {
-                    try { File.Delete(tempOutputPath); } catch { /* Cleanup silent */ }
+                    try { if (File.Exists(candidate)) File.Delete(candidate); } catch { /* Cleanup silent */ }
                 }
             }
         }
