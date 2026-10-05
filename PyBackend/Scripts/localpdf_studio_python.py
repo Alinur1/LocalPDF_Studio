@@ -2342,12 +2342,7 @@ class blank_duplicate_scan:
 
 # ============================================================
 # pdf_to_excel — table extraction to XLSX/CSV (direct export)
-# ============================================================
-# REPLACE everything from this banner down to (but NOT including) the
-# "Module shims" banner. The shim line
-#     _make_module("pdf_to_excel", pdf_to_excel.main)
-# at the bottom of your file stays exactly as it is.
-#
+# ============================================================#
 # Offline, layout-aware extraction with pdfplumber + openpyxl.
 # pandas is no longer required.
 #
