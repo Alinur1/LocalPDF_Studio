@@ -767,6 +767,39 @@ ipcMain.handle('save-pdf-file', async (event, { filename, buffer }) => {
     }
 });
 
+ipcMain.handle('save-excel-file', async (event, { filename, buffer }) => {
+    const { filePath, canceled } = await dialog.showSaveDialog({
+        defaultPath: filename,
+        filters: [
+            { name: 'Excel Workbook', extensions: ['xlsx'] },
+            { name: 'All Files', extensions: ['*'] }
+        ]
+    });
+
+    if (canceled || !filePath) {
+        return null;
+    }
+
+    try {
+        let nodeBuffer;
+        if (Buffer.isBuffer(buffer)) {
+            nodeBuffer = buffer;
+        } else if (buffer instanceof ArrayBuffer) {
+            nodeBuffer = Buffer.from(new Uint8Array(buffer));
+        } else if (ArrayBuffer.isView(buffer)) {
+            nodeBuffer = Buffer.from(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+        } else {
+            throw new Error("Unsupported buffer type received from renderer");
+        }
+
+        fs.writeFileSync(filePath, nodeBuffer);
+        return filePath;
+    } catch (err) {
+        console.error("Failed to save file:", err);
+        return null;
+    }
+});
+
 ipcMain.handle('save-text-file', async (event, { filename, text }) => {
     const { filePath, canceled } = await dialog.showSaveDialog({
         defaultPath: filename,

@@ -2,3 +2,6 @@ PyMuPDF
 pikepdf
 pillow
 pymupdf4llm
+pdfplumber
+pandas
+openpyxl

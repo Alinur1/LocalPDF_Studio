@@ -19,7 +19,7 @@ import json
 
 def main():
     if len(sys.argv) < 2:
-        print(json.dumps({"success": False, "error": "No command specified. Available: watermark, extract_images, convert_pdf_images, grayscale, redact"}))
+        print(json.dumps({"success": False, "error": "No command specified. Available: watermark, extract_images, convert_pdf_images, grayscale, redact, metadata_scrub_scan, metadata_scrub_scrub, pdf_to_markdown, blank_duplicate_scan, pdf_to_excel"}))
         sys.exit(1)
 
     command = sys.argv[1]
@@ -53,8 +53,11 @@ def main():
     elif command == "blank_duplicate_scan":
         from blank_duplicate_scan import main as _main
         _main()
+    elif command == "pdf_to_excel":
+        from pdf_to_excel import main as _main
+        _main()
     else:
-        print(json.dumps({"success": False, "error": f"Unknown command: '{command}'. Available: watermark, extract_images, convert_pdf_images, grayscale, redact, metadata_scrub_scan, metadata_scrub_scrub, pdf_to_markdown, blank_duplicate_scan"}))
+        print(json.dumps({"success": False, "error": f"Unknown command: '{command}'. Available: watermark, extract_images, convert_pdf_images, grayscale, redact, metadata_scrub_scan, metadata_scrub_scrub, pdf_to_markdown, blank_duplicate_scan, pdf_to_excel"}))
         sys.exit(1)
 
 
@@ -2338,6 +2341,337 @@ class blank_duplicate_scan:
 
 
 # ============================================================
+# pdf_to_excel — table extraction to XLSX/CSV (direct export)
+# ============================================================
+# Offline, layout-aware extraction with pdfplumber + pandas + openpyxl.
+# Imports are local so this command degrades gracefully when the
+# optional table stack is missing (other commands keep working).
+# Input (temp JSON): { file_path, output_path, pages, page_ranges,
+#                      flavor: auto|lattice|stream, format: xlsx|csv }
+# Output (stdout JSON): { success, pageCount, tableCount, flavor,
+#                         format, notes[], output, error? }
+
+_PDF_TO_EXCEL_FLAVORS = ("auto", "lattice", "stream")
+_PDF_TO_EXCEL_FORMATS = ("xlsx", "csv")
+_PDF_TO_EXCEL_LATTICE_SETTINGS = {"vertical_strategy": "lines", "horizontal_strategy": "lines",
+                                   "text_x_tolerance": 3, "text_y_tolerance": 3}
+_PDF_TO_EXCEL_STREAM_SETTINGS = {"vertical_strategy": "text", "horizontal_strategy": "text",
+                                 "text_x_tolerance": 6, "text_y_tolerance": 3}
+
+
+def _pdf_to_excel_page_list(total_pages, pages, page_ranges):
+    selected = set()
+    if not pages and not page_ranges:
+        return list(range(total_pages))
+    if pages:
+        for p in pages:
+            try:
+                if 1 <= int(p) <= total_pages:
+                    selected.add(int(p) - 1)
+            except (ValueError, TypeError):
+                continue
+    if page_ranges:
+        for range_str in page_ranges:
+            try:
+                if '-' in str(range_str):
+                    s, e = str(range_str).split('-', 1)
+                    for p in range(int(s.strip()), int(e.strip()) + 1):
+                        if 1 <= p <= total_pages:
+                            selected.add(p - 1)
+                elif 1 <= int(str(range_str).strip()) <= total_pages:
+                    selected.add(int(str(range_str).strip()) - 1)
+            except (ValueError, TypeError):
+                continue
+    return sorted(selected)
+
+
+# Control characters illegal in XML 1.0 (and therefore in XLSX cells).
+# openpyxl raises on these instead of stripping them, so we remove them
+# during cleaning. Plain Bengali/Latin/CJK text passes through untouched.
+_PDF_TO_EXCEL_ILLEGAL_CHARS_RE = None
+
+
+def _pdf_to_excel_sanitize(value):
+    global _PDF_TO_EXCEL_ILLEGAL_CHARS_RE
+    if not isinstance(value, str) or "\x00" not in value and not any(ord(c) < 32 for c in value):
+        return value
+    import re as _re
+    if _PDF_TO_EXCEL_ILLEGAL_CHARS_RE is None:
+        _PDF_TO_EXCEL_ILLEGAL_CHARS_RE = _re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f]")
+    return _PDF_TO_EXCEL_ILLEGAL_CHARS_RE.sub("", value)
+
+
+# Script ranges for complex-text handling, mirroring the watermark CJK
+# ranges. JOIN: scripts with no intra-word spaces, where a space between
+# single-cluster tokens inside a table cell is certainly a positioning
+# artifact (letterspacing-as-design doesn't happen in table cells).
+# NOTE: spaced languages — only detection + warning, never auto-join.
+_PDF_TO_EXCEL_JOIN_RANGES = [
+    (0x3000, 0x303F),  # CJK Symbols and Punctuation
+    (0x3040, 0x309F),  # Hiragana
+    (0x30A0, 0x30FF),  # Katakana
+    (0x3400, 0x4DBF),  # CJK Extension A
+    (0x4E00, 0x9FFF),  # CJK Unified Ideographs
+]
+_PDF_TO_EXCEL_NOTE_RANGES = _PDF_TO_EXCEL_JOIN_RANGES + [
+    (0x0900, 0x097F),  # Devanagari (Hindi, Marathi, ...)
+    (0x0980, 0x09FF),  # Bengali
+    (0xAC00, 0xD7AF),  # Hangul Syllables (spaced language: note only)
+]
+
+
+def _pdf_to_excel_in_ranges(cp, ranges):
+    return any(lo <= cp <= hi for lo, hi in ranges)
+
+
+# Glyph-by-glyph emission (broken ToUnicode/positioning) cannot be safely re-joined post-hoc for spaced languages.
+def _pdf_to_excel_cluster_len(text):
+    import unicodedata as _ud
+    n = 0
+    for ch in text:
+        if n == 0 or (_ud.combining(ch) == 0 and _ud.category(ch) not in ("Mn", "Mc", "Me")):
+            n += 1
+    return n
+
+
+def _pdf_to_excel_repair(value):
+    if not isinstance(value, str) or " " not in value:
+        return value
+    toks = [t for t in value.split(" ") if t != ""]
+    if len(toks) < 2:
+        return value
+    if all(_pdf_to_excel_cluster_len(t) == 1
+           and all(_pdf_to_excel_in_ranges(ord(c), _PDF_TO_EXCEL_JOIN_RANGES) for c in t)
+           for t in toks):
+        return "".join(toks)
+    return value
+
+
+def _pdf_to_excel_shredded_hits(tables):
+    hits = 0
+    for table in tables:
+        for row in table:
+            for cell in row:
+                if not isinstance(cell, str):
+                    continue
+                for tok in cell.split(" "):
+                    if len(tok) >= 1 and _pdf_to_excel_cluster_len(tok) == 1 \
+                            and all(_pdf_to_excel_in_ranges(ord(c), _PDF_TO_EXCEL_NOTE_RANGES) for c in tok):
+                        hits += 1
+    return hits
+
+
+def _pdf_to_excel_clean(raw):
+    """Normalize one pdfplumber table: pad ragged rows, strip text,
+    drop fully-empty rows/columns. Returns list-of-lists or None."""
+    if not raw:
+        return None
+    width = max(len(r) for r in raw)
+    if width == 0:
+        return None
+    norm = []
+    for row in raw:
+        padded = list(row) + [None] * (width - len(row))
+        norm.append([_pdf_to_excel_repair(_pdf_to_excel_sanitize(c.strip())) if isinstance(c, str) else ("" if c is None else c) for c in padded])
+    try:
+        import pandas as pd
+        df = pd.DataFrame(norm)
+        # Blank strings are not NaN: normalize them first so empty
+        # rows/columns (common with text-strategy detection) are dropped.
+        df = df.replace(r"^\s*$", pd.NA, regex=True)
+        df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
+        if df.empty:
+            return None
+        return df.astype(object).where(pd.notnull(df), "").values.tolist()
+    except Exception:
+        # Fallback without pandas: drop rows/cols that are all empty strings.
+        kept_rows = [r for r in norm if any(c != "" for c in r)]
+        if not kept_rows:
+            return None
+        cols = [c for c in range(width) if any(r[c] != "" for r in kept_rows)]
+        if not cols:
+            return None
+        return [[r[c] for c in cols] for r in kept_rows]
+
+
+def _pdf_to_excel_write_xlsx(per_page, output_path):
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill
+        from openpyxl.utils import get_column_letter
+        wb = Workbook()
+        wb.remove(wb.active)
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        for page_num, tables in per_page:
+            ws = wb.create_sheet(title=f"Page_{page_num}")
+            widths = {}
+            row = 1
+            for ti, table in enumerate(tables):
+                if ti > 0:
+                    row += 1
+                for ri, trow in enumerate(table):
+                    for ci, val in enumerate(trow):
+                        cell = ws.cell(row=row, column=ci + 1, value=val)
+                        if ri == 0:
+                            cell.font = header_font
+                            cell.fill = header_fill
+                        try:
+                            ln = len(str(val)) if val not in (None, "") else 0
+                        except Exception:
+                            ln = 0
+                        if ln > widths.get(ci, 0):
+                            widths[ci] = ln
+                    row += 1
+            for ci, w in widths.items():
+                ws.column_dimensions[get_column_letter(ci + 1)].width = min(max(w + 2, 10), 50)
+            ws.freeze_panes = "A2"
+        wb.save(output_path)
+        return ""
+    except Exception as e:
+        return f"Could not write XLSX: {e}"
+
+
+def _pdf_to_excel_write_csv_zip(per_page, output_path):
+    import csv as _csv
+    try:
+        with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            for page_num, tables in per_page:
+                for ti, table in enumerate(tables, 1):
+                    buf = io.StringIO()
+                    writer = _csv.writer(buf)
+                    writer.writerows([("" if v is None else v) for v in row] for row in table)
+                    name = f"page_{page_num:03d}_table_{ti}.csv" if len(tables) > 1 else f"page_{page_num:03d}.csv"
+                    # UTF-8 BOM: without it Excel on Windows misdetects the
+                    # encoding (Bengali/CJK shown as mojibake). LibreOffice
+                    # and parsers handle the BOM transparently.
+                    zf.writestr(name, "\ufeff" + buf.getvalue())
+        return ""
+    except Exception as e:
+        return f"Could not write CSV archive: {e}"
+
+
+def _pdf_to_excel_convert(pdf_path, output_path, pages=None, page_ranges=None, flavor="auto", fmt="xlsx"):
+    try:
+        import pdfplumber
+    except ImportError:
+        return {"success": False, "error": "Table engine unavailable (pdfplumber missing).",
+                "missingDependencies": ["pdfplumber"]}
+    try:
+        import pandas  # noqa: F401  (cleaning step; fallback exists without it)
+    except ImportError:
+        pandas = None
+    flavor = (flavor or "auto").lower()
+    if flavor not in _PDF_TO_EXCEL_FLAVORS:
+        flavor = "auto"
+    fmt = (fmt or "xlsx").lower()
+    if fmt not in _PDF_TO_EXCEL_FORMATS:
+        fmt = "xlsx"
+    if fmt == "xlsx":
+        try:
+            import openpyxl  # noqa: F401
+        except ImportError:
+            return {"success": False, "error": "XLSX engine unavailable (openpyxl missing).",
+                    "missingDependencies": ["openpyxl"]}
+    try:
+        pdf = pdfplumber.open(pdf_path)
+    except Exception as e:
+        if "password" in str(e).lower():
+            return {"success": False, "error": "ENCRYPTED: This PDF is password-protected. Unlock it first."}
+        return {"success": False, "error": f"Could not open PDF: {e}"}
+    try:
+        total = len(pdf.pages)
+        idx = _pdf_to_excel_page_list(total, pages, page_ranges)
+        if not idx:
+            return {"success": False, "error": "No valid pages selected."}
+        per_page = []
+        notes = []
+        table_total = 0
+        for n, pi in enumerate(idx):
+            page = pdf.pages[pi]
+            raw_tables = []
+            try:
+                if flavor in ("auto", "lattice"):
+                    raw_tables = page.extract_tables(table_settings=dict(_PDF_TO_EXCEL_LATTICE_SETTINGS)) or []
+                if not raw_tables and flavor in ("auto", "stream"):
+                    raw_tables = page.extract_tables(table_settings=dict(_PDF_TO_EXCEL_STREAM_SETTINGS)) or []
+            except Exception as e:
+                notes.append(f"page {pi + 1}: table detection failed ({e})")
+                continue
+            cleaned = []
+            for raw in raw_tables:
+                t = _pdf_to_excel_clean(raw)
+                if t:
+                    cleaned.append(t)
+            if not cleaned:
+                try:
+                    if (page.extract_text() or "").strip() == "":
+                        notes.append(f"page {pi + 1}: no extractable text (scanned? try the OCR tool first)")
+                except Exception:
+                    pass
+            else:
+                table_total += len(cleaned)
+                per_page.append((pi + 1, cleaned))
+                if _pdf_to_excel_shredded_hits(cleaned) >= 6:
+                    notes.append(f"page {pi + 1}: complex-script text is stored glyph-by-glyph in the source PDF; "
+                                 "words may show extra spaces (numbers and table structure are unaffected)")
+            if len(idx) >= 5 and (n + 1) % 5 == 0:
+                sys.stderr.write(f"PROGRESS:{int(((n + 1) / len(idx)) * 80)}\n")
+        if table_total == 0:
+            return {"success": False, "error": "No extractable tables found in the selected pages.",
+                    "notes": notes, "pageCount": total, "tableCount": 0}
+        if fmt == "xlsx":
+            write_err = _pdf_to_excel_write_xlsx(per_page, output_path)
+        else:
+            write_err = _pdf_to_excel_write_csv_zip(per_page, output_path)
+        if write_err:
+            return {"success": False, "error": write_err, "notes": notes,
+                    "pageCount": total, "tableCount": table_total}
+        sys.stderr.write("PROGRESS:100\n")
+        return {"success": True, "pageCount": total, "tableCount": table_total,
+                "flavor": flavor, "format": fmt, "notes": notes, "output": output_path}
+    finally:
+        try:
+            pdf.close()
+        except Exception:
+            pass
+
+
+class pdf_to_excel:
+    @staticmethod
+    def main():
+        if len(sys.argv) < 2:
+            print(json.dumps({"success": False, "error": "No arguments provided"}))
+            sys.exit(1)
+        try:
+            json_file_path = sys.argv[1]
+            with open(json_file_path, "r", encoding="utf-8") as f:
+                request = json.load(f)
+            pdf_path = request.get("file_path")
+            output_path = request.get("output_path")
+            if not pdf_path or not os.path.exists(pdf_path):
+                print(json.dumps({"success": False, "error": f"PDF file not found: {pdf_path}"}))
+                sys.exit(1)
+            if not output_path:
+                print(json.dumps({"success": False, "error": "No output path provided"}))
+                sys.exit(1)
+            result = _pdf_to_excel_convert(
+                pdf_path, output_path,
+                pages=request.get("pages"),
+                page_ranges=request.get("page_ranges"),
+                flavor=request.get("flavor", "auto"),
+                fmt=request.get("format", "xlsx"),
+            )
+            print(json.dumps(result))
+        except json.JSONDecodeError as e:
+            print(json.dumps({"success": False, "error": f"Invalid JSON input: {str(e)}"}))
+            sys.exit(1)
+        except Exception as e:
+            print(json.dumps({"success": False, "error": f"Processing error: {str(e)}"}))
+            sys.exit(1)
+
+
+# ============================================================
 # Module shims — allow "from X import main" inside main()
 # ============================================================
 import types as _types
@@ -2356,6 +2690,7 @@ _make_module("metadata_scrub_scan",      metadata_scrub_scan.main)
 _make_module("metadata_scrub_scrub",     metadata_scrub_scrub.main)
 _make_module("pdf_to_markdown",     pdf_to_markdown.main)
 _make_module("blank_duplicate_scan",       blank_duplicate_scan.main)
+_make_module("pdf_to_excel",            pdf_to_excel.main)
 
 
 if __name__ == "__main__":

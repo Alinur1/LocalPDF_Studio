@@ -1,0 +1,547 @@
+/**
+ * LocalPDF Studio - Offline PDF Toolkit
+ * ======================================
+ * 
+ * @author      Md. Alinur Hossain <alinur1160@gmail.com>
+ * @license     AGPL 3.0 (GNU Affero General Public License version 3)
+ * @website     https://alinur1.github.io/LocalPDF_Studio_Website/
+ * @repository  https://github.com/Alinur1/LocalPDF_Studio
+ * 
+ * Copyright (c) 2025 Md. Alinur Hossain. All rights reserved.
+ * 
+ * Architecture:
+ * - Frontend: Electron + HTML/CSS/JS
+ * - Backend: ASP.NET Core Web API, Python
+ * - PDF Engine: PdfSharp + Mozilla PDF.js
+**/
+
+
+/* src/renderer/tools/pdfToExcel/pdfToExcel.css */
+
+:root {
+    --tool-title-color: #ecf0f1;
+    --select-btn-color: #ecf0f1;
+    --select-btn-bg: #2c3e50;
+    --select-btn-border: #3498db;
+    --select-btn-hover-bg: #34495e;
+    --selected-file-bg: #2c3e50;
+    --selected-file-border: #18222e;
+    --selected-file-color: #ecf0f1;
+    --pdf-name-color: #ecf0f1;
+    --pdf-size-color: #bdc3c7;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --preview-container-bg: #2c3e50;
+    --preview-container-border: #18222e;
+    --preview-header-color: #ecf0f1;
+    --preview-header-border: #34495e;
+    --page-count-bg: #34495e;
+    --page-count-color: #bdc3c7;
+    --preview-grid-scroll-track: #1c2833;
+    --preview-grid-scroll-thumb: #34495e;
+    --preview-grid-scroll-thumb-hover: #4a5f7f;
+    --page-thumbnail-bg: #1c2833;
+    --page-thumbnail-border: #34495e;
+    --page-thumbnail-hover-border: #3498db;
+    --page-label-color: #bdc3c7;
+    --conversion-options-bg: #2c3e50;
+    --conversion-options-border: #18222e;
+    --conversion-options-title-color: #ecf0f1;
+    --conversion-options-title-border: #34495e;
+    --option-label-color: #bdc3c7;
+    --checkbox-accent: #3498db;
+    --options-select-bg: #1c2833;
+    --options-select-border: #34495e;
+    --options-select-color: #ecf0f1;
+    --options-select-focus-border: #3498db;
+    --help-text-color: #7f8c8d;
+    --disabled-btn-bg: #34495e;
+}
+
+body.light {
+    --tool-title-color: #1a1a1a;
+    --select-btn-color: #1a1a1a;
+    --select-btn-bg: #F0EFEA;
+    --select-btn-border: #D97757;
+    --select-btn-hover-bg: #E6E5E0;
+    --selected-file-bg: #F0EFEA;
+    --selected-file-border: #D1CEC5;
+    --selected-file-color: #1a1a1a;
+    --pdf-name-color: #1a1a1a;
+    --pdf-size-color: #666666;
+    --remove-btn-bg: #e74c3c;
+    --remove-btn-hover: #c0392b;
+    --preview-container-bg: #F0EFEA;
+    --preview-container-border: #D1CEC5;
+    --preview-header-color: #1a1a1a;
+    --preview-header-border: #E6E5E0;
+    --page-count-bg: #E6E5E0;
+    --page-count-color: #666666;
+    --preview-grid-scroll-track: #E6E5E0;
+    --preview-grid-scroll-thumb: #D1CEC5;
+    --preview-grid-scroll-thumb-hover: #D97757;
+    --page-thumbnail-bg: #FAF9F5;
+    --page-thumbnail-border: #D1CEC5;
+    --page-thumbnail-hover-border: #D97757;
+    --page-label-color: #666666;
+    --conversion-options-bg: #F0EFEA;
+    --conversion-options-border: #D1CEC5;
+    --conversion-options-title-color: #1a1a1a;
+    --conversion-options-title-border: #E6E5E0;
+    --option-label-color: #666666;
+    --checkbox-accent: #D97757;
+    --options-select-bg: #FFFFFF;
+    --options-select-border: #D1CEC5;
+    --options-select-color: #1a1a1a;
+    --options-select-focus-border: #D97757;
+    --help-text-color: #888888;
+    --disabled-btn-bg: #E2B09F;
+}
+
+.tool-title {
+    font-size: 1.2rem;
+    margin-left: 1rem;
+    color: var(--tool-title-color);
+}
+
+.tool-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+    height: calc(100vh - 58px);
+    overflow-y: auto;
+}
+
+.file-selection-area .select-pdf-btn {
+    color: var(--select-btn-color);
+    width: 100%;
+    border: 2px dashed var(--select-btn-border);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    background: var(--select-btn-bg);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.file-selection-area .select-pdf-btn:hover {
+    background: var(--select-btn-hover-bg);
+    border-color: var(--select-btn-border);
+}
+
+.selected-file-info {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: var(--selected-file-bg);
+    border-radius: 6px;
+    gap: 1rem;
+    color: var(--selected-file-color);
+    border: 1px solid var(--selected-file-border);
+}
+
+.pdf-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--pdf-name-color);
+    margin: 0 0 0.3rem 0;
+}
+
+.pdf-size {
+    font-size: 0.75rem;
+    color: var(--pdf-size-color);
+    margin: 0;
+}
+
+.remove-btn {
+    background: var(--remove-btn-bg);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.remove-btn:hover {
+    background: var(--remove-btn-hover);
+}
+
+.preview-container {
+    background: var(--preview-container-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--preview-container-border);
+    max-height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--preview-header-border);
+}
+
+.preview-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--preview-header-color);
+}
+
+.page-count {
+    font-size: 0.85rem;
+    color: var(--page-count-color);
+    background: var(--page-count-bg);
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+}
+
+.preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+    overflow-y: auto;
+    padding: 0.5rem;
+    max-height: 400px;
+}
+
+.preview-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.preview-grid::-webkit-scrollbar-track {
+    background: var(--preview-grid-scroll-track);
+    border-radius: 4px;
+}
+
+.preview-grid::-webkit-scrollbar-thumb {
+    background: var(--preview-grid-scroll-thumb);
+    border-radius: 4px;
+}
+
+.preview-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--preview-grid-scroll-thumb-hover);
+}
+
+.page-thumbnail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--page-thumbnail-bg);
+    border-radius: 6px;
+    padding: 0.5rem;
+    border: 2px solid var(--page-thumbnail-border);
+    cursor: pointer;
+}
+
+.page-thumbnail:hover {
+    border-color: var(--page-thumbnail-hover-border);
+    transform: translateY(-2px);
+}
+
+.page-thumbnail canvas {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.page-label {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--page-label-color);
+    text-align: center;
+}
+
+.conversion-options-container {
+    background: var(--conversion-options-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--conversion-options-border);
+}
+
+.conversion-options-container h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    color: var(--conversion-options-title-color);
+    border-bottom: 1px solid var(--conversion-options-title-border);
+    padding-bottom: 0.8rem;
+}
+
+.option-group {
+    margin-bottom: 1.5rem;
+}
+
+.option-group label {
+    display: block;
+    color: var(--option-label-color);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.option-group label input[type="checkbox"] {
+    margin-right: 0.5rem;
+    accent-color: var(--checkbox-accent);
+    cursor: pointer;
+}
+
+.options-select {
+    width: 100%;
+    padding: 0.7rem;
+    background: var(--options-select-bg);
+    border: 1px solid var(--options-select-border);
+    border-radius: 4px;
+    color: var(--options-select-color);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.options-select:focus {
+    outline: none;
+    border-color: var(--options-select-focus-border);
+}
+
+.options-select option {
+    background: var(--options-select-bg);
+    color: var(--options-select-color);
+}
+
+.help-text {
+    display: block;
+    color: var(--help-text-color);
+    font-size: 0.75rem;
+    font-style: italic;
+    margin-top: 0.4rem;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+.action-buttons .top-btn {
+    min-width: 150px;
+}
+
+.action-buttons .top-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--disabled-btn-bg);
+}
+
+.action-buttons .top-btn:disabled:hover {
+    background: var(--disabled-btn-bg);
+}
+
+/* ---- PDF to Excel additions: selectable thumbnails, format cards, info ---- */
+
+:root {
+    --page-thumbnail-selected-bg: #1f3a52;
+    --page-thumbnail-selected-border: #3498db;
+    --page-label-selected-color: #3498db;
+    --mode-card-bg: #1c2833;
+    --mode-card-border: #34495e;
+    --mode-card-hover-border: #3498db;
+    --mode-card-selected-border: #3498db;
+    --mode-card-selected-bg: #1f3a52;
+    --mode-card-selected-shadow: rgba(52, 152, 219, 0.2);
+    --mode-details-color: #ecf0f1;
+    --mode-details-desc-color: #bdc3c7;
+    --xlsx-icon-gradient-start: #217346;
+    --xlsx-icon-gradient-end: #185c37;
+    --csv-icon-gradient-start: #3498db;
+    --csv-icon-gradient-end: #2980b9;
+    --info-box-bg: #1f3a52;
+    --info-box-border: #3498db;
+    --info-box-color: #ecf0f1;
+}
+
+body.light {
+    --page-thumbnail-selected-bg: #FFE8E0;
+    --page-thumbnail-selected-border: #D97757;
+    --page-label-selected-color: #D97757;
+    --mode-card-bg: #FAF9F5;
+    --mode-card-border: #D1CEC5;
+    --mode-card-hover-border: #D97757;
+    --mode-card-selected-border: #D97757;
+    --mode-card-selected-bg: #FFE8E0;
+    --mode-card-selected-shadow: rgba(217, 119, 87, 0.2);
+    --mode-details-color: #1a1a1a;
+    --mode-details-desc-color: #666666;
+    --xlsx-icon-gradient-start: #217346;
+    --xlsx-icon-gradient-end: #185c37;
+    --csv-icon-gradient-start: #D97757;
+    --csv-icon-gradient-end: #C06647;
+    --info-box-bg: #FFE8E0;
+    --info-box-border: #D97757;
+    --info-box-color: #1a1a1a;
+}
+
+.page-thumbnail {
+    position: relative;
+}
+
+.page-thumbnail.selected {
+    border-color: var(--page-thumbnail-selected-border);
+    background: var(--page-thumbnail-selected-bg);
+}
+
+.page-thumbnail.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 0.3rem;
+    right: 0.3rem;
+    background: var(--page-thumbnail-selected-border);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.page-thumbnail.selected canvas {
+    opacity: 0.8;
+}
+
+.page-thumbnail.selected .page-label {
+    color: var(--page-label-selected-color);
+    font-weight: bold;
+}
+
+.selection-info {
+    font-size: 0.85rem;
+    color: var(--preview-header-color);
+    opacity: 0.8;
+    margin: 0;
+}
+
+.action-btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.action-btn.secondary {
+    opacity: 0.8;
+}
+
+.options-input {
+    width: 100%;
+    padding: 0.6rem;
+    background: var(--options-select-bg);
+    border: 1px solid var(--options-select-border);
+    border-radius: 4px;
+    color: var(--options-select-color);
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.options-input:focus {
+    outline: none;
+    border-color: var(--options-select-focus-border);
+}
+
+.mode-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.mode-option {
+    cursor: pointer;
+    display: block;
+}
+
+.mode-option input[type="radio"] {
+    display: none;
+}
+
+.mode-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem;
+    background: var(--mode-card-bg);
+    border: 2px solid var(--mode-card-border);
+    border-radius: 8px;
+}
+
+.mode-option input[type="radio"]:checked+.mode-card {
+    border-color: var(--mode-card-selected-border);
+    background: var(--mode-card-selected-bg);
+    box-shadow: 0 0 0 2px var(--mode-card-selected-shadow);
+}
+
+.mode-card:hover {
+    border-color: var(--mode-card-hover-border);
+    transform: translateY(-2px);
+}
+
+.mode-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.xlsx-icon {
+    background: linear-gradient(135deg, var(--xlsx-icon-gradient-start) 0%, var(--xlsx-icon-gradient-end) 100%);
+}
+
+.csv-icon {
+    background: linear-gradient(135deg, var(--csv-icon-gradient-start) 0%, var(--csv-icon-gradient-end) 100%);
+}
+
+.mode-details h3 {
+    margin: 0 0 0.3rem 0;
+    font-size: 1rem;
+    color: var(--mode-details-color);
+}
+
+.mode-details p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--mode-details-desc-color);
+    line-height: 1.4;
+}
+
+.info-box {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--info-box-bg);
+    border-left: 4px solid var(--info-box-border);
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    color: var(--info-box-color);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}

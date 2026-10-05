@@ -38,6 +38,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveMergedPdf: (buffer) => ipcRenderer.invoke('save-merged-pdf', buffer),
     saveZipFile: (filename, buffer) => ipcRenderer.invoke('save-zip-file', { filename, buffer }),
     savePdfFile: (filename, buffer) => ipcRenderer.invoke('save-pdf-file', { filename, buffer }),
+    saveExcelFile: (filename, buffer) => ipcRenderer.invoke('save-excel-file', { filename, buffer }),
     saveTextFile: (filename, text) => ipcRenderer.invoke('save-text-file', { filename, text }),
     saveMarkdownFile: (filename, text) => ipcRenderer.invoke('save-markdown-file', { filename, text }),
     selectOutputFolder: () => ipcRenderer.invoke('select-output-folder'),

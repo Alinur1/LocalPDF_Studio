@@ -29,7 +29,8 @@
     "image-editor": "画像エディタ",
     "pdf-to-pdfa": "PDF から PDF/A への変換",
     "split-pdf-vertical": "PDF を分割（垂直）",
-    "pdf-to-markdown": "PDF から Markdown へ変換"
+    "pdf-to-markdown": "PDF から Markdown へ変換",
+    "tool-pdf-to-excel": "PDF を Excel に変換"
   },
   "error": {
     "empty-message": "開いているファイルはありません。 「PDF/Markdown ビューアを開く」をクリックして開始してください!"
@@ -1269,5 +1270,46 @@
     "insertTableTooltip": "表を挿入",
     "unsavedChangesTitle": "保存されていない変更",
     "unsavedChangesMessage": "保存されていない変更があります。このタブを閉じてもよろしいですか？"
+  },
+  "pdftoExcel": {
+    "page-title": "PDF を Excel に変換",
+    "preview-title": "PDF プレビュー - ページを選択",
+    "no-pages-selected": "ページが選択されていません（すべてのページを変換します）",
+    "clear-selection": "選択をクリア",
+    "conversion-options-title": "変換オプション",
+    "output-format-title": "出力形式",
+    "format-xlsx-title": "Excel (.xlsx)",
+    "format-xlsx-desc": "スタイル付きブック、ページごとに1シート",
+    "format-csv-title": "CSV (.zip)",
+    "format-csv-desc": "プレーンデータ、ページごとに1ファイル",
+    "flavor-label": "表の検出方法:",
+    "flavor-auto": "自動（推奨）",
+    "flavor-lattice": "罫線表（枠線あり）",
+    "flavor-stream": "罫線なし表（テキスト配置）",
+    "flavor-help": "自動では罫線検出を先に試し、なければテキスト配置に切り替えます",
+    "pages-to-convert-title": "変換するページ",
+    "pages-to-convert-label": "ページ:",
+    "pages-to-convert-help": "空欄のままですべてのページを変換します。上のサムネイルをクリックして選択もできます。",
+    "convert-note-title": "直接エクスポート: ",
+    "convert-note-desc": "表を抽出してすぐにダウンロードします。スキャンされたページには抽出可能なテキストがありません — 先にOCRを実行してください。",
+    "convert-to-excel": "Excel に変換"
+  },
+  "pdfToExcelJS": {
+    "selectingPdfs": "PDF ファイルを選択中...",
+    "loadingPreview": "PDF プレビューを読み込み中...",
+    "failedToLoadPreview": "PDF プレビューの読み込みに失敗",
+    "pageLabel": "ページ ",
+    "pagesSelected": "選択中のページ",
+    "dropOnlyOne": "1 つの PDF ファイルのみをドラッグ&ドロップしてください。",
+    "failedToSaveDrop": "ドラッグ&ドロップされたファイルの保存に失敗: ",
+    "dropPdfFile": "PDF ファイルをドラッグ&ドロップしてください。",
+    "selectFileFirst": "最初にファイルを選択してください。",
+    "convertingFile": "表を抽出中...",
+    "convertingBtn": "変換中...",
+    "successMsg": "成功！表の抽出が完了しました！",
+    "successSavedTo": "保存先: ",
+    "tablesExtracted": "抽出された表の数: ",
+    "cancelledMsg": "操作がキャンセルされたか、ファイルの保存に失敗しました。",
+    "errorConverting": "PDF の変換中にエラーが発生しました: "
   }
 }

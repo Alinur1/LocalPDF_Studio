@@ -29,7 +29,8 @@
     "image-editor": "图片编辑器",
     "pdf-to-pdfa": "PDF 转 PDF/A 转换器",
     "split-pdf-vertical": "拆分 PDF (垂直)",
-    "pdf-to-markdown": "PDF 转 Markdown"
+    "pdf-to-markdown": "PDF 转 Markdown",
+    "tool-pdf-to-excel": "PDF 转 Excel"
   },
   "error": {
     "empty-message": "没有打开的文件。点击“打开 PDF/Markdown 查看器”开始使用!"
@@ -1269,5 +1270,46 @@
     "insertTableTooltip": "插入表格",
     "unsavedChangesTitle": "未保存的更改",
     "unsavedChangesMessage": "您有未保存的更改。确定要关闭此选项卡吗？"
+  },
+  "pdftoExcel": {
+    "page-title": "PDF 转 Excel",
+    "preview-title": "PDF 预览 - 选择页面",
+    "no-pages-selected": "未选择页面（将转换所有页面）",
+    "clear-selection": "清除选择",
+    "conversion-options-title": "转换选项",
+    "output-format-title": "输出格式",
+    "format-xlsx-title": "Excel (.xlsx)",
+    "format-xlsx-desc": "带样式的工作簿，每页一个工作表",
+    "format-csv-title": "CSV (.zip)",
+    "format-csv-desc": "纯数据，每页一个文件",
+    "flavor-label": "表格检测:",
+    "flavor-auto": "自动（推荐）",
+    "flavor-lattice": "有框线表格（边框线）",
+    "flavor-stream": "无框线表格（对齐文本）",
+    "flavor-help": "自动模式先尝试框线检测，失败则回退到文本对齐",
+    "pages-to-convert-title": "要转换的页面",
+    "pages-to-convert-label": "页面:",
+    "pages-to-convert-help": "留空即转换所有页面，也可点击上方缩略图选择页面。",
+    "convert-note-title": "直接导出: ",
+    "convert-note-desc": "提取表格后立即下载。扫描版页面没有可提取的文本 — 请先使用 OCR 处理。",
+    "convert-to-excel": "转换为 Excel"
+  },
+  "pdfToExcelJS": {
+    "selectingPdfs": "正在选择 PDF 文件...",
+    "loadingPreview": "正在加载 PDF 预览...",
+    "failedToLoadPreview": "PDF 预览加载失败",
+    "pageLabel": "页面 ",
+    "pagesSelected": "已选页面",
+    "dropOnlyOne": "一次只能拖放一个 PDF 文件。",
+    "failedToSaveDrop": "拖放文件保存失败: ",
+    "dropPdfFile": "请拖放一个 PDF 文件。",
+    "selectFileFirst": "请先选择文件。",
+    "convertingFile": "正在提取表格...",
+    "convertingBtn": "转换中...",
+    "successMsg": "成功！表格提取完成！",
+    "successSavedTo": "已保存到: ",
+    "tablesExtracted": "提取的表格数: ",
+    "cancelledMsg": "操作已取消或文件保存失败。",
+    "errorConverting": "转换 PDF 时出错: "
   }
 }

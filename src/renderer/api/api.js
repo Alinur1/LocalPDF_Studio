@@ -122,6 +122,7 @@ async function getEndpoints() {
         pdfToPdfa: `${base}/PdfToPdfa/convert`,
         verticalSplit: `${base}/PdfVerticalSplit/split`,
         pdfToMarkdown: `${base}/PdfMarkdown/convert`,
+        pdfToExcel: `${base}/PdfToExcel/convert`,
         metadataScrubScan: `${base}/PdfMetadataScrubber/scan`,
         metadataScrubScrub: `${base}/PdfMetadataScrubber/scrub`,
         blankDuplicateScan: `${base}/PdfBlankDuplicate/scan`,

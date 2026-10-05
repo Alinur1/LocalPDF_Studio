@@ -1,0 +1,138 @@
+<!--
+ * LocalPDF Studio - Offline PDF Toolkit
+ * ======================================
+ * 
+ * @author      Md. Alinur Hossain <alinur1160@gmail.com>
+ * @license     AGPL 3.0 (GNU Affero General Public License version 3)
+ * @website     https://alinur1.github.io/LocalPDF_Studio_Website/
+ * @repository  https://github.com/Alinur1/LocalPDF_Studio
+ * 
+ * Copyright (c) 2025 Md. Alinur Hossain. All rights reserved.
+ * 
+ * Architecture:
+ * - Frontend: Electron + HTML/CSS/JS
+ * - Backend: ASP.NET Core Web API, Python
+ * - PDF Engine: PdfSharp + Mozilla PDF.js
+-->
+
+
+<!-- src/renderer/tools/pdfToExcel/pdfToExcel.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalPDF Studio - PDF to Excel</title>
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self' http://localhost:*;">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="./pdfToExcel.css">
+    <script type="module" src="../../utils/themeManager.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <a href="../../index.html" class="top-btn" data-i18n="common.back-btn">← Back</a>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-spreadsheet-icon lucide-file-spreadsheet"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg>
+            <h1 class="tool-title" data-i18n="pdftoExcel.page-title">PDF to Excel</h1>
+        </div>
+        <main class="tool-container">
+            <div class="file-selection-area">
+                <button id="select-pdf-btn" class="select-pdf-btn">
+                    <span data-i18n="common.btn-select">Click to Select a PDF File or drop PDF here</span>
+                    <p><small class="select-hint" data-i18n="common.supported-formats">Supports PDF</small></p>
+                </button>
+                <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                    <div style="flex-grow: 1;">
+                        <p id="pdf-name" class="pdf-name"></p>
+                        <p id="pdf-size" class="pdf-size"></p>
+                    </div>
+                    <button id="remove-pdf-btn" class="remove-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="preview-container" class="preview-container" style="display: none;">
+                <div class="preview-header">
+                    <div>
+                        <h3 data-i18n="pdftoExcel.preview-title">PDF Preview - Select Pages</h3>
+                        <p class="selection-info" id="selection-info" data-i18n="pdftoExcel.no-pages-selected">No pages selected (all pages will be converted)</p>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span id="page-count" class="page-count"></span>
+                        <button id="clear-selection-btn" class="action-btn secondary" data-i18n="pdftoExcel.clear-selection" style="display: none;">Clear Selection</button>
+                    </div>
+                </div>
+                <div id="preview-grid" class="preview-grid">
+                </div>
+            </div>
+            <div class="conversion-options-container">
+                <h2 data-i18n="pdftoExcel.conversion-options-title">Conversion Options</h2>
+                <div class="option-group">
+                    <h3 data-i18n="pdftoExcel.output-format-title">Output Format</h3>
+                    <div class="mode-selection">
+                        <label class="mode-option">
+                            <input type="radio" name="output-format" value="xlsx" checked>
+                            <div class="mode-card">
+                                <div class="mode-icon xlsx-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-spreadsheet-icon lucide-file-spreadsheet"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg>
+                                </div>
+                                <div class="mode-details">
+                                    <h3 data-i18n="pdftoExcel.format-xlsx-title">Excel (.xlsx)</h3>
+                                    <p data-i18n="pdftoExcel.format-xlsx-desc">Styled workbook, one sheet per page</p>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="mode-option">
+                            <input type="radio" name="output-format" value="csv">
+                            <div class="mode-card">
+                                <div class="mode-icon csv-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text-icon lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
+                                </div>
+                                <div class="mode-details">
+                                    <h3 data-i18n="pdftoExcel.format-csv-title">CSV (.zip)</h3>
+                                    <p data-i18n="pdftoExcel.format-csv-desc">Plain data, one file per page</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="option-group">
+                    <label for="tableFlavor" data-i18n="pdftoExcel.flavor-label">Table Detection:</label>
+                    <select id="tableFlavor" class="options-select">
+                        <option value="auto" data-i18n="pdftoExcel.flavor-auto" selected>Auto (recommended)</option>
+                        <option value="lattice" data-i18n="pdftoExcel.flavor-lattice">Ruled tables (border lines)</option>
+                        <option value="stream" data-i18n="pdftoExcel.flavor-stream">Borderless tables (aligned text)</option>
+                    </select>
+                    <small class="help-text" data-i18n="pdftoExcel.flavor-help">Auto tries ruled-line detection first, then falls back to text alignment</small>
+                </div>
+                <div class="option-group">
+                    <h3 data-i18n="pdftoExcel.pages-to-convert-title">Pages to Convert</h3>
+                    <label for="pages-input" data-i18n="pdftoExcel.pages-to-convert-label">Pages:</label>
+                    <input type="text" id="pages-input" class="options-input" placeholder="e.g., 1, 3-5, 8">
+                    <small class="help-text" data-i18n="pdftoExcel.pages-to-convert-help">Leave empty to convert all pages. Click thumbnails above to pick pages.</small>
+                </div>
+                <div class="info-box" id="convert-info" style="display: block;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    <div>
+                        <strong data-i18n="pdftoExcel.convert-note-title">Direct export: </strong>
+                        <span data-i18n="pdftoExcel.convert-note-desc">Tables are extracted and downloaded immediately. Scanned pages contain no extractable text — run them through OCR first.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button id="convert-btn" class="top-btn" data-i18n="pdftoExcel.convert-to-excel" disabled>Convert to Excel</button>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="./pdfToExcel.js"></script>
+</body>
+
+</html>

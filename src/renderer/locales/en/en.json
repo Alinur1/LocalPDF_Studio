@@ -29,7 +29,8 @@
     "image-editor": "Image Editor",
     "pdf-to-pdfa": "PDF to PDF/A Converter",
     "split-pdf-vertical": "Split PDF (Vertical)",
-    "pdf-to-markdown": "PDF to Markdown"
+    "pdf-to-markdown": "PDF to Markdown",
+    "tool-pdf-to-excel": "PDF to Excel"
   },
   "error": {
     "empty-message": "No files are open. Click \"Open PDF/Markdown viewer\" to get started!"
@@ -1269,5 +1270,46 @@
     "insertTableTooltip": "Insert Table",
     "unsavedChangesTitle": "Unsaved Changes",
     "unsavedChangesMessage": "You have unsaved changes. Are you sure you want to close this tab?"
+  },
+  "pdftoExcel": {
+    "page-title": "PDF to Excel",
+    "preview-title": "PDF Preview - Select Pages",
+    "no-pages-selected": "No pages selected (all pages will be converted)",
+    "clear-selection": "Clear Selection",
+    "conversion-options-title": "Conversion Options",
+    "output-format-title": "Output Format",
+    "format-xlsx-title": "Excel (.xlsx)",
+    "format-xlsx-desc": "Styled workbook, one sheet per page",
+    "format-csv-title": "CSV (.zip)",
+    "format-csv-desc": "Plain data, one file per page",
+    "flavor-label": "Table Detection:",
+    "flavor-auto": "Auto (recommended)",
+    "flavor-lattice": "Ruled tables (border lines)",
+    "flavor-stream": "Borderless tables (aligned text)",
+    "flavor-help": "Auto tries ruled-line detection first, then falls back to text alignment",
+    "pages-to-convert-title": "Pages to Convert",
+    "pages-to-convert-label": "Pages:",
+    "pages-to-convert-help": "Leave empty to convert all pages. Click thumbnails above to pick pages.",
+    "convert-note-title": "Direct export: ",
+    "convert-note-desc": "Tables are extracted and downloaded immediately. Scanned pages contain no extractable text — run them through OCR first.",
+    "convert-to-excel": "Convert to Excel"
+  },
+  "pdfToExcelJS": {
+    "selectingPdfs": "Selecting PDF files...",
+    "loadingPreview": "Loading PDF preview...",
+    "failedToLoadPreview": "Failed to load PDF preview",
+    "pageLabel": "Page ",
+    "pagesSelected": "Pages selected",
+    "dropOnlyOne": "Please drop only one PDF file.",
+    "failedToSaveDrop": "Failed to save dropped file: ",
+    "dropPdfFile": "Please drop a PDF file.",
+    "selectFileFirst": "Please select a file first.",
+    "convertingFile": "Extracting tables...",
+    "convertingBtn": "Converting...",
+    "successMsg": "Success! Tables extracted successfully!",
+    "successSavedTo": "Saved to: ",
+    "tablesExtracted": "Tables extracted: ",
+    "cancelledMsg": "Operation cancelled or failed to save the file.",
+    "errorConverting": "An error occurred while converting the PDF: "
   }
 }
