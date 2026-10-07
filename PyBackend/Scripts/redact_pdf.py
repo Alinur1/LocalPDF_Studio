@@ -16,7 +16,7 @@
 import sys
 import json
 import argparse
-import fitz  # PyMuPDF
+import pymupdf as fitz
 
 
 def hex_to_rgb(hex_color):

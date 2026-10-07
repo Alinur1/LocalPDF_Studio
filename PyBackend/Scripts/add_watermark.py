@@ -21,7 +21,7 @@ import base64
 import tempfile
 import argparse
 import json
-import fitz  # PyMuPDF
+import pymupdf as fitz
 from PIL import Image, ImageDraw, ImageFont
 
 

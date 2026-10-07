@@ -315,7 +315,7 @@ def scan_pdf(pdf_path):
 
     # --- Images + fonts via PyMuPDF (independent of pikepdf).
     try:
-        import fitz as _fitz
+        import pymupdf as _fitz
 
         doc = None
         try:

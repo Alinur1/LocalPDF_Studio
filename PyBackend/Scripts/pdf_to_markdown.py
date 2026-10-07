@@ -74,7 +74,7 @@ def markdown_image_paths(md_text: str, tmp_dir: str, output_dir: str) -> str:
 def _load_dependencies():
     missing = []
     modules = {}
-    for pkg in ["fitz", "pymupdf4llm"]:
+    for pkg in ["pymupdf", "pymupdf4llm"]:
         try:
             modules[pkg] = importlib.import_module(pkg)
         except Exception:
@@ -99,7 +99,7 @@ def convert(input_path, output_folder, pdf_stem, options):
             "engine":              "pymupdf4llm",
         }
 
-    fitz        = modules["fitz"]
+    fitz        = modules["pymupdf"]
     pymupdf4llm = modules["pymupdf4llm"]
 
     include_images = bool(options.get("includeImages", True))

@@ -20,7 +20,7 @@ import io
 import re
 import hashlib
 import difflib
-import fitz  # PyMuPDF
+import pymupdf as fitz
 from PIL import Image
 
 

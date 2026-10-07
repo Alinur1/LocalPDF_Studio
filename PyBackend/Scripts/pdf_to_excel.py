@@ -21,7 +21,7 @@ import json
 import time
 import zipfile
 import unicodedata
-import fitz  # PyMuPDF
+import pymupdf as fitz
 
 
 FLAVORS = ("auto", "lattice", "stream", "hybrid")

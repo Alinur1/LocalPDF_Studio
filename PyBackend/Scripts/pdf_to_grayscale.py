@@ -16,7 +16,7 @@
 import sys
 import os
 import json
-import fitz  # PyMuPDF
+import pymupdf as fitz
 
 
 def convert_vector(input_path, output_path, custom_pages=None):

@@ -18,7 +18,7 @@ import os
 import io
 import json
 import base64
-import fitz  # PyMuPDF
+import pymupdf as fitz
 
 
 def extract_images_from_pdf(pdf_path, pages=None, page_ranges=None, mode="extract"):

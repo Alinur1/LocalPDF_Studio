@@ -19,7 +19,7 @@ import io
 import json
 import zipfile
 import argparse
-import fitz  # PyMuPDF
+import pymupdf as fitz
 from PIL import Image
 
 
