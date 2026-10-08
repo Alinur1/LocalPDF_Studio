@@ -14,52 +14,49 @@
 # - PDF Engine: PdfSharp + Mozilla PDF.js
 
 import sys
+import importlib
 import json
 
+COMMANDS = {
+    "watermark": "add_watermark",
+    "extract_images": "extract_images",
+    "convert_pdf_images": "convert_pdf_images",
+    "grayscale": "pdf_to_grayscale",
+    "redact": "redact_pdf",
+    "metadata_scrub_scan": "metadata_scrub_scan",
+    "metadata_scrub_scrub": "metadata_scrub_scrub",
+    "pdf_to_markdown": "pdf_to_markdown",
+    "blank_duplicate_scan": "blank_duplicate_scan",
+    "pdf_to_excel": "pdf_to_excel",
+}
 
-def main():
+
+def main() -> int:
     if len(sys.argv) < 2:
-        print(json.dumps({"success": False, "error": "No command specified. Available: watermark, extract_images, convert_pdf_images, grayscale, redact, metadata_scrub_scan, metadata_scrub_scrub, pdf_to_markdown, blank_duplicate_scan, pdf_to_excel"}))
-        sys.exit(1)
+        print(json.dumps({"success": False,
+                          "error": f"No command specified. Available: {', '.join(COMMANDS)}"}))
+        return 1
 
     command = sys.argv[1]
     # Remove the command from argv so each script's argparse / sys.argv logic works normally
     sys.argv = [sys.argv[0]] + sys.argv[2:]
 
-    if command == "watermark":
-        from add_watermark import main as _main
-        _main()
-    elif command == "extract_images":
-        from extract_images import main as _main
-        _main()
-    elif command == "convert_pdf_images":
-        from convert_pdf_images import main as _main
-        _main()
-    elif command == "grayscale":
-        from pdf_to_grayscale import main as _main
-        _main()
-    elif command == "redact":
-        from redact_pdf import main as _main
-        _main()
-    elif command == "metadata_scrub_scan":
-        from metadata_scrub_scan import main as _main
-        _main()
-    elif command == "metadata_scrub_scrub":
-        from metadata_scrub_scrub import main as _main
-        _main()
-    elif command == "pdf_to_markdown":
-        from pdf_to_markdown import main as _main
-        _main()
-    elif command == "blank_duplicate_scan":
-        from blank_duplicate_scan import main as _main
-        _main()
-    elif command == "pdf_to_excel":
-        from pdf_to_excel import main as _main
-        _main()
-    else:
-        print(json.dumps({"success": False, "error": f"Unknown command: '{command}'. Available: watermark, extract_images, convert_pdf_images, grayscale, redact, metadata_scrub_scan, metadata_scrub_scrub, pdf_to_markdown, blank_duplicate_scan, pdf_to_excel"}))
-        sys.exit(1)
+    module_name = COMMANDS.get(command)
+    if module_name is None:
+        print(json.dumps({"success": False,
+                          "error": f"Unknown command: '{command}'. Available: {', '.join(COMMANDS)}"}))
+        return 1
+
+    try:
+        module = importlib.import_module(module_name)
+    except Exception as exc:  # missing vendored dependency, syntax error, ...
+        print(json.dumps({"success": False,
+                          "error": f"Failed to load module '{module_name}': {exc}"}))
+        return 1
+
+    module.main()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
