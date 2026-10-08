@@ -13,62 +13,104 @@
 # - Backend: ASP.NET Core Web API, Python
 # - PDF Engine: PdfSharp + Mozilla PDF.js
 
+from __future__ import annotations
 import sys
 import os
 import json
-import io
 import re
 import hashlib
 import difflib
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple
 import pymupdf as fitz
 from PIL import Image
 
-
 # A page with a full sentence (30+ non-space chars) is content, not blank.
 # Thresholds count only page-number/header/footer residue as ignorable text.
-PRESETS = {
-    "strict":   {"maxTextChars": 5, "maxInkRatio": 0.002, "dupHamming": 3},
+PRESETS: Dict[str, Dict[str, Any]] = {
+    "strict":   {"maxTextChars": 5,  "maxInkRatio": 0.002, "dupHamming": 3},
     "balanced": {"maxTextChars": 10, "maxInkRatio": 0.005, "dupHamming": 6},
     "lenient":  {"maxTextChars": 20, "maxInkRatio": 0.01,  "dupHamming": 10},
 }
+
 # Pixels at/above this gray level count as paper white. 240 (not 250)
 # tolerates JPEG/scan background noise; real text and lines are far darker.
 WHITE_LEVEL = 240
 
-# Production guards for the blank/duplicate detector.
+# Production guards.
 MAX_PAGES = 2000
+MAX_WARNINGS = 20
 # Visual agreement required to call two same-text pages "exact".
 # Keeps signed vs. unsigned copies of the same contract out of exact groups.
 EXACT_VISUAL_MAX = 3
-MAX_WARNINGS = 20
+# dHash is 64 bits; similarity is reported as 1 - maxPairDistance / 64.
+DHASH_BITS = 64
+
+# Text gate: pages with substantial text must also read alike before they
+# may be grouped (dHash cannot tell two same-layout pages with different
+# wording apart). Below this length the page is treated as image-only.
+TEXT_GATE_MIN_CHARS = 30
+TEXT_GATE_RATIO = 0.85
+TEXT_SNIPPET_CHARS = 4000
+
+# Progress lines are opt-in: the current ASP.NET host does not read stderr
+# progress, so it stays silent unless a listener sets this variable.
+PROGRESS_ENV = "LOCALPDF_PROGRESS"
+
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
 
 
-def resolve_config(preset, options):
+@dataclass
+class ScanConfig:
+    max_text_chars: int
+    max_ink_ratio: float
+    dup_hamming: int
+    ignore_footer: bool = True
+    render_dpi: int = 100
+
+    @property
+    def exact_hamming(self) -> int:
+        return min(EXACT_VISUAL_MAX, self.dup_hamming)
+
+
+def resolve_config(preset: Optional[str], options: Optional[dict]) -> ScanConfig:
+    """Merge a named preset with per-request overrides, clamped to sane ranges."""
     base = PRESETS.get((preset or "balanced").lower(), PRESETS["balanced"])
-    cfg = dict(base)
     opts = options or {}
-    try:
-        if opts.get("maxTextChars") is not None:
-            cfg["maxTextChars"] = max(0, int(opts["maxTextChars"]))
-        if opts.get("maxInkRatio") is not None:
-            cfg["maxInkRatio"] = min(0.2, max(0.0, float(opts["maxInkRatio"])))
-        if opts.get("dupHamming") is not None:
-            cfg["dupHamming"] = min(32, max(0, int(opts["dupHamming"])))
-    except (ValueError, TypeError):
-        pass
-    cfg["ignoreFooter"] = bool(opts.get("ignoreFooter", True))
-    try:
-        cfg["renderDpi"] = min(200, max(72, int(opts.get("renderDpi", 100))))
-    except (ValueError, TypeError):
-        cfg["renderDpi"] = 100
-    return cfg
+
+    def as_int(key: str, lo: int, hi: int, default: int) -> int:
+        try:
+            return max(lo, min(hi, int(opts[key])))
+        except (KeyError, TypeError, ValueError):
+            return default
+
+    def as_float(key: str, lo: float, hi: float, default: float) -> float:
+        try:
+            return max(lo, min(hi, float(opts[key])))
+        except (KeyError, TypeError, ValueError):
+            return default
+
+    return ScanConfig(
+        max_text_chars=as_int("maxTextChars", 0, 10000, int(base["maxTextChars"])),
+        max_ink_ratio=as_float("maxInkRatio", 0.0, 0.2, float(base["maxInkRatio"])),
+        dup_hamming=as_int("dupHamming", 0, 32, int(base["dupHamming"])),
+        ignore_footer=bool(opts.get("ignoreFooter", True)),
+        render_dpi=as_int("renderDpi", 72, 200, 100),
+    )
 
 
-def normalize_text(text):
+# ---------------------------------------------------------------------------
+# Text / render / hash primitives
+# ---------------------------------------------------------------------------
+
+
+def normalize_text(text: Optional[str]) -> str:
     return re.sub(r"\s+", " ", (text or "").strip().lower())
 
 
-def page_text(page, ignore_footer):
+def page_text(page: "fitz.Page", ignore_footer: bool) -> str:
     """Extractable text, optionally excluding the footer band (bottom 10%).
 
     Mirrors the footer crop applied to rendered images so a page number
@@ -81,48 +123,28 @@ def page_text(page, ignore_footer):
     if not ignore_footer or not raw.strip():
         return raw
     try:
-        height = page.rect.height
-        cutoff = height * 0.90
-        parts = []
-        for b in page.get_text("blocks") or []:
-            try:
-                x0, y0, x1, y1, text = b[0], b[1], b[2], b[3], b[4]
-            except Exception:
+        cutoff = page.rect.height * 0.90
+        parts: List[str] = []
+        for block in page.get_text("blocks") or []:
+            if len(block) < 5:
                 continue
+            y0, text = block[1], block[4]
+            if len(block) >= 7 and block[6] != 0:
+                continue  # image block, not text
             if y0 is not None and y0 >= cutoff:
                 continue  # footer band: page numbers, running heads
             if text:
                 parts.append(text)
-        return "\n".join(parts) if parts else ""
+        return "\n".join(parts)
     except Exception:
         return raw
 
 
-def dhash(gray_img):
-    # gray_img: PIL grayscale. Resize to 9x8, compare adjacent pixels -> 64-bit int.
-    small = gray_img.resize((9, 8), Image.LANCZOS)
-    px = list(small.getdata())
-    h = 0
-    for row in range(8):
-        for col in range(8):
-            h = (h << 1) | (1 if px[row * 9 + col] > px[row * 9 + col + 1] else 0)
-    return h
+def render_gray(page: "fitz.Page", dpi: int, ignore_footer: bool) -> Optional[Image.Image]:
+    """Render a page to a grayscale PIL image (footer-cropped).
 
-
-def hamming(a, b):
-    try:
-        return bin(a ^ b).count("1")
-    except Exception:
-        x = a ^ b
-        n = 0
-        while x:
-            n += x & 1
-            x >>= 1
-        return n
-
-
-def render_gray(page, dpi, ignore_footer):
-    """Render a page once to grayscale PIL image (footer-cropped). Returns None on failure."""
+    Returns None on failure so callers can degrade gracefully.
+    """
     try:
         zoom = dpi / 72.0
         pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), colorspace=fitz.csGRAY, alpha=False)
@@ -137,304 +159,541 @@ def render_gray(page, dpi, ignore_footer):
         return None
 
 
-def ink_ratio_from_image(gray_img):
-    """Ink ratio from an already-rendered grayscale image."""
+def ink_ratio_from_image(gray_img: Image.Image) -> float:
+    """Fraction of pixels darker than paper white. 1.0 on failure (conservative)."""
     try:
         hist = gray_img.histogram()
         total = gray_img.width * gray_img.height
-        # Pixels darker than near-white count as ink.
         nonwhite = total - sum(hist[WHITE_LEVEL:])
         return (nonwhite / total) if total else 0.0
     except Exception:
         return 1.0
 
 
-def ink_ratio(page, dpi, ignore_footer):
-    img = render_gray(page, dpi, ignore_footer)
-    if img is None:
-        return 1.0
-    return ink_ratio_from_image(img)
+def dhash(gray_img: Image.Image) -> int:
+    """64-bit difference hash: resize to 9x8, compare horizontal neighbors."""
+    small = gray_img.resize((9, 8), Image.LANCZOS)
+    px = list(small.getdata())
+    h = 0
+    for row in range(8):
+        for col in range(8):
+            h = (h << 1) | (1 if px[row * 9 + col] > px[row * 9 + col + 1] else 0)
+    return h
 
 
-def scan_pdf(pdf_path, preset="balanced", options=None):
+def hamming(a: int, b: int) -> int:
+    return bin(a ^ b).count("1")
+
+
+# ---------------------------------------------------------------------------
+# Data model
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class PageFingerprint:
+    page: int                    # 1-based page number
+    text_norm: str = ""          # normalized, footer-cropped, capped
+    text_chars: int = 0          # non-space character count
+    text_hash: str = ""          # sha256 hex of text_norm; "" when page has no text
+    dhash: Optional[int] = None  # 64-bit perceptual hash; None when render failed
+
+
+@dataclass
+class BlankPage:
+    page: int
+    confidence: float
+    reason: str
+    ink_ratio: float
+    text_chars: int
+
+    def to_json(self) -> Dict[str, Any]:
+        # Keys intentionally match the C# model / frontend expectations.
+        return {
+            "page": self.page,
+            "confidence": round(self.confidence, 2),
+            "reason": self.reason,
+            "inkRatio": round(self.ink_ratio, 5),
+            "textChars": self.text_chars,
+        }
+
+
+@dataclass
+class _PageObjects:
+    """Cheap structural queries. None = the query failed (unknown)."""
+    drawings: Optional[int] = None
+    images: Optional[int] = None
+    has_annot: bool = False
+    has_widget: bool = False
+
+
+class _WarningSink:
+    """Caps warning volume but keeps the true count for `warningCount`."""
+
+    def __init__(self, cap: int = MAX_WARNINGS) -> None:
+        self.messages: List[str] = []
+        self.total = 0
+        self._cap = cap
+
+    def add(self, message: str) -> None:
+        self.total += 1
+        if len(self.messages) < self._cap:
+            self.messages.append(str(message)[:160])
+
+
+class _RenderOnce:
+    """Renders a page at most once; the single grayscale pixmap serves both
+    the ink-ratio (blank check) and the dHash (duplicate fingerprint)."""
+
+    __slots__ = ("_page", "_page_no", "_dpi", "_ignore_footer", "_warn", "_img", "_done")
+
+    def __init__(self, page: "fitz.Page", page_no: int, cfg: ScanConfig,
+                 warn: Callable[[str], None]) -> None:
+        self._page = page
+        self._page_no = page_no
+        self._dpi = cfg.render_dpi
+        self._ignore_footer = cfg.ignore_footer
+        self._warn = warn
+        self._img: Optional[Image.Image] = None
+        self._done = False
+
+    def get(self) -> Optional[Image.Image]:
+        if not self._done:
+            self._done = True
+            self._img = render_gray(self._page, self._dpi, self._ignore_footer)
+            if self._img is None:
+                self._warn(f"page {self._page_no}: render failed")
+        return self._img
+
+
+def _emit_progress(percent: int) -> None:
+    """Opt-in progress on stderr (PROGRESS:nn). See PROGRESS_ENV."""
+    if os.environ.get(PROGRESS_ENV, "").lower() in ("", "0", "false"):
+        return
+    sys.stderr.write(f"PROGRESS:{percent}\n")
+    sys.stderr.flush()
+
+
+# ---------------------------------------------------------------------------
+# Phase 1: per-page fingerprinting and blank detection
+# ---------------------------------------------------------------------------
+
+
+def _inspect_page_objects(page: "fitz.Page") -> _PageObjects:
+    objects = _PageObjects()
+    try:
+        objects.drawings = len(page.get_drawings())
+    except Exception:
+        pass
+    try:
+        objects.images = len(page.get_images())
+    except Exception:
+        pass
+    try:
+        annots = page.annots()
+        objects.has_annot = next(annots, None) is not None if annots is not None else False
+    except Exception:
+        pass
+    try:
+        objects.has_widget = len(list(page.widgets() or [])) > 0
+    except Exception:
+        pass
+    return objects
+
+
+def _classify_blank(fp: PageFingerprint, objects: _PageObjects,
+                    renderer: _RenderOnce, cfg: ScanConfig) -> Optional[BlankPage]:
+    """Decide whether a low-text page is blank.
+
+    Only called when fp.text_chars <= cfg.max_text_chars.
+
+    Pages with embedded images ARE ink-checked: a blank page in a scanned
+    PDF is a full-page image of white paper, and the ink ratio is exactly
+    what distinguishes it from a page carrying a real logo or photo.
+    """
+    if objects.has_annot or objects.has_widget:
+        return None  # interactive content is never blank
+
+    # Fast path: provably empty page, no render needed.
+    if (fp.text_chars == 0
+            and objects.drawings == 0
+            and objects.images == 0):
+        return BlankPage(fp.page, 0.99, "no-text-no-artwork", 0.0, fp.text_chars)
+
+    gray = renderer.get()
+    if gray is None:
+        return None  # render failed -> stay conservative, never blank
+    ink = ink_ratio_from_image(gray)
+    if ink <= cfg.max_ink_ratio:
+        if ink == 0.0:
+            confidence = 0.99
+        else:
+            confidence = max(0.55, min(0.99, 1.0 - (ink / max(cfg.max_ink_ratio, 1e-9)) * 0.4))
+        return BlankPage(fp.page, confidence, "low-ink", ink, fp.text_chars)
+    return None
+
+
+def collect_fingerprints(
+    doc: "fitz.Document",
+    cfg: ScanConfig,
+    warn: Callable[[str], None],
+    progress: Optional[Callable[[int], None]] = None,
+) -> Tuple[List[PageFingerprint], List[BlankPage], Set[int]]:
+    """One pass over the document. Memory stays flat: one pixmap at a time."""
+    total = doc.page_count
+    fingerprints: List[PageFingerprint] = []
+    blanks: List[BlankPage] = []
+    blank_pages: Set[int] = set()
+
+    for index in range(total):
+        page_no = index + 1
+        try:
+            page = doc[index]
+            text_norm = normalize_text(page_text(page, cfg.ignore_footer))
+            fp = PageFingerprint(
+                page=page_no,
+                text_norm=text_norm[:TEXT_SNIPPET_CHARS],
+                text_chars=len(text_norm.replace(" ", "")),
+                text_hash=(hashlib.sha256(text_norm.encode("utf-8")).hexdigest()
+                           if text_norm else ""),
+            )
+            renderer = _RenderOnce(page, page_no, cfg, warn)
+
+            if fp.text_chars <= cfg.max_text_chars:
+                blank = _classify_blank(fp, _inspect_page_objects(page), renderer, cfg)
+                if blank is not None:
+                    blanks.append(blank)
+                    blank_pages.add(page_no)
+
+            if page_no not in blank_pages:
+                gray = renderer.get()
+                if gray is not None:
+                    try:
+                        fp.dhash = dhash(gray)
+                    except Exception:
+                        fp.dhash = None
+
+            fingerprints.append(fp)
+        except Exception as exc:
+            # One corrupt page must not kill the whole scan.
+            warn(f"page {page_no}: {exc}")
+            fingerprints.append(PageFingerprint(page=page_no))
+
+        if progress is not None and total >= 20 and page_no % 10 == 0:
+            progress(int(page_no / total * 90))
+
+    return fingerprints, blanks, blank_pages
+
+
+# ---------------------------------------------------------------------------
+# Phase 2: duplicate clustering (pure function -- unit-testable without PDFs)
+# ---------------------------------------------------------------------------
+
+
+class _BKNode:
+    __slots__ = ("hash_value", "children")
+
+    def __init__(self, hash_value: int) -> None:
+        self.hash_value = hash_value
+        self.children: Dict[int, "_BKNode"] = {}
+
+
+class BKTree:
+    """BK-tree over 64-bit hashes for exact radius-limited Hamming queries.
+
+    Replaces the O(n^2) all-pairs comparison: pages pair up via their
+    *distinct* hash values, and a radius query returns every hash within
+    `dup_hamming` bits -- no false negatives, a fraction of the comparisons.
+    """
+
+    def __init__(self) -> None:
+        self._root: Optional[_BKNode] = None
+
+    def add(self, hash_value: int) -> None:
+        if self._root is None:
+            self._root = _BKNode(hash_value)
+            return
+        node = self._root
+        while True:
+            distance = hamming(hash_value, node.hash_value)
+            if distance == 0:
+                return
+            child = node.children.get(distance)
+            if child is None:
+                node.children[distance] = _BKNode(hash_value)
+                return
+            node = child
+
+    def query(self, hash_value: int, radius: int) -> List[Tuple[int, int]]:
+        """All (hash_value, distance) pairs within `radius`, excluding self."""
+        found: List[Tuple[int, int]] = []
+        if self._root is None:
+            return found
+        stack = [self._root]
+        while stack:
+            node = stack.pop()
+            distance = hamming(hash_value, node.hash_value)
+            if 0 < distance <= radius:
+                found.append((node.hash_value, distance))
+            low, high = distance - radius, distance + radius
+            for edge, child in node.children.items():
+                if low <= edge <= high:
+                    stack.append(child)
+        return found
+
+
+def _candidate_pairs(pages_by_hash: Dict[int, List[int]],
+                     threshold: int) -> List[Tuple[int, int, int]]:
+    """All (page_a, page_b, hamming) triples that could join one group.
+
+    Complete: bit-identical dHashes pair up directly at distance 0, and the
+    BK-tree radius query provably finds every distinct-hash pair within
+    `threshold`. Deterministic: returned sorted.
+    """
+    pairs: Set[Tuple[int, int, int]] = set()
+
+    # Pages sharing one dHash value are visual twins (distance 0).
+    for same_hash in pages_by_hash.values():
+        if len(same_hash) > 1:
+            for i, page_a in enumerate(same_hash):
+                for page_b in same_hash[i + 1:]:
+                    pairs.add((page_a, page_b, 0))
+
+    tree = BKTree()
+    for hash_value in sorted(pages_by_hash):
+        for neighbor_hash, distance in tree.query(hash_value, threshold):
+            for page_a in pages_by_hash[hash_value]:
+                for page_b in pages_by_hash[neighbor_hash]:
+                    pairs.add((min(page_a, page_b), max(page_a, page_b), distance))
+        tree.add(hash_value)
+
+    return sorted(pairs)
+
+
+def _make_text_gate(fp_by_page: Dict[int, PageFingerprint]) -> Callable[[int, int], bool]:
+    """dHash cannot tell two text-heavy pages apart (same layout, different
+    wording), so pages carrying substantial text must also read alike before
+    they may be grouped. Results are memoized: the complete-link check
+    re-tests the same pairs, and difflib ratios are the expensive part.
+    """
+    cache: Dict[Tuple[int, int], bool] = {}
+
+    def similar(page_a: int, page_b: int) -> bool:
+        key = (page_a, page_b) if page_a < page_b else (page_b, page_a)
+        cached = cache.get(key)
+        if cached is not None:
+            return cached
+        text_a = fp_by_page[page_a].text_norm
+        text_b = fp_by_page[page_b].text_norm
+        result = True
+        if len(text_a) >= TEXT_GATE_MIN_CHARS and len(text_b) >= TEXT_GATE_MIN_CHARS:
+            # autojunk=False: popular chars (spaces, 'e') must NOT count as
+            # junk -- with it, one-word-drift pages score ~0.2 instead of ~0.99.
+            matcher = difflib.SequenceMatcher(None, text_a, text_b, autojunk=False)
+            # real_quick_ratio()/quick_ratio() are cheap upper bounds of
+            # ratio(); if even the bound misses the threshold, the full
+            # ratio() computation is skipped entirely.
+            if (matcher.real_quick_ratio() < TEXT_GATE_RATIO
+                    or matcher.quick_ratio() < TEXT_GATE_RATIO
+                    or matcher.ratio() < TEXT_GATE_RATIO):
+                result = False
+        cache[key] = result
+        return result
+
+    return similar
+
+
+def cluster_duplicates(fingerprints: List[PageFingerprint],
+                       blank_pages: Set[int],
+                       cfg: ScanConfig) -> List[Dict[str, Any]]:
+    """Cluster non-blank pages into duplicate groups with complete-link
+    semantics: every pair inside a group is visually within `dup_hamming`
+    AND passes the text gate (no A~B~C chaining where A and C differ wildly).
+    """
+    fp_by_page = {fp.page: fp for fp in fingerprints}
+    eligible = [fp for fp in fingerprints
+                if fp.page not in blank_pages and fp.dhash is not None]
+    if len(eligible) < 2:
+        return []
+
+    pages_by_hash: Dict[int, List[int]] = {}
+    for fp in eligible:
+        pages_by_hash.setdefault(fp.dhash, []).append(fp.page)
+    hash_of = {fp.page: fp.dhash for fp in eligible}
+
+    text_similar = _make_text_gate(fp_by_page)
+    parent = {fp.page: fp.page for fp in eligible}
+    members: Dict[int, Set[int]] = {fp.page: {fp.page} for fp in eligible}
+
+    def find(x: int) -> int:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]  # path halving
+            x = parent[x]
+        return x
+
+    def complete_link_ok(cluster_a: Set[int], cluster_b: Set[int]) -> bool:
+        for x in cluster_a:
+            hash_x = hash_of[x]
+            for y in cluster_b:
+                if hamming(hash_x, hash_of[y]) > cfg.dup_hamming:
+                    return False
+                if not text_similar(x, y):
+                    return False
+        return True
+
+    for page_a, page_b, distance in _candidate_pairs(pages_by_hash, cfg.dup_hamming):
+        if distance > cfg.dup_hamming:  # defensive; candidates are pre-filtered
+            continue
+        root_a, root_b = find(page_a), find(page_b)
+        if root_a == root_b:
+            continue
+        if not text_similar(page_a, page_b):
+            continue
+        if not complete_link_ok(members[root_a], members[root_b]):
+            continue
+        parent[root_b] = root_a
+        members[root_a] |= members[root_b]
+        del members[root_b]
+
+    # Assemble output groups. "exact" = identical text across the group AND
+    # worst pair within the tight exact threshold; everything else "near".
+    clusters: Dict[int, List[int]] = {}
+    for fp in eligible:
+        clusters.setdefault(find(fp.page), []).append(fp.page)
+
+    groups: List[Dict[str, Any]] = []
+    for cluster in clusters.values():
+        if len(cluster) < 2:
+            continue
+        cluster.sort()
+        distinct_texts = {fp_by_page[p].text_norm for p in cluster}
+        max_distance = max(
+            hamming(hash_of[x], hash_of[y])
+            for i, x in enumerate(cluster) for y in cluster[i + 1:]
+        )
+        is_exact = len(distinct_texts) == 1 and max_distance <= cfg.exact_hamming
+        groups.append({
+            "pages": cluster,
+            "kind": "exact" if is_exact else "near",
+            "similarity": round(1.0 - max_distance / DHASH_BITS, 3),
+        })
+    groups.sort(key=lambda g: (g["pages"][0], len(g["pages"])))
+    return groups
+
+
+# ---------------------------------------------------------------------------
+# Orchestration
+# ---------------------------------------------------------------------------
+
+
+def _failure(code: str, message: str) -> Dict[str, Any]:
+    return {"success": False, "code": code, "error": message}
+
+
+def scan_pdf(pdf_path: str, preset: Optional[str] = None,
+             options: Optional[dict] = None) -> Dict[str, Any]:
+    """Scan one PDF. Returns the result dict -- never raises for expected
+    failures (encrypted, empty, oversized); the caller decides status."""
     cfg = resolve_config(preset, options)
+    preset_name = (preset or "balanced").lower()
+    if preset_name not in PRESETS:
+        preset_name = "balanced"
+
+    doc = None
     try:
-        doc = fitz.open(pdf_path)
-    except Exception as e:
-        msg = str(e)
-        if "password" in msg.lower() or "encrypt" in msg.lower():
-            return {"success": False, "code": "ENCRYPTED",
-                    "error": "ENCRYPTED: This PDF is password-protected. Unlock it first."}
-        return {"success": False, "code": "OPEN_FAILED", "error": f"Could not open PDF: {e}"}
-    try:
-        if getattr(doc, "needs_pass", False) or getattr(doc, "is_encrypted", False):
-            try:
-                if doc.needs_pass:
-                    return {"success": False, "code": "ENCRYPTED",
-                            "error": "ENCRYPTED: This PDF is password-protected. Unlock it first."}
-            except Exception:
-                pass
+        try:
+            doc = fitz.open(pdf_path)
+        except Exception as exc:
+            message = str(exc)
+            if "password" in message.lower() or "encrypt" in message.lower():
+                return _failure("ENCRYPTED",
+                                "ENCRYPTED: This PDF is password-protected. Unlock it first.")
+            return _failure("OPEN_FAILED", f"Could not open PDF: {exc}")
+
+        # needs_pass=True means no/wrong password supplied and the document
+        # cannot be read. (is_encrypted alone can still be readable, e.g.
+        # owner-locked with an empty user password -- do not block those.)
+        try:
+            needs_pass = bool(doc.needs_pass)
+        except Exception:
+            needs_pass = False
+        if needs_pass:
+            return _failure("ENCRYPTED",
+                            "ENCRYPTED: This PDF is password-protected. Unlock it first.")
+
         total = doc.page_count
         if total <= 0:
-            return {"success": False, "code": "EMPTY", "error": "PDF has no pages."}
+            return _failure("EMPTY", "PDF has no pages.")
         if total > MAX_PAGES:
-            return {"success": False, "code": "PAGE_LIMIT",
-                    "error": f"PDF has {total} pages (limit {MAX_PAGES}). Split it and scan in parts."}
-        blanks = []
-        blank_set = set()
-        infos = []  # per-page { page, textHash, dhash, textLen }
-        warnings = []
-        warned = [0]
-        dhash_by_page = {}
-        norm_by_page = {}
+            return _failure("PAGE_LIMIT",
+                            f"PDF has {total} pages (limit {MAX_PAGES}). Split it and scan in parts.")
 
-        def _warn(msg):
-            if warned[0] < MAX_WARNINGS:
-                warnings.append(msg[:160])
-            warned[0] += 1
+        sink = _WarningSink()
+        fingerprints, blanks, blank_pages = collect_fingerprints(
+            doc, cfg, sink.add, _emit_progress)
+        groups = cluster_duplicates(fingerprints, blank_pages, cfg)
+        _emit_progress(100)
 
-        for i in range(total):
-            try:
-                page = doc[i]
-                raw_text = page_text(page, cfg["ignoreFooter"])
-                norm = normalize_text(raw_text)
-                text_chars = len(norm.replace(" ", ""))
-                max_chars = cfg["maxTextChars"]
-
-                # Render-once cache: a single grayscale pixmap serves both
-                # ink-ratio (blank check) and dHash (duplicate fingerprint).
-                gray_img = [None]
-                gray_done = [False]
-
-                def _get_gray():
-                    if gray_done[0]:
-                        return gray_img[0]
-                    gray_done[0] = True
-                    gray_img[0] = render_gray(page, cfg["renderDpi"], cfg["ignoreFooter"])
-                    if gray_img[0] is None:
-                        _warn(f"page {i + 1}: render failed")
-                    return gray_img[0]
-
-                ink = None
-                is_blank = False
-                reason = ""
-                # Lazy structural queries: only needed when the page can be blank.
-                if text_chars <= max_chars:
-                    try:
-                        n_draw = len(page.get_drawings())
-                    except Exception:
-                        n_draw = 1 if text_chars == 0 else 0
-                    try:
-                        n_img = len(page.get_images())
-                    except Exception:
-                        n_img = 0
-                    try:
-                        has_annot = next(page.annots() or iter([]), None) is not None
-                    except Exception:
-                        has_annot = False
-                    try:
-                        has_widget = len(list(page.widgets() or [])) > 0
-                    except Exception:
-                        has_widget = False
-
-                    # Fast path: absolutely empty and no annotations/widgets.
-                    if text_chars == 0 and n_draw == 0 and n_img == 0 and not has_annot and not has_widget:
-                        is_blank = True
-                        reason = "no-text-no-artwork"
-                        ink = 0.0
-                    elif not has_annot and not has_widget and n_img == 0:
-                        # Tiny/no text + no embedded images — render decides
-                        # (borders alone stay under the ink threshold).
-                        img = _get_gray()
-                        ink = ink_ratio_from_image(img) if img is not None else 1.0
-                        if ink <= cfg["maxInkRatio"]:
-                            is_blank = True
-                            reason = "low-ink"
-                    # Note: pages with embedded images + tiny text are never
-                    # blank (a logo/photo counts as content), same as before.
-                if is_blank:
-                    conf = 0.99 if ink == 0.0 else max(0.55, min(0.99, 1.0 - (ink / max(cfg["maxInkRatio"], 1e-9)) * 0.4))
-                    blanks.append({"page": i + 1, "confidence": round(conf, 2),
-                                   "reason": reason, "inkRatio": round(ink or 0.0, 5), "textChars": text_chars})
-                    blank_set.add(i + 1)
-                # Fingerprint for duplicate detection (skip blanks to keep UI clean).
-                dhash = None
-                text_hash = hashlib.sha256(norm.encode("utf-8")).hexdigest() if norm else ""
-                if (i + 1) not in blank_set:
-                    img = _get_gray()
-                    if img is not None:
-                        try:
-                            dhash = dhash(img)
-                        except Exception:
-                            dhash = None
-                    if dhash is not None:
-                        dhash_by_page[i + 1] = dhash
-                    norm_by_page[i + 1] = norm[:4000]
-                infos.append({"page": i + 1, "textHash": text_hash, "dhash": dhash, "textLen": text_chars,
-                              "textNorm": norm[:4000]})
-            except Exception as e_page:
-                # One corrupt page must not kill the whole scan.
-                _warn(f"page {i + 1}: {e_page}")
-                infos.append({"page": i + 1, "textHash": "", "dhash": None, "textLen": 0, "textNorm": ""})
-            if total >= 20 and (i + 1) % 10 == 0:
-                sys.stderr.write(f"PROGRESS:{int(((i + 1) / total) * 90)}\n")
-        # Exact groups: same non-empty normalized text AND visual agreement.
-        # Text-only matching used to flag e.g. the same contract with a
-        # different signature as "exact" — now visual distance must also be tiny.
-        groups = []
-        exact_max = min(EXACT_VISUAL_MAX, cfg["dupHamming"])
-        by_text = {}
-        for info in infos:
-            if info["page"] in blank_set or not info["textHash"]:
-                continue
-            by_text.setdefault(info["textHash"], []).append(info)
-        for bucket in by_text.values():
-            if len(bucket) < 2:
-                continue
-            # Sub-cluster the text bucket by visual proximity.
-            members = [b["page"] for b in bucket]
-            eparent = {p: p for p in members}
-
-            def _efind(x):
-                while eparent[x] != x:
-                    eparent[x] = eparent[eparent[x]]
-                    x = eparent[x]
-                return x
-
-            for a in range(len(bucket)):
-                for b in range(a + 1, len(bucket)):
-                    pa, pb = bucket[a]["page"], bucket[b]["page"]
-                    da, db = dhash_by_page.get(pa), dhash_by_page.get(pb)
-                    if da is None or db is None:
-                        continue  # render failed: stay conservative, no exact claim
-                    if hamming(da, db) <= exact_max:
-                        ra, rb = _efind(pa), _efind(pb)
-                        if ra != rb:
-                            eparent[rb] = ra
-            eclusters = {}
-            for b in bucket:
-                eclusters.setdefault(_efind(b["page"]), []).append(b["page"])
-            for pages in eclusters.values():
-                if len(pages) > 1:
-                    groups.append({"pages": sorted(pages), "kind": "exact", "similarity": 1.0})
-        # Near groups: complete-link clustering — every pair in a group must be
-        # within threshold (no A~B~C chaining where A and C differ wildly).
-        idx = [info for info in infos if info["page"] not in blank_set and info["dhash"] is not None]
-        parent = {info["page"]: info["page"] for info in idx}
-        members_of = {info["page"]: {info["page"]} for info in idx}
-
-        def _find(x):
-            while parent[x] != x:
-                parent[x] = parent[parent[x]]
-                x = parent[x]
-            return x
-
-        for a in range(len(idx)):
-            for b in range(a + 1, len(idx)):
-                pa, pb = idx[a], idx[b]
-                # Same-text pairs were already handled above: never double-report.
-                if pa["textHash"] and pa["textHash"] == pb["textHash"]:
-                    continue
-                if _find(pa["page"]) == _find(pb["page"]):
-                    continue
-                if hamming(pa["dhash"], pb["dhash"]) > cfg["dupHamming"]:
-                    continue
-                # Text gate: same layout + different wording is not a duplicate.
-                # dHash alone cannot tell two textboxes apart, so pages with
-                # substantial text must also read alike (fuzzy match allows a
-                # word or two of scan/OCR drift). Image-only pages skip this.
-                na, nb = pa.get("textNorm") or "", pb.get("textNorm") or ""
-                if len(na) >= 30 and len(nb) >= 30:
-                    try:
-                        # autojunk=False: popular chars (spaces, 'e') must NOT
-                        # count as junk — with it, one-word-drift pages score
-                        # ~0.2 instead of ~0.99 (texts are 200+ chars).
-                        if difflib.SequenceMatcher(None, na, nb, autojunk=False).ratio() < 0.85:
-                            continue
-                    except Exception:
-                        continue
-                ra, rb = _find(pa["page"]), _find(pb["page"])
-                if ra == rb:
-                    continue
-                # Complete-link check: all cross pairs must fit the visual
-                # threshold AND read alike (same text gate as above).
-                ok = True
-                for x in members_of[ra]:
-                    dx = dhash_by_page[x]
-                    nx = norm_by_page.get(x, "")
-                    for y in members_of[rb]:
-                        if hamming(dx, dhash_by_page[y]) > cfg["dupHamming"]:
-                            ok = False
-                            break
-                        ny = norm_by_page.get(y, "")
-                        if len(nx) >= 30 and len(ny) >= 30:
-                            try:
-                                if difflib.SequenceMatcher(None, nx, ny, autojunk=False).ratio() < 0.85:
-                                    ok = False
-                                    break
-                            except Exception:
-                                ok = False
-                                break
-                    if not ok:
-                        break
-                if ok:
-                    parent[rb] = ra
-                    members_of[ra] |= members_of[rb]
-                    del members_of[rb]
-        clusters = {}
-        for info in idx:
-            clusters.setdefault(_find(info["page"]), []).append(info)
-        for pages_infos in clusters.values():
-            if len(pages_infos) < 2:
-                continue
-            pages = sorted(info["page"] for info in pages_infos)
-            # Max pairwise distance -> similarity.
-            maxd = 0
-            for a in range(len(pages_infos)):
-                for b in range(a + 1, len(pages_infos)):
-                    maxd = max(maxd, hamming(pages_infos[a]["dhash"], pages_infos[b]["dhash"]))
-            sim = round(1.0 - maxd / 64.0, 3)
-            groups.append({"pages": pages, "kind": "near", "similarity": sim})
-        groups.sort(key=lambda g: (g["pages"][0], len(g["pages"])))
-        sys.stderr.write("PROGRESS:100\n")
-        result = {"success": True, "pageCount": total,
-                  "preset": (preset or "balanced").lower() if (preset or "").lower() in PRESETS else "balanced",
-                  "blanks": blanks, "groups": groups}
-        if warnings:
-            result["warnings"] = warnings
-            if warned[0] > len(warnings):
-                result["warningCount"] = warned[0]
+        result: Dict[str, Any] = {
+            "success": True,
+            "pageCount": total,
+            "preset": preset_name,
+            "blanks": [blank.to_json() for blank in blanks],
+            "groups": groups,
+        }
+        if sink.messages:
+            result["warnings"] = sink.messages
+            if sink.total > len(sink.messages):
+                result["warningCount"] = sink.total
         return result
     finally:
-        try:
-            doc.close()
-        except Exception:
-            pass
+        if doc is not None:
+            try:
+                doc.close()
+            except Exception:
+                pass
 
 
-class blank_duplicate_scan:
-    pass
-
-
-def main():
+def main() -> int:
     if len(sys.argv) < 2:
         print(json.dumps({"success": False, "error": "No arguments provided"}))
-        sys.exit(1)
+        return 1
+
+    request_path = sys.argv[1]
     try:
-        json_file_path = sys.argv[1]
-        with open(json_file_path, "r", encoding="utf-8") as f:
-            request = json.load(f)
-        pdf_path = request.get("file_path")
-        preset = request.get("preset", "balanced")
-        options = request.get("options")
-        if not pdf_path or not os.path.exists(pdf_path):
-            print(json.dumps({"success": False, "error": f"PDF file not found: {pdf_path}"}))
-            sys.exit(1)
+        with open(request_path, "r", encoding="utf-8") as fh:
+            request = json.load(fh)
+    except (OSError, json.JSONDecodeError) as exc:
+        print(json.dumps({"success": False, "error": f"Invalid request file: {exc}"}))
+        return 1
+    if not isinstance(request, dict):
+        print(json.dumps({"success": False, "error": "Invalid request: expected a JSON object."}))
+        return 1
+
+    pdf_path = request.get("file_path")
+    preset = request.get("preset", "balanced")
+    options = request.get("options")
+
+    if not pdf_path or not os.path.exists(pdf_path):
+        print(json.dumps({"success": False, "error": f"PDF file not found: {pdf_path}"}))
+        return 1
+
+    # Keep stdout pristine: the host parses the ENTIRE stdout as one JSON
+    # document, so any library print during the scan would corrupt the
+    # payload. Stray writes are diverted to stderr until the result is out.
+    real_stdout = sys.stdout
+    sys.stdout = sys.stderr
+    exit_code = 0
+    try:
         result = scan_pdf(pdf_path, preset, options)
-        print(json.dumps(result))
-    except json.JSONDecodeError as e:
-        print(json.dumps({"success": False, "error": f"Invalid JSON input: {str(e)}"}))
-        sys.exit(1)
-    except Exception as e:
-        print(json.dumps({"success": False, "error": f"Processing error: {str(e)}"}))
-        sys.exit(1)
+    except Exception as exc:  # last-resort guard for the harness
+        result = _failure("UNEXPECTED", f"Processing error: {exc}")
+        exit_code = 1
+    finally:
+        sys.stdout = real_stdout
+
+    print(json.dumps(result))
+    return exit_code
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -25,6 +25,9 @@ namespace LocalPDF_Studio_api.DAL.Models.PdfBlankDuplicate
         [JsonPropertyName("success")]
         public bool Success { get; set; }
 
+        [JsonPropertyName("code")]
+        public string? Code { get; set; }
+
         [JsonPropertyName("pageCount")]
         public int PageCount { get; set; }
 
@@ -36,6 +39,9 @@ namespace LocalPDF_Studio_api.DAL.Models.PdfBlankDuplicate
 
         [JsonPropertyName("groups")]
         public List<DuplicateGroup> Groups { get; set; } = new();
+
+        [JsonPropertyName("warnings")]
+        public List<string> Warnings { get; set; } = new();
 
         [JsonPropertyName("error")]
         public string? Error { get; set; }

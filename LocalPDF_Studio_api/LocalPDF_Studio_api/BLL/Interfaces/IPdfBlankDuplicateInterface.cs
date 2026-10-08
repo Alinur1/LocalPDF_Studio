@@ -22,6 +22,6 @@ namespace LocalPDF_Studio_api.BLL.Interfaces
 {
     public interface IPdfBlankDuplicateInterface
     {
-        Task<PdfBlankDuplicateScanResult> ScanAsync(PdfBlankDuplicateScanRequest request);
+        Task<PdfBlankDuplicateScanResult> ScanAsync(PdfBlankDuplicateScanRequest request, CancellationToken cancellationToken = default);
     }
 }

@@ -42,7 +42,7 @@ namespace LocalPDF_Studio_api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Scan([FromBody] PdfBlankDuplicateScanRequest request)
+        public async Task<IActionResult> Scan([FromBody] PdfBlankDuplicateScanRequest? request, CancellationToken cancellationToken)
         {
             try
             {
@@ -52,13 +52,14 @@ namespace LocalPDF_Studio_api.Controllers
                 if (string.IsNullOrWhiteSpace(request.FilePath) || !System.IO.File.Exists(request.FilePath))
                     return BadRequest("Invalid file path.");
 
-                var result = await _blankDuplicateService.ScanAsync(request);
+                var result = await _blankDuplicateService.ScanAsync(request, cancellationToken);
 
                 if (!result.Success)
                 {
-                    if ((result.Error ?? string.Empty).Contains("ENCRYPTED"))
-                        return BadRequest(new { error = result.Error });
-                    return StatusCode(StatusCodes.Status500InternalServerError, new { error = result.Error ?? "Scan failed." });
+                    return result.Code is "ENCRYPTED" or "EMPTY" or "PAGE_LIMIT" or "OPEN_FAILED"
+                        ? BadRequest(new { error = result.Error, code = result.Code })
+                        : StatusCode(StatusCodes.Status500InternalServerError,
+                            new { error = result.Error ?? "Scan failed.", code = result.Code });
                 }
 
                 return Ok(result);
@@ -67,10 +68,15 @@ namespace LocalPDF_Studio_api.Controllers
             {
                 return NotFound(new { error = ex.Message });
             }
+            catch (TimeoutException ex)
+            {
+                _logger.LogWarning("Page analysis timed out: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status504GatewayTimeout, new { error = ex.Message });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error analyzing PDF pages");
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "An error occurred while analyzing the PDF", details = ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "An error occurred while analyzing the PDF" });
             }
         }
 
