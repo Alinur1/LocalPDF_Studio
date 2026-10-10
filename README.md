@@ -14,7 +14,7 @@
 
 If LocalPDF Studio is useful to you, the best thing you can do is **pass it on**.
 
-💖 [Support on Patreon](https://www.patreon.com/cw/MdAlinurHossain?vanity=MdAlinurHossain)
+💖 Donate via [Patreon](https://www.patreon.com/cw/MdAlinurHossain?vanity=MdAlinurHossain) or [SupportKori](https://www.supportkori.com/alinur2000)
 
 ⭐ Leave a review on [AlternativeTo](https://alternativeto.net/software/localpdf-studio/about/)
 
