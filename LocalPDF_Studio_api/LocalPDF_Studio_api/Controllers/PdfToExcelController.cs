@@ -42,7 +42,7 @@ namespace LocalPDF_Studio_api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Convert([FromBody] PdfToExcelRequest request)
+        public async Task<IActionResult> Convert([FromBody] PdfToExcelRequest request, CancellationToken cancellationToken)
         {
             try
             {
@@ -52,7 +52,7 @@ namespace LocalPDF_Studio_api.Controllers
                 if (string.IsNullOrWhiteSpace(request.FilePath) || !System.IO.File.Exists(request.FilePath))
                     return BadRequest("Invalid file path.");
 
-                var outcome = await _toExcelService.ConvertAsync(request);
+                var outcome = await _toExcelService.ConvertAsync(request, cancellationToken);
 
                 var fileName = Path.GetFileNameWithoutExtension(request.FilePath);
                 if (outcome.OutputKind == "csv")
@@ -60,6 +60,15 @@ namespace LocalPDF_Studio_api.Controllers
                 if (outcome.OutputKind == "zip")
                     return File(outcome.FileBytes, "application/zip", $"{fileName}_tables_csv.zip");
                 return File(outcome.FileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{fileName}_tables.xlsx");
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("PDF to Excel conversion cancelled by client disconnect.");
+                return StatusCode(499);
+            }
+            catch (TimeoutException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (FileNotFoundException ex)
             {

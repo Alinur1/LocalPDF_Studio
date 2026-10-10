@@ -22,6 +22,6 @@ namespace LocalPDF_Studio_api.BLL.Interfaces
 {
     public interface IPdfToExcelInterface
     {
-        Task<PdfToExcelOutcome> ConvertAsync(PdfToExcelRequest request);
+        Task<PdfToExcelOutcome> ConvertAsync(PdfToExcelRequest request, CancellationToken cancellationToken = default);
     }
 }

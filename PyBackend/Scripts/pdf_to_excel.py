@@ -35,13 +35,33 @@ STREAM_SETTINGS = {"vertical_strategy": "text", "horizontal_strategy": "text",
                    "text_x_tolerance": 6, "text_y_tolerance": 3}
 
 MAX_CELL_CHARS = 32767          # Excel hard limit per cell
+EXCEL_MAX_ROWS = 1_048_576      # Excel hard limit: rows per sheet
+EXCEL_MAX_COLS = 16_384         # Excel hard limit: columns per sheet
 PAGE_TIME_BUDGET = 20.0         # soft budget (s): skip further fallbacks once exceeded
 SHREDDED_CELL_THRESHOLD = 3     # cells per page before warning
+
+# Sentinel for argument-validation failure (None is a valid "not provided").
+_INVALID = object()
 
 
 # ------------------------------------------------------------
 # Page selection
 # ------------------------------------------------------------
+
+def page_arg(value):
+    """Normalize a pages/page_ranges argument from JSON. Accepts None,
+    a single int, or a list/tuple. A bare string like "12" is REJECTED
+    (iterating it would silently select pages 1 and 2)."""
+    if value is None:
+        return None
+    if isinstance(value, bool):  # bool is an int subclass; never a page
+        return _INVALID
+    if isinstance(value, int):
+        return [value]
+    if isinstance(value, (list, tuple)):
+        return list(value)
+    return _INVALID
+
 
 def page_list(total_pages, pages, page_ranges):
     selected = set()
@@ -279,7 +299,16 @@ def extract_page(page, flavor, page_num, errors, slow_pages):
     Returns (tables, strategy_name_or_None)."""
     started = time.monotonic()
     strategies_list = strategies(flavor)
+    # Lattice derives cell boundaries from ruling lines / rect edges. On a
+    # page with neither it cannot succeed, and running it is the single
+    # most expensive false start in auto flavor (pure-text pages), so skip it.
+    try:
+        has_ruling = bool(page.lines or page.rects)
+    except Exception:
+        has_ruling = True  # can't tell; run lattice as before
     for i, (name, settings) in enumerate(strategies_list):
+        if name == "lattice" and not has_ruling:
+            continue
         if i > 0 and time.monotonic() - started > PAGE_TIME_BUDGET:
             slow_pages.append(page_num)
             break
@@ -328,6 +357,52 @@ def merge_continuations(sheets):
 
 def label(pages):
     return f"Page_{pages[0]}" if len(pages) == 1 else f"Page_{pages[0]}-{pages[-1]}"
+
+
+# ------------------------------------------------------------
+# Excel structural limits
+# ------------------------------------------------------------
+
+def enforce_excel_limits(sheets):
+    """Excel refuses to open sheets beyond 1,048,576 rows / 16,384 columns,
+    and openpyxl will happily write such a file without raising. Truncate
+    here (and say so in notes) instead of shipping a broken workbook.
+    Mutates `sheets`; returns notes."""
+    notes = []
+    wide_tables = 0
+    for sheet in sheets:
+        for table in sheet["tables"]:
+            width = max((len(r) for r in table["rows"]), default=0)
+            if width > EXCEL_MAX_COLS:
+                wide_tables += 1
+                for r in table["rows"]:
+                    del r[EXCEL_MAX_COLS:]
+    dropped_rows = 0
+    dropped_tables = 0
+    for sheet in sheets:
+        # One blank separator row between stacked tables.
+        budget = EXCEL_MAX_ROWS - max(0, len(sheet["tables"]) - 1)
+        total = sum(len(t["rows"]) for t in sheet["tables"])
+        while total > budget and sheet["tables"]:
+            last = sheet["tables"][-1]
+            overflow = total - budget
+            if len(last["rows"]) <= overflow:
+                dropped_rows += len(last["rows"])
+                total -= len(last["rows"]) + 1
+                sheet["tables"].pop()
+                dropped_tables += 1
+            else:
+                dropped_rows += overflow
+                del last["rows"][len(last["rows"]) - overflow:]
+                total = budget
+    if wide_tables:
+        notes.append(f"{wide_tables} table(s) exceeded Excel's {EXCEL_MAX_COLS}-column limit "
+                     "and were truncated to that width")
+    if dropped_rows:
+        extra = f" ({dropped_tables} whole table(s) dropped)" if dropped_tables else ""
+        notes.append(f"{dropped_rows} row(s) exceeded Excel's {EXCEL_MAX_ROWS}-row limit "
+                     f"per sheet and were dropped{extra}")
+    return notes
 
 
 # ------------------------------------------------------------
@@ -386,7 +461,9 @@ def write_xlsx(sheets, fh):
                 row += 1
         for ci, w in widths.items():
             ws.column_dimensions[get_column_letter(ci + 1)].width = min(max(w + 2, 10), 50)
-        if sheet["tables"] and sheet["tables"][0]["header"]:
+        # Freeze only when the sheet holds exactly one table; with several
+        # stacked tables row 1 is not a header for all of them.
+        if len(sheet["tables"]) == 1 and sheet["tables"][0]["header"]:
             ws.freeze_panes = "A2"
     wb.save(fh)
     return escaped
@@ -435,10 +512,12 @@ def csv_entries(sheets):
 
 def write_csv_files(sheets, output_dir):
     """Write one .csv file per table into output_dir. Returns (error, escaped, files).
-    CSV bytes are identical to the former write_csv_zip entries (UTF-8 with BOM,
-    same csv_text content); only the zip container moved to C#."""
+    CSV bytes are identical to the former zip entries (UTF-8 with BOM, same
+    csv_text content); only the zip container moved to C#."""
+    created_dir = not os.path.isdir(output_dir)
     try:
-        os.makedirs(output_dir, exist_ok=True)
+        if created_dir:
+            os.makedirs(output_dir, exist_ok=True)
     except Exception as e:
         return str(e) or e.__class__.__name__, 0, []
     escaped = 0
@@ -459,10 +538,16 @@ def write_csv_files(sheets, output_dir):
                     os.remove(tmp)
             except OSError:
                 pass
-            # Best-effort cleanup of already-written files on failure.
+            # Best-effort cleanup: remove files written so far, and the
+            # directory itself if we created it (leave pre-existing dirs alone).
             for done in written:
                 try:
                     os.remove(os.path.join(output_dir, done))
+                except OSError:
+                    pass
+            if created_dir:
+                try:
+                    os.rmdir(output_dir)
                 except OSError:
                     pass
             return str(e) or e.__class__.__name__, 0, []
@@ -519,12 +604,26 @@ def is_locked(pdf_path):
 ENCRYPTED_ERROR = "ENCRYPTED: This PDF is password-protected. Unlock it first."
 
 
+def progress(pct):
+    sys.stderr.write(f"PROGRESS:{pct}\n")
+    sys.stderr.flush()
+
+
 # ------------------------------------------------------------
 # Main conversion
 # ------------------------------------------------------------
 
 def convert(pdf_path, output_path, pages=None, page_ranges=None, flavor="auto", fmt="xlsx",
             coerce_numbers=False, merge_continuations=False):
+    # Validate the two arguments whose silent misinterpretation would
+    # produce wrong-but-plausible output (e.g. "12" -> pages 1 and 2).
+    pages = page_arg(pages)
+    if pages is _INVALID:
+        return {"success": False, "error": "'pages' must be a list of 1-based page numbers (or a single number)"}
+    page_ranges = page_arg(page_ranges)
+    if page_ranges is _INVALID:
+        return {"success": False, "error": "'page_ranges' must be a list of ranges like \"3-7\" (or a single range)"}
+
     try:
         import pdfplumber
     except ImportError:
@@ -587,7 +686,7 @@ def convert(pdf_path, output_path, pages=None, page_ranges=None, flavor="auto", 
             except Exception:
                 pass
             if len(idx) >= 5 and (n + 1) % 5 == 0:
-                sys.stderr.write(f"PROGRESS:{int(((n + 1) / len(idx)) * 80)}\n")
+                progress(int(((n + 1) / len(idx)) * 80))
 
         # Aggregate notes (one line per category, not one per page).
         notes = []
@@ -627,16 +726,29 @@ def convert(pdf_path, output_path, pages=None, page_ranges=None, flavor="auto", 
                     for r in range(start, len(table["rows"])):
                         table["rows"][r] = [coerce(c) for c in table["rows"][r]]
 
+        if fmt == "xlsx":
+            # Do this AFTER merging/coercing so limits reflect final row
+            # counts. openpyxl would write an oversized workbook without
+            # raising; Excel then refuses to open it.
+            notes.extend(enforce_excel_limits(sheets))
+            # A sheet may have lost ALL its tables to the row limit.
+            sheets = [s for s in sheets if s["tables"]]
+            if not sheets:
+                return {"success": False, "error": "No extractable tables found in the selected pages.",
+                        "notes": notes, "pageCount": total, "tableCount": 0}
+
         table_total = sum(len(s["tables"]) for s in sheets)
 
         out_path = output_path
+        # Python's artifact on the csv path is a directory of .csv files
+        # (the zip container is assembled by the C# layer), so the honest
+        # outputKind here is "csv"; the API-level download is the zip.
         output_kind = fmt
         files = []
         if fmt == "xlsx":
             write_err, escaped = atomic_write(
                 out_path, lambda fh: write_xlsx(sheets, fh))
         else:
-            # CSV files are written individually; C# creates the zip archive.
             output_kind = "csv"
             write_err, escaped, files = write_csv_files(sheets, out_path)
 
@@ -644,10 +756,13 @@ def convert(pdf_path, output_path, pages=None, page_ranges=None, flavor="auto", 
             return {"success": False, "error": f"Could not write {fmt.upper()}: {write_err}",
                     "notes": notes, "pageCount": total, "tableCount": table_total}
         if escaped:
-            notes.append(f"{escaped} cell(s) starting with '=', '+', '-' or '@' were stored as literal text "
+            # Only '=' is formula-interpreted in XLSX (openpyxl); CSV imports
+            # also treat '+', '-', '@', tab and CR as formula triggers.
+            triggers = "'='" if fmt == "xlsx" else "'=', '+', '-' or '@'"
+            notes.append(f"{escaped} cell(s) beginning with {triggers} were stored as literal text "
                          "so they cannot run as spreadsheet formulas")
 
-        sys.stderr.write("PROGRESS:100\n")
+        progress(100)
         result = {"success": True, "pageCount": total, "tableCount": table_total,
                 "sheetCount": len(sheets), "flavor": flavor, "strategiesUsed": used,
                 "format": fmt, "outputKind": output_kind, "notes": notes, "output": out_path}
@@ -659,10 +774,6 @@ def convert(pdf_path, output_path, pages=None, page_ranges=None, flavor="auto", 
             pdf.close()
         except Exception:
             pass
-
-
-class pdf_to_excel:
-    pass
 
 
 def main():

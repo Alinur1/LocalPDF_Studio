@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LocalPDF Studio - Offline PDF Toolkit
  * ======================================
  * 
@@ -42,6 +42,7 @@ namespace LocalPDF_Studio_api.BLL.Services
             "csv",
         };
 
+        private static readonly TimeSpan ExtractionTimeout = TimeSpan.FromMinutes(10);
         private readonly ILogger<PdfToExcelService> _logger;
         private readonly string _pythonExePath;
         private readonly string _scriptPath;
@@ -58,7 +59,7 @@ namespace LocalPDF_Studio_api.BLL.Services
             _vendorPath = Path.Combine(baseDir, "PyBackend", "vendor");
         }
 
-        public async Task<PdfToExcelOutcome> ConvertAsync(PdfToExcelRequest request)
+        public async Task<PdfToExcelOutcome> ConvertAsync(PdfToExcelRequest request, CancellationToken cancellationToken = default)
         {
             if (!File.Exists(request.FilePath))
                 throw new FileNotFoundException($"File not found: {request.FilePath}");
@@ -72,7 +73,7 @@ namespace LocalPDF_Studio_api.BLL.Services
                 format = "xlsx";
 
             if (format == "csv")
-                return await ConvertCsvAsync(request.FilePath, options, flavor);
+                return await ConvertCsvAsync(request.FilePath, options, flavor, cancellationToken);
 
             string tempOutputPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_pdf_tables.xlsx");
             // Python reports the real path it wrote; honor it (temp dir only).
@@ -94,7 +95,7 @@ namespace LocalPDF_Studio_api.BLL.Services
                     coerce_numbers = options.CoerceNumbers,
                     merge_continuations = options.MergeContinuations
                 };
-                string stdout = await RunPythonAsync("pdf_to_excel", payload);
+                string stdout = await RunPythonAsync("pdf_to_excel", payload, cancellationToken);
                 var result = PythonJsonParser.CleanAndDeserialize<PythonPdfToExcelResult>(stdout);
 
                 if (!result.Success)
@@ -118,7 +119,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
                 return new PdfToExcelOutcome
                 {
-                    FileBytes = await File.ReadAllBytesAsync(actualPath),
+                    FileBytes = await File.ReadAllBytesAsync(actualPath, cancellationToken),
                     Format = format,
                     OutputKind = "xlsx",
                     TableCount = result.TableCount,
@@ -127,14 +128,14 @@ namespace LocalPDF_Studio_api.BLL.Services
             }
             finally
             {
-                foreach (var candidate in new[] { tempOutputPath, actualPath })
+                foreach (var candidate in new[] { tempOutputPath, actualPath, tempOutputPath + ".part", actualPath + ".part" })
                 {
                     try { if (File.Exists(candidate)) File.Delete(candidate); } catch { /* Cleanup silent */ }
                 }
             }
         }
 
-        private async Task<PdfToExcelOutcome> ConvertCsvAsync(string filePath, PdfToExcelOptions options, string flavor)
+        private async Task<PdfToExcelOutcome> ConvertCsvAsync(string filePath, PdfToExcelOptions options, string flavor, CancellationToken cancellationToken)
         {
             string tempDir = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_pdf_tables_csv");
             Directory.CreateDirectory(tempDir);
@@ -155,7 +156,7 @@ namespace LocalPDF_Studio_api.BLL.Services
                     coerce_numbers = options.CoerceNumbers,
                     merge_continuations = options.MergeContinuations
                 };
-                string stdout = await RunPythonAsync("pdf_to_excel", payload);
+                string stdout = await RunPythonAsync("pdf_to_excel", payload, cancellationToken);
                 var result = PythonJsonParser.CleanAndDeserialize<PythonPdfToExcelResult>(stdout);
 
                 if (!result.Success)
@@ -239,7 +240,7 @@ namespace LocalPDF_Studio_api.BLL.Services
             return zipStream.ToArray();
         }
 
-        private async Task<string> RunPythonAsync(string command, object payload)
+        private async Task<string> RunPythonAsync(string command, object payload, CancellationToken cancellationToken)
         {
             if (!File.Exists(_pythonExePath))
                 throw new FileNotFoundException($"Python Engine not found: {_pythonExePath}");
@@ -271,7 +272,46 @@ namespace LocalPDF_Studio_api.BLL.Services
                 process.Start();
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
-                await process.WaitForExitAsync();
+
+                // Two independent reasons to stop waiting: the caller's token
+                // (client disconnect / app shutdown) and the hard timeout.
+                // Linked so either one cancels the wait.
+                using var timeoutCts = new CancellationTokenSource(ExtractionTimeout);
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
+                try
+                {
+                    await process.WaitForExitAsync(linkedCts.Token);
+                }
+                catch (OperationCanceledException) when (!process.HasExited)
+                {
+                    // Kill the whole tree so a hung pdfplumber run cannot
+                    // outlive the request as an orphaned CPU-spinning process.
+                    try { process.Kill(entireProcessTree: true); }
+                    catch (InvalidOperationException) { /* already gone */ }
+                    catch (System.ComponentModel.Win32Exception) { /* already dying */ }
+
+                    // Reap so the async output/error handlers finish and the
+                    // process handle is released; ignore a second failure.
+                    try { await process.WaitForExitAsync(CancellationToken.None); }
+                    catch (OperationCanceledException) { /* give up reaping */ }
+
+                    var killedStderr = errorBuilder.ToString().Trim();
+
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        throw new OperationCanceledException(
+                            "Table extraction was cancelled.", cancellationToken);
+                    }
+
+                    _logger.LogWarning("Table extraction timed out after {Timeout} and was killed. Stderr tail: {Stderr}",
+                        ExtractionTimeout, Truncate(killedStderr, 500));
+
+                    throw new TimeoutException(
+                        $"Table extraction timed out after {(int)ExtractionTimeout.TotalMinutes} minutes and was stopped. " +
+                        "The PDF may contain a page the table engine cannot process. " +
+                        "Try selecting specific pages, or a stricter flavor (lattice/stream/hybrid) instead of auto.");
+                }
 
                 var stdout = outputBuilder.ToString().Trim();
                 var stderr = errorBuilder.ToString().Trim();
@@ -286,5 +326,8 @@ namespace LocalPDF_Studio_api.BLL.Services
                 if (File.Exists(tempJsonFile)) File.Delete(tempJsonFile);
             }
         }
+
+        private static string Truncate(string s, int max) =>
+            string.IsNullOrEmpty(s) ? s : (s.Length > max ? s[..max] + "..." : s);
     }
 }
