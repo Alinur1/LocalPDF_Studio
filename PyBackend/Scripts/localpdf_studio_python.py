@@ -35,7 +35,7 @@ def main() -> int:
     if len(sys.argv) < 2:
         print(json.dumps({"success": False,
                           "error": f"No command specified. Available: {', '.join(COMMANDS)}"}))
-        return 1
+        return 0
 
     command = sys.argv[1]
     # Remove the command from argv so each script's argparse / sys.argv logic works normally
@@ -45,16 +45,24 @@ def main() -> int:
     if module_name is None:
         print(json.dumps({"success": False,
                           "error": f"Unknown command: '{command}'. Available: {', '.join(COMMANDS)}"}))
-        return 1
+        return 0
 
     try:
         module = importlib.import_module(module_name)
     except Exception as exc:  # missing vendored dependency, syntax error, ...
         print(json.dumps({"success": False,
                           "error": f"Failed to load module '{module_name}': {exc}"}))
-        return 1
+        return 0
 
-    module.main()
+    try:
+        module.main()
+    except SystemExit:
+        return 0
+    except Exception as exc:
+        print(json.dumps({"success": False,
+                          "error": f"{module_name} failed: {exc}"}))
+        return 0
+
     return 0
 
 
