@@ -19,7 +19,6 @@ import io
 import re
 import json
 import time
-import zipfile
 import unicodedata
 import pymupdf as fitz
 
@@ -434,14 +433,40 @@ def csv_entries(sheets):
             yield (f"{stem}_table_{ti}.csv" if many else f"{stem}.csv"), table["rows"]
 
 
-def write_csv_zip(sheets, fh):
+def write_csv_files(sheets, output_dir):
+    """Write one .csv file per table into output_dir. Returns (error, escaped, files).
+    CSV bytes are identical to the former write_csv_zip entries (UTF-8 with BOM,
+    same csv_text content); only the zip container moved to C#."""
+    try:
+        os.makedirs(output_dir, exist_ok=True)
+    except Exception as e:
+        return str(e) or e.__class__.__name__, 0, []
     escaped = 0
-    with zipfile.ZipFile(fh, "w", zipfile.ZIP_DEFLATED) as zf:
-        for name, rows in csv_entries(sheets):
-            text, esc = csv_text(rows)
-            escaped += esc
-            zf.writestr(name, text)
-    return escaped
+    written = []
+    for name, rows in csv_entries(sheets):
+        text, esc = csv_text(rows)
+        escaped += esc
+        dest = os.path.join(output_dir, name)
+        tmp = dest + ".part"
+        try:
+            with open(tmp, "w", encoding="utf-8", newline="") as fh:
+                fh.write(text)
+            os.replace(tmp, dest)
+            written.append(name)
+        except Exception as e:
+            try:
+                if os.path.exists(tmp):
+                    os.remove(tmp)
+            except OSError:
+                pass
+            # Best-effort cleanup of already-written files on failure.
+            for done in written:
+                try:
+                    os.remove(os.path.join(output_dir, done))
+                except OSError:
+                    pass
+            return str(e) or e.__class__.__name__, 0, []
+    return "", escaped, written
 
 
 def atomic_write(output_path, writer_fn):
@@ -606,13 +631,14 @@ def convert(pdf_path, output_path, pages=None, page_ranges=None, flavor="auto", 
 
         out_path = output_path
         output_kind = fmt
+        files = []
         if fmt == "xlsx":
             write_err, escaped = atomic_write(
                 out_path, lambda fh: write_xlsx(sheets, fh))
         else:
-            output_kind = "zip"
-            write_err, escaped = atomic_write(
-                out_path, lambda fh: write_csv_zip(sheets, fh))
+            # CSV files are written individually; C# creates the zip archive.
+            output_kind = "csv"
+            write_err, escaped, files = write_csv_files(sheets, out_path)
 
         if write_err:
             return {"success": False, "error": f"Could not write {fmt.upper()}: {write_err}",
@@ -622,9 +648,12 @@ def convert(pdf_path, output_path, pages=None, page_ranges=None, flavor="auto", 
                          "so they cannot run as spreadsheet formulas")
 
         sys.stderr.write("PROGRESS:100\n")
-        return {"success": True, "pageCount": total, "tableCount": table_total,
+        result = {"success": True, "pageCount": total, "tableCount": table_total,
                 "sheetCount": len(sheets), "flavor": flavor, "strategiesUsed": used,
                 "format": fmt, "outputKind": output_kind, "notes": notes, "output": out_path}
+        if fmt == "csv":
+            result["files"] = files
+        return result
     finally:
         try:
             pdf.close()

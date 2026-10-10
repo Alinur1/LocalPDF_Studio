@@ -20,6 +20,7 @@ using LocalPDF_Studio_api.BLL.Interfaces;
 using LocalPDF_Studio_api.BLL.Utils;
 using LocalPDF_Studio_api.DAL.Models.PdfToExcel;
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 
@@ -70,8 +71,10 @@ namespace LocalPDF_Studio_api.BLL.Services
             if (!AllowedFormats.Contains(format))
                 format = "xlsx";
 
-            string extension = format == "csv" ? "zip" : "xlsx";
-            string tempOutputPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_pdf_tables.{extension}");
+            if (format == "csv")
+                return await ConvertCsvAsync(request.FilePath, options, flavor);
+
+            string tempOutputPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_pdf_tables.xlsx");
             // Python reports the real path it wrote; honor it (temp dir only).
             string actualPath = tempOutputPath;
 
@@ -113,15 +116,11 @@ namespace LocalPDF_Studio_api.BLL.Services
                 if (!File.Exists(actualPath))
                     throw new Exception("Table extraction output was not produced.");
 
-                var outputKind = string.IsNullOrWhiteSpace(result.OutputKind)
-                    ? (format == "xlsx" ? "xlsx" : "zip")
-                    : result.OutputKind.ToLowerInvariant();
-
                 return new PdfToExcelOutcome
                 {
                     FileBytes = await File.ReadAllBytesAsync(actualPath),
                     Format = format,
-                    OutputKind = outputKind,
+                    OutputKind = "xlsx",
                     TableCount = result.TableCount,
                     Notes = result.Notes ?? new List<string>(),
                 };
@@ -133,6 +132,111 @@ namespace LocalPDF_Studio_api.BLL.Services
                     try { if (File.Exists(candidate)) File.Delete(candidate); } catch { /* Cleanup silent */ }
                 }
             }
+        }
+
+        private async Task<PdfToExcelOutcome> ConvertCsvAsync(string filePath, PdfToExcelOptions options, string flavor)
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_pdf_tables_csv");
+            Directory.CreateDirectory(tempDir);
+
+            try
+            {
+                _logger.LogInformation("Starting PDF to Excel conversion: {FilePath} flavor={Flavor} format=csv coerce={Coerce} merge={Merge}",
+                    filePath, flavor, options.CoerceNumbers, options.MergeContinuations);
+
+                var payload = new
+                {
+                    file_path = filePath,
+                    output_path = tempDir,
+                    pages = options.Pages,
+                    page_ranges = options.PageRanges,
+                    flavor,
+                    format = "csv",
+                    coerce_numbers = options.CoerceNumbers,
+                    merge_continuations = options.MergeContinuations
+                };
+                string stdout = await RunPythonAsync("pdf_to_excel", payload);
+                var result = PythonJsonParser.CleanAndDeserialize<PythonPdfToExcelResult>(stdout);
+
+                if (!result.Success)
+                    throw new Exception(result.Error ?? "Unknown table extraction error");
+
+                // Resolve the directory Python actually wrote (temp dir only).
+                string actualDir = tempDir;
+                if (!string.IsNullOrWhiteSpace(result.Output))
+                {
+                    try
+                    {
+                        var full = Path.GetFullPath(result.Output);
+                        if (full.StartsWith(Path.GetTempPath(), StringComparison.OrdinalIgnoreCase)
+                            && Directory.Exists(full))
+                            actualDir = full;
+                    }
+                    catch { /* fall through to tempDir */ }
+                }
+
+                var csvPaths = ResolveCsvPaths(actualDir, result.Files);
+                if (csvPaths.Count == 0)
+                    throw new Exception("Table extraction output was not produced.");
+
+                byte[] zipBytes = CreateZipFromFiles(csvPaths);
+
+                return new PdfToExcelOutcome
+                {
+                    FileBytes = zipBytes,
+                    Format = "csv",
+                    OutputKind = "zip",
+                    TableCount = result.TableCount,
+                    Notes = result.Notes ?? new List<string>(),
+                };
+            }
+            finally
+            {
+                try { if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true); } catch { /* Cleanup silent */ }
+            }
+        }
+
+        private static List<string> ResolveCsvPaths(string directory, List<string>? reportedFiles)
+        {
+            var paths = new List<string>();
+
+            if (reportedFiles != null && reportedFiles.Count > 0)
+            {
+                foreach (var name in reportedFiles)
+                {
+                    // Guard against path traversal: only accept basenames inside the temp dir.
+                    var safeName = Path.GetFileName(name);
+                    if (string.IsNullOrWhiteSpace(safeName))
+                        continue;
+                    var full = Path.Combine(directory, safeName);
+                    if (File.Exists(full))
+                        paths.Add(full);
+                }
+            }
+
+            if (paths.Count == 0 && Directory.Exists(directory))
+            {
+                paths.AddRange(Directory.GetFiles(directory, "*.csv"));
+                paths.Sort(StringComparer.OrdinalIgnoreCase);
+            }
+
+            return paths;
+        }
+
+        private static byte[] CreateZipFromFiles(List<string> csvPaths)
+        {
+            using var zipStream = new MemoryStream();
+            using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+            {
+                foreach (var path in csvPaths)
+                {
+                    var entry = archive.CreateEntry(Path.GetFileName(path), CompressionLevel.Optimal);
+                    using var entryStream = entry.Open();
+                    using var fileStream = File.OpenRead(path);
+                    fileStream.CopyTo(entryStream);
+                }
+            }
+            return zipStream.ToArray();
         }
 
         private async Task<string> RunPythonAsync(string command, object payload)

@@ -46,6 +46,9 @@ namespace LocalPDF_Studio_api.DAL.Models.PdfToExcel
         [JsonPropertyName("outputKind")]
         public string? OutputKind { get; set; }
 
+        [JsonPropertyName("files")]
+        public List<string> Files { get; set; } = new();
+
         [JsonPropertyName("error")]
         public string? Error { get; set; }
     }
