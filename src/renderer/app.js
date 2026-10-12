@@ -55,96 +55,70 @@ window.addEventListener('DOMContentLoaded', async () => {
     const toolsMenu = document.getElementById('tools-menu');
     const devModeCheckbox = document.getElementById('dev-mode-enabled');
     let toolsMenuOpen = false;
+    let hoverOpen = false;
+    let mouseHoverTimeout = null;
+    const HOVER_DELAY = 200;
 
     emptyState.classList.add('hidden');
 
+    
+    function renderToolsMenu() {
+        const open = toolsMenuOpen || hoverOpen;
+        toolsMenu.classList.toggle('open', open);
+        toolsBtn.setAttribute('aria-expanded', String(open));
+    }
+
     toolsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        clearTimeout(mouseHoverTimeout);
         toolsMenuOpen = !toolsMenuOpen;
-
-        if (toolsMenuOpen) {
-            toolsMenu.classList.add('open');
-            toolsBtn.setAttribute('aria-expanded', 'true');
-            // Keep empty-state transparency if menu is open
-            if (emptyState && !emptyState.classList.contains('hidden')) {
-                emptyState.classList.add('transparent');
-            }
-        } else {
-            toolsMenu.classList.remove('open');
-            toolsBtn.setAttribute('aria-expanded', 'false');
-            if (emptyState && !emptyState.classList.contains('hidden')) {
-                emptyState.classList.remove('transparent');
-            }
-        }
+        if (!toolsMenuOpen) hoverOpen = false;
+        renderToolsMenu();
     });
 
     // Close menu when clicking outside
     document.addEventListener('click', (e) => {
-        if (toolsMenuOpen && !toolsDropdown.contains(e.target)) {
-            toolsMenu.classList.remove('open');
-            toolsBtn.setAttribute('aria-expanded', 'false');
+        if ((toolsMenuOpen || hoverOpen) && !toolsDropdown.contains(e.target)) {
             toolsMenuOpen = false;
-            if (emptyState && !emptyState.classList.contains('hidden')) {
-                emptyState.classList.remove('transparent');
-            }
+            hoverOpen = false;
+            renderToolsMenu();
         }
     });
 
     // Close on Escape key
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && toolsMenuOpen) {
+        if (e.key === 'Escape' && (toolsMenuOpen || hoverOpen)) {
             e.preventDefault();
-            toolsMenu.classList.remove('open');
-            toolsBtn.setAttribute('aria-expanded', 'false');
             toolsMenuOpen = false;
+            hoverOpen = false;
+            renderToolsMenu();
             toolsBtn.focus();
-            if (emptyState && !emptyState.classList.contains('hidden')) {
-                emptyState.classList.remove('transparent');
-            }
         }
     });
 
-    // 200ms delay prevents accidental opens
-    let mouseHoverTimeout;
+    // 200ms delay prevents accidental opens; hover is transient, click pins
     toolsDropdown.addEventListener('mouseenter', () => {
-        if (!toolsMenuOpen && !('ontouchstart' in window)) {
-            mouseHoverTimeout = setTimeout(() => {
-                toolsMenu.classList.add('open');
-                toolsBtn.setAttribute('aria-expanded', 'true');
-            }, 200);
-        }
+        if ((toolsMenuOpen || hoverOpen) || ('ontouchstart' in window)) return;
+        clearTimeout(mouseHoverTimeout);
+        mouseHoverTimeout = setTimeout(() => {
+            hoverOpen = true;
+            renderToolsMenu();
+        }, HOVER_DELAY);
     });
 
     toolsDropdown.addEventListener('mouseleave', () => {
         clearTimeout(mouseHoverTimeout);
-        if (!toolsMenuOpen) {
-            toolsMenu.classList.remove('open');
-            toolsBtn.setAttribute('aria-expanded', 'false');
-        }
+        hoverOpen = false;
+        renderToolsMenu();
     });
 
     toolsMenu.addEventListener('click', (e) => {
         if (e.target.tagName === 'A') {
             setTimeout(() => {
-                toolsMenu.classList.remove('open');
-                toolsBtn.setAttribute('aria-expanded', 'false');
                 toolsMenuOpen = false;
-                if (emptyState && !emptyState.classList.contains('hidden')) {
-                    emptyState.classList.remove('transparent');
-                }
+                hoverOpen = false;
+                renderToolsMenu();
             }, 100);
-        }
-    });
-
-    toolsDropdown.addEventListener('mouseenter', () => {
-        if (emptyState && !emptyState.classList.contains('hidden')) {
-            emptyState.classList.add('transparent');
-        }
-    });
-
-    toolsDropdown.addEventListener('mouseleave', () => {
-        if (emptyState && !emptyState.classList.contains('hidden')) {
-            emptyState.classList.remove('transparent');
         }
     });
 
