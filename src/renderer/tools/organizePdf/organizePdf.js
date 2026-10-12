@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     removePdfBtn.addEventListener('click', async () => {
         await cleanupDroppedFile();
-        clearAll();
+        await clearAll();
     });
 
     const backBtn = document.querySelector('a[href="../../index.html"]');
@@ -76,13 +76,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         backBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             await cleanupDroppedFile();
-            clearAll();
+            await clearAll();
             window.location.href = '../../index.html';
         });
     }
 
     async function handleFileSelected(file) {
-        clearAll(true);
+        await clearAll(true);
         selectedFile = file;
         pdfNameEl.textContent = file.name;
         pdfSizeEl.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
