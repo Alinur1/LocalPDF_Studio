@@ -49,6 +49,8 @@
 class CustomAlert {
     constructor() {
         this.container = null;
+        this._keyHandler = null;
+        this._prevFocus = null;
         this.createContainer();
 
         // Button index constants (for readability)
@@ -112,12 +114,31 @@ class CustomAlert {
      * @param {string} title - Alert title
      * @param {string} description - Alert message
      * @param {Array} buttons - Array of button texts
+     * @param {Object} [options] - Keyboard behavior options
+     * @param {number} [options.defaultIndex=0] - Button focused on open + activated by Enter when focus is outside buttons (safe default: 0 = Cancel/OK)
+     * @param {number} [options.cancelIndex=0] - Button resolved by Escape (safe default: 0)
      * @returns {Promise<number>} Button index that was clicked
      */
-    alert(title, description, buttons = ['OK']) {
+    alert(title, description, buttons = ['OK'], options = {}) {
         return new Promise((resolve) => {
+            // Remove any stale keyboard handler from a previous alert
+            if (this._keyHandler) {
+                document.removeEventListener('keydown', this._keyHandler, true);
+                this._keyHandler = null;
+            }
+            this._prevFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+            // Sanitize buttons + options (backward compatible: 4th arg optional)
+            const safeButtons = (Array.isArray(buttons) && buttons.length > 0) ? buttons : ['OK'];
+            const clampIndex = (v, fallback) => (Number.isInteger(v) && v >= 0 && v < safeButtons.length ? v : fallback);
+            const defaultIndex = clampIndex(options.defaultIndex, 0);
+            const cancelIndex = clampIndex(options.cancelIndex, 0);
             // Create modal content
             const modal = document.createElement('div');
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+            modal.setAttribute('aria-label', String(title));
+            modal.tabIndex = -1;
             modal.style.cssText = `
                 background: #2c3e50;
                 padding: 1.5rem;
@@ -131,6 +152,9 @@ class CustomAlert {
 
             // Copy button (top right corner)
             const copyButton = document.createElement('button');
+            copyButton.type = 'button';
+            // Keep copy available by mouse but exclude from keyboard Tab cycle
+            copyButton.tabIndex = -1;
             copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list-icon lucide-clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>';
             copyButton.title = 'Copy message to clipboard';
             copyButton.style.cssText = `
@@ -256,9 +280,24 @@ class CustomAlert {
             `;
 
             // Create buttons
-            buttons.forEach((buttonText, index) => {
+            const actionButtons = [];
+            let settled = false;
+            const finish = (index) => {
+                if (settled) return;
+                settled = true;
+                if (this._keyHandler) {
+                    document.removeEventListener('keydown', this._keyHandler, true);
+                    this._keyHandler = null;
+                }
+                this.hide();
+                resolve(index);
+            };
+
+            safeButtons.forEach((buttonText, index) => {
                 const button = document.createElement('button');
+                button.type = 'button';
                 button.textContent = buttonText;
+                button.dataset.alertIndex = String(index);
                 button.style.cssText = `
                     background: ${index === 0 ? '#3498db' : '#34495e'};
                     color: #ecf0f1;
@@ -268,7 +307,17 @@ class CustomAlert {
                     cursor: pointer;
                     font-size: 0.9rem;
                     min-width: 80px;
+                    outline: none;
                 `;
+
+                const applyFocusRing = () => {
+                    button.style.outline = '2px solid #5dade2';
+                    button.style.outlineOffset = '2px';
+                };
+                const clearFocusRing = () => {
+                    button.style.outline = 'none';
+                    button.style.outlineOffset = '';
+                };
 
                 button.addEventListener('mouseenter', () => {
                     button.style.background = index === 0 ? '#2980b9' : '#3d566e';
@@ -280,13 +329,110 @@ class CustomAlert {
                     button.style.transform = 'translateY(0)';
                 });
 
+                button.addEventListener('focus', applyFocusRing);
+                button.addEventListener('blur', clearFocusRing);
+
                 button.addEventListener('click', () => {
-                    this.hide();
-                    resolve(index); // Return button index instead of text
+                    finish(index); // Return button index instead of text
                 });
 
                 buttonsContainer.appendChild(button);
+                actionButtons.push(button);
             });
+
+            const focusButton = (index) => {
+                const btn = actionButtons[index];
+                if (btn) btn.focus();
+            };
+
+            // Keyboard: Enter/Space activate, Tab traps, Arrows move, Esc cancels (safe index 0)
+            // Cross-platform: uses Web-standard e.key/e.code only (no OS-specific APIs),
+            // so behavior is identical on Windows / Linux / macOS Electron (Chromium).
+            this._keyHandler = (e) => {
+                if (this.container.style.display !== 'flex') return;
+                const focusedIndex = actionButtons.indexOf(document.activeElement);
+                // Normalize key names across Chromium versions / layouts:
+                // - macOS Return reports 'Enter'; NumpadEnter may report 'Enter' with code 'NumpadEnter'
+                // - Older browsers used 'Esc' / 'Spacebar' / 'Return'
+                const key = e.key ?? '';
+                const code = e.code ?? '';
+                const isEscape = key === 'Escape' || key === 'Esc' || code === 'Escape';
+                const isCancelCombo = (key === '.' || code === 'Period') && (e.metaKey || e.ctrlKey); // macOS Cmd+. / Ctrl+. = cancel
+                const isTab = key === 'Tab' || code === 'Tab';
+                const isEnter = key === 'Enter' || key === 'Return' || code === 'Enter' || code === 'NumpadEnter';
+                const isSpace = key === ' ' || key === 'Spacebar' || code === 'Space';
+                const isRight = key === 'ArrowRight' || code === 'ArrowRight';
+                const isDown = key === 'ArrowDown' || code === 'ArrowDown';
+                const isLeft = key === 'ArrowLeft' || code === 'ArrowLeft';
+                const isUp = key === 'ArrowUp' || code === 'ArrowUp';
+
+                if (isEscape || isCancelCombo) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    focusButton(cancelIndex);
+                    finish(cancelIndex);
+                    return;
+                }
+
+                if (isTab) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (actionButtons.length === 0) return;
+                    let next;
+                    if (focusedIndex === -1) {
+                        next = e.shiftKey ? actionButtons.length - 1 : 0;
+                    } else {
+                        next = e.shiftKey
+                            ? (focusedIndex - 1 + actionButtons.length) % actionButtons.length
+                            : (focusedIndex + 1) % actionButtons.length;
+                    }
+                    focusButton(next);
+                    return;
+                }
+
+                if (isRight || isDown) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (actionButtons.length === 0) return;
+                    focusButton(focusedIndex === -1 ? 0 : (focusedIndex + 1) % actionButtons.length);
+                    return;
+                }
+
+                if (isLeft || isUp) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (actionButtons.length === 0) return;
+                    focusButton(focusedIndex === -1 ? actionButtons.length - 1 : (focusedIndex - 1 + actionButtons.length) % actionButtons.length);
+                    return;
+                }
+
+                if (isEnter) {
+                    // If focus is on an alert button, activate it; otherwise activate default (safe: Cancel/OK).
+                    // preventDefault avoids background Enter leaking + avoids double-activation.
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (focusedIndex !== -1) {
+                        actionButtons[focusedIndex].click();
+                    } else {
+                        focusButton(defaultIndex);
+                        actionButtons[defaultIndex].click();
+                    }
+                    return;
+                }
+
+                if (isSpace) {
+                    if (focusedIndex !== -1) {
+                        // Let native Space-on-button activate on keyup (do not double-fire here)
+                        e.stopPropagation();
+                        return;
+                    }
+                    // Space outside buttons: prevent page scroll, move to default
+                    e.preventDefault();
+                    e.stopPropagation();
+                    focusButton(defaultIndex);
+                }
+            };
+            document.addEventListener('keydown', this._keyHandler, true);
 
             // Assemble modal
             modal.appendChild(copyButton);
@@ -299,9 +445,8 @@ class CustomAlert {
             this.container.appendChild(modal);
             this.show();
 
-            // Focus first action button (not copy button)
-            const firstActionButton = buttonsContainer.querySelector('button');
-            if (firstActionButton) firstActionButton.focus();
+            // Focus default action button (index 0 = safe Cancel/OK unless overridden)
+            focusButton(defaultIndex);
         });
     }
 
@@ -309,11 +454,12 @@ class CustomAlert {
      * Legacy alert method - returns button text (for backward compatibility)
      * Use this if you're not ready to update your comparisons yet
      */
-    alertLegacy(title, description, buttons = ['OK']) {
+    alertLegacy(title, description, buttons = ['OK'], options = {}) {
         return new Promise((resolve) => {
-            this.alert(title, description, buttons).then((index) => {
+            this.alert(title, description, buttons, options).then((index) => {
                 // Return the button text instead of index
-                resolve(buttons[index]);
+                const safe = (Array.isArray(buttons) && buttons.length > 0) ? buttons : ['OK'];
+                resolve(safe[index]);
             });
         });
     }
@@ -322,37 +468,37 @@ class CustomAlert {
      * Quick confirmation dialog with Yes/No buttons
      * Returns: 0 for No (first), 1 for Yes (second)
      */
-    confirm(title, description) {
-        return this.alert(title, description, ['No', 'Yes']);
+    confirm(title, description, options = {}) {
+        return this.alert(title, description, ['No', 'Yes'], options);
     }
 
     /**
      * Quick OK dialog
      * Returns: 0 for OK
      */
-    ok(title, description) {
-        return this.alert(title, description, ['OK']);
+    ok(title, description, options = {}) {
+        return this.alert(title, description, ['OK'], options);
     }
 
     /**
      * Quick error dialog with OK button
      */
-    error(title, description) {
-        return this.alert(title, description, ['OK']);
+    error(title, description, options = {}) {
+        return this.alert(title, description, ['OK'], options);
     }
 
     /**
      * Quick warning dialog with OK button
      */
-    warning(title, description) {
-        return this.alert(title, description, ['OK']);
+    warning(title, description, options = {}) {
+        return this.alert(title, description, ['OK'], options);
     }
 
     /**
      * Quick success dialog with OK button
      */
-    success(title, description) {
-        return this.alert(title, description, ['OK']);
+    success(title, description, options = {}) {
+        return this.alert(title, description, ['OK'], options);
     }
 
     /**
@@ -434,8 +580,16 @@ class CustomAlert {
     hide() {
         this.container.style.display = 'none';
         document.body.style.overflow = '';
-        // Restore focus
-        setTimeout(() => document.body.focus(), 50);
+        // Restore focus to element that opened the alert, fallback to body
+        const prev = this._prevFocus;
+        this._prevFocus = null;
+        setTimeout(() => {
+            if (prev && document.contains(prev) && typeof prev.focus === 'function') {
+                prev.focus();
+            } else {
+                document.body.focus();
+            }
+        }, 50);
     }
 }
 
