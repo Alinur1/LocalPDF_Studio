@@ -54,6 +54,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const toolsBtn = document.getElementById('tools-btn');
     const toolsMenu = document.getElementById('tools-menu');
     const devModeCheckbox = document.getElementById('dev-mode-enabled');
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
     let toolsMenuOpen = false;
     let hoverOpen = false;
     let mouseHoverTimeout = null;
@@ -126,12 +127,14 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (tabManager.tabs.size === 0) {
             console.log('No tabs - showing empty state');
             emptyState.classList.remove('hidden');
+            sidebarToggleBtn.style.display = 'none';
             if (clockManager.isEnabled) {
                 clockManager.start();
             }
         } else {
             console.log('Tabs present - hiding empty state');
             emptyState.classList.add('hidden');
+            sidebarToggleBtn.style.display = '';
             clockManager.stop();
         }
     }
@@ -324,7 +327,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     const tabBar = document.getElementById('tab-bar');
     const resizer = document.getElementById('resizer');
-    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
 
     tabBar.style.width = '220px';
     const savedWidth = localStorage.getItem('sidebarWidth');
