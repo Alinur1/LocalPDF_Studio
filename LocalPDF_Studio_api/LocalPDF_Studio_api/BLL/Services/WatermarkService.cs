@@ -73,10 +73,8 @@ namespace LocalPDF_Studio_api.BLL.Services
         {
             if (!File.Exists(_pythonExePath))
                 throw new FileNotFoundException($"Python Engine not found: {_pythonExePath}");
-
-            // Pass the .py script path as the first argument to the python executable.
+                
             // Use ArgumentList so each value is passed as a discrete OS argument
-            // (Windows/Linux/macOS safe, no manual quoting, no argument injection).
             var startInfo = new ProcessStartInfo
             {
                 FileName = _pythonExePath,

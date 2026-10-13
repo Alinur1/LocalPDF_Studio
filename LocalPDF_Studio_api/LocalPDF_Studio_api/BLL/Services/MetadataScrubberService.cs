@@ -141,7 +141,6 @@ namespace LocalPDF_Studio_api.BLL.Services
                 };
 
                 // Use ArgumentList so each value is passed as a discrete OS argument
-                // (Windows/Linux/macOS safe, no manual quoting, no argument injection).
                 startInfo.ArgumentList.Add(_scriptPath);
                 startInfo.ArgumentList.Add(command);
                 startInfo.ArgumentList.Add(tempJsonFile);
