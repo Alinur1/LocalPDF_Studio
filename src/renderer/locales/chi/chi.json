@@ -1257,6 +1257,8 @@
     "syncScrollOnTooltip": "同步滚动 开启",
     "syncScrollOffTooltip": "同步滚动 关闭",
     "headingTooltip": "标题 {level}",
+    "headingStyleLabel": "标题样式",
+    "paragraphStyle": "段落",
     "boldTooltip": "加粗 (Ctrl+B)",
     "italicTooltip": "斜体 (Ctrl+I)",
     "strikethroughTooltip": "删除线",

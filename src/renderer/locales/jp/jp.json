@@ -1257,6 +1257,8 @@
     "syncScrollOnTooltip": "スクロール同期オン",
     "syncScrollOffTooltip": "スクロール同期オフ",
     "headingTooltip": "見出し {level}",
+    "headingStyleLabel": "見出しスタイル",
+    "paragraphStyle": "段落",
     "boldTooltip": "太字 (Ctrl+B)",
     "italicTooltip": "斜体 (Ctrl+I)",
     "strikethroughTooltip": "取り消し線",

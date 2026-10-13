@@ -23,6 +23,7 @@ import {
     isWebUrl,
     prefixLinesInText,
     insertHeadingInText,
+    clearHeadingInText,
     insertTableInText,
     insertNumberedListInText,
     insertImageInText,
@@ -38,6 +39,7 @@ import { countWords, readMinutes } from './markdown/stats.mjs';
 import { escapeHtml, renderMarkdownToHtml, resolvePreviewImages } from './markdown/render.mjs';
 import { relativizeImagePath } from './markdown/imageUrl.mjs';
 import { assignSyncLines } from './markdown/syncLines.mjs';
+import { expandTabs, computeRowMap, rowToLineIndex, lineToRowIndex } from './markdown/visualMap.mjs';
 
 
 let sharedMarkdownCssLink = null;
@@ -72,7 +74,9 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     function applyTip(entry) {
         const text = tooltipText(entry.key, entry.params);
         entry.el.setAttribute('data-tooltip', text);
-        if (entry.el instanceof HTMLButtonElement) entry.el.setAttribute('aria-label', text);
+        if (entry.el instanceof HTMLButtonElement || entry.el instanceof HTMLSelectElement) {
+            entry.el.setAttribute('aria-label', text);
+        }
         if (entry.el.title) entry.el.title = text;
     }
     function bindTip(el, key, params) {
@@ -86,6 +90,8 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             if (entry.el.isConnected) applyTip(entry);
         }
         if (searchInput.isConnected) searchInput.placeholder = t('searchPlaceholder');
+        const paraOpt = headingSelect.querySelector('option[value="paragraph"]');
+        if (paraOpt) paraOpt.textContent = t('paragraphStyle');
         updateStatusIndicator();
         const warnText = container.querySelector('[data-warn-text]');
         if (warnText) warnText.textContent = t('degradedPreviewWarning');
@@ -353,7 +359,11 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     const preview = document.createElement('article');
     preview.className = 'markdown-body';
-    preview.style.cssText = `padding: 45px; width: 100%; box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto;`;
+    // Phase 7 follow-up: top padding matches the editor's 16px so both panes
+    // start content at the same height — a 45px/16px mismatch guaranteed a
+    // permanent "off by a bit" feel at the top that no mapping can fix.
+    // Sides/bottom keep the roomy GitHub look.
+    preview.style.cssText = `padding: 16px 45px 45px; width: 100%; box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto;`;
     previewPane.appendChild(preview);
 
     contentArea.append(editorPane, previewPane);
@@ -580,7 +590,13 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             preview.innerHTML = renderMarkdownToHtml(editor.value);
             resolvePreviewImages(preview, currentFilePath);
             assignSyncLines(editor.value, preview, window.marked);
+            // Images shift layout when they arrive — re-measure then.
+            preview.querySelectorAll('img').forEach(img => {
+                if (!img.complete) img.addEventListener('load', invalidateBlockCache, { once: true });
+                img.addEventListener('error', invalidateBlockCache, { once: true });
+            });
             invalidateBlockCache();
+            rebuildVisualMap();
         } catch (err) {
             preview.innerHTML = `<p style="color: #e74c3c;">${escapeHtml(t('errorParsingMarkdown'))} ${escapeHtml(err.message)}</p>`;
         }
@@ -720,20 +736,12 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         for (const f of images) insertImageReference(f.name, f.path || f.name);
     });
 
-    // Formatting toolbar for visual buttons
+    // Formatting controls live in the MAIN toolbar (single row) — builders
+    // below are function declarations so the toolbar assembly can use them.
     // Helper to handle multi-line prefixes (like Lists and Blockquotes)
     function prefixLines(prefix) {
         applyTextResult(prefixLinesInText(editor.value, editor.selectionStart, editor.selectionEnd, prefix));
     }
-
-    // Create the toolbar container
-    const formattingToolbar = document.createElement('div');
-    formattingToolbar.className = 'markdown-formatting-toolbar';
-    formattingToolbar.style.cssText = `
-        display: flex; gap: 4px; padding: 6px 12px; 
-        background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color);
-        flex-wrap: wrap; align-items: center;
-    `;
 
     // Helper to generate buttons (tooltipKey = markdownEditor.* key, so
     // language refreshes and aria-labels stay in sync via bindTip)
@@ -749,9 +757,12 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         return btn;
     }
 
-    // Helper for Headings (Toggles between H1, H2, H3, or plain text)
+    // Helper for Headings (select levels, or Paragraph to clear)
     function insertHeading(level) {
         applyTextResult(insertHeadingInText(editor.value, editor.selectionStart, level));
+    }
+    function clearHeading() {
+        applyTextResult(clearHeadingInText(editor.value, editor.selectionStart));
     }
 
     // Helper for inserting a Markdown Table
@@ -766,17 +777,31 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         return span;
     }
 
-    // Helper to create Heading buttons (Text looks cleaner than SVGs for H1/H2/H3)
-    function createHeadingBtn(level) {
-        const btn = document.createElement('button');
-        btn.innerHTML = `H${level}`;
-        bindTip(btn, 'headingTooltip', { level });
-        btn.title = tooltipText('headingTooltip', { level }); // Native browser tooltip fallback
-        btn.className = 'markdown-btn';
-        btn.style.cssText = `padding: 4px 8px; min-width: 28px; font-weight: bold; font-size: 12px;`;
-        btn.addEventListener('mousedown', (e) => e.preventDefault());
-        btn.addEventListener('click', () => { insertHeading(level); editor.focus(); });
-        return btn;
+    // Headings dropdown (native select: free keyboard support, no
+    // focus-stealing popups near the editor). Resets to Paragraph after
+    // each pick so it behaves as an action menu.
+    function createHeadingSelect() {
+        const select = document.createElement('select');
+        select.className = 'markdown-btn markdown-heading-select';
+        select.style.cssText = `padding: 4px 6px; min-width: 0; font-weight: bold; font-size: 12px;`;
+        bindTip(select, 'headingStyleLabel');
+        const para = document.createElement('option');
+        para.value = 'paragraph';
+        para.textContent = t('paragraphStyle');
+        select.appendChild(para);
+        for (let level = 1; level <= 6; level++) {
+            const opt = document.createElement('option');
+            opt.value = String(level);
+            opt.textContent = `H${level}`;
+            select.appendChild(opt);
+        }
+        select.addEventListener('change', () => {
+            if (select.value === 'paragraph') clearHeading();
+            else insertHeading(parseInt(select.value, 10));
+            select.value = 'paragraph';
+            editor.focus();
+        });
+        return select;
     }
 
     // Add new icons
@@ -794,14 +819,14 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         codeBlock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
     };
 
-    //toolbar
-    formattingToolbar.append(
-        createHeadingBtn(1),
-        createHeadingBtn(2),
-        createHeadingBtn(3),
-        createHeadingBtn(4),
-        createHeadingBtn(5),
-        createHeadingBtn(6),
+    // Option A merge: format group joins the MAIN toolbar before the zoom
+    // controls (zoomContainer/searchContainer/statusIndicator keep the tail).
+    // Six heading buttons become one dropdown (native select = free keyboard
+    // support, no focus-stealing popups); groups separated by dividers.
+    const headingSelect = createHeadingSelect();
+    const formatNodes = [
+        createDivider(),
+        headingSelect,
         createDivider(),
         createFormatBtn('boldTooltip', icons.bold, () => wrapSelection('**', '**')),
         createFormatBtn('italicTooltip', icons.italic, () => wrapSelection('*', '*')),
@@ -814,8 +839,10 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         createFormatBtn('blockquoteTooltip', icons.quote, () => prefixLines('> ')),
         createFormatBtn('bulletListTooltip', icons.list, () => prefixLines('- ')),
         createFormatBtn('numberedListTooltip', icons.numbered, insertNumberedList),
-        createFormatBtn('insertTableTooltip', icons.table, insertTable)
-    );
+        createFormatBtn('insertTableTooltip', icons.table, insertTable),
+        createDivider(),
+    ];
+    for (const node of formatNodes) toolbar.insertBefore(node, zoomContainer);
 
     // Helper for Numbered Lists (Smart incrementing and toggle-off)
     function insertNumberedList() {
@@ -831,9 +858,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     function insertCodeBlock() {
         applyTextResult(insertCodeBlockInText(editor.value, editor.selectionStart, editor.selectionEnd));
     }
-
-    // Inject the toolbar at the very top of the editor pane
-    editorPane.prepend(formattingToolbar);
 
     // Editor shortcuts — same wrappers as the toolbar buttons
     editor.addEventListener('keydown', (e) => {
@@ -1058,6 +1082,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         preview.style.fontSize = (16 * previewZoom / 100) + 'px';
         invalidateMeasureCache();
         invalidateBlockCache();
+        rebuildVisualMap();
     }
 
     zoomInBtn.addEventListener('click', () => {
@@ -1118,7 +1143,9 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         const blocks = Array.from(preview.querySelectorAll('[data-sync-line]'));
         _blockPositionCache = blocks.map(block => ({
             line: parseInt(block.dataset.syncLine, 10),
-            top: blockScrollTop(block)
+            end: parseInt(block.dataset.syncEnd || block.dataset.syncLine, 10),
+            top: blockScrollTop(block),
+            height: block.offsetHeight
         }));
         return _blockPositionCache;
     }
@@ -1129,7 +1156,52 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         const blockRect = block.getBoundingClientRect();
         return blockRect.top - paneRect.top + previewPane.scrollTop;
     }
-    function editorScrollToLine() { return editor.scrollTop / getLineHeight(); }
+    // ── Visual-row map (Phase 6 follow-up) ────────────────────────────────────
+    // The editor soft-wraps, so scrollTop/lineHeight is a VISUAL row, not a
+    // logical line. This map converts between the two using measured pixel
+    // widths (canvas, same font as the textarea). Rebuilt with the render
+    // pipeline, on zoom, and on resize; per-line widths are cached so only
+    // changed lines are re-measured. Null = fall back to linear mapping.
+    let visualMap = null;
+    let measureCanvas = null;
+    const widthCache = new Map();
+    function editorFontForMeasure() {
+        const cs = getComputedStyle(editor);
+        const spacing = cs.letterSpacing && cs.letterSpacing !== 'normal' ? ` ${cs.letterSpacing}` : '';
+        return `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}${spacing}`;
+    }
+    function rebuildVisualMap() {
+        // Hidden pane has no layout — keep the old map (or linear fallback).
+        if (editor.clientWidth < 50) return;
+        const lines = editor.value.split('\n');
+        const wrapWidth = Math.max(50, editor.clientWidth - 32); // 16px padding × 2
+        if (!measureCanvas) measureCanvas = document.createElement('canvas');
+        const ctx = measureCanvas.getContext('2d');
+        ctx.font = editorFontForMeasure();
+        const widths = new Array(lines.length);
+        for (let i = 0; i < lines.length; i++) {
+            const expanded = expandTabs(lines[i]);
+            let w = widthCache.get(expanded);
+            if (w === undefined) {
+                w = ctx.measureText(expanded).width;
+                // Bound the cache: drop it wholesale past 20k unique lines
+                // (pathological docs) rather than growing forever.
+                if (widthCache.size > 20000) widthCache.clear();
+                widthCache.set(expanded, w);
+            }
+            widths[i] = w;
+        }
+        visualMap = computeRowMap(widths, wrapWidth);
+    }
+    function editorScrollToLine() {
+        const row = editor.scrollTop / getLineHeight();
+        if (!visualMap) return row;
+        return rowToLineIndex(visualMap, row);
+    }
+    function lineToPixels(line) {
+        if (!visualMap) return line * getLineHeight();
+        return lineToRowIndex(visualMap, line) * getLineHeight();
+    }
 
     function lineToPreviewScrollTop(targetLine) {
         return calcLineToPreview(targetLine, getBlockPositions(), {
@@ -1147,11 +1219,11 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         if (positions.length === 0) {
             return previewMax > 0 ? (previewScrollTop / previewMax) * editorMax : 0;
         }
-        return Math.max(0, calcPreviewToLine(previewScrollTop, positions, {
+        return Math.max(0, lineToPixels(calcPreviewToLine(previewScrollTop, positions, {
             totalLines: editor.value.split('\n').length,
             editorMax,
             previewMax,
-        }) * getLineHeight());
+        })));
     }
 
     // Keep overlay scrolled in sync with textarea
@@ -1179,6 +1251,11 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         syncTip.key = syncEnabled ? 'syncScrollOnTooltip' : 'syncScrollOffTooltip';
         applyTip(syncTip);
     });
+
+    // Wrap points depend on pane width — rebuild the visual map on resize.
+    // (Zoom funnels through updateZoom, which rebuilds too.)
+    const _editorResizeObserver = new ResizeObserver(() => { rebuildVisualMap(); });
+    _editorResizeObserver.observe(editorWrapper);
 
     // Search — overlay-based highlighting
     // Don't delete this comment about how the search overlay works
@@ -1439,6 +1516,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             document.removeEventListener('wheel', onDocumentWheel);
             window.removeEventListener('focus', checkExternalChange);
             window.removeEventListener('language-changed', onLanguageChanged);
+            _editorResizeObserver.disconnect();
             clearTimeout(previewTimeout);
             clearTimeout(statusCountTimer);
             themeObserver.disconnect();

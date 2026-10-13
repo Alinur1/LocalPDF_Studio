@@ -21,7 +21,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
     wrapSelectionInText, insertLinkInText, isWebUrl, prefixLinesInText, insertHeadingInText,
-    insertTableInText, TABLE_TEMPLATE, insertNumberedListInText,
+    clearHeadingInText, insertTableInText, TABLE_TEMPLATE, insertNumberedListInText,
     insertImageInText, IMAGE_TEMPLATE, insertCodeBlockInText, CODE_PLACEHOLDER,
     indentInText, continueListInText,
 } from './textTransforms.mjs';
@@ -29,6 +29,7 @@ import { lineToPreviewScrollTop, previewScrollToEditorLine } from './scrollMath.
 import { countWords, readMinutes } from './stats.mjs';
 import { hasUriScheme, isWindowsAbsolutePath, toFileUrl, relativizeImagePath, buildFileBaseUrl, resolveRelativeSrc } from './imageUrl.mjs';
 import { topLevelTokens, computeTokenLines, assignSyncLines } from './syncLines.mjs';
+import { expandTabs, computeRowMap, rowToLineIndex, lineToRowIndex } from './visualMap.mjs';
 import { marked } from 'marked';
 
 // ─── wrap ───
@@ -217,6 +218,20 @@ test('heading on second line', () => {
     assert.equal(r.end, 5);
 });
 
+test('clear heading returns paragraph text', () => {
+    const r = clearHeadingInText('## hi there', 5);
+    assert.equal(r.text, 'hi there');
+    assert.equal(r.start, 8);
+    assert.equal(r.end, 8);
+});
+
+test('clear heading on plain line is a no-op', () => {
+    const r = clearHeadingInText('plain', 2);
+    assert.equal(r.text, 'plain');
+    assert.equal(r.start, 5);
+    assert.equal(r.end, 5);
+});
+
 // ─── table ───
 test('table inserts template at cursor', () => {
     const r = insertTableInText('ab', 1);
@@ -289,6 +304,18 @@ test('previewToLine interpolates', () => {
     assert.equal(line, 5);
 });
 
+test('lineToPreview interpolates within a tall block', () => {
+    const pos = [{ line: 2, end: 12, top: 100, height: 200 }, { line: 14, top: 320 }];
+    const px = lineToPreviewScrollTop(7, pos, { totalLines: 20, editorScrollTop: 0, editorMax: 50, previewMax: 400 });
+    assert.equal(px, 200);
+});
+
+test('previewToLine interpolates within a tall block', () => {
+    const pos = [{ line: 2, end: 12, top: 100, height: 200 }, { line: 14, top: 320 }];
+    const line = previewScrollToEditorLine(200, pos, { totalLines: 20, editorMax: 50, previewMax: 400 });
+    assert.equal(line, 7);
+});
+
 // ─── stats ───
 test('word counts', () => {
     assert.equal(countWords('  a b  '), 2);
@@ -352,25 +379,30 @@ test('token lines map blocks to source lines', () => {
     const src = '# Title\n\nFirst para.\n\nSecond para.\n';
     const tokens = topLevelTokens(marked, src);
     assert.ok(tokens.length > 0);
-    assert.deepEqual(computeTokenLines(src, tokens), [0, 2, 4]);
+    assert.deepEqual(computeTokenLines(src, tokens).map(s => s.start), [0, 2, 4]);
+    // end = first line after the block (trailing \n belongs to the next
+    // space token, except at EOF where the last block absorbs it)
+    assert.deepEqual(computeTokenLines(src, tokens).map(s => s.end), [0, 2, 5]);
 });
 
 test('duplicate paragraphs resolve in order', () => {
     const src = 'Same text.\n\nSame text.\n\nSame text.\n';
     const tokens = topLevelTokens(marked, src);
-    assert.deepEqual(computeTokenLines(src, tokens), [0, 2, 4]);
+    assert.deepEqual(computeTokenLines(src, tokens).map(s => s.start), [0, 2, 4]);
 });
 
 test('code fence with markdown inside maps once', () => {
     const src = '# A\n\n```\n# not a heading\n[not](a)\n```\n\nTail.\n';
     const tokens = topLevelTokens(marked, src);
-    assert.deepEqual(computeTokenLines(src, tokens), [0, 2, 7]);
+    const spans = computeTokenLines(src, tokens);
+    assert.deepEqual(spans.map(s => s.start), [0, 2, 7]);
+    assert.deepEqual(spans.map(s => s.end), [0, 5, 8]);
 });
 
 test('hr, quote, list and image-only blocks map', () => {
     const src = 'Para.\n\n---\n\n> quote\n\n- a\n- b\n\n![alt](i.png)\n';
     const tokens = topLevelTokens(marked, src);
-    assert.deepEqual(computeTokenLines(src, tokens), [0, 2, 4, 6, 9]);
+    assert.deepEqual(computeTokenLines(src, tokens).map(s => s.start), [0, 2, 4, 6, 9]);
 });
 
 test('assign pairs elements with lines monotonically', () => {
@@ -392,3 +424,34 @@ test('assign bails without a lexer', () => {
     assert.equal(assignSyncLines('# T\n', root, null), 0);
     assert.equal(assignSyncLines('# T\n', root, {}), 0);
 });
+
+// ─── visual rows ───
+test('rows from widths', () => {
+    const m = computeRowMap([10, 0, 250], 100);
+    assert.deepEqual(m.rows, [1, 1, 3]);
+    assert.deepEqual(m.lineStartRow, [0, 1, 2]);
+    assert.equal(m.totalRows, 5);
+});
+
+test('row to line with clamping', () => {
+    const m = computeRowMap([10, 250, 10], 100); // rows 1, 3, 1
+    assert.equal(rowToLineIndex(m, 0), 0);
+    assert.equal(rowToLineIndex(m, 1), 1);
+    assert.equal(rowToLineIndex(m, 3), 1);
+    assert.equal(rowToLineIndex(m, 4), 2);
+    assert.equal(rowToLineIndex(m, 99), 2);
+    assert.equal(rowToLineIndex(null, 5), 0);
+});
+
+test('line to row with clamping', () => {
+    const m = computeRowMap([10, 250, 10], 100);
+    assert.equal(lineToRowIndex(m, 0), 0);
+    assert.equal(lineToRowIndex(m, 1), 1);
+    assert.equal(lineToRowIndex(m, 2), 4);
+    assert.equal(lineToRowIndex(m, 99), 4);
+});
+
+test('tabs expand to spaces', () => {
+    assert.equal(expandTabs('a\tb'), 'a    b');
+});
+

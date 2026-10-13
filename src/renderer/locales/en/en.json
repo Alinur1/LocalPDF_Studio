@@ -1257,6 +1257,8 @@
     "syncScrollOnTooltip": "Sync scroll ON",
     "syncScrollOffTooltip": "Sync scroll OFF",
     "headingTooltip": "Heading {level}",
+    "headingStyleLabel": "Heading style",
+    "paragraphStyle": "Paragraph",
     "boldTooltip": "Bold (Ctrl+B)",
     "italicTooltip": "Italic (Ctrl+I)",
     "strikethroughTooltip": "Strikethrough",

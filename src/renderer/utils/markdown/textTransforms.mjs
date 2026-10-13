@@ -141,6 +141,21 @@ export function insertHeadingInText(text, start, level) {
     };
 }
 
+// Replaces the current line's heading (if any) with plain paragraph text.
+export function clearHeadingInText(text, start) {
+    const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+    const lineEnd = text.indexOf('\n', start);
+    const actualEnd = lineEnd === -1 ? text.length : lineEnd;
+
+    const cleanLine = text.slice(lineStart, actualEnd).replace(/^#{1,6}\s*/, '');
+    const cursor = lineStart + cleanLine.length;
+    return {
+        text: text.slice(0, lineStart) + cleanLine + text.slice(actualEnd),
+        start: cursor,
+        end: cursor,
+    };
+}
+
 // ─── Table ───────────────────────────────────────────────────────────────────
 export const TABLE_TEMPLATE = `\n| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |\n| Cell 4   | Cell 5   | Cell 6   |\n`;
 

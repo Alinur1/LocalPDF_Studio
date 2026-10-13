@@ -17,6 +17,9 @@
 
 // src/renderer/utils/markdown/scrollMath.mjs
 
+// Positions are [{ line, top }] with optional { end, height } for long
+// blocks (code fences, lists): targets INSIDE a block interpolate within
+// it instead of pinning to its top (Phase 6 follow-up).
 export function lineToPreviewScrollTop(targetLine, positions, metrics) {
     const { totalLines, editorScrollTop, editorMax, previewMax } = metrics;
     if (positions.length === 0) {
@@ -30,6 +33,13 @@ export function lineToPreviewScrollTop(targetLine, positions, metrics) {
     if (!before) {
         const first = positions[0];
         return first.line > 0 ? Math.min(targetLine / first.line, 1) * first.top : 0;
+    }
+    // Inside a measured block: interpolate within it.
+    const beforeEnd = before.end ?? before.line;
+    const beforeHeight = before.height ?? 0;
+    if (targetLine <= beforeEnd && beforeHeight > 0 && beforeEnd > before.line) {
+        const frac = (targetLine - before.line) / (beforeEnd - before.line);
+        return before.top + frac * beforeHeight;
     }
     if (!after) {
         const tail = totalLines > before.line ? (targetLine - before.line) / (totalLines - before.line) : 0;
@@ -53,6 +63,13 @@ export function previewScrollToEditorLine(previewScrollTop, positions, metrics) 
     if (!before) {
         const first = positions[0];
         return first.top > 0 ? (previewScrollTop / first.top) * first.line : 0;
+    }
+    // Inside a measured block: interpolate within it.
+    const beforeEnd = before.end ?? before.line;
+    const beforeHeight = before.height ?? 0;
+    if (beforeHeight > 0 && previewScrollTop <= before.top + beforeHeight && beforeEnd > before.line) {
+        const frac = (previewScrollTop - before.top) / beforeHeight;
+        return before.line + frac * (beforeEnd - before.line);
     }
     if (!after) {
         const tail = previewMax > before.top ? (previewScrollTop - before.top) / (previewMax - before.top) : 0;

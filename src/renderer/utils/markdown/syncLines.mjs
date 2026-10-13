@@ -31,11 +31,12 @@ export function topLevelTokens(markedApi, markdownText) {
     }
 }
 
-// Start line (0-based) of each token via one progressive source scan.
-// Duplicate identical blocks resolve in order because the cursor only moves
-// forward. Tokens without usable raw text reuse the cursor position.
+// Start/end lines (0-based, end exclusive-ish: last line index + span) of each
+// token via one progressive source scan. Duplicate identical blocks resolve
+// in order because the cursor only moves forward. Tokens without usable raw
+// text reuse the cursor position.
 export function computeTokenLines(markdownText, tokens) {
-    const lines = [];
+    const spans = [];
     let cursor = 0;
     for (const token of tokens) {
         const raw = (token && typeof token.raw === 'string' && token.raw) ? token.raw : '';
@@ -45,13 +46,17 @@ export function computeTokenLines(markdownText, tokens) {
             if (idx !== -1) cursor = idx + raw.length;
         }
         if (idx === -1) idx = cursor;
-        let startLine = 0;
-        for (let i = 0; i < idx; i++) {
-            if (markdownText[i] === '\n') startLine++;
-        }
-        lines.push(startLine);
+        spans.push({ start: countLines(markdownText, idx), end: countLines(markdownText, cursor) });
     }
-    return lines;
+    return spans;
+}
+
+function countLines(text, idx) {
+    let n = 0;
+    for (let i = 0; i < idx; i++) {
+        if (text[i] === '\n') n++;
+    }
+    return n;
 }
 
 // Pairing guard: raw-HTML tokens can render several elements (or none),
@@ -66,14 +71,15 @@ export function assignSyncLines(markdownText, root, markedApi) {
     if (elements.length === 0) return 0;
     if (Math.abs(elements.length - tokens.length) / tokens.length > MAX_MISMATCH_RATIO) return 0;
 
-    const lines = computeTokenLines(markdownText, tokens);
+    const spans = computeTokenLines(markdownText, tokens);
     let prev = 0;
     let assigned = 0;
-    for (let i = 0; i < elements.length && i < lines.length; i++) {
+    for (let i = 0; i < elements.length && i < spans.length; i++) {
         // Enforce monotonicity so one bad token can't invert the map.
-        const line = Math.max(lines[i], prev);
-        elements[i].dataset.syncLine = line;
-        prev = line;
+        const start = Math.max(spans[i].start, prev);
+        elements[i].dataset.syncLine = start;
+        elements[i].dataset.syncEnd = Math.max(spans[i].end, start);
+        prev = start;
         assigned++;
     }
     return assigned;

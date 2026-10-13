@@ -1257,6 +1257,8 @@
     "syncScrollOnTooltip": "সিঙ্ক স্ক্রল চালু",
     "syncScrollOffTooltip": "সিঙ্ক স্ক্রল বন্ধ",
     "headingTooltip": "শিরোনাম {level}",
+    "headingStyleLabel": "শিরোনাম শৈলী",
+    "paragraphStyle": "অনুচ্ছেদ",
     "boldTooltip": "বোল্ড (Ctrl+B)",
     "italicTooltip": "ইটালিক (Ctrl+I)",
     "strikethroughTooltip": "স্ট্রাইকথ্রু",
