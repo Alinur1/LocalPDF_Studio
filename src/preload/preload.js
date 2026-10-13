@@ -30,9 +30,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getFileInfo: (path) => {
         try {
             const stats = fs.statSync(path);
-            return Promise.resolve({ size: stats.size });
+            return Promise.resolve({ size: stats.size, mtimeMs: stats.mtimeMs });
         } catch (err) {
-            return Promise.resolve({ size: 0 });
+            return Promise.resolve({ size: 0, mtimeMs: 0 });
         }
     },
     saveMergedPdf: (buffer) => ipcRenderer.invoke('save-merged-pdf', buffer),

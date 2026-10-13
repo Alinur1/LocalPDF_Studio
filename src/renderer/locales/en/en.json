@@ -1261,7 +1261,7 @@
     "italicTooltip": "Italic (Ctrl+I)",
     "strikethroughTooltip": "Strikethrough",
     "inlineCodeTooltip": "Inline Code (Ctrl+`)",
-    "codeBlockTooltip": "Code Block (Ctrl+Shift+C)",
+    "codeBlockTooltip": "Code Block (Ctrl+Alt+C)",
     "linkTooltip": "Link (Ctrl+K)",
     "imageTooltip": "Image",
     "blockquoteTooltip": "Blockquote",
@@ -1269,7 +1269,16 @@
     "numberedListTooltip": "Numbered List",
     "insertTableTooltip": "Insert Table",
     "unsavedChangesTitle": "Unsaved Changes",
-    "unsavedChangesMessage": "You have unsaved changes. Are you sure you want to close this tab?"
+    "unsavedChangesMessage": "You have unsaved changes. Are you sure you want to close this tab?",
+    "loadFailedBanner": "Could not load file content. Saving will ask for confirmation before overwriting.",
+    "loadFailedRetry": "Retry",
+    "loadFailedOverwriteTitle": "Overwrite Unread File?",
+    "loadFailedOverwriteMessage": "The original file could not be read, so its contents are unknown. Saving now will replace it with the current editor content. Continue?",
+    "loadEncodingError": "File is not readable text (binary content or unsupported encoding).",
+    "externalChangeBanner": "This file changed on disk.",
+    "externalChangeReload": "Reload",
+    "externalChangeKeep": "Keep mine",
+    "degradedPreviewWarning": "Preview libraries failed to load. Showing plain text preview."
   },
   "pdftoExcel": {
     "page-title": "PDF to Excel",

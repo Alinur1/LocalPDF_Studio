@@ -105,6 +105,7 @@ class I18n {
         this.currentLanguage = lang;
         localStorage.setItem('language', lang);
         this.updateUI();
+        window.dispatchEvent(new CustomEvent('language-changed', { detail: lang }));
     }
 
     // t(key) {

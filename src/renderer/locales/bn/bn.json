@@ -1261,7 +1261,7 @@
     "italicTooltip": "ইটালিক (Ctrl+I)",
     "strikethroughTooltip": "স্ট্রাইকথ্রু",
     "inlineCodeTooltip": "ইনলাইন কোড (Ctrl+`)",
-    "codeBlockTooltip": "কোড ব্লক (Ctrl+Shift+C)",
+    "codeBlockTooltip": "কোড ব্লক (Ctrl+Alt+C)",
     "linkTooltip": "লিঙ্ক (Ctrl+K)",
     "imageTooltip": "ছবি",
     "blockquoteTooltip": "ব্লকউট",
@@ -1269,7 +1269,16 @@
     "numberedListTooltip": "সংখ্যাযুক্ত তালিকা",
     "insertTableTooltip": "টেবিল যুক্ত করুন",
     "unsavedChangesTitle": "অসংরক্ষিত পরিবর্তন",
-    "unsavedChangesMessage": "আপনার অসংরক্ষিত পরিবর্তন রয়েছে। এই ট্যাবটি বন্ধ করতে চান কি?"
+    "unsavedChangesMessage": "আপনার অসংরক্ষিত পরিবর্তন রয়েছে। এই ট্যাবটি বন্ধ করতে চান কি?",
+    "loadFailedBanner": "ফাইলের বিষয়বস্তু লোড করা যায়নি। সংরক্ষণের আগে ওভাররাইটের জন্য নিশ্চিতকরণ চাওয়া হবে।",
+    "loadFailedRetry": "পুনরায় চেষ্টা",
+    "loadFailedOverwriteTitle": "অপঠিত ফাইল ওভাররাইট করবেন?",
+    "loadFailedOverwriteMessage": "মূল ফাইলটি পড়া যায়নি, তাই এর বিষয়বস্তু অজানা। এখন সংরক্ষণ করলে বর্তমান এডিটরের বিষয়বস্তু দিয়ে প্রতিস্থাপিত হবে। চালিয়ে যাবেন?",
+    "loadEncodingError": "ফাইলটি পাঠযোগ্য টেক্সট নয় (বাইনারি বিষয়বস্তু বা অসমর্থিত এনকোডিং)।",
+    "externalChangeBanner": "এই ফাইলটি ডিস্কে পরিবর্তিত হয়েছে।",
+    "externalChangeReload": "পুনরায় লোড",
+    "externalChangeKeep": "আমারটা রাখুন",
+    "degradedPreviewWarning": "প্রিভিউ লাইব্রেরি লোড করা যায়নি। সাধারণ টেক্সট প্রিভিউ দেখানো হচ্ছে।"
   },
   "pdftoExcel": {
     "page-title": "পিডিএফ থেকে Excel",

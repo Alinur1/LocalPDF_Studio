@@ -170,7 +170,7 @@ export default class TabManager {
         this.tabs = newTabs;
     }
 
-    openTab({ id, title, content, onClose }) {
+    openTab({ id, title, content, onClose, onDestroy }) {
         if (this.tabs.has(id)) {
             this.switchTab(id);
             return;
@@ -211,9 +211,18 @@ export default class TabManager {
         this.tabBar.appendChild(tabButton);
         this.tabContent.appendChild(contentWrapper);
 
-        this.tabs.set(id, { tabButton, contentWrapper, content, onClose });
+        this.tabs.set(id, { tabButton, contentWrapper, content, onClose, onDestroy });
         this.switchTab(id);
         if (this.onTabChange) this.onTabChange();
+    }
+
+    // Update a tab's visible title (e.g. dirty ● marker). No-op for unknown ids.
+    setTitle(id, title) {
+        const tab = this.tabs.get(id);
+        if (!tab) return false;
+        const titleSpan = tab.tabButton.querySelector('.tab-title');
+        if (titleSpan) titleSpan.textContent = title;
+        return true;
     }
 
     switchTab(id) {
@@ -248,6 +257,11 @@ export default class TabManager {
         tab.tabButton.remove();
         tab.contentWrapper.remove();
         this.tabs.delete(id);
+
+        // Teardown hook for per-tab cleanup (observers, listeners, timers).
+        if (tab.onDestroy) {
+            try { tab.onDestroy(); } catch (err) { console.error(err); }
+        }
 
         // Remove from history
         this.navigationHistory = this.navigationHistory.filter(tabId => tabId !== id);

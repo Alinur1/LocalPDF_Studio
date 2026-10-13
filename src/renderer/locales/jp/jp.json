@@ -1261,7 +1261,7 @@
     "italicTooltip": "斜体 (Ctrl+I)",
     "strikethroughTooltip": "取り消し線",
     "inlineCodeTooltip": "インラインコード (Ctrl+`)",
-    "codeBlockTooltip": "コードブロック (Ctrl+Shift+C)",
+    "codeBlockTooltip": "コードブロック (Ctrl+Alt+C)",
     "linkTooltip": "リンク (Ctrl+K)",
     "imageTooltip": "画像",
     "blockquoteTooltip": "引用",
@@ -1269,7 +1269,16 @@
     "numberedListTooltip": "番号付きリスト",
     "insertTableTooltip": "表を挿入",
     "unsavedChangesTitle": "保存されていない変更",
-    "unsavedChangesMessage": "保存されていない変更があります。このタブを閉じてもよろしいですか？"
+    "unsavedChangesMessage": "保存されていない変更があります。このタブを閉じてもよろしいですか？",
+    "loadFailedBanner": "ファイルの内容を読み込めませんでした。保存前に上書きの確認を求めます。",
+    "loadFailedRetry": "再試行",
+    "loadFailedOverwriteTitle": "未読ファイルを上書きしますか？",
+    "loadFailedOverwriteMessage": "元のファイルを読み込めなかったため、内容は不明です。今保存すると、現在のエディタの内容で置き換えられます。続行しますか？",
+    "loadEncodingError": "ファイルは読み取り可能なテキストではありません（バイナリまたは未対応のエンコーディング）。",
+    "externalChangeBanner": "このファイルはディスク上で変更されました。",
+    "externalChangeReload": "再読み込み",
+    "externalChangeKeep": "維持する",
+    "degradedPreviewWarning": "プレビューライブラリの読み込みに失敗しました。プレーンテキストで表示します。"
   },
   "pdftoExcel": {
     "page-title": "PDF を Excel に変換",

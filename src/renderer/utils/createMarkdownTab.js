@@ -17,17 +17,90 @@
 
 // src/renderer/utils/createMarkdownTab.js
 import i18n from './i18n.js';
+import {
+    wrapSelectionInText,
+    insertLinkInText,
+    isWebUrl,
+    prefixLinesInText,
+    insertHeadingInText,
+    insertTableInText,
+    insertNumberedListInText,
+    insertImageInText,
+    insertCodeBlockInText,
+    indentInText,
+    continueListInText,
+} from './markdown/textTransforms.mjs';
+import {
+    lineToPreviewScrollTop as calcLineToPreview,
+    previewScrollToEditorLine as calcPreviewToLine,
+} from './markdown/scrollMath.mjs';
+import { countWords, readMinutes } from './markdown/stats.mjs';
+import { escapeHtml, renderMarkdownToHtml, resolvePreviewImages } from './markdown/render.mjs';
+import { relativizeImagePath } from './markdown/imageUrl.mjs';
+import { assignSyncLines } from './markdown/syncLines.mjs';
+
+
+let sharedMarkdownCssLink = null;
+let exportModalSeq = 0;
+let markdownTabSeq = 0;
+
+let overlayScrollbarStyle = null;
+function ensureOverlayScrollbarStyle() {
+    if (overlayScrollbarStyle?.parentNode) return;
+    overlayScrollbarStyle = document.createElement('style');
+    overlayScrollbarStyle.textContent = `.markdown-search-overlay::-webkit-scrollbar { display: none; }`;
+    document.head.appendChild(overlayScrollbarStyle);
+}
 
 export default async function createMarkdownTab(filePath, tabManager, existingId = null, initialContent = null) {
-    const tabId = existingId || `markdown:${filePath}:${Date.now()}`;
+    const tabId = existingId || `markdown:${filePath}:${Date.now()}:${++markdownTabSeq}`;
     const title = filePath.split(/[\\/]/).pop();
     let isDirty = false;
     let currentFilePath = filePath;
     let editorZoom = 100;
     let previewZoom = 100;
-    let markedReady = false;
     let forceClose = false;
     const t = (key) => i18n.t(`markdownEditor.${key}`);
+    const i18nBindings = [];
+    function tooltipText(key, params) {
+        let s = t(key);
+        if (params) {
+            for (const [k, v] of Object.entries(params)) s = s.replace(`{${k}}`, String(v));
+        }
+        return s;
+    }
+    function applyTip(entry) {
+        const text = tooltipText(entry.key, entry.params);
+        entry.el.setAttribute('data-tooltip', text);
+        if (entry.el instanceof HTMLButtonElement) entry.el.setAttribute('aria-label', text);
+        if (entry.el.title) entry.el.title = text;
+    }
+    function bindTip(el, key, params) {
+        const entry = { el, key, params };
+        applyTip(entry);
+        i18nBindings.push(entry);
+        return entry;
+    }
+    function onLanguageChanged() {
+        for (const entry of i18nBindings) {
+            if (entry.el.isConnected) applyTip(entry);
+        }
+        if (searchInput.isConnected) searchInput.placeholder = t('searchPlaceholder');
+        updateStatusIndicator();
+        const warnText = container.querySelector('[data-warn-text]');
+        if (warnText) warnText.textContent = t('degradedPreviewWarning');
+        const loadText = loadBanner?.querySelector('[data-load-text]');
+        if (loadText) loadText.textContent = t('loadFailedBanner');
+        const loadRetry = loadBanner?.querySelector('[data-load-retry]');
+        if (loadRetry) loadRetry.textContent = t('loadFailedRetry');
+        const extText = externalBanner?.querySelector('[data-ext-text]');
+        if (extText) extText.textContent = t('externalChangeBanner');
+        const extReload = externalBanner?.querySelector('[data-ext-reload]');
+        if (extReload) extReload.textContent = t('externalChangeReload');
+        const extKeep = externalBanner?.querySelector('[data-ext-keep]');
+        if (extKeep) extKeep.textContent = t('externalChangeKeep');
+    }
+    window.addEventListener('language-changed', onLanguageChanged);
 
     const getAssetPath = async (relativePath) => {
         if (window.electronAPI?.resolveAsset) {
@@ -38,14 +111,14 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     };
 
     const loadMarked = async () => {
-        if (window.marked) { markedReady = true; return; }
+        if (window.marked) { return; }
         const scriptUrl = await getAssetPath('js/marked.umd.js');
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = scriptUrl;
             script.onload = () => {
-                window.marked.setOptions({ gfm: true, breaks: true, headerIds: true, mangle: false });
-                markedReady = true;
+                // marked 18: only gfm/breaks are valid here (headerIds/mangle were removed).
+                window.marked.setOptions({ gfm: true, breaks: true });
                 resolve();
             };
             script.onerror = () => reject(new Error('Failed to load marked.js'));
@@ -53,20 +126,55 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         });
     };
 
-    let activeCssLink = null;
+    const loadPurify = async () => {
+        if (window.DOMPurify?.sanitize) { return; }
+        const scriptUrl = await getAssetPath('js/purify.min.js');
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = scriptUrl;
+            script.onload = () => {
+                if (window.DOMPurify?.sanitize) resolve();
+                else reject(new Error('DOMPurify loaded but sanitize() is unavailable'));
+            };
+            script.onerror = () => reject(new Error('Failed to load purify.min.js'));
+            document.head.appendChild(script);
+        });
+    };
+
+    // Single shared <link> for all markdown tabs. Reused when
+    // it already points at the right file; otherwise its href is updated.
+    // Never removed per-tab — it belongs to the window, not the tab.
     const loadGithubCss = async (theme) => {
-        if (activeCssLink?.parentNode) activeCssLink.parentNode.removeChild(activeCssLink);
         let cssFile = 'github-markdown.css';
         if (theme === 'light') cssFile = 'github-markdown-light.css';
         else if (theme === 'dark') cssFile = 'github-markdown-dark.css';
         const cssUrl = await getAssetPath(`css/${cssFile}`);
-        activeCssLink = document.createElement('link');
-        activeCssLink.rel = 'stylesheet';
-        activeCssLink.href = cssUrl;
-        document.head.appendChild(activeCssLink);
+        if (!sharedMarkdownCssLink?.parentNode) {
+            sharedMarkdownCssLink = document.createElement('link');
+            sharedMarkdownCssLink.rel = 'stylesheet';
+            sharedMarkdownCssLink.id = 'markdown-github-css';
+            document.head.appendChild(sharedMarkdownCssLink);
+        }
+        if (sharedMarkdownCssLink.getAttribute('href') !== cssUrl) {
+            sharedMarkdownCssLink.href = cssUrl;
+        }
     };
 
-    await loadMarked();
+    // Guarded boot — a missing vendor lib degrades to safe fallback
+    // rendering instead of killing the whole tab.
+    let loadWarning = null;
+    try {
+        await loadMarked();
+    } catch (err) {
+        console.error('Markdown preview degraded: could not load marked.js:', err);
+        loadWarning = 'marked';
+    }
+    try {
+        await loadPurify();
+    } catch (err) {
+        console.error('Markdown preview degraded: could not load DOMPurify:', err);
+        loadWarning = loadWarning ? 'marked+purify' : 'purify';
+    }
 
     // ─── Container ───────────────────────────────────────────────────────────
     const container = document.createElement('div');
@@ -80,37 +188,40 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     const saveBtn = document.createElement('button');
     saveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
-    saveBtn.setAttribute('data-tooltip', t('saveTooltip'));
+    bindTip(saveBtn, 'saveTooltip');
     saveBtn.className = 'markdown-btn tooltip-left';
 
     const exportPdfBtn = document.createElement('button');
     exportPdfBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
-    exportPdfBtn.setAttribute('data-tooltip', t('exportTooltip'));
+    bindTip(exportPdfBtn, 'exportTooltip');
     exportPdfBtn.className = 'markdown-btn tooltip-left';
 
     const toggleEditorBtn = document.createElement('button');
     toggleEditorBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
-    toggleEditorBtn.setAttribute('data-tooltip', t('toggleEditorTooltip'));
+    bindTip(toggleEditorBtn, 'toggleEditorTooltip');
+    toggleEditorBtn.setAttribute('aria-pressed', 'false');
     toggleEditorBtn.className = 'markdown-btn tooltip-left';
 
     const layoutBtn = document.createElement('button');
     layoutBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>';
-    layoutBtn.setAttribute('data-tooltip', t('toggleLayoutTooltip'));
+    bindTip(layoutBtn, 'toggleLayoutTooltip');
     layoutBtn.className = 'markdown-btn tooltip-left';
 
     const syncToggleBtn = document.createElement('button');
     syncToggleBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>';
-    syncToggleBtn.setAttribute('data-tooltip', t('syncScrollTooltip'));
+    const syncTip = bindTip(syncToggleBtn, 'syncScrollTooltip');
     syncToggleBtn.className = 'markdown-btn tooltip-left';
-    syncToggleBtn.style.background = 'var(--accent-color)';
-    syncToggleBtn.style.color = 'white';
+    // Toggle state lives in .is-active (markdown-tab.css) +
+    // aria-pressed, not inline styles — inline colors fought the theme.
+    syncToggleBtn.classList.add('is-active');
+    syncToggleBtn.setAttribute('aria-pressed', 'true');
 
     const zoomContainer = document.createElement('div');
     zoomContainer.style.cssText = `display: flex; gap: 4px; align-items: center; margin-left: 12px; border-left: 1px solid var(--border-color); padding-left: 12px;`;
 
     const zoomOutBtn = document.createElement('button');
     zoomOutBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6"/></svg>';
-    zoomOutBtn.setAttribute('data-tooltip', t('zoomOutTooltip'));
+    bindTip(zoomOutBtn, 'zoomOutTooltip');
     zoomOutBtn.className = 'markdown-btn';
 
     const zoomLevel = document.createElement('span');
@@ -119,7 +230,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     const zoomInBtn = document.createElement('button');
     zoomInBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>';
-    zoomInBtn.setAttribute('data-tooltip', t('zoomInTooltip'));
+    bindTip(zoomInBtn, 'zoomInTooltip');
     zoomInBtn.className = 'markdown-btn';
 
     zoomContainer.append(zoomOutBtn, zoomLevel, zoomInBtn);
@@ -135,7 +246,8 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     const searchCaseSensitiveBtn = document.createElement('button');
     searchCaseSensitiveBtn.textContent = 'Aa';
-    searchCaseSensitiveBtn.setAttribute('data-tooltip', t('caseSensitiveTooltip'));
+    bindTip(searchCaseSensitiveBtn, 'caseSensitiveTooltip');
+    searchCaseSensitiveBtn.setAttribute('aria-pressed', 'false');
     searchCaseSensitiveBtn.className = 'markdown-btn';
     searchCaseSensitiveBtn.style.cssText = `font-size: 11px; font-weight: bold; padding: 3px 6px; min-width: 26px;`;
     let searchCaseSensitive = false;
@@ -146,24 +258,24 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     const searchPrevBtn = document.createElement('button');
     searchPrevBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`;
-    searchPrevBtn.setAttribute('data-tooltip', t('previousTooltip'));
+    bindTip(searchPrevBtn, 'previousTooltip');
     searchPrevBtn.className = 'markdown-btn';
 
     const searchNextBtn = document.createElement('button');
     searchNextBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
-    searchNextBtn.setAttribute('data-tooltip', t('nextTooltip'));
+    bindTip(searchNextBtn, 'nextTooltip');
     searchNextBtn.className = 'markdown-btn';
 
     const searchCloseBtn = document.createElement('button');
     searchCloseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
-    searchCloseBtn.setAttribute('data-tooltip', t('closeTooltip'));
+    bindTip(searchCloseBtn, 'closeTooltip');
     searchCloseBtn.className = 'markdown-btn';
 
     searchContainer.append(searchInput, searchCaseSensitiveBtn, searchMatchCount, searchPrevBtn, searchNextBtn, searchCloseBtn);
 
     const statusIndicator = document.createElement('span');
     statusIndicator.style.cssText = `margin-left: auto; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: help;`;
-    statusIndicator.setAttribute('data-tooltip', t('fileStatusTooltip'));
+    bindTip(statusIndicator, 'fileStatusTooltip');
 
     toolbar.append(saveBtn, exportPdfBtn, toggleEditorBtn, layoutBtn, syncToggleBtn, zoomContainer, searchContainer, statusIndicator);
 
@@ -182,19 +294,26 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     editorWrapper.style.cssText = `position: relative; flex: 1; display: flex; overflow: hidden;`;
 
     // ── Highlight overlay (sits BEHIND the textarea) ─────────────────────────
-    // Must share identical font/padding/sizing with the textarea so characters
-    // land in exactly the same pixel positions.
+    // Must share identical font/padding/sizing/tab-size with the textarea so
+    // characters land in exactly the same pixel positions. The
+    // overlay scrolls identically (overflow auto, scrollbars hidden) and the
+    // textarea reserves a stable scrollbar gutter so its content width never
+    // oscillates as the scrollbar appears/disappears.
     const highlightOverlay = document.createElement('div');
     highlightOverlay.setAttribute('aria-hidden', 'true');
+    highlightOverlay.className = 'markdown-search-overlay';
+    ensureOverlayScrollbarStyle();
     highlightOverlay.style.cssText = `
         position: absolute; top: 0; left: 0; right: 0; bottom: 0;
         padding: 16px;
-        font-family: 'Courier New', monospace;
+        font-family: ui-monospace, 'Cascadia Code', 'JetBrains Mono', 'Courier New', monospace;
         font-size: 14px;
         line-height: 1.5;
+        tab-size: 4;
         white-space: pre-wrap;
         word-wrap: break-word;
-        overflow: hidden;
+        overflow: auto;
+        scrollbar-width: none;
         pointer-events: none;
         color: transparent;
         background: transparent;
@@ -212,9 +331,11 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         color: var(--text-primary);
         caret-color: var(--text-primary);
         border: none; outline: none;
-        font-family: 'Courier New', monospace;
+        font-family: ui-monospace, 'Cascadia Code', 'JetBrains Mono', 'Courier New', monospace;
         font-size: 14px;
         line-height: 1.5;
+        tab-size: 4;
+        scrollbar-gutter: stable;
         resize: none;
         width: 100%; height: 100%;
         box-sizing: border-box;
@@ -238,57 +359,234 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     contentArea.append(editorPane, previewPane);
     container.append(toolbar, contentArea);
 
+    // Surface a degraded-preview warning instead of failing silently.
+    if (loadWarning) {
+        const warnBar = document.createElement('div');
+        warnBar.setAttribute('role', 'alert');
+        warnBar.style.cssText = `padding: 8px 12px; background: #7a4a00; color: #fff; font-size: 12px; display: flex; align-items: center; gap: 8px;`;
+        const warnText = document.createElement('span');
+        warnText.setAttribute('data-warn-text', '');
+        warnText.textContent = t('degradedPreviewWarning');
+        const warnClose = document.createElement('button');
+        warnClose.textContent = '×';
+        warnClose.setAttribute('aria-label', t('closeTooltip'));
+        warnClose.style.cssText = `margin-left: auto; background: transparent; border: none; color: #fff; font-size: 16px; cursor: pointer;`;
+        warnClose.addEventListener('click', () => warnBar.remove());
+        warnBar.append(warnText, warnClose);
+        container.prepend(warnBar);
+    }
+
     let editorVisible = false;
+    let savedEditorScroll = 0;
+    let savedSelStart = 0;
+    let savedSelEnd = 0;
     editorPane.style.display = 'none';
 
+    // Never navigate the app window from preview content.
+    // will-navigate allows file: URLs, so a relative link would unload the app.
+    // http(s) opens externally; everything else is ignored. Hook
+    // relative *.md links could open in a new markdown tab instead.
     preview.addEventListener('click', (e) => {
         const link = e.target.closest('a[href]');
-        if (link) {
-            const href = link.getAttribute('href');
-            if (href && /^https?:\/\//i.test(href)) {
-                e.preventDefault();
-                if (window.electronAPI?.openExternal) {
-                    window.electronAPI.openExternal(href);
-                } else {
-                    window.open(href, '_blank');
-                }
+        if (!link) return;
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        if (href && /^https?:\/\//i.test(href)) {
+            if (window.electronAPI?.openExternal) {
+                window.electronAPI.openExternal(href);
+            } else {
+                window.open(href, '_blank');
             }
         }
     });
 
-    // Load content
-    if (!initialContent) {
+
+    let loadFailed = false;
+    let loadErrorMessage = '';
+    let loadBanner = null;
+    let knownMtimeMs = 0;
+    function sanitizeLoadedContent(content) {
+        if (typeof content !== 'string') throw new Error(t('loadEncodingError'));
+        const stripped = content.replace(/^\uFEFF/, '');
+        if (stripped.includes('\0')) throw new Error(t('loadEncodingError'));
+        return stripped;
+    }
+    async function refreshKnownMtime() {
         try {
-            initialContent = await window.electronAPI.readMarkdownFile(filePath);
+            const info = await window.electronAPI?.getFileInfo?.(currentFilePath);
+            if (info && typeof info.mtimeMs === 'number') knownMtimeMs = info.mtimeMs;
+        } catch { /* stat unavailable — external detection stays off */ }
+    }
+    let rawContent = initialContent;
+    if (!rawContent) {
+        try {
+            rawContent = await window.electronAPI.readMarkdownFile(filePath);
         } catch (err) {
             console.error('Error loading markdown file:', err);
+            loadFailed = true;
+            loadErrorMessage = err?.message || t('unknownError');
+            rawContent = null;
+        }
+    }
+    if (rawContent == null) {
+        initialContent = '';
+    } else {
+        try {
+            initialContent = sanitizeLoadedContent(rawContent);
+        } catch (err) {
+            console.error('Error decoding markdown file:', err);
+            loadFailed = true;
+            loadErrorMessage = err?.message || t('unknownError');
             initialContent = '';
         }
     }
     editor.value = initialContent;
+    await refreshKnownMtime();
+
+    function removeLoadBanner() {
+        if (loadBanner?.parentNode) loadBanner.parentNode.removeChild(loadBanner);
+        loadBanner = null;
+    }
+
+    async function retryLoad() {
+        // Only safe when the user hasn't typed anything — otherwise we'd
+        // discard their content. The retry button disables itself once dirty.
+        if (isDirty) return;
+        try {
+            const content = sanitizeLoadedContent(
+                await window.electronAPI.readMarkdownFile(currentFilePath));
+            editor.value = content;
+            loadFailed = false;
+            loadErrorMessage = '';
+            removeLoadBanner();
+            await refreshKnownMtime();
+            updatePreview();
+            updateStatusIndicator();
+        } catch (err) {
+            console.error('Retry loading markdown file:', err);
+            loadErrorMessage = err?.message || t('unknownError');
+            updateLoadBannerDetail();
+        }
+    }
+
+    let externalBanner = null;
+    function removeExternalBanner() {
+        if (externalBanner?.parentNode) externalBanner.parentNode.removeChild(externalBanner);
+        externalBanner = null;
+    }
+    async function adoptExternalContent(content) {
+        editor.value = content;
+        isDirty = false;
+        loadFailed = false;
+        loadErrorMessage = '';
+        removeLoadBanner();
+        removeExternalBanner();
+        await refreshKnownMtime();
+        updateTabTitle();
+        updatePreview();
+        updateStatusIndicator();
+    }
+    function showExternalBanner() {
+        if (externalBanner) return;
+        externalBanner = document.createElement('div');
+        externalBanner.setAttribute('role', 'alert');
+        externalBanner.style.cssText = `padding: 8px 12px; background: #5b4a00; color: #fff; font-size: 12px; display: flex; align-items: center; gap: 8px;`;
+        const msg = document.createElement('span');
+        msg.setAttribute('data-ext-text', '');
+        msg.textContent = t('externalChangeBanner');
+        const reloadBtn = document.createElement('button');
+        reloadBtn.setAttribute('data-ext-reload', '');
+        reloadBtn.textContent = t('externalChangeReload');
+        reloadBtn.style.cssText = `margin-left: auto; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); color: #fff; border-radius: 4px; padding: 2px 10px; font-size: 12px; cursor: pointer;`;
+        reloadBtn.addEventListener('click', async () => {
+            try {
+                await adoptExternalContent(sanitizeLoadedContent(
+                    await window.electronAPI.readMarkdownFile(currentFilePath)));
+            } catch (err) {
+                console.error('Reload after external change failed:', err);
+            }
+        });
+        const keepBtn = document.createElement('button');
+        keepBtn.setAttribute('data-ext-keep', '');
+        keepBtn.textContent = t('externalChangeKeep');
+        keepBtn.style.cssText = reloadBtn.style.cssText;
+        keepBtn.addEventListener('click', async () => {
+            // Accept the divergence: track the new mtime so we ask once.
+            removeExternalBanner();
+            await refreshKnownMtime();
+        });
+        externalBanner.append(msg, reloadBtn, keepBtn);
+        container.prepend(externalBanner);
+    }
+    async function checkExternalChange() {
+        let info;
+        try {
+            info = await window.electronAPI?.getFileInfo?.(currentFilePath);
+        } catch { return; }
+        if (!info || typeof info.mtimeMs !== 'number' || info.mtimeMs === 0) return;
+        if (knownMtimeMs === 0) { knownMtimeMs = info.mtimeMs; return; } // first sighting
+        if (info.mtimeMs === knownMtimeMs) return;
+        if (!isDirty) {
+            try {
+                await adoptExternalContent(sanitizeLoadedContent(
+                    await window.electronAPI.readMarkdownFile(currentFilePath)));
+            } catch (err) {
+                console.error('Auto-reload after external change failed:', err);
+            }
+            return;
+        }
+        showExternalBanner();
+    }
+    window.addEventListener('focus', checkExternalChange);
+
+    function updateLoadBannerDetail() {
+        const detail = loadBanner?.querySelector('[data-load-error]');
+        if (detail) detail.textContent = loadErrorMessage;
+        const retry = loadBanner?.querySelector('[data-load-retry]');
+        if (retry) retry.disabled = isDirty;
+    }
+
+    if (loadFailed) {
+        loadBanner = document.createElement('div');
+        loadBanner.setAttribute('role', 'alert');
+        loadBanner.style.cssText = `padding: 8px 12px; background: #7a1f1f; color: #fff; font-size: 12px; display: flex; align-items: center; gap: 8px;`;
+        const warnText = document.createElement('span');
+        warnText.setAttribute('data-load-text', '');
+        warnText.textContent = t('loadFailedBanner');
+        const errDetail = document.createElement('span');
+        errDetail.setAttribute('data-load-error', '');
+        errDetail.style.cssText = `opacity: 0.8;`;
+        errDetail.textContent = loadErrorMessage;
+        const retryBtn = document.createElement('button');
+        retryBtn.setAttribute('data-load-retry', '');
+        retryBtn.textContent = t('loadFailedRetry');
+        retryBtn.style.cssText = `margin-left: auto; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); color: #fff; border-radius: 4px; padding: 2px 10px; font-size: 12px; cursor: pointer;`;
+        retryBtn.addEventListener('click', retryLoad);
+        loadBanner.append(warnText, errDetail, retryBtn);
+        container.prepend(loadBanner);
+    }
 
     // ─── Preview renderer ─────────────────────────────────────────────────────
     let previewTimeout;
     function updatePreview() {
         clearTimeout(previewTimeout);
-        previewTimeout = setTimeout(() => {
-            try {
-                let htmlContent;
-                if (window.marked) {
-                    htmlContent = window.marked.parse(editor.value, { gfm: true, breaks: true });
-                } else {
-                    htmlContent = typeof simpleMarkdownParser === 'function'
-                        ? simpleMarkdownParser(editor.value)
-                        : `<pre><code>${editor.value}</code></pre>`;
-                }
-                htmlContent = resolveImagePaths(htmlContent, currentFilePath);
-                preview.innerHTML = htmlContent;
-                invalidateBlockCache();
-                scheduleReinjectSentinels();
-            } catch (err) {
-                preview.innerHTML = `<p style="color: #e74c3c;">${t('errorParsingMarkdown')} ${err.message}</p>`;
-            }
-        }, 150);
+        previewTimeout = setTimeout(runPreviewPipeline, 150);
+    }
+    function runPreviewPipeline() {
+        const maxBefore = previewPane.scrollHeight - previewPane.clientHeight;
+        const scrollFraction = maxBefore > 0 ? previewPane.scrollTop / maxBefore : 0;
+        suppressSyncScroll = true;
+        try {
+            preview.innerHTML = renderMarkdownToHtml(editor.value);
+            resolvePreviewImages(preview, currentFilePath);
+            assignSyncLines(editor.value, preview, window.marked);
+            invalidateBlockCache();
+        } catch (err) {
+            preview.innerHTML = `<p style="color: #e74c3c;">${escapeHtml(t('errorParsingMarkdown'))} ${escapeHtml(err.message)}</p>`;
+        }
+        const maxAfter = previewPane.scrollHeight - previewPane.clientHeight;
+        previewPane.scrollTop = maxAfter > 0 ? scrollFraction * maxAfter : 0;
+        requestAnimationFrame(() => requestAnimationFrame(() => { suppressSyncScroll = false; }));
     }
 
     const applyThemeToPreview = () => {
@@ -306,110 +604,126 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     editor.addEventListener('input', () => {
         isDirty = true;
+        updateTabTitle();
+        updateLoadBannerDetail();
         updatePreview();
         updateStatusIndicator();
     });
 
-    function updateStatusIndicator() {
-        const text = editor.value;
-        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-        const chars = text.length;
-        const readTime = Math.max(1, Math.ceil(words / 200)); // Average 200 words per minute
+    function updateTabTitle() {
+        if (typeof tabManager.setTitle === 'function') {
+            tabManager.setTitle(tabId, (isDirty ? '● ' : '') + title);
+        }
+    }
 
+
+    let statusCountTimer = null;
+    let statusInitialized = false;
+    let cachedStatusCounts = { words: 0, chars: 0, readTime: 0 };
+    function refreshStatusCounts() {
+        const text = editor.value;
+        const words = countWords(text);
+        cachedStatusCounts = { words, chars: text.length, readTime: readMinutes(words) };
+    }
+    function renderStatusIndicator() {
         const statusText = isDirty ? t('modified') : t('saved');
         const statusColor = isDirty ? '#f39c12' : '#2ecc71';
 
         statusIndicator.innerHTML = `
         <span style="color: var(--text-secondary); font-size: 11px; margin-right: 8px;">
-            ${words} ${t('statusWords')} &middot; ${chars} ${t('statusChars')} &middot; ${readTime} ${t('statusReadTime')}
+            ${cachedStatusCounts.words} ${t('statusWords')} &middot; ${cachedStatusCounts.chars} ${t('statusChars')} &middot; ${cachedStatusCounts.readTime} ${t('statusReadTime')}
         </span>
         <span style="color: ${statusColor};">● ${statusText}</span>
     `;
     }
+    function updateStatusIndicator() {
+        if (!statusInitialized) {
+            statusInitialized = true;
+            refreshStatusCounts();
+        }
+        renderStatusIndicator();
+        clearTimeout(statusCountTimer);
+        statusCountTimer = setTimeout(() => {
+            refreshStatusCounts();
+            renderStatusIndicator();
+        }, 250);
+    }
 
-    function wrapSelection(prefix, suffix) {
-        const start = editor.selectionStart;
-        const end = editor.selectionEnd;
-        const text = editor.value;
-        const selectedText = text.slice(start, end);
-
-        // Trim whitespace from selection for cleaner formatting
-        const trimmedText = selectedText.trim();
-        const leadingSpace = selectedText.match(/^\s*/)[0];
-        const trailingSpace = selectedText.match(/\s*$/)[0];
-
-        // If selection is only whitespace, don't apply formatting
-        if (!trimmedText) {
+    function applyTextResult(result) {
+        if (!result) {
             editor.focus();
             return;
         }
-
-        // Check if already wrapped (to toggle off)
-        const before = text.slice(Math.max(0, start - prefix.length), start);
-        const after = text.slice(end, end + suffix.length);
-
-        if (before === prefix && after === suffix) {
-            // Remove wrapper - keep the trimmed text only
-            editor.value = text.slice(0, start - prefix.length) + trimmedText + text.slice(end + suffix.length);
-            editor.selectionStart = start - prefix.length + leadingSpace.length;
-            editor.selectionEnd = end - prefix.length - trailingSpace.length;
-        } else {
-            // Add wrapper around trimmed text, preserving spaces outside
-            const newText = text.slice(0, start) + leadingSpace + prefix + trimmedText + suffix + trailingSpace + text.slice(end);
+        const oldText = editor.value;
+        const newText = result.text;
+        let start = 0;
+        while (start < oldText.length && start < newText.length && oldText[start] === newText[start]) start++;
+        let oldEnd = oldText.length, newEnd = newText.length;
+        while (oldEnd > start && newEnd > start && oldText[oldEnd - 1] === newText[newEnd - 1]) { oldEnd--; newEnd--; }
+        editor.focus();
+        editor.selectionStart = start;
+        editor.selectionEnd = oldEnd;
+        const applied = (start !== oldEnd || start !== newEnd)
+            && document.execCommand('insertText', false, newText.slice(start, newEnd));
+        if (!applied && newText !== editor.value) {
             editor.value = newText;
-
-            // Position cursor after the formatted text
-            const newStart = start + leadingSpace.length + prefix.length;
-            const newEnd = newStart + trimmedText.length;
-            editor.selectionStart = newStart;
-            editor.selectionEnd = newEnd;
         }
+        editor.selectionStart = result.start;
+        editor.selectionEnd = result.end;
         editor.dispatchEvent(new Event('input')); // Trigger preview update
         editor.focus();
     }
 
-    function insertMarkdownLink() {
-        const start = editor.selectionStart;
-        const end = editor.selectionEnd;
-        const text = editor.value;
-        const selectedText = text.slice(start, end);
-
-        const linkText = selectedText || 'link text';
-        const insertion = `[${linkText}](url)`;
-
-        editor.value = text.slice(0, start) + insertion + text.slice(end);
-
-        // Automatically select the 'url' part so the user can start typing immediately
-        const urlStart = start + linkText.length + 3;
-        editor.selectionStart = urlStart;
-        editor.selectionEnd = urlStart + 3;
-        editor.focus();
-        editor.dispatchEvent(new Event('input'));
+    function wrapSelection(prefix, suffix) {
+        applyTextResult(wrapSelectionInText(editor.value, editor.selectionStart, editor.selectionEnd, prefix, suffix));
     }
+
+    async function insertMarkdownLink() {
+        let url = 'url';
+        try {
+            const clip = await navigator.clipboard?.readText();
+            if (isWebUrl(clip)) url = clip.trim();
+        } catch { /* clipboard unavailable — placeholder it is */ }
+        applyTextResult(insertLinkInText(editor.value, editor.selectionStart, editor.selectionEnd, url));
+    }
+
+    function insertImageReference(fileName, imagePath) {
+        const ref = relativizeImagePath(currentFilePath, imagePath || fileName);
+        const label = (fileName || 'image').replace(/[\[\]]/g, '') || 'image';
+        const insertion = `![${label}](${ref})`;
+        const at = editor.selectionStart;
+        applyTextResult({
+            text: editor.value.slice(0, at) + insertion + editor.value.slice(editor.selectionEnd),
+            start: at + insertion.length,
+            end: at + insertion.length,
+        });
+    }
+
+    function isImageFile(f) {
+        return f && (/^image\//.test(f.type || '') || /\.(png|jpe?g|gif|webp|bmp|svg|ico)$/i.test(f.name || ''));
+    }
+
+    editorWrapper.addEventListener('dragover', (e) => {
+        if ([...(e.dataTransfer?.types || [])].includes('Files')) e.preventDefault();
+    });
+    editorWrapper.addEventListener('drop', (e) => {
+        const images = [...(e.dataTransfer?.files || [])].filter(isImageFile);
+        if (images.length === 0) return;
+        e.preventDefault();
+        editor.focus();
+        for (const f of images) insertImageReference(f.name, f.path || f.name);
+    });
+    editor.addEventListener('paste', (e) => {
+        const images = [...(e.clipboardData?.files || [])].filter(isImageFile);
+        if (images.length === 0) return; // native text paste proceeds
+        e.preventDefault();
+        for (const f of images) insertImageReference(f.name, f.path || f.name);
+    });
 
     // Formatting toolbar for visual buttons
     // Helper to handle multi-line prefixes (like Lists and Blockquotes)
     function prefixLines(prefix) {
-        const start = editor.selectionStart;
-        const end = editor.selectionEnd;
-        const text = editor.value;
-
-        const lineStart = text.lastIndexOf('\n', start - 1) + 1;
-        let lineEnd = text.indexOf('\n', end);
-        if (lineEnd === -1) lineEnd = text.length;
-
-        const lines = text.slice(lineStart, lineEnd).split('\n');
-        const allPrefixed = lines.filter(l => l.trim()).every(line => line.startsWith(prefix));
-
-        const newLines = allPrefixed
-            ? lines.map(line => line.startsWith(prefix) ? line.slice(prefix.length) : line).join('\n')
-            : lines.map(line => line.trim() ? prefix + line : line).join('\n');
-
-        editor.value = text.slice(0, lineStart) + newLines + text.slice(lineEnd);
-        editor.selectionStart = lineStart;
-        editor.selectionEnd = lineStart + newLines.length;
-        editor.dispatchEvent(new Event('input'));
-        editor.focus();
+        applyTextResult(prefixLinesInText(editor.value, editor.selectionStart, editor.selectionEnd, prefix));
     }
 
     // Create the toolbar container
@@ -421,12 +735,13 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         flex-wrap: wrap; align-items: center;
     `;
 
-    // Helper to generate buttons
-    function createFormatBtn(tooltip, iconSvg, onClick) {
+    // Helper to generate buttons (tooltipKey = markdownEditor.* key, so
+    // language refreshes and aria-labels stay in sync via bindTip)
+    function createFormatBtn(tooltipKey, iconSvg, onClick) {
         const btn = document.createElement('button');
         btn.innerHTML = iconSvg;
-        btn.setAttribute('data-tooltip', tooltip);
-        btn.setAttribute('title', tooltip); //  Native browser tooltip fallback
+        bindTip(btn, tooltipKey);
+        btn.title = tooltipText(tooltipKey); //  Native browser tooltip fallback
         btn.className = 'markdown-btn';
         btn.style.cssText = `padding: 4px 8px; min-width: 28px;`;
         btn.addEventListener('mousedown', (e) => e.preventDefault()); // Prevents editor from losing focus
@@ -436,31 +751,12 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     // Helper for Headings (Toggles between H1, H2, H3, or plain text)
     function insertHeading(level) {
-        const start = editor.selectionStart;
-        const text = editor.value;
-        const lineStart = text.lastIndexOf('\n', start - 1) + 1;
-        const lineEnd = text.indexOf('\n', start);
-        const actualEnd = lineEnd === -1 ? text.length : lineEnd;
-
-        const lineText = text.slice(lineStart, actualEnd);
-        const cleanLine = lineText.replace(/^#{1,6}\s*/, ''); // Remove existing headings
-        const prefix = '#'.repeat(level) + ' ';
-
-        editor.value = text.slice(0, lineStart) + prefix + cleanLine + text.slice(actualEnd);
-        editor.selectionStart = editor.selectionEnd = lineStart + prefix.length + cleanLine.length;
-        editor.dispatchEvent(new Event('input'));
-        editor.focus();
+        applyTextResult(insertHeadingInText(editor.value, editor.selectionStart, level));
     }
 
     // Helper for inserting a Markdown Table
     function insertTable() {
-        const start = editor.selectionStart;
-        const text = editor.value;
-        const tableMarkdown = `\n| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |\n| Cell 4   | Cell 5   | Cell 6   |\n`;
-        editor.value = text.slice(0, start) + tableMarkdown + text.slice(start);
-        editor.selectionStart = editor.selectionEnd = start + tableMarkdown.length;
-        editor.dispatchEvent(new Event('input'));
-        editor.focus();
+        applyTextResult(insertTableInText(editor.value, editor.selectionStart));
     }
 
     // Helper to create visual dividers in the toolbar
@@ -474,9 +770,8 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     function createHeadingBtn(level) {
         const btn = document.createElement('button');
         btn.innerHTML = `H${level}`;
-        const headingLabel = t('headingTooltip').replace('{level}', level);
-        btn.setAttribute('data-tooltip', headingLabel);
-        btn.setAttribute('title', headingLabel); // Native browser tooltip fallback
+        bindTip(btn, 'headingTooltip', { level });
+        btn.title = tooltipText('headingTooltip', { level }); // Native browser tooltip fallback
         btn.className = 'markdown-btn';
         btn.style.cssText = `padding: 4px 8px; min-width: 28px; font-weight: bold; font-size: 12px;`;
         btn.addEventListener('mousedown', (e) => e.preventDefault());
@@ -508,87 +803,56 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         createHeadingBtn(5),
         createHeadingBtn(6),
         createDivider(),
-        createFormatBtn(t('boldTooltip'), icons.bold, () => wrapSelection('**', '**')),
-        createFormatBtn(t('italicTooltip'), icons.italic, () => wrapSelection('*', '*')),
-        createFormatBtn(t('strikethroughTooltip'), icons.strikethrough, () => wrapSelection('~~', '~~')),
-        createFormatBtn(t('inlineCodeTooltip'), icons.code, () => wrapSelection('`', '`')),
-        createFormatBtn(t('codeBlockTooltip'), icons.codeBlock, insertCodeBlock),
+        createFormatBtn('boldTooltip', icons.bold, () => wrapSelection('**', '**')),
+        createFormatBtn('italicTooltip', icons.italic, () => wrapSelection('*', '*')),
+        createFormatBtn('strikethroughTooltip', icons.strikethrough, () => wrapSelection('~~', '~~')),
+        createFormatBtn('inlineCodeTooltip', icons.code, () => wrapSelection('`', '`')),
+        createFormatBtn('codeBlockTooltip', icons.codeBlock, insertCodeBlock),
         createDivider(),
-        createFormatBtn(t('linkTooltip'), icons.link, insertMarkdownLink),
-        createFormatBtn(t('imageTooltip'), icons.image, insertImage),
-        createFormatBtn(t('blockquoteTooltip'), icons.quote, () => prefixLines('> ')),
-        createFormatBtn(t('bulletListTooltip'), icons.list, () => prefixLines('- ')),
-        createFormatBtn(t('numberedListTooltip'), icons.numbered, insertNumberedList),
-        createFormatBtn(t('insertTableTooltip'), icons.table, insertTable)
+        createFormatBtn('linkTooltip', icons.link, insertMarkdownLink),
+        createFormatBtn('imageTooltip', icons.image, insertImage),
+        createFormatBtn('blockquoteTooltip', icons.quote, () => prefixLines('> ')),
+        createFormatBtn('bulletListTooltip', icons.list, () => prefixLines('- ')),
+        createFormatBtn('numberedListTooltip', icons.numbered, insertNumberedList),
+        createFormatBtn('insertTableTooltip', icons.table, insertTable)
     );
 
     // Helper for Numbered Lists (Smart incrementing and toggle-off)
     function insertNumberedList() {
-        const start = editor.selectionStart;
-        const end = editor.selectionEnd;
-        const text = editor.value;
-
-        const lineStart = text.lastIndexOf('\n', start - 1) + 1;
-        let lineEnd = text.indexOf('\n', end);
-        if (lineEnd === -1) lineEnd = text.length;
-
-        const lines = text.slice(lineStart, lineEnd).split('\n');
-        // Check if already a numbered list to toggle off
-        const isNumbered = lines.filter(l => l.trim()).every(line => /^\d+\.\s/.test(line));
-
-        let newLines;
-        if (isNumbered) {
-            newLines = lines.map(line => line.replace(/^\d+\.\s/, '')).join('\n');
-        } else {
-            let num = 1;
-            newLines = lines.map(line => line.trim() ? `${num++}. ${line}` : line).join('\n');
-        }
-
-        editor.value = text.slice(0, lineStart) + newLines + text.slice(lineEnd);
-        editor.selectionStart = lineStart;
-        editor.selectionEnd = lineStart + newLines.length;
-        editor.dispatchEvent(new Event('input'));
-        editor.focus();
+        applyTextResult(insertNumberedListInText(editor.value, editor.selectionStart, editor.selectionEnd));
     }
 
     // Helper for inserting an Image
     function insertImage() {
-        const start = editor.selectionStart;
-        const text = editor.value;
-        const insertion = `![alt text](image_url)`;
-        editor.value = text.slice(0, start) + insertion + text.slice(start);
-
-        // Automatically select the 'image_url' part so the user can paste/type immediately
-        const urlStart = start + 11;
-        editor.selectionStart = urlStart;
-        editor.selectionEnd = urlStart + 9;
-        editor.focus();
-        editor.dispatchEvent(new Event('input'));
+        applyTextResult(insertImageInText(editor.value, editor.selectionStart));
     }
 
     // Helper for inserting a Multi-line Code Block
     function insertCodeBlock() {
-        const start = editor.selectionStart;
-        const end = editor.selectionEnd;
-        const text = editor.value;
-        const selectedText = text.slice(start, end);
-
-        const insertion = `\n\`\`\`\n${selectedText || 'code here'}\n\`\`\`\n`;
-        editor.value = text.slice(0, start) + insertion + text.slice(end);
-
-        // Select the code content inside the block
-        const codeStart = start + 4;
-        editor.selectionStart = codeStart;
-        editor.selectionEnd = codeStart + (selectedText ? selectedText.length : 9);
-        editor.focus();
-        editor.dispatchEvent(new Event('input'));
+        applyTextResult(insertCodeBlockInText(editor.value, editor.selectionStart, editor.selectionEnd));
     }
 
     // Inject the toolbar at the very top of the editor pane
     editorPane.prepend(formattingToolbar);
 
-    // Update your existing editor keydown listener to include these:
+    // Editor shortcuts — same wrappers as the toolbar buttons
     editor.addEventListener('keydown', (e) => {
+        if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.isComposing) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                applyTextResult(indentInText(editor.value, editor.selectionStart, editor.selectionEnd, e.shiftKey));
+                return;
+            }
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const continued = continueListInText(editor.value, editor.selectionStart, editor.selectionEnd);
+                if (continued) {
+                    e.preventDefault();
+                    applyTextResult(continued);
+                    return;
+                }
+            }
+        }
+
         const isMac = navigator.platform.toUpperCase().includes('MAC');
         const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
 
@@ -596,8 +860,9 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             // Save File
             if (e.code === 'KeyS') { e.preventDefault(); saveFile(); return; }
 
-            // Code Block
-            if (e.code === 'KeyC' && e.shiftKey) { e.preventDefault(); insertCodeBlock(); return; }
+            // Code Block (Ctrl+Alt+C — Ctrl+Shift+C is the Chromium
+            // DevTools/inspector shortcut and must not be overridden)
+            if (e.code === 'KeyC' && e.altKey && !e.shiftKey) { e.preventDefault(); insertCodeBlock(); return; }
 
             //  UNDO & REDO SHORTCUTS
             if (e.code === 'KeyZ' || e.code === 'KeyY') {
@@ -619,16 +884,26 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     });
 
     async function saveFile() {
+        if (loadFailed) {
+            const overwrite = await window.customAlert.confirm(
+                t('loadFailedOverwriteTitle'),
+                t('loadFailedOverwriteMessage')
+            );
+            if (overwrite !== 1) return;
+        }
         try {
             const content = editor.value;
             await window.electronAPI.saveMarkdownFile(currentFilePath, content);
             isDirty = false;
-            updateStatusIndicator();
-            const tabButton = tabManager.tabBar.querySelector(`[data-tab-id="${tabId}"]`);
-            if (tabButton) {
-                const titleSpan = tabButton.querySelector('.tab-title');
-                if (titleSpan) titleSpan.textContent = title;
+            if (loadFailed) {
+                loadFailed = false;
+                loadErrorMessage = '';
+                removeLoadBanner();
             }
+            removeExternalBanner();
+            await refreshKnownMtime();
+            updateStatusIndicator();
+            updateTabTitle();
         } catch (err) {
             console.error('Error saving markdown file:', err);
             window.customAlert.error(t('saveErrorTitle'), `${t('saveErrorMessage')} ${err.message}`);
@@ -637,9 +912,13 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     saveBtn.addEventListener('click', saveFile);
 
-
-    // PDF Export Settings Modal
     function showExportModal() {
+        const seq = ++exportModalSeq;
+        const sizeId = `md-pdf-size-${seq}`;
+        const cancelId = `md-pdf-cancel-${seq}`;
+        const exportId = `md-pdf-export-${seq}`;
+        const titleId = `md-pdf-title-${seq}`;
+
         const overlay = document.createElement('div');
         overlay.style.cssText = `
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -648,42 +927,63 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         `;
 
         const modal = document.createElement('div');
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', titleId);
         modal.style.cssText = `
-            background: var(--bg-secondary); padding: 24px; border-radius: 8px; 
+            background: var(--bg-secondary); padding: 24px; border-radius: 8px;
             width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             border: 1px solid var(--border-color);
         `;
         modal.innerHTML = `
-            <h3 style="margin: 0 0 16px 0; color: var(--text-primary); font-size: 16px;">${t('exportPdfSettingsTitle')}</h3>
-            
+            <h3 id="${titleId}" style="margin: 0 0 16px 0; color: var(--text-primary); font-size: 16px;">${escapeHtml(t('exportPdfSettingsTitle'))}</h3>
+
             <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">${t('pageSizeLabel')}</label>
-                <select id="pdf-page-size" style="width: 100%; padding: 6px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px;">
+                <label for="${sizeId}" style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">${escapeHtml(t('pageSizeLabel'))}</label>
+                <select id="${sizeId}" style="width: 100%; padding: 6px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px;">
                     <option value="A4" selected>A4</option>
-                    <option value="Letter">${t('pageSizeLetter')}</option>
-                    <option value="Legal">${t('pageSizeLegal')}</option>
+                    <option value="Letter">${escapeHtml(t('pageSizeLetter'))}</option>
+                    <option value="Legal">${escapeHtml(t('pageSizeLegal'))}</option>
                 </select>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                <button id="pdf-cancel-btn" style="padding: 6px 12px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">${t('cancel')}</button>
-                <button id="pdf-export-btn" style="padding: 6px 12px; background: var(--accent-color); color: white; border: none; border-radius: 4px; cursor: pointer;">${t('exportBtn')}</button>
+                <button id="${cancelId}" style="padding: 6px 12px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">${escapeHtml(t('cancel'))}</button>
+                <button id="${exportId}" style="padding: 6px 12px; background: var(--accent-color); color: white; border: none; border-radius: 4px; cursor: pointer;">${escapeHtml(t('exportBtn'))}</button>
             </div>
         `;
 
         overlay.appendChild(modal);
         container.appendChild(overlay);
+        const sizeSelect = modal.querySelector(`#${CSS.escape(sizeId)}`);
+        const cancelBtn = modal.querySelector(`#${CSS.escape(cancelId)}`);
+        const exportBtn = modal.querySelector(`#${CSS.escape(exportId)}`);
+        const previouslyFocused = document.activeElement;
 
-        // Event Listeners
-        overlay.querySelector('#pdf-cancel-btn').onclick = () => overlay.remove();
-        overlay.querySelector('#pdf-export-btn').onclick = () => {
-            const options = {
-                pageSize: overlay.querySelector('#pdf-page-size').value,
-                margins: 0  // Explicitly set to 0 (means "none" in PDF engines)
-            };
+        function closeModal() {
             overlay.remove();
+            if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
+        }
+
+        cancelBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('mousedown', (e) => {
+            if (e.target === overlay) closeModal();
+        });
+        overlay.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { e.stopPropagation(); closeModal(); return; }
+            if (e.key !== 'Tab') return;
+            const focusables = [sizeSelect, cancelBtn, exportBtn];
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        });
+        exportBtn.addEventListener('click', () => {
+            const options = { pageSize: sizeSelect.value };
+            closeModal();
             executePdfExport(options);
-        };
+        });
+        exportBtn.focus();
     }
 
     async function executePdfExport(options) {
@@ -691,19 +991,10 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             exportPdfBtn.disabled = true;
             exportPdfBtn.setAttribute('data-tooltip', t('exportingTooltip'));
             exportPdfBtn.style.opacity = '0.6';
-
-            let htmlContent;
-            if (window.marked) {
-                htmlContent = window.marked.parse(editor.value, { gfm: true, breaks: true });
-            } else {
-                htmlContent = typeof simpleMarkdownParser === 'function' ? simpleMarkdownParser(editor.value) : `<pre><code>${editor.value}</code></pre>`;
-            }
-
-            // Pass ONLY validated options to the backend
+            const htmlContent = renderMarkdownToHtml(editor.value);
             const result = await window.electronAPI.exportMarkdownToPdf(htmlContent, title, {
                 mdFilePath: currentFilePath,
-                pageSize: options.pageSize,
-                margins: options.margins // Explicitly passed to bypass backend validation
+                pageSize: options.pageSize
             });
 
             if (result?.success) {
@@ -730,41 +1021,34 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     exportPdfBtn.addEventListener('click', showExportModal);
 
 
-    let previewVisible = true;
     toggleEditorBtn.addEventListener('click', () => {
         editorVisible = !editorVisible;
-        editorPane.style.display = editorVisible ? 'flex' : 'none';
-        toggleEditorBtn.style.background = editorVisible ? 'var(--accent-color)' : 'var(--bg-secondary)';
-        toggleEditorBtn.style.color = editorVisible ? 'white' : 'var(--text-primary)';
-        if (!editorVisible) closeSearch();
-        if (editorVisible) {
-            editor.scrollTop = 0;
-            editor.selectionStart = 0;
-            editor.selectionEnd = 0;
-            editor.focus();
+        if (!editorVisible) {
+            savedEditorScroll = editor.scrollTop;
+            savedSelStart = editor.selectionStart;
+            savedSelEnd = editor.selectionEnd;
+            editorPane.style.display = 'none';
+            closeSearch();
+        } else {
+            editorPane.style.display = 'flex';
+            requestAnimationFrame(() => {
+                editor.scrollTop = savedEditorScroll;
+                try { editor.selectionStart = savedSelStart; editor.selectionEnd = savedSelEnd; } catch { /* noop */ }
+                editor.focus();
+            });
         }
+        toggleEditorBtn.classList.toggle('is-active', editorVisible);
+        toggleEditorBtn.setAttribute('aria-pressed', String(editorVisible));
     });
 
     let isHorizontalLayout = true;
+    layoutBtn.setAttribute('aria-pressed', 'false');
     layoutBtn.addEventListener('click', () => {
         isHorizontalLayout = !isHorizontalLayout;
         contentArea.style.flexDirection = isHorizontalLayout ? 'row' : 'column';
-        layoutBtn.style.background = isHorizontalLayout ? 'var(--bg-secondary)' : 'var(--accent-color)';
-        layoutBtn.style.color = isHorizontalLayout ? 'var(--text-primary)' : 'white';
+        layoutBtn.classList.toggle('is-active', !isHorizontalLayout);
+        layoutBtn.setAttribute('aria-pressed', String(!isHorizontalLayout));
     });
-
-    function resolveImagePaths(html, mdFilePath) {
-        const normPath = mdFilePath.replace(/\\/g, '/');
-        const dirPath = normPath.slice(0, normPath.lastIndexOf('/') + 1);
-        const baseUrl = `file:///${dirPath.replace(/^\/+/, '')}`;
-        return html.replace(/(<img[^>]+src=["'])([^"']+)(["'][^>]*>)/gi, (match, prefix, src, suffix) => {
-            if (/^(https?:|data:|file:)/i.test(src)) return match;
-            try {
-                const absoluteUrl = new URL(src, baseUrl).href;
-                return `${prefix}${absoluteUrl}${suffix}`;
-            } catch { return match; }
-        });
-    }
 
     function updateZoom() {
         zoomLevel.textContent = Math.round(editorZoom) + '%';
@@ -772,6 +1056,8 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         editor.style.fontSize = editorFontSize;
         highlightOverlay.style.fontSize = editorFontSize; // keep overlay in sync
         preview.style.fontSize = (16 * previewZoom / 100) + 'px';
+        invalidateMeasureCache();
+        invalidateBlockCache();
     }
 
     zoomInBtn.addEventListener('click', () => {
@@ -788,7 +1074,8 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         updateZoom();
     });
 
-    document.addEventListener('keydown', (e) => {
+    function onDocumentZoomKey(e) {
+        if (tabManager.activeTabId !== tabId) return;
         const isMac = navigator.platform.toUpperCase().includes('MAC');
         const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
         if (ctrlOrCmd) {
@@ -796,7 +1083,8 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             else if (e.key === '-') { e.preventDefault(); zoomOutBtn.click(); }
             else if (e.key === '0') { e.preventDefault(); editorZoom = previewZoom = 100; updateZoom(); }
         }
-    });
+    }
+    document.addEventListener('keydown', onDocumentZoomKey);
 
     editor.addEventListener('wheel', (e) => {
         if (e.ctrlKey || e.metaKey) { e.preventDefault(); e.deltaY < 0 ? zoomInBtn.click() : zoomOutBtn.click(); }
@@ -811,6 +1099,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     // Synchronized Scrolling
     let syncEnabled = true;
     let syncSource = null;
+    let suppressSyncScroll = false;
 
     let _cachedLineHeight = null;
     function getLineHeight() {
@@ -821,14 +1110,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     }
     function invalidateMeasureCache() {
         _cachedLineHeight = null;
-        scheduleReinjectSentinels();
     }
-
-    const _zoomBtns = [zoomInBtn, zoomOutBtn];
-    _zoomBtns.forEach(btn => btn.addEventListener('click', () => {
-        invalidateMeasureCache();
-        invalidateBlockCache();
-    }));
 
     let _blockPositionCache = null;
     function getBlockPositions() {
@@ -842,32 +1124,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     }
     function invalidateBlockCache() { _blockPositionCache = null; }
 
-    function injectSentinels() {
-        const lines = editor.value.split('\n');
-        const blocks = preview.querySelectorAll('h1, h2, h3, h4, h5, h6, p, pre, blockquote, ul, ol, table, hr');
-        let lineIndex = 0;
-        blocks.forEach(block => {
-            const blockText = block.textContent.trim().slice(0, 60);
-            let found = lineIndex;
-            for (let i = lineIndex; i < lines.length; i++) {
-                const stripped = lines[i].replace(/^#{1,6}\s*/, '').replace(/[*_`~[\]]/g, '').trim();
-                if (stripped.length > 4 && blockText.startsWith(stripped.slice(0, Math.min(stripped.length, 40)))) {
-                    found = i; lineIndex = i; break;
-                }
-            }
-            block.dataset.syncLine = found;
-        });
-    }
-
-    let _sentinelReinjectTimer = null;
-    function scheduleReinjectSentinels() {
-        clearTimeout(_sentinelReinjectTimer);
-        _sentinelReinjectTimer = setTimeout(() => { injectSentinels(); invalidateBlockCache(); }, 250);
-    }
-
-    editor.addEventListener('input', scheduleReinjectSentinels);
-    setTimeout(() => { injectSentinels(); invalidateBlockCache(); }, 400);
-
     function blockScrollTop(block) {
         const paneRect = previewPane.getBoundingClientRect();
         const blockRect = block.getBoundingClientRect();
@@ -876,58 +1132,26 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     function editorScrollToLine() { return editor.scrollTop / getLineHeight(); }
 
     function lineToPreviewScrollTop(targetLine) {
-        const positions = getBlockPositions();
-        if (positions.length === 0) {
-            const editorMax = editor.scrollHeight - editor.clientHeight;
-            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-            return editorMax > 0 ? (editor.scrollTop / editorMax) * previewMax : 0;
-        }
-        const totalLines = editor.value.split('\n').length;
-        let before = null, after = null;
-        for (const pos of positions) {
-            if (pos.line <= targetLine) before = pos;
-            else { after = pos; break; }
-        }
-        if (!before) {
-            const first = positions[0];
-            return first.line > 0 ? Math.min(targetLine / first.line, 1) * first.top : 0;
-        }
-        if (!after) {
-            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-            const tail = totalLines > before.line ? (targetLine - before.line) / (totalLines - before.line) : 0;
-            return before.top + tail * (previewMax - before.top);
-        }
-        const fraction = after.line > before.line ? (targetLine - before.line) / (after.line - before.line) : 0;
-        return before.top + fraction * (after.top - before.top);
+        return calcLineToPreview(targetLine, getBlockPositions(), {
+            totalLines: editor.value.split('\n').length,
+            editorScrollTop: editor.scrollTop,
+            editorMax: editor.scrollHeight - editor.clientHeight,
+            previewMax: previewPane.scrollHeight - previewPane.clientHeight,
+        });
     }
 
     function previewScrollToEditorScrollTop(previewScrollTop) {
         const positions = getBlockPositions();
+        const editorMax = editor.scrollHeight - editor.clientHeight;
+        const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
         if (positions.length === 0) {
-            const editorMax = editor.scrollHeight - editor.clientHeight;
-            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
             return previewMax > 0 ? (previewScrollTop / previewMax) * editorMax : 0;
         }
-        const lineHeight = getLineHeight();
-        const totalLines = editor.value.split('\n').length;
-        let before = null, after = null;
-        for (const pos of positions) {
-            if (pos.top <= previewScrollTop) before = pos;
-            else { after = pos; break; }
-        }
-        let targetLine;
-        if (!before) {
-            const first = positions[0];
-            targetLine = first.top > 0 ? (previewScrollTop / first.top) * first.line : 0;
-        } else if (!after) {
-            const previewMax = previewPane.scrollHeight - previewPane.clientHeight;
-            const tail = previewMax > before.top ? (previewScrollTop - before.top) / (previewMax - before.top) : 0;
-            targetLine = before.line + tail * (totalLines - before.line);
-        } else {
-            const fraction = after.top > before.top ? (previewScrollTop - before.top) / (after.top - before.top) : 0;
-            targetLine = before.line + fraction * (after.line - before.line);
-        }
-        return Math.max(0, targetLine * lineHeight);
+        return Math.max(0, calcPreviewToLine(previewScrollTop, positions, {
+            totalLines: editor.value.split('\n').length,
+            editorMax,
+            previewMax,
+        }) * getLineHeight());
     }
 
     // Keep overlay scrolled in sync with textarea
@@ -935,14 +1159,14 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         highlightOverlay.scrollTop = editor.scrollTop;
         highlightOverlay.scrollLeft = editor.scrollLeft;
 
-        if (!syncEnabled || syncSource === 'preview') return;
+        if (!syncEnabled || suppressSyncScroll || syncSource === 'preview') return;
         syncSource = 'editor';
         previewPane.scrollTop = lineToPreviewScrollTop(editorScrollToLine());
         requestAnimationFrame(() => { if (syncSource === 'editor') syncSource = null; });
     });
 
     previewPane.addEventListener('scroll', () => {
-        if (!syncEnabled || syncSource === 'editor') return;
+        if (!syncEnabled || suppressSyncScroll || syncSource === 'editor') return;
         syncSource = 'preview';
         editor.scrollTop = previewScrollToEditorScrollTop(previewPane.scrollTop);
         requestAnimationFrame(() => { if (syncSource === 'preview') syncSource = null; });
@@ -950,9 +1174,10 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     syncToggleBtn.addEventListener('click', () => {
         syncEnabled = !syncEnabled;
-        syncToggleBtn.style.background = syncEnabled ? 'var(--accent-color)' : 'var(--bg-secondary)';
-        syncToggleBtn.style.color = syncEnabled ? 'white' : 'var(--text-primary)';
-        syncToggleBtn.setAttribute('data-tooltip', syncEnabled ? t('syncScrollOnTooltip') : t('syncScrollOffTooltip'));
+        syncToggleBtn.classList.toggle('is-active', syncEnabled);
+        syncToggleBtn.setAttribute('aria-pressed', String(syncEnabled));
+        syncTip.key = syncEnabled ? 'syncScrollOnTooltip' : 'syncScrollOffTooltip';
+        applyTip(syncTip);
     });
 
     // Search — overlay-based highlighting
@@ -971,14 +1196,6 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
     let searchMatches = [];
     let searchCurrent = -1;
     let searchActive = false;
-
-    // Escape text for insertion into the overlay div
-    function escapeHtml(str) {
-        return str
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-    }
 
     // Rebuild the overlay with all matches highlighted.
     // currentIdx = which match gets the "active" highlight colour.
@@ -1018,8 +1235,9 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         highlightOverlay.innerHTML = '';
     }
 
-    function runSearch() {
+    function runSearch({ scroll = true } = {}) {
         const query = searchInput.value;
+        const prevCurrent = searchMatches[searchCurrent];
         searchMatches = [];
         searchCurrent = -1;
 
@@ -1041,6 +1259,14 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         }
 
         if (searchMatches.length > 0) {
+            if (!scroll && prevCurrent) {
+                // Keep the active match when it survives the edit; no scrolling.
+                const kept = searchMatches.findIndex(m => m.start === prevCurrent.start && m.end === prevCurrent.end);
+                searchCurrent = kept !== -1 ? kept : 0;
+                renderHighlightOverlay(editor.value, searchMatches, searchCurrent);
+                updateSearchCount();
+                return;
+            }
             // Jump to the nearest match to the current cursor position
             const cursorPos = editor.selectionStart;
             let nearest = 0, nearestDist = Infinity;
@@ -1120,7 +1346,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         if (editorVisible) editor.focus();
     }
 
-    searchInput.addEventListener('input', runSearch);
+    searchInput.addEventListener('input', () => runSearch());
 
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -1139,13 +1365,14 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
 
     searchCaseSensitiveBtn.addEventListener('click', () => {
         searchCaseSensitive = !searchCaseSensitive;
-        searchCaseSensitiveBtn.style.background = searchCaseSensitive ? 'var(--accent-color)' : '';
-        searchCaseSensitiveBtn.style.color = searchCaseSensitive ? 'white' : '';
+        searchCaseSensitiveBtn.classList.toggle('is-active', searchCaseSensitive);
+        searchCaseSensitiveBtn.setAttribute('aria-pressed', String(searchCaseSensitive));
         runSearch();
     });
 
-    // Ctrl+F — only when the editor pane is visible
-    document.addEventListener('keydown', (e) => {
+    // Ctrl+F — only when this tab is active and its editor pane is visible
+    function onDocumentFindKey(e) {
+        if (tabManager.activeTabId !== tabId) return;
         const isMac = navigator.platform.toUpperCase().includes('MAC');
         const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
         if (ctrlOrCmd && e.key === 'f' && editorVisible) {
@@ -1153,18 +1380,26 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
             e.stopPropagation();
             searchActive ? closeSearch() : openSearch();
         }
-    });
+    }
+    document.addEventListener('keydown', onDocumentFindKey);
 
-    // Re-run search on editor changes so highlights stay accurate
+    // Re-run search on editor changes so highlights stay accurate — without
+    // moving the viewport (see runSearch scroll:false).
     editor.addEventListener('input', () => {
         if (searchActive && searchInput.value) {
-            runSearch();
+            runSearch({ scroll: false });
         }
     });
 
-    document.addEventListener('wheel', (e) => {
-        if (e.ctrlKey) e.preventDefault();
-    }, { passive: false });
+    // Only neutralise ctrl+wheel over this tab's own (active) content — the
+    // editor/preview panes run their own zoom on the same gesture.
+    function onDocumentWheel(e) {
+        if (!e.ctrlKey) return;
+        if (tabManager.activeTabId !== tabId) return;
+        if (!container.contains(e.target)) return;
+        e.preventDefault();
+    }
+    document.addEventListener('wheel', onDocumentWheel, { passive: false });
 
 
     // Notify main process when this markdown tab is active
@@ -1186,7 +1421,7 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
         title: title,
         content: container,
         onClose: () => {
-            if (forceClose) { themeObserver.disconnect(); _visibilityObserver.disconnect(); return true; }
+            if (forceClose) { return true; }
             if (isDirty) {
                 window.customAlert.confirm(
                     t('unsavedChangesTitle'),
@@ -1196,9 +1431,18 @@ export default async function createMarkdownTab(filePath, tabManager, existingId
                 });
                 return false;
             }
+            return true;
+        },
+        onDestroy: () => {
+            document.removeEventListener('keydown', onDocumentZoomKey);
+            document.removeEventListener('keydown', onDocumentFindKey);
+            document.removeEventListener('wheel', onDocumentWheel);
+            window.removeEventListener('focus', checkExternalChange);
+            window.removeEventListener('language-changed', onLanguageChanged);
+            clearTimeout(previewTimeout);
+            clearTimeout(statusCountTimer);
             themeObserver.disconnect();
             _visibilityObserver.disconnect();
-            return true;
         },
         type: 'markdown'
     });

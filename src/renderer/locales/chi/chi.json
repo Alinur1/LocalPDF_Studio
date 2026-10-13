@@ -1261,7 +1261,7 @@
     "italicTooltip": "斜体 (Ctrl+I)",
     "strikethroughTooltip": "删除线",
     "inlineCodeTooltip": "内联代码 (Ctrl+`)",
-    "codeBlockTooltip": "代码块 (Ctrl+Shift+C)",
+    "codeBlockTooltip": "代码块 (Ctrl+Alt+C)",
     "linkTooltip": "链接 (Ctrl+K)",
     "imageTooltip": "图片",
     "blockquoteTooltip": "引用",
@@ -1269,7 +1269,16 @@
     "numberedListTooltip": "编号列表",
     "insertTableTooltip": "插入表格",
     "unsavedChangesTitle": "未保存的更改",
-    "unsavedChangesMessage": "您有未保存的更改。确定要关闭此选项卡吗？"
+    "unsavedChangesMessage": "您有未保存的更改。确定要关闭此选项卡吗？",
+    "loadFailedBanner": "无法加载文件内容。保存前将要求确认是否覆盖。",
+    "loadFailedRetry": "重试",
+    "loadFailedOverwriteTitle": "覆盖未读取的文件？",
+    "loadFailedOverwriteMessage": "原始文件无法读取，因此内容未知。现在保存将用当前编辑器内容替换它。是否继续？",
+    "loadEncodingError": "文件不是可读文本（二进制内容或不支持的编码）。",
+    "externalChangeBanner": "此文件在磁盘上已被更改。",
+    "externalChangeReload": "重新加载",
+    "externalChangeKeep": "保留我的",
+    "degradedPreviewWarning": "预览库加载失败。正在显示纯文本预览。"
   },
   "pdftoExcel": {
     "page-title": "PDF 转 Excel",
