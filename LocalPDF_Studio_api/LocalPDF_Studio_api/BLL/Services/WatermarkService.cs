@@ -74,46 +74,57 @@ namespace LocalPDF_Studio_api.BLL.Services
             if (!File.Exists(_pythonExePath))
                 throw new FileNotFoundException($"Python Engine not found: {_pythonExePath}");
 
-            // Pass the .py script path as the first argument to the python executable
-            var arguments = new List<string>
-            {
-                $"\"{_scriptPath}\"",
-                "watermark",
-                $"\"{request.FilePath}\"",
-                $"\"{outputPath}\"",
-                $"--watermark-type {request.WatermarkType}",
-                $"--text \"{request.Text}\"",
-                $"--position {request.Position}",
-                $"--rotation {request.Rotation}",
-                $"--opacity {request.Opacity}",
-                $"--font-size {request.FontSize}",
-                $"--text-color {request.TextColor}",
-                $"--image-scale {request.ImageScale}",
-                $"--start-page {request.StartPage}",
-                $"--end-page {request.EndPage}",
-                $"--pages-range {request.PagesRange}",
-                "--json"
-            };
-
-            if (request.WatermarkType == "image" && !string.IsNullOrEmpty(request.ImagePath))
-            {
-                arguments.Add($"--image-path \"{request.ImagePath}\"");
-            }
-
-            if (!string.IsNullOrEmpty(request.CustomPages))
-            {
-                arguments.Add($"--custom-pages \"{request.CustomPages}\"");
-            }
-
+            // Pass the .py script path as the first argument to the python executable.
+            // Use ArgumentList so each value is passed as a discrete OS argument
+            // (Windows/Linux/macOS safe, no manual quoting, no argument injection).
             var startInfo = new ProcessStartInfo
             {
                 FileName = _pythonExePath,
-                Arguments = string.Join(" ", arguments),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
+
+            startInfo.ArgumentList.Add(_scriptPath);
+            startInfo.ArgumentList.Add("watermark");
+            startInfo.ArgumentList.Add(request.FilePath);
+            startInfo.ArgumentList.Add(outputPath);
+            startInfo.ArgumentList.Add("--watermark-type");
+            startInfo.ArgumentList.Add(request.WatermarkType);
+            startInfo.ArgumentList.Add("--text");
+            startInfo.ArgumentList.Add(request.Text);
+            startInfo.ArgumentList.Add("--position");
+            startInfo.ArgumentList.Add(request.Position);
+            startInfo.ArgumentList.Add("--rotation");
+            startInfo.ArgumentList.Add(request.Rotation.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            startInfo.ArgumentList.Add("--opacity");
+            startInfo.ArgumentList.Add(request.Opacity.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            startInfo.ArgumentList.Add("--font-size");
+            startInfo.ArgumentList.Add(request.FontSize.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            startInfo.ArgumentList.Add("--text-color");
+            startInfo.ArgumentList.Add(request.TextColor);
+            startInfo.ArgumentList.Add("--image-scale");
+            startInfo.ArgumentList.Add(request.ImageScale.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            startInfo.ArgumentList.Add("--start-page");
+            startInfo.ArgumentList.Add(request.StartPage.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            startInfo.ArgumentList.Add("--end-page");
+            startInfo.ArgumentList.Add(request.EndPage.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            startInfo.ArgumentList.Add("--pages-range");
+            startInfo.ArgumentList.Add(request.PagesRange);
+            startInfo.ArgumentList.Add("--json");
+
+            if (request.WatermarkType == "image" && !string.IsNullOrEmpty(request.ImagePath))
+            {
+                startInfo.ArgumentList.Add("--image-path");
+                startInfo.ArgumentList.Add(request.ImagePath);
+            }
+
+            if (!string.IsNullOrEmpty(request.CustomPages))
+            {
+                startInfo.ArgumentList.Add("--custom-pages");
+                startInfo.ArgumentList.Add(request.CustomPages);
+            }
 
             // Inject the vendor folder so PyMuPDF is found automatically
             startInfo.EnvironmentVariables["PYTHONPATH"] = _vendorPath;

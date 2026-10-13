@@ -101,12 +101,17 @@ namespace LocalPDF_Studio_api.BLL.Services
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = _pythonExePath,
-                    Arguments = $"\"{_scriptPath}\" extract_images \"{tempJsonFile}\"",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 };
+
+                // Use ArgumentList so each value is passed as a discrete OS argument
+                // (Windows/Linux/macOS safe, no manual quoting, no argument injection).
+                startInfo.ArgumentList.Add(_scriptPath);
+                startInfo.ArgumentList.Add("extract_images");
+                startInfo.ArgumentList.Add(tempJsonFile);
 
                 // Allow Python to find PyMuPDF/Pillow
                 startInfo.EnvironmentVariables["PYTHONPATH"] = _vendorPath;

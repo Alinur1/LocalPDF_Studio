@@ -145,18 +145,22 @@ namespace LocalPDF_Studio_api.BLL.Services
         {
             try
             {
-                var ghostscriptCommand = BuildGhostscriptCommand(inputPath, outputPath, options);
+                var ghostscriptArgs = BuildGhostscriptArguments(inputPath, outputPath, options);
                 var processName = GetGhostscriptProcessName();
 
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = processName,
-                    Arguments = ghostscriptCommand,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 };
+
+                // Use ArgumentList so each value is passed as a discrete OS argument
+                // (Windows/Linux/macOS safe, no manual quoting, no argument injection).
+                foreach (var arg in ghostscriptArgs)
+                    startInfo.ArgumentList.Add(arg);
 
                 using var process = new Process { StartInfo = startInfo };
                 process.Start();
@@ -189,12 +193,14 @@ namespace LocalPDF_Studio_api.BLL.Services
             }
         }
 
-        private string BuildGhostscriptCommand(string inputPath, string outputPath, CompressOptions options)
+        private List<string> BuildGhostscriptArguments(string inputPath, string outputPath, CompressOptions options)
         {
             var quality = options.GetQualityValue();
             var dpi = quality >= 80 ? "150" : quality >= 60 ? "120" : "96";
 
-            var commands = new List<string>
+            // Each entry is one discrete OS argument. Paths are passed raw —
+            // ArgumentList handles spaces/quotes per-OS, so no manual quoting here.
+            return new List<string>
             {
                     "-dNOPAUSE",
                     "-dBATCH",
@@ -216,11 +222,11 @@ namespace LocalPDF_Studio_api.BLL.Services
                     "-dSubsetFonts=true",
 
                     // Image downsampling
-                    $"-dColorImageDownsampleType=/Bicubic",
+                    "-dColorImageDownsampleType=/Bicubic",
                     $"-dColorImageResolution={dpi}",
-                    $"-dGrayImageDownsampleType=/Bicubic",
+                    "-dGrayImageDownsampleType=/Bicubic",
                     $"-dGrayImageResolution={dpi}",
-                    $"-dMonoImageDownsampleType=/Bicubic",
+                    "-dMonoImageDownsampleType=/Bicubic",
                     $"-dMonoImageResolution={dpi}",
 
                     // Image filters — important for PDFSharp
@@ -229,12 +235,10 @@ namespace LocalPDF_Studio_api.BLL.Services
                     "-dMonoImageFilter=/FlateEncode",
 
                     // Output file
-                    $"-sOutputFile=\"{outputPath}\"",
+                    $"-sOutputFile={outputPath}",
 
-                    $"\"{inputPath}\""
+                    inputPath
             };
-
-            return string.Join(" ", commands);
         }
 
         private string GetPdfSettings(CompressionQuality quality)

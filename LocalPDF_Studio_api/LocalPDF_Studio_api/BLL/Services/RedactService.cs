@@ -104,12 +104,18 @@ namespace LocalPDF_Studio_api.BLL.Services
                 {
                     FileName = _pythonExePath,
                     // Use the 'redact' command pointing to the temp JSON file
-                    Arguments = $"\"{_scriptPath}\" redact \"{tempJsonFile}\" --json",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 };
+
+                // Use ArgumentList so each value is passed as a discrete OS argument
+                // (Windows/Linux/macOS safe, no manual quoting, no argument injection).
+                startInfo.ArgumentList.Add(_scriptPath);
+                startInfo.ArgumentList.Add("redact");
+                startInfo.ArgumentList.Add(tempJsonFile);
+                startInfo.ArgumentList.Add("--json");
 
                 startInfo.EnvironmentVariables["PYTHONPATH"] = _vendorPath;
 

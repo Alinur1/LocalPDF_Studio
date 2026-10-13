@@ -80,27 +80,9 @@ namespace LocalPDF_Studio_api.BLL.Services
             if (!File.Exists(_pythonExePath))
                 throw new FileNotFoundException($"Python Engine not found: {_pythonExePath}");
 
-            var arguments = new List<string>
-            {
-                $"\"{_scriptPath}\"",
-                "grayscale",
-                $"\"{request.FilePath}\"",
-                $"\"{outputPath}\""
-            };
-
-            if (!string.IsNullOrEmpty(request.CustomPages) && request.PagesRange == "custom")
-                arguments.Add($"--custom-pages \"{request.CustomPages}\"");
-
-            // Add conversion mode
-            var mode = string.IsNullOrWhiteSpace(request.ConversionMode) ? "vector" : request.ConversionMode.ToLower();
-            if (mode == "raster")
-                arguments.Add("--mode raster");
-            // else, default is vector
-
             var startInfo = new ProcessStartInfo
             {
                 FileName = _pythonExePath,
-                Arguments = string.Join(" ", arguments),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -108,6 +90,28 @@ namespace LocalPDF_Studio_api.BLL.Services
                 StandardOutputEncoding = System.Text.Encoding.UTF8,
                 StandardErrorEncoding = System.Text.Encoding.UTF8
             };
+
+            // Use ArgumentList so each value is passed as a discrete OS argument
+            // (Windows/Linux/macOS safe, no manual quoting, no argument injection).
+            startInfo.ArgumentList.Add(_scriptPath);
+            startInfo.ArgumentList.Add("grayscale");
+            startInfo.ArgumentList.Add(request.FilePath);
+            startInfo.ArgumentList.Add(outputPath);
+
+            if (!string.IsNullOrEmpty(request.CustomPages) && request.PagesRange == "custom")
+            {
+                startInfo.ArgumentList.Add("--custom-pages");
+                startInfo.ArgumentList.Add(request.CustomPages);
+            }
+
+            // Add conversion mode
+            var mode = string.IsNullOrWhiteSpace(request.ConversionMode) ? "vector" : request.ConversionMode.ToLower();
+            if (mode == "raster")
+            {
+                startInfo.ArgumentList.Add("--mode");
+                startInfo.ArgumentList.Add("raster");
+            }
+            // else, default is vector
 
             // Inject the vendor folder for PyMuPDF/Ghostscript dependencies
             startInfo.EnvironmentVariables["PYTHONPATH"] = _vendorPath;
