@@ -116,12 +116,16 @@ const wallpaperService = {
         return this.list().length;
     },
 
-    async addViaDialog() {
-        const { canceled, filePaths } = await dialog.showOpenDialog({
+    async addViaDialog(parentWindow) {
+        const openOptions = {
             title: 'Choose wallpaper image',
             properties: ['openFile', 'multiSelections'],
             filters: [{ name: 'Images (JPG, PNG, WebP)', extensions: ALLOWED_DIALOG_EXTS }]
-        });
+        };
+        // Parent keeps the dialog above the app window (see dialogParent in main.js).
+        const { canceled, filePaths } = parentWindow
+            ? await dialog.showOpenDialog(parentWindow, openOptions)
+            : await dialog.showOpenDialog(openOptions);
         if (canceled || !filePaths || filePaths.length === 0) {
             return { success: false, canceled: true, added: [] };
         }

@@ -40,6 +40,24 @@ let lastUpdateStatus = { status: 'No updates checked yet.', details: '' };
 let openFileQueue = [];
 let devToolsOpened = false;
 
+function dialogParent() {
+    return (mainWindow && !mainWindow.isDestroyed()) ? mainWindow : null;
+}
+
+async function showOpenDialog(options) {
+    const parent = dialogParent();
+    return parent
+        ? dialog.showOpenDialog(parent, options)
+        : dialog.showOpenDialog(options);
+}
+
+async function showSaveDialog(options) {
+    const parent = dialogParent();
+    return parent
+        ? dialog.showSaveDialog(parent, options)
+        : dialog.showSaveDialog(options);
+}
+
 // Helper to send or queue file paths to renderer
 function queueOrSendOpenFile(filePath) {
     try {
@@ -544,7 +562,7 @@ ipcMain.on('open-external-link', (event, url) => {
 });
 
 ipcMain.handle('select-pdf-files', async () => {
-    const result = await dialog.showOpenDialog({
+    const result = await showOpenDialog({
         properties: ['openFile', 'multiSelections'],
         filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
     });
@@ -552,7 +570,7 @@ ipcMain.handle('select-pdf-files', async () => {
 });
 
 ipcMain.handle('select-pdf-and-image-files', async () => {
-    const result = await dialog.showOpenDialog({
+    const result = await showOpenDialog({
         properties: ['openFile', 'multiSelections'],
         filters: [
             { name: 'PDF and Image Files', extensions: ['pdf', 'jpg', 'jpeg', 'png', 'bmp'] },
@@ -564,7 +582,7 @@ ipcMain.handle('select-pdf-and-image-files', async () => {
 });
 
 ipcMain.handle('select-markdown-files', async () => {
-    const result = await dialog.showOpenDialog({
+    const result = await showOpenDialog({
         properties: ['openFile', 'multiSelections'],
         filters: [
             { name: 'Markdown Files', extensions: ['md', 'markdown', 'txt'] },
@@ -671,7 +689,7 @@ ipcMain.handle('export-markdown-to-pdf', async (event, { html, title, options = 
 });
 
 ipcMain.handle('save-merged-pdf', async (event, arrayBuffer) => {
-    const { filePath, canceled } = await dialog.showSaveDialog({
+    const { filePath, canceled } = await showSaveDialog({
         title: 'Save Merged PDF',
         defaultPath: 'merged.pdf',
         filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
@@ -692,7 +710,7 @@ ipcMain.handle('save-merged-pdf', async (event, arrayBuffer) => {
 });
 
 ipcMain.handle('save-zip-file', async (event, { filename, buffer }) => {
-    const { filePath, canceled } = await dialog.showSaveDialog({
+    const { filePath, canceled } = await showSaveDialog({
         defaultPath: filename,
         filters: [
             { name: 'ZIP Archive', extensions: ['zip'] },
@@ -739,7 +757,7 @@ ipcMain.handle('save-pdf-file', async (event, { filename, buffer }) => {
     //     safeDefaultPath = path.join(app.getPath('downloads'), cleanFileName);
     // }
 
-    const { filePath, canceled } = await dialog.showSaveDialog({
+    const { filePath, canceled } = await showSaveDialog({
         defaultPath: filename,
         filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
     });
@@ -769,7 +787,7 @@ ipcMain.handle('save-pdf-file', async (event, { filename, buffer }) => {
 });
 
 ipcMain.handle('save-excel-file', async (event, { filename, buffer }) => {
-    const { filePath, canceled } = await dialog.showSaveDialog({
+    const { filePath, canceled } = await showSaveDialog({
         defaultPath: filename,
         filters: [
             { name: 'Excel Workbook', extensions: ['xlsx'] },
@@ -802,7 +820,7 @@ ipcMain.handle('save-excel-file', async (event, { filename, buffer }) => {
 });
 
 ipcMain.handle('save-text-file', async (event, { filename, text }) => {
-    const { filePath, canceled } = await dialog.showSaveDialog({
+    const { filePath, canceled } = await showSaveDialog({
         defaultPath: filename,
         filters: [{ name: 'Text Files', extensions: ['txt'] }]
     });
@@ -835,7 +853,7 @@ ipcMain.handle('save-text-file', async (event, { filename, text }) => {
 });
 
 ipcMain.handle('save-markdown-file', async (event, { filename, text }) => {
-    const { filePath, canceled } = await dialog.showSaveDialog({
+    const { filePath, canceled } = await showSaveDialog({
         defaultPath: filename,
         filters: [{ name: 'Markdown Files', extensions: ['md'] }]
     });
@@ -854,7 +872,7 @@ ipcMain.handle('save-markdown-file', async (event, { filename, text }) => {
 });
 
 ipcMain.handle('select-output-folder', async () => {
-    const { filePaths, canceled } = await dialog.showOpenDialog({
+    const { filePaths, canceled } = await showOpenDialog({
         properties: ['openDirectory', 'createDirectory'],
     });
     if (canceled || filePaths.length === 0) return null;
@@ -862,7 +880,7 @@ ipcMain.handle('select-output-folder', async () => {
 });
 
 ipcMain.handle('save-json-file', async (event, { filename, json }) => {
-    const { filePath, canceled } = await dialog.showSaveDialog({
+    const { filePath, canceled } = await showSaveDialog({
         defaultPath: filename,
         filters: [{ name: 'JSON Files', extensions: ['json'] }]
     });
@@ -879,7 +897,7 @@ ipcMain.handle('save-json-file', async (event, { filename, json }) => {
 });
 
 ipcMain.handle('select-json-file', async () => {
-    const { filePaths, canceled } = await dialog.showOpenDialog({
+    const { filePaths, canceled } = await showOpenDialog({
         filters: [{ name: 'JSON Files', extensions: ['json'] }],
         properties: ['openFile']
     });
@@ -903,7 +921,7 @@ ipcMain.handle('save-pdf-with-metadata', async (event, { filePath, metadata }) =
         const base = path.basename(filePath, ext);
         const defaultName = `${base}_edited_metadata${ext}`;
 
-        const { filePath: savedPath, canceled } = await dialog.showSaveDialog({
+        const { filePath: savedPath, canceled } = await showSaveDialog({
             defaultPath: defaultName,
             filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
         });
@@ -1254,8 +1272,7 @@ ipcMain.handle('save-image-file', async (event, { filename, buffer }) => {
     const filters = filterMap[ext] || [{ name: 'Image File', extensions: ['png', 'jpg', 'jpeg', 'webp', 'bmp'] }];
     filters.push({ name: 'All Files', extensions: ['*'] });
 
-    const { dialog } = require('electron');
-    const result = await dialog.showSaveDialog({
+    const result = await showSaveDialog({
         defaultPath: filename,
         filters: filters
     });
@@ -1538,7 +1555,7 @@ ipcMain.handle('wallpaper-list', () => {
 });
 
 ipcMain.handle('wallpaper-add', async () => {
-    return wallpaperService.addViaDialog();
+    return wallpaperService.addViaDialog(dialogParent());
 });
 
 ipcMain.handle('wallpaper-remove', (event, name) => {
@@ -1546,7 +1563,7 @@ ipcMain.handle('wallpaper-remove', (event, name) => {
 });
 
 ipcMain.handle('select-pdf-and-markdown-files', async () => {
-    const result = await dialog.showOpenDialog({
+    const result = await showOpenDialog({
         properties: ['openFile', 'multiSelections'],
         filters: [
             { name: 'PDF & Markdown', extensions: ['pdf', 'md'] }
