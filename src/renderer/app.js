@@ -27,6 +27,7 @@ import customAlert from './utils/customAlert.js';
 import i18n from './utils/i18n.js';
 import { SearchBar } from './utils/searchBar.js';
 import { SearchIndexManager } from './utils/searchIndexManager.js';
+import { listCustomWallpapers, renderCustomTiles, applyWallpaper, isCustomId } from './utils/wallpaperManager.js';
 
 window.addEventListener('DOMContentLoaded', async () => {
     await i18n.init();
@@ -495,7 +496,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    settingsBtn.addEventListener('click', () => {
+    settingsBtn.addEventListener('click', async () => {
         originalSettings = {
             restoreTabs: localStorage.getItem('restoreTabs') || 'restore',
             clockEnabled: localStorage.getItem('clockEnabled') !== 'false',
@@ -506,7 +507,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             devMode: localStorage.getItem('devMode') === 'true'
         };
         document.querySelector(`input[name="restore-tabs"][value="${originalSettings.restoreTabs}"]`).checked = true;
-        document.querySelectorAll('.wallpaper-option').forEach(opt => { opt.classList.toggle('selected', opt.dataset.wallpaper === originalSettings.wallpaper); });
+        await refreshWallpaperGrid(originalSettings.wallpaper);
         document.getElementById('clock-enabled').checked = originalSettings.clockEnabled;
         document.getElementById('search-enabled').checked = originalSettings.searchEnabled;
         languageSelect.value = originalSettings.language;
@@ -607,7 +608,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         localStorage.setItem('theme', originalSettings.theme);
         localStorage.setItem('activeWallpaper', originalSettings.wallpaper);
         applyTheme(originalSettings.theme);
-        applyWallpaper(originalSettings.wallpaper);
+        applyWallpaper(originalSettings.wallpaper, customWallpaperCache);
         searchIndexManager.setEnabled(originalSettings.searchEnabled);
         searchBar.setVisible(originalSettings.searchEnabled);
         clockManager.setEnabled(originalSettings.clockEnabled);
@@ -717,7 +718,77 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Apply theme
     applyTheme(savedTheme);
-    applyWallpaper(savedWallpaper);
+
+    // Custom wallpaper cache (refreshed when Settings opens / add / remove)
+    let customWallpaperCache = await listCustomWallpapers();
+    // Active file may have been deleted externally (Pictures folder is user-visible)
+    if (isCustomId(savedWallpaper) && !customWallpaperCache.some(w => w.id === savedWallpaper)) {
+        localStorage.setItem('activeWallpaper', 'none');
+        applyWallpaper('none', customWallpaperCache);
+    } else {
+        applyWallpaper(localStorage.getItem('activeWallpaper') || 'none', customWallpaperCache);
+    }
+
+    async function refreshWallpaperGrid(activeId) {
+        customWallpaperCache = await listCustomWallpapers();
+        const grid = document.getElementById('wallpaper-grid');
+        document.querySelectorAll('.wallpaper-option:not([data-custom])').forEach(opt => {
+            opt.classList.toggle('selected', opt.dataset.wallpaper === activeId);
+        });
+        renderCustomTiles(grid, customWallpaperCache, activeId || localStorage.getItem('activeWallpaper') || 'none', {
+            onSelect: (id) => applyWallpaper(id, customWallpaperCache),
+            onRemove: (name) => removeCustomWallpaper(name)
+        });
+    }
+
+    async function removeCustomWallpaper(name) {
+        try {
+            const choice = await customAlert.alert(
+                i18n.t('settings.wallpaper-confirm-title'),
+                `${name}\n\n${i18n.t('settings.wallpaper-confirm-msg')}`,
+                [i18n.t('settings.cancel-btn'), i18n.t('settings.wallpaper-delete-btn')]
+            );
+            if (choice !== 1) return; // user cancelled
+            const res = await window.electronAPI?.removeWallpaper?.(name);
+            if (!res || res.success === false) {
+                customAlert.alert(i18n.t('settings.wallpaper-remove-failed-title'), res?.error || i18n.t('settings.wallpaper-remove-failed-msg'), [i18n.t('common.ok')]);
+                return;
+            }
+            const removedId = `custom:${name}`;
+            const selected = document.querySelector('.wallpaper-option.selected')?.dataset.wallpaper;
+            if (selected === removedId) {
+                document.querySelectorAll('.wallpaper-option').forEach(b => b.classList.remove('selected'));
+                document.querySelector('.wallpaper-option[data-wallpaper="none"]')?.classList.add('selected');
+                applyWallpaper('none', customWallpaperCache);
+            }
+            const activeAfter = document.querySelector('.wallpaper-option.selected')?.dataset.wallpaper || 'none';
+            await refreshWallpaperGrid(activeAfter);
+        } catch (err) {
+            console.error('removeCustomWallpaper error:', err);
+        }
+    }
+
+    const wallpaperAddBtn = document.getElementById('wallpaper-add');
+    if (wallpaperAddBtn) {
+        wallpaperAddBtn.addEventListener('click', async () => {
+            try {
+                if (customWallpaperCache.length >= 10) {
+                    customAlert.alert(i18n.t('settings.wallpaper-limit-title'), i18n.t('settings.wallpaper-limit-msg'), [i18n.t('common.ok')]);
+                    return;
+                }
+                const res = await window.electronAPI?.selectWallpaperImages?.();
+                if (!res || res.canceled || !res.added || res.added.length === 0) {
+                    if (res?.errors?.length) customAlert.alert(i18n.t('settings.wallpaper-add-failed-title'), res.errors.join('\n'), [i18n.t('common.ok')]);
+                    return;
+                }
+                if (res.errors?.length) customAlert.alert(i18n.t('settings.wallpaper-partial-title'), res.errors.join('\n'), [i18n.t('common.ok')]);
+                const activeAfter = document.querySelector('.wallpaper-option.selected')?.dataset.wallpaper || 'none';
+                await refreshWallpaperGrid(activeAfter);
+            } catch (err) {
+                console.error('wallpaper add error:', err);
+            }
+        });
+    }
 
     // Set radio state
     const themeRadio = document.querySelector(`input[name="theme-mode"][value="${savedTheme}"]`);
@@ -741,22 +812,11 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-    function applyWallpaper(wallpaperId) {
-        const emptyState = document.getElementById('empty-state');
-        if (!emptyState) return;
-
-        if (wallpaperId === 'none' || !wallpaperId) {
-            emptyState.style.backgroundImage = 'none';
-        } else {
-            emptyState.style.backgroundImage = `url('./wallpapers/${wallpaperId}.jpg')`;
-        }
-    }
-
-    document.querySelectorAll('.wallpaper-option').forEach(btn => {
+    document.querySelectorAll('.wallpaper-option:not([data-custom]):not(#wallpaper-add)').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.wallpaper-option').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
-            applyWallpaper(btn.dataset.wallpaper);
+            applyWallpaper(btn.dataset.wallpaper, customWallpaperCache);
         });
     });
 });

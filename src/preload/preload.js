@@ -82,6 +82,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveMarkdownFile: (filePath, content) => ipcRenderer.invoke('save-markdown-file-direct', filePath, content),
     exportMarkdownToPdf: (html, title, options) => ipcRenderer.invoke('export-markdown-to-pdf', { html, title, options }),
     setDevMode: (isDevMode) => ipcRenderer.send('set-dev-mode', isDevMode),
+    selectWallpaperImages: () => ipcRenderer.invoke('wallpaper-add'),
+    listWallpapers: () => ipcRenderer.invoke('wallpaper-list'),
+    removeWallpaper: (name) => ipcRenderer.invoke('wallpaper-remove', name),
 });
 
 contextBridge.exposeInMainWorld('pdfTabsAPI', {

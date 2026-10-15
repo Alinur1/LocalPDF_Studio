@@ -65,7 +65,17 @@
     "theme-light": "浅色",
     "theme-system": "系统（自动）",
     "dev-mode": "开发者模式",
-    "dev-mode-desc": "启用原生菜单并自动打开 DevTools 进行调试"
+    "dev-mode-desc": "启用原生菜单并自动打开 DevTools 进行调试",
+    "wallpaper-hint": "自定义图片保存在 Pictures / LocalPDF_Studio_Wallpaper（JPG、PNG、WebP · 最多 10 张 · 每张 40MB）。",
+    "wallpaper-limit-title": "已达到壁纸上限",
+    "wallpaper-limit-msg": "最多保存 10 张自定义壁纸。请删除一张后再添加。",
+    "wallpaper-add-failed-title": "无法添加壁纸",
+    "wallpaper-partial-title": "部分图片已跳过",
+    "wallpaper-remove-failed-title": "无法删除壁纸",
+    "wallpaper-remove-failed-msg": "无法删除该文件。",
+    "wallpaper-confirm-title": "删除壁纸？",
+    "wallpaper-confirm-msg": "这将从 Pictures / LocalPDF_Studio_Wallpaper 中删除该图片文件。继续吗？",
+    "wallpaper-delete-btn": "删除"
   },
   "search": {
     "placeholder": "搜索已打开的文件...",

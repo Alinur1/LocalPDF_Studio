@@ -65,7 +65,17 @@
     "theme-light": "লাইট",
     "theme-system": "সিস্টেম (স্বয়ংক্রিয়)",
     "dev-mode": "ডেভেলপার মোড",
-    "dev-mode-desc": "নেটিভ মেনু সক্রিয় করুন এবং ডিবাগিংয়ের জন্য DevTools স্বয়ংক্রিয়ভাবে খুলুন"
+    "dev-mode-desc": "নেটিভ মেনু সক্রিয় করুন এবং ডিবাগিংয়ের জন্য DevTools স্বয়ংক্রিয়ভাবে খুলুন",
+    "wallpaper-hint": "কাস্টম ছবি Pictures / LocalPDF_Studio_Wallpaper-এ সংরক্ষিত হয় (JPG, PNG, WebP · সর্বোচ্চ ১০টি · প্রতিটি ৪০MB)।",
+    "wallpaper-limit-title": "ওয়ালপেপার সীমা পূর্ণ",
+    "wallpaper-limit-msg": "সর্বোচ্চ ১০টি কাস্টম ওয়ালপেপার রাখা যাবে। নতুন যোগ করতে একটি মুছুন।",
+    "wallpaper-add-failed-title": "ওয়ালপেপার যোগ করা যায়নি",
+    "wallpaper-partial-title": "কিছু ছবি বাদ পড়েছে",
+    "wallpaper-remove-failed-title": "ওয়ালপেপার মুছা যায়নি",
+    "wallpaper-remove-failed-msg": "ফাইলটি মুছা যায়নি।",
+    "wallpaper-confirm-title": "ওয়ালপেপার মুছবেন?",
+    "wallpaper-confirm-msg": "এটি Pictures / LocalPDF_Studio_Wallpaper থেকে ছবি ফাইলটি মুছে দেবে। চালিয়ে যাবেন?",
+    "wallpaper-delete-btn": "মুছুন"
   },
   "search": {
     "placeholder": "খোলা ফাইল খুঁজুন...",

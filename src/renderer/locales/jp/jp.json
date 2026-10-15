@@ -65,7 +65,17 @@
     "theme-light": "ライト",
     "theme-system": "システム（自動）",
     "dev-mode": "デベロッパーモード",
-    "dev-mode-desc": "ネイティブメニューを有効にし、デバッグ用に DevTools を自動的に開く"
+    "dev-mode-desc": "ネイティブメニューを有効にし、デバッグ用に DevTools を自動的に開く",
+    "wallpaper-hint": "カスタム画像は Pictures / LocalPDF_Studio_Wallpaper に保存されます（JPG、PNG、WebP · 最大10件 · 各40MB）。",
+    "wallpaper-limit-title": "壁紙の上限に達しました",
+    "wallpaper-limit-msg": "カスタム壁紙は最大10件までです。追加するには1件削除してください。",
+    "wallpaper-add-failed-title": "壁紙を追加できませんでした",
+    "wallpaper-partial-title": "一部の画像はスキップされました",
+    "wallpaper-remove-failed-title": "壁紙を削除できませんでした",
+    "wallpaper-remove-failed-msg": "ファイルを削除できませんでした。",
+    "wallpaper-confirm-title": "壁紙を削除しますか？",
+    "wallpaper-confirm-msg": "Pictures / LocalPDF_Studio_Wallpaper から画像ファイルが削除されます。続行しますか？",
+    "wallpaper-delete-btn": "削除"
   },
   "search": {
     "placeholder": "開いているファイルを検索...",

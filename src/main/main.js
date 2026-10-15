@@ -30,6 +30,7 @@ const { PDFDocument, PDFName, PDFRawStream } = require('pdf-lib');
 const Tesseract = require('tesseract.js');
 const gotTheLock = app.requestSingleInstanceLock();
 const pdfTabsService = require('./services/pdfTabsService.js');
+const wallpaperService = require('./services/wallpaperService.js');
 
 let apiProcess = null;
 let apiPort = null;
@@ -1529,6 +1530,19 @@ ipcMain.handle('search-get-all', () => {
 // Wipe the search index
 ipcMain.handle('search-clear', () => {
     return pdfTabsService.clearSearchIndex();
+});
+
+// Custom wallpapers — stored in ~/Pictures/LocalPDF_Studio_Wallpaper
+ipcMain.handle('wallpaper-list', () => {
+    return wallpaperService.list();
+});
+
+ipcMain.handle('wallpaper-add', async () => {
+    return wallpaperService.addViaDialog();
+});
+
+ipcMain.handle('wallpaper-remove', (event, name) => {
+    return wallpaperService.remove(name);
 });
 
 ipcMain.handle('select-pdf-and-markdown-files', async () => {

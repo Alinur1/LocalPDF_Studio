@@ -65,7 +65,17 @@
     "theme-light": "Light",
     "theme-system": "System (Auto)",
     "dev-mode": "Developer Mode",
-    "dev-mode-desc": "Enable native menu & auto-open DevTools for debugging"
+    "dev-mode-desc": "Enable native menu & auto-open DevTools for debugging",
+    "wallpaper-hint": "Custom images are saved in Pictures / LocalPDF_Studio_Wallpaper (JPG, PNG, WebP · max 10 · 40MB each).",
+    "wallpaper-limit-title": "Wallpaper limit reached",
+    "wallpaper-limit-msg": "You can save max 10 custom wallpapers. Remove one to add another.",
+    "wallpaper-add-failed-title": "Could not add wallpaper",
+    "wallpaper-partial-title": "Some images were skipped",
+    "wallpaper-remove-failed-title": "Could not remove wallpaper",
+    "wallpaper-remove-failed-msg": "The file could not be deleted.",
+    "wallpaper-confirm-title": "Remove wallpaper?",
+    "wallpaper-confirm-msg": "This deletes the image file from Pictures / LocalPDF_Studio_Wallpaper. Continue?",
+    "wallpaper-delete-btn": "Delete"
   },
   "search": {
     "placeholder": "Search opened files...",
