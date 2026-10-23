@@ -1,7 +1,9 @@
-PyMuPDF
+pymupdf==1.28.2 ; sys_platform == "darwin"
+pymupdf4llm==1.28.2 ; sys_platform == "darwin"
+pymupdf ; sys_platform != "darwin"
+pymupdf4llm ; sys_platform != "darwin"
 pikepdf
 pillow
-pymupdf4llm
 pdfplumber
 pandas
 openpyxl

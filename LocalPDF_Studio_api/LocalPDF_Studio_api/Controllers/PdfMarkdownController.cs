@@ -17,6 +17,7 @@
 
 
 using LocalPDF_Studio_api.BLL.Interfaces;
+using LocalPDF_Studio_api.BLL.Services;
 using LocalPDF_Studio_api.DAL.Models.PDFMarkdown;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -44,14 +45,8 @@ namespace LocalPDF_Studio_api.Controllers
             if (string.IsNullOrWhiteSpace(request.FilePath))
                 return BadRequest(new { error = "File path is required." });
 
-            if (string.IsNullOrWhiteSpace(request.OutputFolder))
-                request.OutputFolder = System.IO.Path.GetTempPath();
-
             if (!System.IO.File.Exists(request.FilePath))
                 return NotFound(new { error = $"File not found: {request.FilePath}" });
-
-            if (!System.IO.Directory.Exists(request.OutputFolder))
-                return BadRequest(new { error = $"Output folder does not exist: {request.OutputFolder}" });
 
             if (Path.GetExtension(request.FilePath).ToLowerInvariant() != ".pdf")
                 return BadRequest(new { error = "File must be a PDF." });
@@ -98,6 +93,8 @@ namespace LocalPDF_Studio_api.Controllers
                 var zipBytes = await System.IO.File.ReadAllBytesAsync(zipTempPath);
                 // Clean up temp zip after reading
                 System.IO.File.Delete(zipTempPath);
+                PdfMarkdownService.CleanupWorkspaceFolder(outputFolderPath, _logger);
+
                 var fileName = Path.GetFileNameWithoutExtension(request.FilePath) + "_markdown.zip";
                 return File(zipBytes, "application/zip", fileName);
             }

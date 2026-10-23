@@ -143,7 +143,9 @@ function startBackend() {
             }
 
             console.log(`Starting backend from: ${backendPath}`);
-            apiProcess = spawn(backendPath);
+            apiProcess = spawn(backendPath, {
+                env: { ...process.env, LOCALPDF_IMAGE_TASK_DIR: getImageTaskFolderPath() },
+            });
 
             apiProcess.stdout.on('data', (data) => {
                 const output = data.toString();
@@ -489,6 +491,20 @@ function cleanupTaskFolder() {
     } catch (err) {
         console.error('Error cleaning up task folder:', err);
     }
+}
+
+// Helper function to get the LocalPDF_Studio_Image_Task folder path in Downloads.
+function getImageTaskFolderPath() {
+    let basePath;
+
+    // Handle Snap with strict confinement (same fallback as the task folder)
+    if (process.platform === 'linux' && process.env.SNAP) {
+        basePath = process.env.SNAP_USER_DATA || process.env.HOME;
+    } else {
+        basePath = app.getPath('downloads');
+    }
+
+    return path.join(basePath, 'LocalPDF_Studio_Image_Task');
 }
 
 // Helper function to get the LocalPDF_Studio_Task folder path in Downloads

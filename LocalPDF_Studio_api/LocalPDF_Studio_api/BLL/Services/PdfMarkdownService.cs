@@ -47,6 +47,7 @@ namespace LocalPDF_Studio_api.BLL.Services
 
         public async Task<PythonMarkdownResult> ConvertToMarkdownAsync(PdfMarkdownRequest request)
         {
+            string? workspaceFolder = null;
             try
             {
                 if (!File.Exists(request.FilePath))
@@ -57,12 +58,13 @@ namespace LocalPDF_Studio_api.BLL.Services
                 // Derive the PDF's name - PDF Steam (filename without extension)
                 var pdfStem = Path.GetFileNameWithoutExtension(request.FilePath);
 
-                // Use a temporary folder for conversion output instead of user-specified folder
-                var tempRoot = Path.Combine(Path.GetTempPath(), "LocalPDF_Studio", Guid.NewGuid().ToString());
-                var outputSubFolder = Path.Combine(tempRoot, pdfStem);
-                // Ensure the temporary output directory exists
+                // Workspace under the user's Downloads/LocalPDF_Studio_Image_Task/pdf_to_markdown
+                // when Electron passed the image task directory (LOCALPDF_IMAGE_TASK_DIR).
+                var outputSubFolder = CreateConversionWorkspace(pdfStem);
+                workspaceFolder = outputSubFolder;
+                // Ensure the workspace directory exists
                 Directory.CreateDirectory(outputSubFolder);
-                // No folder-exists conflict check needed for temporary locations
+                // No folder-exists conflict check needed for this location
 
 
                 _logger.LogInformation(
@@ -80,14 +82,69 @@ namespace LocalPDF_Studio_api.BLL.Services
                         "Markdown conversion complete — Pages: {Pages}, Assets: {Assets}",
                         result.Meta?.PageCount ?? 0,
                         result.Meta?.AssetCount ?? 0);
+                else
+                {
+                    // A failed conversion may still have left partial artifacts in the workspace; nothing gets delivered, so discard them.
+                    CleanupWorkspaceFolder(outputSubFolder, _logger);
+                    workspaceFolder = null;
+                }
 
                 return result;
             }
             catch (Exception ex)
             {
+                if (workspaceFolder != null)
+                    CleanupWorkspaceFolder(workspaceFolder, _logger);
                 _logger.LogError(ex, "Error converting PDF to Markdown: {FilePath}", request.FilePath);
                 throw;
             }
+        }
+
+        // Removes a disposable per-conversion workspace folder. Best-effort: a failed cleanup is logged so it never blocks the user's result.
+        internal static void CleanupWorkspaceFolder(string workspaceFolder, ILogger? logger = null)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(workspaceFolder) && Directory.Exists(workspaceFolder))
+                {
+                    Directory.Delete(workspaceFolder, recursive: true);
+                    logger?.LogInformation("Conversion workspace removed: {Folder}", workspaceFolder);
+                }
+            }
+            catch (Exception cleanupEx)
+            {
+                logger?.LogWarning(cleanupEx, "Failed to clean up conversion workspace: {Folder}", workspaceFolder);
+            }
+        }
+
+        /// <summary>
+        /// Creates the per-conversion workspace folder:
+        ///   &lt;LOCALPDF_IMAGE_TASK_DIR&gt;/pdf_to_markdown/&lt;stem&gt;-&lt;short guid&gt;
+        /// where LOCALPDF_IMAGE_TASK_DIR is provided by Electron
+        /// (Downloads/LocalPDF_Studio_Image_Task - the shared sandbox for
+        /// image-producing operations; each operation owns a subfolder inside it).
+        /// Falls back to the OS temp directory if the env var is missing.
+        /// </summary>
+        private static string CreateConversionWorkspace(string pdfStem)
+        {
+            var shortGuid = Guid.NewGuid().ToString("N")[..8];
+
+            try
+            {
+                var taskDir = Environment.GetEnvironmentVariable("LOCALPDF_IMAGE_TASK_DIR");
+                if (!string.IsNullOrWhiteSpace(taskDir))
+                {
+                    var taskRoot = Path.Combine(taskDir, "pdf_to_markdown");
+                    return Path.Combine(taskRoot, $"{pdfStem}-{shortGuid}");
+                }
+            }
+            catch
+            {
+                // Degrade gracefully to the OS temp location below.
+            }
+
+            var tempRoot = Path.Combine(Path.GetTempPath(), "LocalPDF_Studio", Guid.NewGuid().ToString());
+            return Path.Combine(tempRoot, pdfStem);
         }
 
         private async Task<PythonMarkdownResult> RunPythonAsync(PdfMarkdownRequest request, string outputSubFolder, string pdfStem)
