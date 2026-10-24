@@ -2,7 +2,8 @@ pymupdf==1.28.2 ; sys_platform == "darwin"
 pymupdf4llm==1.28.2 ; sys_platform == "darwin"
 pymupdf ; sys_platform != "darwin"
 pymupdf4llm ; sys_platform != "darwin"
-pikepdf
+pikepdf==10.13.0.post1 ; sys_platform == "darwin"
+pikepdf ; sys_platform != "darwin"
 pillow
 pdfplumber
 pandas
