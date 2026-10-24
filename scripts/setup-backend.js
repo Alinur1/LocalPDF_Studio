@@ -20,7 +20,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 
 const platform = process.platform;
 const osFolder = platform === 'win32' ? 'win' : platform === 'darwin' ? 'mac' : 'linux';
@@ -103,6 +103,26 @@ async function setup() {
         console.log("--- Backend Assets Fully Prepared ---");
     } catch (err) {
         console.error("Script sync failed:", err.message);
+    }
+
+    // 4. REPORT INSTALLED PYTHON PACKAGES (vendor folder of the current OS)
+    try {
+        if (fs.existsSync(pythonExe) && fs.existsSync(vendorDir)) {
+            console.log(`Installed Python packages (vendor, ${osFolder}):`);
+            // execFileSync avoids shell quoting issues with paths containing spaces;
+            // --path scopes the listing to the vendored packages only, not system ones.
+            const listing = execFileSync(
+                pythonExe,
+                ['-E', '-m', 'pip', 'list', '--path', vendorDir, '--format=freeze'],
+                { encoding: 'utf8', maxBuffer: 1024 * 1024 }
+            );
+            console.log(listing.trimEnd());
+            console.log(`(${listing.trim().split('\n').length} packages)`);
+        } else {
+            console.warn("Skipping package report: Python engine or vendor folder missing.");
+        }
+    } catch (err) {
+        console.warn("Could not list Python packages:", err.message);
     }
 }
 
