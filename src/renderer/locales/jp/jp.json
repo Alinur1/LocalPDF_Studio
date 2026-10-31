@@ -43,7 +43,7 @@
     "fresh-start": "新規起動",
     "fresh-start-desc": "毎回クリーンな状態で開始",
     "sidebar-note": "サイドバーのレイアウトとサイズの設定は常に記憶されます",
-    "language-section": "言語（実験的）",
+    "language-section": "言語",
     "interface-language": "インターフェース言語",
     "interface-language-desc": "アプリケーションの優先言語を選択",
     "interface-section": "インターフェース",
@@ -1194,7 +1194,7 @@
     "split-btn": "PDF を分割（垂直）"
   },
   "pdfToMarkdown": {
-    "page-title": "PDF から Markdown へ変換（実験的）",
+    "page-title": "PDF から Markdown へ変換",
     "options-title": "変換オプション",
     "include-images": "画像を抽出して含める",
     "include-images-help": "画像は Markdown ファイルと同じ場所に保存されます。",

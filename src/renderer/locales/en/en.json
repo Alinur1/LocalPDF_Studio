@@ -43,7 +43,7 @@
     "fresh-start": "Fresh Start",
     "fresh-start-desc": "Start with a clean slate every time",
     "sidebar-note": "Sidebar layout and size preferences are always remembered",
-    "language-section": "Language (Experimental)",
+    "language-section": "Language",
     "interface-language": "Interface Language",
     "interface-language-desc": "Select your preferred language for the application",
     "interface-section": "Interface",
@@ -1194,7 +1194,7 @@
     "split-btn": "Split PDF (Vertical)"
   },
   "pdfToMarkdown": {
-    "page-title": "PDF to Markdown (Experimental)",
+    "page-title": "PDF to Markdown",
     "options-title": "Conversion Options",
     "include-images": "Extract and include images",
     "include-images-help": "Images are saved to the same location with the markdown file.",
