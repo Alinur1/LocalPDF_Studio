@@ -59,6 +59,14 @@ class I18n {
                 'bn': `${basePath}locales/bn/bn.json`,
                 'jp': `${basePath}locales/jp/jp.json`,
                 'chi': `${basePath}locales/chi/chi.json`,
+                'fr': `${basePath}locales/fr/fr.json`,
+                'de': `${basePath}locales/de/de.json`,
+                'id': `${basePath}locales/id/id.json`,
+                'it': `${basePath}locales/it/it.json`,
+                'ko': `${basePath}locales/ko/ko.json`,
+                'pt-br': `${basePath}locales/pt-br/pt-br.json`,
+                'es-419': `${basePath}locales/es-419/es-419.json`,
+                'es-es': `${basePath}locales/es-es/es-es.json`,
             };
 
             const filePath = languageFiles[lang];

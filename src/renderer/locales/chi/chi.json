@@ -90,7 +90,15 @@
     "lang-en": "English | English",
     "lang-bn": "Bengali | বাংলা",
     "lang-chi": "Chinese | 中文",
-    "lang-jp": "Japanese | 日本語"
+    "lang-jp": "Japanese | 日本語",
+    "lang-fr": "French | Français",
+    "lang-de": "German | Deutsch",
+    "lang-id": "Indonesian | Bahasa Indonesia",
+    "lang-it": "Italian | Italiano",
+    "lang-ko": "Korean | 한국어",
+    "lang-pt-br": "Portuguese | Português (Brasil)",
+    "lang-es-419": "Spanish | Español (Latinoamérica)",
+    "lang-es-es": "Spanish | Español (España)"
   },
   "about": {
     "back-btn": "← 返回应用",
