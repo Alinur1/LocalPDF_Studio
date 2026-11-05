@@ -140,7 +140,7 @@ Supported on **Windows**, **Linux**, and **macOS** (x86_64).
 |---|---|
 | **Node.js** | v24 or later |
 | **Git** | Any recent version |
-| **.NET SDK** | 8 (recommended) |
+| **.NET SDK** | 10 (recommended) |
 | **Python** | 3.8.10+ *(optional)* |
 | **Architecture** | x86_64 (Intel/AMD) |
 
@@ -204,7 +204,7 @@ LocalPDF Studio currently bundles **x86_64** binaries only. ARM64 is unsupported
 
 Or browse all builds: [python-build-standalone releases](https://github.com/astral-sh/python-build-standalone/releases/tag/20260414)
 
-> ⚠️ Ensure .NET 8 SDK is installed before building.
+> ⚠️ Ensure .NET 10 SDK is installed before building.
 
 ---
 
