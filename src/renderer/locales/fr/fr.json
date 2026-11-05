@@ -549,8 +549,6 @@
     "size-helpTxt": "Choisissez le format de page du PDF généré.",
     "merge-checkbox": "Regrouper toutes les images dans un seul PDF",
     "merge-hint": "Si cette option n’est pas cochée, chaque image sera enregistrée dans un fichier PDF distinct.",
-    "image-quality-label": "Qualité de l’image :",
-    "image-quality-helpTxt": "Une meilleure qualité augmente la taille du fichier.",
     "convert-btn": "Convertir en PDF"
   },
   "imageToPdfJS": {

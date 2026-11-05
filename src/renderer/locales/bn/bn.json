@@ -549,8 +549,6 @@
     "size-helpTxt": "PDF আউটপুটের জন্য পৃষ্ঠা সাইজ নির্বাচন করুন।",
     "merge-checkbox": "সব ইমেজ একটিই PDF ফাইলে মার্জ করুন",
     "merge-hint": "অচেক করলে প্রতিটি ইমেজ আলাদা PDF ফাইল হিসেবে সংরক্ষণ করা হবে।",
-    "image-quality-label": "ইমেজ কোয়ালিটি:",
-    "image-quality-helpTxt": "বেশি কোয়ালিটি = বড় ফাইল সাইজ।",
     "convert-btn": "PDF-এ কনভার্ট করুন"
   },
   "imageToPdfJS": {

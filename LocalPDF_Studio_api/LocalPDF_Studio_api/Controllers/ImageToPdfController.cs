@@ -47,7 +47,6 @@ namespace LocalPDF_Studio_api.Controllers
                 var orientation = Request.Form["orientation"].ToString();
                 var pageSize = Request.Form["pageSize"].ToString();
                 var mergeAll = bool.Parse(Request.Form["mergeAll"].ToString());
-                var quality = int.Parse(Request.Form["quality"].ToString());
 
                 var imageFiles = Request.Form.Files.GetFiles("images");
 
@@ -62,7 +61,6 @@ namespace LocalPDF_Studio_api.Controllers
                     Orientation = orientation,
                     PageSize = pageSize,
                     MergeAll = mergeAll,
-                    Quality = quality,
                     Images = new List<ImageFileData>()
                 };
 

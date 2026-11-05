@@ -549,8 +549,6 @@
     "size-helpTxt": "Pilih ukuran halaman untuk PDF keluaran.",
     "merge-checkbox": "Gabungkan semua gambar menjadi satu file PDF",
     "merge-hint": "Jika tidak dicentang, setiap gambar akan disimpan sebagai file PDF terpisah.",
-    "image-quality-label": "Kualitas Gambar:",
-    "image-quality-helpTxt": "Kualitas lebih tinggi = ukuran file lebih besar.",
     "convert-btn": "Konversi ke PDF"
   },
   "imageToPdfJS": {

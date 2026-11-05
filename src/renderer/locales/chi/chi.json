@@ -549,8 +549,6 @@
     "size-helpTxt": "选择 PDF 输出的页面尺寸。",
     "merge-checkbox": "将所有图片合并为一个 PDF 文件",
     "merge-hint": "如果取消勾选，每张图片将保存为单独的 PDF 文件。",
-    "image-quality-label": "图片质量：",
-    "image-quality-helpTxt": "质量越高 = 文件越大。",
     "convert-btn": "转换为 PDF"
   },
   "imageToPdfJS": {

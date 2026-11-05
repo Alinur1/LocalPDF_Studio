@@ -49,9 +49,6 @@ function setupCreditLinks() {
     
     document.getElementById('pdfsharp-link')?.addEventListener('click', () => 
         openExternalLink('https://www.nuget.org/packages/PDFSharp'));
-    
-    document.getElementById('imagesharp-link')?.addEventListener('click', () => 
-        openExternalLink('https://www.nuget.org/packages/sixlabors.imagesharp/'));
 
     // .NET Ecosystem
     document.getElementById('dotnet-link')?.addEventListener('click', () => 
@@ -139,7 +136,6 @@ function addButtonTooltips() {
         'electron-updater-link': 'https://www.npmjs.com/package/electron-updater',
         'ghostscript-link': 'https://ghostscript.com/',
         'pdfsharp-link': 'https://www.nuget.org/packages/PDFSharp',
-        'imagesharp-link': 'https://www.nuget.org/packages/sixlabors.imagesharp/',
         'dotnet-link': 'https://dotnet.microsoft.com/en-us/',
         'python-link': 'https://www.python.org/',
         'python-standalone-build-link': 'https://github.com/astral-sh/python-build-standalone',

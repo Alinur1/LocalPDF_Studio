@@ -549,8 +549,6 @@
     "size-helpTxt": "PDF出力のページサイズを選択してください。",
     "merge-checkbox": "すべての画像を1つのPDFファイルに結合",
     "merge-hint": "チェックを外すと、各画像は個別のPDFファイルとして保存されます。",
-    "image-quality-label": "画像品質：",
-    "image-quality-helpTxt": "品質が高いほどファイルサイズが大きくなります。",
     "convert-btn": "PDFに変換"
   },
   "imageToPdfJS": {

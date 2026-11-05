@@ -45,8 +45,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const orientationRadios = document.querySelectorAll('input[name="orientation"]');
     const pageSizeSelect = document.getElementById("page-size");
     const mergeImagesCheckbox = document.getElementById("merge-images");
-    const imageQualitySlider = document.getElementById("image-quality");
-    const qualityNumberInput = document.getElementById("image-quality-number");
 
     let selectedImages = [];
     let droppedFilePaths = [];
@@ -62,25 +60,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         clearAll();
     });
     convertBtn.addEventListener("click", convertToPdf);
-
-    imageQualitySlider.addEventListener("input", () => {
-        qualityNumberInput.value = imageQualitySlider.value;
-    });
-
-    qualityNumberInput.addEventListener('input', () => {
-        let val = parseInt(qualityNumberInput.value, 10);
-        if (!isNaN(val) && val >= 50 && val <= 100) {
-            imageQualitySlider.value = val;
-        }
-    });
-
-    qualityNumberInput.addEventListener('blur', () => {
-        let val = parseInt(qualityNumberInput.value, 10);
-        if (isNaN(val)) val = parseInt(imageQualitySlider.value, 10);
-        val = Math.min(100, Math.max(50, val));
-        qualityNumberInput.value = val;
-        imageQualitySlider.value = val;
-    });
 
     closeModalBtn.addEventListener('click', () => {
         modal.style.display = 'none';
@@ -348,7 +327,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const orientation = document.querySelector('input[name="orientation"]:checked').value;
         const pageSize = pageSizeSelect.value;
         const mergeAll = mergeImagesCheckbox.checked;
-        const quality = parseInt(imageQualitySlider.value);
 
         try {
             loadingUI.show(i18n.t('imageToPdfJS.convertingPdf'));
@@ -362,7 +340,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             formData.append('orientation', orientation);
             formData.append('pageSize', pageSize);
             formData.append('mergeAll', mergeAll);
-            formData.append('quality', quality);
 
             // Add all image files
             for (const image of selectedImages) {

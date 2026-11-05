@@ -28,9 +28,6 @@ namespace LocalPDF_Studio_api.DAL.Models.imageToPdf
         // Whether to merge all images into one PDF file
         public bool MergeAll { get; set; } = true;
 
-        // Image quality (1-100)
-        public int Quality { get; set; } = 95;
-
         // List of images to convert
         public List<ImageFileData> Images { get; set; } = new List<ImageFileData>();
     }

@@ -1,4 +1,4 @@
-@LocalPDF_Studio_api_HostAddress = http://localhost:5295
+@LocalPDF_Studio_api_HostAddress = http://localhost:5239
 
 GET {{LocalPDF_Studio_api_HostAddress}}/weatherforecast/
 Accept: application/json

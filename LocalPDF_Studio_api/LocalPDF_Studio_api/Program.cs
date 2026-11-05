@@ -19,11 +19,14 @@
 using LocalPDF_Studio_api.BLL.Interfaces;
 using LocalPDF_Studio_api.BLL.Services;
 using LocalPDF_Studio_api.BLL.Utils;
+using PdfSharp;
 using PdfSharp.Fonts;
 using System.Net;
 using System.Net.Sockets;
 
 var builder = WebApplication.CreateBuilder(args);
+
+PdfSharpLicense.SetAgplLicense();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

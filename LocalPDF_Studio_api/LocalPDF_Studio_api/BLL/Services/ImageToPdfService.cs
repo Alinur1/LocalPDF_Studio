@@ -19,9 +19,6 @@ using LocalPDF_Studio_api.BLL.Interfaces;
 using LocalPDF_Studio_api.DAL.Models.imageToPdf;
 using PdfSharp.Pdf;
 using PdfSharp.Drawing;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Formats.Jpeg;
 using System.IO.Compression;
 
 namespace LocalPDF_Studio_api.BLL.Services
@@ -46,17 +43,17 @@ namespace LocalPDF_Studio_api.BLL.Services
             _logger = logger;
         }
 
-        public async Task<byte[]> ConvertImagesToPdfAsync(ImageToPdfRequest request)
+        public Task<byte[]> ConvertImagesToPdfAsync(ImageToPdfRequest request)
         {
             ValidateRequest(request);
 
             if (request.MergeAll)
             {
-                return await ConvertToSinglePdfAsync(request);
+                return Task.FromResult(ConvertToSinglePdf(request));
             }
             else
             {
-                return await ConvertToMultiplePdfsAsync(request);
+                return Task.FromResult(ConvertToMultiplePdfs(request));
             }
         }
 
@@ -74,9 +71,6 @@ namespace LocalPDF_Studio_api.BLL.Services
             if (string.IsNullOrWhiteSpace(request.PageSize))
                 throw new ArgumentException("Page size is required.");
 
-            if (request.Quality < 1 || request.Quality > 100)
-                throw new ArgumentException("Quality must be between 1 and 100.");
-
             // Validate image formats
             foreach (var image in request.Images)
             {
@@ -86,6 +80,11 @@ namespace LocalPDF_Studio_api.BLL.Services
                 var extension = Path.GetExtension(image.FileName).ToLowerInvariant();
                 if (!IsValidImageExtension(extension))
                     throw new ArgumentException($"Unsupported image format: {extension}");
+
+                // The extension alone is not trustworthy, so also verify the file signature
+                // (JPEG, PNG or BMP) before handing the bytes to the PDFsharp importer.
+                if (!HasSupportedImageSignature(image.Content))
+                    throw new ArgumentException($"Unsupported or corrupt image file: {image.FileName}");
             }
         }
 
@@ -95,7 +94,27 @@ namespace LocalPDF_Studio_api.BLL.Services
             return validExtensions.Contains(extension);
         }
 
-        private async Task<byte[]> ConvertToSinglePdfAsync(ImageToPdfRequest request)
+        private bool HasSupportedImageSignature(byte[] content)
+        {
+            if (content.Length < 4)
+                return false;
+
+            // JPEG: FF D8 FF
+            if (content[0] == 0xFF && content[1] == 0xD8 && content[2] == 0xFF)
+                return true;
+
+            // PNG: 89 50 4E 47
+            if (content[0] == 0x89 && content[1] == 0x50 && content[2] == 0x4E && content[3] == 0x47)
+                return true;
+
+            // BMP: 42 4D ("BM")
+            if (content[0] == 0x42 && content[1] == 0x4D)
+                return true;
+
+            return false;
+        }
+
+        private byte[] ConvertToSinglePdf(ImageToPdfRequest request)
         {
             var document = new PdfDocument();
 
@@ -103,7 +122,7 @@ namespace LocalPDF_Studio_api.BLL.Services
             {
                 try
                 {
-                    await AddImageToPdfAsync(document, imageData, request);
+                    AddImageToPdf(document, imageData, request);
                 }
                 catch (Exception ex)
                 {
@@ -117,24 +136,22 @@ namespace LocalPDF_Studio_api.BLL.Services
             return memoryStream.ToArray();
         }
 
-        private async Task<byte[]> ConvertToMultiplePdfsAsync(ImageToPdfRequest request)
+        private byte[] ConvertToMultiplePdfs(ImageToPdfRequest request)
         {
             using var zipStream = new MemoryStream();
             using var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, true);
 
-            for (int i = 0; i < request.Images.Count; i++)
+            foreach (var imageData in request.Images)
             {
-                var imageData = request.Images[i];
-
                 try
                 {
-                    var pdfBytes = await CreateSingleImagePdfAsync(imageData, request);
+                    var pdfBytes = CreateSingleImagePdf(imageData, request);
 
                     var pdfFileName = Path.GetFileNameWithoutExtension(imageData.FileName) + ".pdf";
                     var entry = archive.CreateEntry(pdfFileName);
 
                     using var entryStream = entry.Open();
-                    await entryStream.WriteAsync(pdfBytes, 0, pdfBytes.Length);
+                    entryStream.Write(pdfBytes, 0, pdfBytes.Length);
                 }
                 catch (Exception ex)
                 {
@@ -147,61 +164,43 @@ namespace LocalPDF_Studio_api.BLL.Services
             return zipStream.ToArray();
         }
 
-        private async Task<byte[]> CreateSingleImagePdfAsync(ImageFileData imageData, ImageToPdfRequest request)
+        private byte[] CreateSingleImagePdf(ImageFileData imageData, ImageToPdfRequest request)
         {
             var document = new PdfDocument();
-            await AddImageToPdfAsync(document, imageData, request);
+            AddImageToPdf(document, imageData, request);
 
             using var memoryStream = new MemoryStream();
             document.Save(memoryStream, false);
             return memoryStream.ToArray();
         }
 
-        private async Task AddImageToPdfAsync(PdfDocument document, ImageFileData imageData, ImageToPdfRequest request)
+        private void AddImageToPdf(PdfDocument document, ImageFileData imageData, ImageToPdfRequest request)
         {
-            // Process image with ImageSharp
+            // Load the image with PDFsharp's built-in image importers (JPEG, PNG, BMP).
+            // The image data is embedded as-is: JPEG via DCTDecode without recompression,
+            // PNG/BMP losslessly via FlateDecode (PNG transparency is preserved).
             using var imageStream = new MemoryStream(imageData.Content);
-            using var image = await Image.LoadAsync(imageStream);
+            using var xImage = XImage.FromStream(imageStream);
 
-            // Compress/resize image based on quality setting
-            var processedImageStream = new MemoryStream();
-            try
-            {
-                var encoder = new JpegEncoder
-                {
-                    Quality = request.Quality
-                };
+            // Get image dimensions
+            var imageWidth = xImage.PixelWidth;
+            var imageHeight = xImage.PixelHeight;
 
-                await image.SaveAsJpegAsync(processedImageStream, encoder);
-                processedImageStream.Position = 0;
+            // Calculate page size
+            var (pageWidth, pageHeight) = GetPageSize(request.PageSize, request.Orientation, imageWidth, imageHeight);
 
-                // Get image dimensions
-                var imageWidth = image.Width;
-                var imageHeight = image.Height;
+            // Create a new page
+            var page = document.AddPage();
+            page.Width = XUnit.FromPoint(pageWidth);
+            page.Height = XUnit.FromPoint(pageHeight);
 
-                // Calculate page size
-                var (pageWidth, pageHeight) = GetPageSize(request.PageSize, request.Orientation, imageWidth, imageHeight);
+            // Calculate image position and size to fit within page while maintaining aspect ratio
+            var (drawWidth, drawHeight, x, y) = CalculateImageBounds(
+                imageWidth, imageHeight, pageWidth, pageHeight);
 
-                // Create a new page
-                var page = document.AddPage();
-                page.Width = XUnit.FromPoint(pageWidth);
-                page.Height = XUnit.FromPoint(pageHeight);
-
-                // Draw the image on the page
-                using var gfx = XGraphics.FromPdfPage(page);
-                using var xImage = XImage.FromStream(processedImageStream);
-
-                // Calculate image position and size to fit within page while maintaining aspect ratio
-                var (drawWidth, drawHeight, x, y) = CalculateImageBounds(
-                    imageWidth, imageHeight, pageWidth, pageHeight);
-
-                gfx.DrawImage(xImage, x, y, drawWidth, drawHeight);
-            }
-            finally
-            {
-                // If processedImageStream was not passed to FromStream (e.g., due to an exception), it will be disposed here.
-                processedImageStream?.Dispose();
-            }
+            // Draw the image on the page
+            using var gfx = XGraphics.FromPdfPage(page);
+            gfx.DrawImage(xImage, x, y, drawWidth, drawHeight);
         }
 
         private (double width, double height) GetPageSize(string pageSizeOption, string orientation, int imageWidth, int imageHeight)
