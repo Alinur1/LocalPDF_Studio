@@ -60,10 +60,24 @@ parts:
       - gcc
       - g++
       - make
-      - dotnet-sdk-8.0
+      - libicu70
+      - libssl3
     source: .
     plugin: nil
     override-build: |
+      DOTNET_VERSION=10.0.403
+      DOTNET_TARBALL=dotnet-sdk-${DOTNET_VERSION}-linux-x64.tar.gz
+      DOTNET_SHA512=b7b3d8461cf98b07d2552ce9199702fa3ad010ac2671a5f8cd5136f7534e50f6855ba7bbb02b11494563f1d04156276a31cda1103b900e5eecd0d9473dc7b9c5
+      mkdir -p /opt/dotnet
+      curl -fsSL -o /tmp/$DOTNET_TARBALL \
+        https://builds.dotnet.microsoft.com/dotnet/Sdk/${DOTNET_VERSION}/${DOTNET_TARBALL}
+      echo "${DOTNET_SHA512}  /tmp/${DOTNET_TARBALL}" | sha512sum -c -
+      tar zxf /tmp/$DOTNET_TARBALL -C /opt/dotnet
+      rm /tmp/$DOTNET_TARBALL
+      export DOTNET_ROOT=/opt/dotnet
+      export PATH=$DOTNET_ROOT:$PATH
+      export DOTNET_CLI_TELEMETRY_OPTOUT=1
+      export DOTNET_NOLOGO=1
       PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "/snap/node" | paste -sd ':' -)
       curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
       apt-get install -y nodejs
