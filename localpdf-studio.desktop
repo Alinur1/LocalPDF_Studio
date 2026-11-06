@@ -7,3 +7,5 @@ Type=Application
 Icon=${SNAP}/meta/gui/app_icon_linux.png
 Categories=Utility;Graphics;Office;
 MimeType=application/pdf;
+StartupWMClass=localpdf-studio
+StartupNotify=true

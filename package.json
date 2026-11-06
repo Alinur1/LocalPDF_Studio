@@ -1,6 +1,7 @@
 {
   "name": "localpdf-studio",
   "version": "4.0.4",
+  "desktopName": "localpdf-studio.desktop",
   "description": "Offline, open-source, privacy-first PDF toolkit.",
   "main": "src/main/main.js",
   "author": {
@@ -147,6 +148,7 @@
       "target": [
         "AppImage"
       ],
+      "syncDesktopName": true,
       "category": "Office",
       "icon": "assets/icons/app_icon_linux.png",
       "executableArgs": [

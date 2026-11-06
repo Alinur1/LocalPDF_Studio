@@ -90,6 +90,12 @@ parts:
       cp localpdf-studio.desktop $SNAPCRAFT_PART_INSTALL/meta/gui/
       cp assets/icons/app_icon_linux.png $SNAPCRAFT_PART_INSTALL/meta/gui/
       npm install
+      node -e "
+      const fs=require('fs');
+      const p=JSON.parse(fs.readFileSync('package.json','utf8'));
+      p.desktopName='localpdf-studio_localpdf-studio.desktop';
+      fs.writeFileSync('package.json',JSON.stringify(p,null,2));
+      "
       npm run pack
       UNPACKED_DIR=$(ls -d build/*-unpacked | head -1)
       cp -rv $UNPACKED_DIR/* $SNAPCRAFT_PART_INSTALL/
