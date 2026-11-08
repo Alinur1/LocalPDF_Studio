@@ -65,12 +65,6 @@ function setupCreditLinks() {
 
     document.getElementById('Pillow-link')?.addEventListener('click', () => 
         openExternalLink('https://github.com/python-pillow/Pillow'));
-    
-    document.getElementById('cliwrap-link')?.addEventListener('click', () => 
-        openExternalLink('https://www.nuget.org/packages/CLIWrap'));
-    
-    document.getElementById('bouncycastle-link')?.addEventListener('click', () => 
-        openExternalLink('https://www.nuget.org/packages/Portable.BouncyCastle'));
 
     document.getElementById('tesseract-link')?.addEventListener('click', () => 
         openExternalLink('https://tesseract.projectnaptha.com/'));
@@ -141,8 +135,6 @@ function addButtonTooltips() {
         'python-standalone-build-link': 'https://github.com/astral-sh/python-build-standalone',
         'pikepdf-link': 'https://github.com/pikepdf/pikepdf',
         'Pillow-link': 'https://github.com/python-pillow/Pillow',
-        'cliwrap-link': 'https://www.nuget.org/packages/CLIWrap',
-        'bouncycastle-link': 'https://www.nuget.org/packages/Portable.BouncyCastle',
         'tesseract-link': 'https://tesseract.projectnaptha.com/',
         'pdfjs-link': 'https://mozilla.github.io/pdf.js/',
         'pymupdf-link': 'https://github.com/pymupdf/PyMuPDF',
